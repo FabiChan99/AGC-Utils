@@ -9,7 +9,7 @@ using DisCatSharp.Enums;
 using IniParser;
 using IniParser.Model;
 using AGC_Management.Services.DatabaseHandler;
-
+using AGC_Management.Commands;
 
 namespace AGC_Management
 {
@@ -31,8 +31,8 @@ namespace AGC_Management
                 Token = DcApiToken,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Trace,
-                Intents = DiscordIntents.AllUnprivileged,
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
+                Intents = DiscordIntents.All,
                 LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt"
             });
             discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
@@ -40,7 +40,7 @@ namespace AGC_Management
             {
                 StringPrefixes = new List<string>() { "!!!" }
             });
-            //commands.RegisterCommands(Assembly.GetExecutingAssembly());
+            commands.RegisterCommands<ModerationSystem>();
             await discord.ConnectAsync();
             await Task.Delay(-1);
             

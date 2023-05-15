@@ -23,6 +23,7 @@ namespace AGC_Management.Services.DatabaseHandler
             string DbName = iniData["MainConfig"]["Database"];
             dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             dbConnection.Open();
+            
         }
 
         public static void CloseConnection() 

@@ -12,14 +12,10 @@ using DisCatSharp.Exceptions;
 
 
 
-namespace AGC_Management.Commands.ModerationSystem
+namespace AGC_Management.Commands
 {
-    public static class ModerationSystem
+    public class ModerationSystem : BaseCommandModule
     {
-        
-
-
-
         public static async Task<bool> TicketUrlCheck(CommandContext ctx, string reason)
         {
             string TicketUrl = "modtickets.animegamingcafe.de";
@@ -43,11 +39,28 @@ namespace AGC_Management.Commands.ModerationSystem
 
         [Command("kick")]
         [RequirePermissions(Permissions.KickMembers)]
-        public static async Task KickMembers(CommandContext ctx, DiscordMember member, string reason)
+        public async Task KickMembers(CommandContext ctx, DiscordMember member, string reason)
         {
             if (await TicketUrlCheck(ctx, reason))
             {
                 return;
+            }
+            else
+            {
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt").WithDescription($"Grund: {reason}").
+                    WithColor(DiscordColor.Red);
+                DiscordEmbed embed = embedBuilder.Build();
+                bool sent = false;
+                try
+                {
+                    await member.SendMessageAsync(embed: embed);
+                    sent = true;
+                }
+                catch (Exception)
+                {
+                    await ctx.Channel.SendMessageAsync("Der User hat seine DMs deaktiviert");
+                    sent = false;
+                }
             }
         }
     }
