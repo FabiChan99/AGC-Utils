@@ -56,10 +56,11 @@ namespace AGC_Management.Commands
                     await member.SendMessageAsync(embed: embed);
                     sent = true;
                 }
-                catch (Exception)
+                catch (UnauthorizedException)
                 {
                     await ctx.Channel.SendMessageAsync("Der User hat seine DMs deaktiviert");
                     sent = false;
+                    // TODO: add kick logic and finish the command
                 }
             }
         }
