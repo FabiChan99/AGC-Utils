@@ -41,7 +41,7 @@ namespace AGC_Management.Commands
 
         [Command("kick")]
         [RequirePermissions(Permissions.KickMembers)]
-        public async Task KickMembers(CommandContext ctx, DiscordMember member,[RemainingText] string reason)
+        public async Task KickMember(CommandContext ctx, DiscordMember member,[RemainingText] string reason)
         {
             if (await TicketUrlCheck(ctx, reason))
             {
@@ -80,5 +80,41 @@ namespace AGC_Management.Commands
                 await ctx.Channel.SendMessageAsync(embed: discordEmbed);  
             }
         }
+        [Command("ban")]
+        [RequirePermissions(Permissions.BanMembers)]
+        public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
+        {
+            if (await TicketUrlCheck(ctx, reason))
+            {
+                return;
+            }
+            else
+            {
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt")
+                    .WithDescription($"Grund: {reason}")
+                    .WithColor(DiscordColor.Red);
+                DiscordEmbed embed = embedBuilder.Build();
+                string sent = "Nein";
+                string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                try
+                {
+                    await user.SendMessageAsync(embed: embed);
+                    sent = "Ja";
+                }
+                catch (UnauthorizedException)
+                {
+                    sent = "Nein. Nutzer hat DMs deaktiviert oder den Bot blockiert.";
+                }
+
+                await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
+                DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder()
+                                    .WithTitle($"{user.UsernameWithDiscriminator} wurde gebannt")
+                                    .WithDescription($"User: {user.UsernameWithDiscriminator}\n" +
+                                                     $"Begründung: {reason}\n" +
+                                                     $"Nutzer benachrichtigt: {sent}")
+                                    .WithColor(GlobalProperties.EmbedColor);
+            }
+        }
+
     }
 }
