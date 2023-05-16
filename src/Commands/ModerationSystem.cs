@@ -9,8 +9,7 @@ using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
-
-
+using IniParser.Model;
 
 namespace AGC_Management.Commands
 {
@@ -19,18 +18,21 @@ namespace AGC_Management.Commands
         public static async Task<bool> TicketUrlCheck(CommandContext ctx, string reason)
         {
             string TicketUrl = "modtickets.animegamingcafe.de";
-            if (reason.ToLower().Contains(TicketUrl))
+            Console.WriteLine($"Ticket-URL Check {reason}");
+            if (reason.ToLower().Contains(TicketUrl.ToLower()))
             {
+                Console.WriteLine("Ticket-URL enthalten");
                 DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Ticket-URL enthalten").
                     WithDescription("Bitte schreibe den Grund ohne Ticket-URL").
                     WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
-                await ctx.Channel.SendMessageAsync(embed: embed);
+                await ctx.Channel.SendMessageAsync(embed:embed);
 
                 return true;
             }
             else
             {
+                Console.WriteLine("Keine URL gefunden");
                 return false;
             }
         }
@@ -39,7 +41,7 @@ namespace AGC_Management.Commands
 
         [Command("kick")]
         [RequirePermissions(Permissions.KickMembers)]
-        public async Task KickMembers(CommandContext ctx, DiscordMember member, string reason)
+        public async Task KickMembers(CommandContext ctx, DiscordMember member,[RemainingText] string reason)
         {
             if (await TicketUrlCheck(ctx, reason))
             {
@@ -47,8 +49,9 @@ namespace AGC_Management.Commands
             }
             else
             {
-                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt").WithDescription($"Grund: {reason}").
-                    WithColor(DiscordColor.Red);
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt")
+                    .WithDescription($"Grund: {reason}")
+                    .WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
                 string sent = "Nein";
                 string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm")}";
@@ -74,7 +77,7 @@ namespace AGC_Management.Commands
                                     $"Nutzer benachrichtigt: {sent}")
                                     .WithColor(GlobalProperties.EmbedColor);
                 DiscordEmbed discordEmbed = discordEmbedBuilder.Build();
-                await ctx.Channel.SendMessageAsync(embed: discordEmbed);                
+                await ctx.Channel.SendMessageAsync(embed: discordEmbed);  
             }
         }
     }
