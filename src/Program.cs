@@ -10,6 +10,7 @@ using IniParser;
 using IniParser.Model;
 using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Commands;
+using DisCatSharp.Entities;
 
 namespace AGC_Management
 {
@@ -46,4 +47,12 @@ namespace AGC_Management
             
         }
     }
+
+
+    class GlobalProperties
+    {
+        public static DiscordColor EmbedColor = 0x2F84A2;
+    }
+
 }
+
