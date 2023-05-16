@@ -56,7 +56,6 @@ namespace AGC_Management
         public static DiscordColor EmbedColor = 0x2F84A2;
         private static FileIniDataParser parser = new FileIniDataParser();
         public static IniData ConfigIni = parser.ReadFile("config.ini");
-        
     }
 
 }

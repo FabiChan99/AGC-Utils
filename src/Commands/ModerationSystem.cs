@@ -54,7 +54,7 @@ namespace AGC_Management.Commands
                     .WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
                 string sent = "Nein";
-                string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm")}";
+                string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 try
                 {
                     await member.SendMessageAsync(embed: embed);

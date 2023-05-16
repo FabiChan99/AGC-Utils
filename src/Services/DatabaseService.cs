@@ -15,37 +15,68 @@ namespace AGC_Management.Services.DatabaseHandler
 
         public static void OpenConnection()
         {
-            var parser = new FileIniDataParser();
-            IniData iniData = parser.ReadFile("config.ini");
-            string DbHost = iniData["MainConfig"]["Database_Host"];
-            string DbUser = iniData["MainConfig"]["Database_User"];
-            string DbPass = iniData["MainConfig"]["Database_Password"];
-            string DbName = iniData["MainConfig"]["Database"];
-            dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
-            dbConnection.Open();
-            
-        }
-
-        public static void CloseConnection() 
-        {
-            dbConnection.Close();
-            dbConnection.Dispose();
-        }
-        
-        //  Change DBContent
-        public static void ExecuteCommand(string sql)
-        {
-            using (var cmd = new NpgsqlCommand(sql, dbConnection))
+            try
             {
-                cmd.ExecuteNonQuery();
+                
+                string DbHost = GlobalProperties.ConfigIni["MainConfig"]["Database_Host"];
+                string DbUser = GlobalProperties.ConfigIni["MainConfig"]["Database_User"];
+                string DbPass = GlobalProperties.ConfigIni["MainConfig"]["Database_Password"];
+                string DbName = GlobalProperties.ConfigIni["MainConfig"]["Database"];
+                dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
+                dbConnection.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while opening the database connection: " + ex.Message);
+                throw;
             }
         }
-        //  Read DBContent
+
+        public static void CloseConnection()
+        {
+            try
+            {
+                dbConnection.Close();
+                dbConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while closing the database connection: " + ex.Message);
+                throw;
+            }
+        }
+
+        // Change DBContent
+        public static void ExecuteCommand(string sql)
+        {
+            try
+            {
+                using (var cmd = new NpgsqlCommand(sql, dbConnection))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while executing the database command: " + ex.Message);
+                throw;
+            }
+        }
+
+        // Read DBContent
         public static NpgsqlDataReader ExecuteQuery(string sql)
         {
-            using (var cmd = new NpgsqlCommand(sql, dbConnection))
+            try
             {
-                return cmd.ExecuteReader();
+                using (var cmd = new NpgsqlCommand(sql, dbConnection))
+                {
+                    return cmd.ExecuteReader();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while executing the database query: " + ex.Message);
+                throw;
             }
         }
     }
