@@ -59,6 +59,9 @@ namespace AGC_Management
         // IniReader
         private static FileIniDataParser parser = new FileIniDataParser();
         public static IniData ConfigIni = parser.ReadFile("config.ini");
+
+        // Server Staffrole ID
+        public static ulong StaffRoleId = ulong.Parse(ConfigIni["MainConfig"]["StaffRoleId"]);
     }
 
 }
