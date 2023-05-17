@@ -9,8 +9,10 @@ using DisCatSharp.Enums;
 using IniParser;
 using IniParser.Model;
 using AGC_Management.Services.DatabaseHandler;
-using AGC_Management.Commands;
+using AGC_Management.Commands.Moderation;
 using DisCatSharp.Entities;
+using DisCatSharp.Interactivity;
+using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management
 {
@@ -41,7 +43,11 @@ namespace AGC_Management
             {
                 StringPrefixes = new List<string>() { "!!!" }
             });
-            commands.RegisterCommands<ModerationSystem>();
+            var interactivity = discord.UseInteractivity(new InteractivityConfiguration()
+            {
+                Timeout = TimeSpan.FromMinutes(2)
+            });
+            commands.RegisterCommands(Assembly.GetExecutingAssembly());
             await discord.ConnectAsync();
             await Task.Delay(-1);
             
@@ -49,7 +55,7 @@ namespace AGC_Management
     }
 
 
-   
+
 
     public class GlobalProperties
     {
@@ -58,13 +64,13 @@ namespace AGC_Management
         public static IniData ConfigIni = parser.ReadFile("config.ini");
 
         // Default Embed Color
-        public static DiscordColor EmbedColor = new DiscordColor($"{ConfigIni["MainConfig"]["DefaultEmbedColor"]}");
-        
+        public static DiscordColor EmbedColor { get; } = new DiscordColor(ConfigIni["MainConfig"]["DefaultEmbedColor"]);
 
+        // Server Staffrole ID
+        public static ulong StaffRoleId { get; } = ulong.Parse(ConfigIni["MainConfig"]["StaffRoleId"]);
 
-        // Server Staffrole ID and Name
-        public static ulong StaffRoleId = ulong.Parse(ConfigIni["MainConfig"]["StaffRoleId"]);
-        public static string StaffRoleName = ConfigIni["MainConfig"]["StaffRoleName"];
+        // Server Staffrole Name
+        public static string StaffRoleName { get; } = ConfigIni["MainConfig"]["StaffRoleName"];
     }
 
 }
