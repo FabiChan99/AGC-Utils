@@ -65,7 +65,10 @@ namespace AGC_Management
             discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new List<string>() { "!!!", "." },
+                StringPrefixes = new()
+                {
+                    GlobalProperties.Prefix
+                },
                 EnableDms = false,
                 EnableMentionPrefix = true
             });
@@ -103,6 +106,9 @@ namespace AGC_Management
 
         // Debug Mode
         public static bool DebugMode { get; } = bool.Parse(ConfigIni["MainConfig"]["DebugMode"]);
+
+        // prefix
+        public static string Prefix { get; } = ConfigIni["MainConfig"]["CommandPrefix"];
     }
 
 }
