@@ -1,0 +1,23 @@
+[MainConfig]
+DebugMode = FALSE
+Discord_API_Token_REL = RELEASE TOKEN HERE
+Discord_API_Token_DEB = ONLY IF DebugMode is True
+
+[DatabaseCfg]
+Database_Host = PSQLDB host
+Database_User = --
+Database_Password = --
+Database = --
+
+
+[EmbedConfig]
+DefaultEmbedColor = 2F84A2
+
+[ServerConfig]
+ServerId = Serverid here
+StaffRoleName = Staffrolename here
+StaffRoleId = some id here
+ServerNameInitials = "TC"
+ModRoleId = obv
+AdminRoleId = also obv
+
