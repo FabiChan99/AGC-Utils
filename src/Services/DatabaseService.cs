@@ -18,10 +18,10 @@ namespace AGC_Management.Services.DatabaseHandler
             try
             {
                 
-                string DbHost = GlobalProperties.ConfigIni["MainConfig"]["Database_Host"];
-                string DbUser = GlobalProperties.ConfigIni["MainConfig"]["Database_User"];
-                string DbPass = GlobalProperties.ConfigIni["MainConfig"]["Database_Password"];
-                string DbName = GlobalProperties.ConfigIni["MainConfig"]["Database"];
+                string DbHost = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Host"];
+                string DbUser = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_User"];
+                string DbPass = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Password"];
+                string DbName = GlobalProperties.ConfigIni["DatabaseCfg"]["Database"];
                 dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
                 dbConnection.Open();
             }

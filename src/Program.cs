@@ -73,13 +73,13 @@ namespace AGC_Management
         public static IniData ConfigIni = parser.ReadFile("config.ini");
 
         // Default Embed Color
-        public static DiscordColor EmbedColor { get; } = new DiscordColor(ConfigIni["MainConfig"]["DefaultEmbedColor"]);
+        public static DiscordColor EmbedColor { get; } = new DiscordColor(ConfigIni["EmbedConfig"]["DefaultEmbedColor"]);
 
         // Server Staffrole ID
-        public static ulong StaffRoleId { get; } = ulong.Parse(ConfigIni["MainConfig"]["StaffRoleId"]);
+        public static ulong StaffRoleId { get; } = ulong.Parse(ConfigIni["ServerConfig"]["StaffRoleId"]);
 
         // Server Staffrole Name
-        public static string StaffRoleName { get; } = ConfigIni["MainConfig"]["StaffRoleName"];
+        public static string StaffRoleName { get; } = ConfigIni["ServerConfig"]["StaffRoleName"];
     }
 
 }

@@ -20,7 +20,7 @@ namespace AGC_Management.Helper.AttributeHelper
     public class RequireStaffRole : CheckBaseAttribute
     {
 
-        private ulong RoleId = ulong.Parse(GlobalProperties.ConfigIni["MainConfig"]["StaffRoleId"]);
+        private ulong RoleId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["StaffRoleId"]);
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
             
