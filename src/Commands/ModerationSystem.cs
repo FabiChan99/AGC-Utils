@@ -15,7 +15,7 @@ using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using AGC_Management.Helper.AttributeHelper;
 using Sentry;
-
+using AGC_Management.Helper.Checks;
 
 namespace AGC_Management.Commands.Moderation
 {
@@ -25,12 +25,12 @@ namespace AGC_Management.Commands.Moderation
         [RequirePermissions(Permissions.KickMembers)]
         public async Task KickMember(CommandContext ctx, DiscordMember member,[RemainingText] string reason)
         {
-            if (await CheckForReason(ctx, reason))
+            if (await HelperChecks.CheckForReason(ctx, reason))
             {
                 return;
             }
             else
-            if (await TicketUrlCheck(ctx, reason))
+            if (await HelperChecks.TicketUrlCheck(ctx, reason))
             {
                 return;
             }
@@ -102,11 +102,11 @@ namespace AGC_Management.Commands.Moderation
         [RequirePermissions(Permissions.BanMembers)]
         public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
         {
-            if (await CheckForReason(ctx, reason))
+            if (await HelperChecks.CheckForReason(ctx, reason))
             {
                 return;
             }
-            if (await TicketUrlCheck(ctx, reason))
+            if (await HelperChecks.TicketUrlCheck(ctx, reason))
             {
                 return;
             }
@@ -191,15 +191,15 @@ namespace AGC_Management.Commands.Moderation
         [RequireStaffRole]
         public async Task BanRequest(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
         {
-            if (await CheckForReason(ctx, reason))
+            if (await HelperChecks.CheckForReason(ctx, reason))
             {
                 return;
             }
-            if (await TicketUrlCheck(ctx, reason))
+            if (await HelperChecks.TicketUrlCheck(ctx, reason))
             {
                 return;
             }
-            string caseid = GenerateCaseID();
+            string caseid = HelperChecks.GenerateCaseID();
             DiscordRole staffrole = ctx.Guild.GetRole(ulong.Parse(GlobalProperties.ConfigIni["MainConfig"]["StaffRoleId"]));
             List<DiscordMember> staffmembers = ctx.Guild.Members
                 .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))
