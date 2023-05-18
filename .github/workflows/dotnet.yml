@@ -29,7 +29,7 @@ jobs:
     - run: Compress-Archive -Path bin/* -Destination Release.zip
     - uses: actions/upload-artifact@v3
       with:
-        name: rel-build
+        name: debug
         path: |
-          bin/
+          bin/Release/net7.0-windows/
           config.ini.example
