@@ -80,6 +80,9 @@ namespace AGC_Management
 
         // Server Staffrole Name
         public static string StaffRoleName { get; } = ConfigIni["ServerConfig"]["StaffRoleName"];
+
+        // Servername Initals for embeds
+        public static string ServerName { get; } = ConfigIni["ServerConfig"]["ServerNameInitials"];
     }
 
 }
