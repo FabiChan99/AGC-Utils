@@ -23,7 +23,15 @@ namespace AGC_Management.Services.DatabaseHandler
                 string DbPass = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Password"];
                 string DbName = GlobalProperties.ConfigIni["DatabaseCfg"]["Database"];
                 dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
-                dbConnection.Open();
+                try
+                {
+                    dbConnection.Open();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An error occurred while opening the database connection: " + ex.Message+ "\nFunctionality will be restricted and the Program can be Unstable, Continue at own risk!\nPress any key to Continue");
+                    Console.ReadKey();
+                }
             }
             catch (Exception ex)
             {
