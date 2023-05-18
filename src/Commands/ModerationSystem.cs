@@ -75,7 +75,7 @@ namespace AGC_Management.Commands.Moderation
                                      $"**Not Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n\n" +
                                      $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
                                      $"**User DM'd:** {SentEmoji} {sentString}")
-                    .WithFooter("AGC Moderation System")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -95,7 +95,7 @@ namespace AGC_Management.Commands.Moderation
                                  $"**Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n" +
                                  $"**Not Punished User:** **Alle User gepunished**\n" +
                                  $"**User DM'd:** {SentEmoji} {sentString}")
-                .WithFooter("AGC Moderation System")
+                .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                 .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
@@ -161,7 +161,7 @@ namespace AGC_Management.Commands.Moderation
                                      $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
                                      $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
                                      $"**User DM'd:** {SentEmoji} {sentString}")
-                    .WithFooter("AGC Moderation System")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -181,7 +181,7 @@ namespace AGC_Management.Commands.Moderation
                                  $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
                                  $"**Not Punished User:** **Alle User gepunished**\n" +
                                  $"**User DM'd:** {SentEmoji} {sentString}")
-                .WithFooter("AGC Moderation System")
+                .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                 .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
@@ -314,7 +314,7 @@ namespace AGC_Management.Commands.Moderation
                         $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
                         $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
                         $"**User DM'd:** {SentEmoji} {sentString}")
-                        .WithFooter("AGC Moderation System")
+                        .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                         .WithColor(DiscordColor.Red);
 
                     DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -336,7 +336,7 @@ namespace AGC_Management.Commands.Moderation
                     $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
                     $"**Not Punished User:** **Alle User gepunished**\n" +
                     $"**User DM'd:** {SentEmoji} {sentString}")
-                    .WithFooter("AGC Moderation System")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Green);
 
                 DiscordEmbed successEmbed = successEmbedBuilder.Build();
@@ -359,7 +359,7 @@ namespace AGC_Management.Commands.Moderation
                     $"**Punished User:** **Kein User gepunisched!**\n" +
                     $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
                     $"**User DM'd:** /-/")
-                    .WithFooter("AGC Moderation System")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed declineEmbed = declineEmbedBuilder.Build();
