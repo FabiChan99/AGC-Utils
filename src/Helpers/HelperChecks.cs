@@ -12,7 +12,7 @@ namespace AGC_Management.Helper.Checks
             {
                 DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Kein Grund angegeben!")
                     .WithDescription("Bitte gebe einen Grund an")
-                    .WithColor(DiscordColor.Red);
+                    .WithColor(DiscordColor.Red).WithFooter($"{ctx.User.UsernameWithDiscriminator}");
                 DiscordMessageBuilder msg = new DiscordMessageBuilder().WithEmbed(embedBuilder.Build()).WithReply(ctx.Message.Id, false);
                 await ctx.Channel.SendMessageAsync(msg);
 
