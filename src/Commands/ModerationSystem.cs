@@ -14,12 +14,31 @@ using IniParser.Model;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using AGC_Management.Helper.AttributeHelper;
+using Sentry;
 
 
 namespace AGC_Management.Commands.Moderation
 {
     public class ModerationSystem : BaseCommandModule
     {
+        private static async Task<bool> CheckForReason(CommandContext ctx, string reason)
+        {
+            if (reason == null)
+            {
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Kein Grund angegeben!")
+                    .WithDescription("Bitte gebe einen Grund an")
+                    .WithColor(DiscordColor.Red);
+                    DiscordMessageBuilder msg = new DiscordMessageBuilder().WithEmbed(embedBuilder.Build()).WithReply(ctx.Message.Id, false);
+                    await ctx.Channel.SendMessageAsync(msg);
+
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
 
         private static string GenerateCaseID()
@@ -33,6 +52,10 @@ namespace AGC_Management.Commands.Moderation
         {
             string TicketUrl = "modtickets.animegamingcafe.de";
             Console.WriteLine($"Ticket-URL Check {reason}");
+            if (reason == null)
+            {
+                return false;
+            }
             if (reason.ToLower().Contains(TicketUrl.ToLower()))
             {
                 Console.WriteLine("Ticket-URL enthalten");
@@ -40,7 +63,8 @@ namespace AGC_Management.Commands.Moderation
                     WithDescription("Bitte schreibe den Grund ohne Ticket-URL").
                     WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
-                await ctx.Channel.SendMessageAsync(embed:embed);
+                DiscordMessageBuilder msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id, false);
+                await ctx.Channel.SendMessageAsync(msg_e);
 
                 return true;
             }
@@ -57,6 +81,11 @@ namespace AGC_Management.Commands.Moderation
         [RequirePermissions(Permissions.KickMembers)]
         public async Task KickMember(CommandContext ctx, DiscordMember member,[RemainingText] string reason)
         {
+            if (await CheckForReason(ctx, reason))
+            {
+                return;
+            }
+            else
             if (await TicketUrlCheck(ctx, reason))
             {
                 return;
@@ -64,40 +93,75 @@ namespace AGC_Management.Commands.Moderation
             else
             {
                 DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt")
-                    .WithDescription($"Grund: {reason}")
+                    .WithDescription($"Grund: ```{reason}```")
                     .WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
-                string sent = "Nein";
+                bool sent;
+                string SentEmoji;
+                string sentString;
                 string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 try
                 {
                     await member.SendMessageAsync(embed: embed);
-                    sent = "Ja";
+                    sent = true;
+                    sentString = "Ja";
+                    SentEmoji = "<:yes:861266772665040917>";
                 }
                 catch (UnauthorizedException)
                 {
-                    sent = "Nein. Nutzer hat DMs deaktiviert oder den Bot blockiert.";
+                    sentString = "Nein. Nutzer hat DMs deaktiviert oder den Bot blockiert.";
+                    sent = false;
+                    SentEmoji = "<:no:861266772724023296>";
                 }
                 try
                 {
                     await member.RemoveAsync(ReasonString);
                 }
-                catch (UnauthorizedException) { 
+                catch (UnauthorizedException e) {
+                    {
+                        DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
+                            .WithTitle($"Punish result")
+                            .WithDescription($"**Grund:** ```{reason}```\n" +
+                                             $"**Action:** Kick\n" +
+                                             $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
+                                             $"**Punished User:** **Kein User gepunisched!**\n" +
+                        $"**Not Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n\n" +
+                                             $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
+                                             $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
+                            .WithColor(DiscordColor.Red);
+                        DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
+                        DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
+                            .WithEmbed(failsuccessEmbed)//.AddComponents(buttons)
+                            .WithReply(ctx.Message.Id, false);
+
+                        await ctx.Channel.SendMessageAsync(failSuccessMessage);
+                        return;
+                    }
                 }
-                DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder()
-                                    .WithTitle($"{member.UsernameWithDiscriminator} wurde gekickt")
-                                    .WithDescription($"User: {member.UsernameWithDiscriminator}\n" +
-                                    $"Begründung: {reason}\n" +
-                                    $"Nutzer benachrichtigt: {sent}")
-                                    .WithColor(GlobalProperties.EmbedColor);
-                DiscordEmbed discordEmbed = discordEmbedBuilder.Build();
-                await ctx.Channel.SendMessageAsync(embed: discordEmbed);  
+                DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle($"Punish result")
+                    .WithDescription($"**Grund:** ```{reason}```\n" +
+                                     $"**Action**: Kick\n" +
+                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
+                $"**Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n" +
+                $"**Not Punished User:** **Alle User gepunished**\n" +
+                                     $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
+                    .WithColor(DiscordColor.Green);
+                DiscordEmbed successEmbed = successEmbedBuilder.Build();
+                DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
+                    .WithEmbed(successEmbed)//.AddComponents(buttons)
+                    .WithReply(ctx.Message.Id, false);
+                await ctx.Channel.SendMessageAsync(SuccessMessage);
             }
         }
         [Command("ban")]
         [RequirePermissions(Permissions.BanMembers)]
         public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
         {
+            if (await CheckForReason(ctx, reason))
+            {
+                return;
+            }
             if (await TicketUrlCheck(ctx, reason))
             {
                 return;
@@ -111,8 +175,8 @@ namespace AGC_Management.Commands.Moderation
                 DiscordEmbed embed = embedBuilder.Build();
                 bool sent;
                 string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
-                string sentEmoji;
                 string sentString;
+                var username = user.UsernameWithDiscriminator;
                 try
                 {
 
@@ -143,27 +207,29 @@ namespace AGC_Management.Commands.Moderation
                 catch (UnauthorizedException e)
                 {
                     DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Ban Result: <:counting_warning:962007085426556989>")
-                    .WithDescription($"**Grund:** ```{reason}```\n" +
-                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
-                     $"**Punished User:** **Kein User gepunisched!**\n" +
-                     $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
-                     $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
-                     $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
-                    .WithColor(DiscordColor.Red);
+                        .WithTitle($"Punish result")
+                        .WithDescription($"**Grund:** ```{reason}```\n" +
+                                         $"**Action:** Ban\n" +
+                                         $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
+                                         $"**Punished User:** **Kein User gepunisched!**\n" +
+                                         $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
+                                         $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
+                                         $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
+                        .WithColor(DiscordColor.Red);
                     DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
                     DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
                         .WithEmbed(failsuccessEmbed)//.AddComponents(buttons)
-                        .WithReply(ctx.Message.Id, true);
+                        .WithReply(ctx.Message.Id, false);
 
                     await ctx.Channel.SendMessageAsync(failSuccessMessage);
                     return;
 
                 }
                 DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Ban Result:")
+                    .WithTitle($"Punish result")
                     .WithDescription($"**Grund:** ```{reason}```\n" +
-                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
+                                     $"**Action**: Ban\n" +
+                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
                                      $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
                                      $"**Not Punished User:** **Alle User gepunished**\n" +
                                      $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
@@ -171,7 +237,7 @@ namespace AGC_Management.Commands.Moderation
                 DiscordEmbed successEmbed = successEmbedBuilder.Build();
                 DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
                     .WithEmbed(successEmbed)//.AddComponents(buttons)
-                    .WithReply(ctx.Message.Id, true);
+                    .WithReply(ctx.Message.Id, false);
                 await ctx.Channel.SendMessageAsync(SuccessMessage);
             }
         }
@@ -181,6 +247,10 @@ namespace AGC_Management.Commands.Moderation
         [RequireStaffRole]
         public async Task BanRequest(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
         {
+            if (await CheckForReason(ctx, reason))
+            {
+                return;
+            }
             if (await TicketUrlCheck(ctx, reason))
             {
                 return;
@@ -224,7 +294,7 @@ namespace AGC_Management.Commands.Moderation
             var builder = new DiscordMessageBuilder()
                 .WithEmbed(embed)
                 .AddComponents(buttons).WithContent(staffMentionString)
-                .WithReply(ctx.Message.Id, true);
+                .WithReply(ctx.Message.Id, false);
             var interactivity = ctx.Client.GetInteractivity();
             var message = await ctx.Channel.SendMessageAsync(builder);
 
@@ -257,7 +327,6 @@ namespace AGC_Management.Commands.Moderation
                                          $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen");
                 bool sent;
                 string sentString;
-                string failReason;
                 try
                 {
 
@@ -291,8 +360,9 @@ namespace AGC_Management.Commands.Moderation
                     buttons.ForEach(x => x.Disable());
                     await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                     DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Ban Result: <:counting_warning:962007085426556989>")
+                    .WithTitle($"Punish result <:counting_warning:962007085426556989>")
                     .WithDescription($"**Grund:** ```{reason}```\n" +
+                    $"**Action:** Ban\n" +
                      $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
                      $"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}\n\n" +
                      $"**Punished User:** **Kein User gepunisched!**\n" +
@@ -303,7 +373,7 @@ namespace AGC_Management.Commands.Moderation
                     DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
                     DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
                         .WithEmbed(failsuccessEmbed)//.AddComponents(buttons)
-                        .WithReply(ctx.Message.Id, true);
+                        .WithReply(ctx.Message.Id, false);
 
                     await message.ModifyAsync(failSuccessMessage);
 
@@ -311,8 +381,9 @@ namespace AGC_Management.Commands.Moderation
                 buttons.ForEach(x => x.Disable());
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Ban Result:")
+                    .WithTitle($"Punish result")
                     .WithDescription($"**Grund:** ```{reason}```\n" +
+                    $"**Action:** Ban\n" +
                                      $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
                                      $"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}\n\n" +
                                      $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
@@ -322,7 +393,7 @@ namespace AGC_Management.Commands.Moderation
                 DiscordEmbed successEmbed = successEmbedBuilder.Build();
                 DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
                     .WithEmbed(successEmbed)//.AddComponents(buttons)
-                    .WithReply(ctx.Message.Id, true);
+                    .WithReply(ctx.Message.Id, false);
 
                 await message.ModifyAsync(SuccessMessage);
             }
@@ -330,8 +401,9 @@ namespace AGC_Management.Commands.Moderation
             {
                 buttons.ForEach(x => x.Disable());
                 DiscordEmbedBuilder declineEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle($"Ban Result:")
+                .WithTitle($"Punish result")
                     .WithDescription($"**Grund:** ```{reason}```\n" +
+                    $"**Action:** Ban\n" +
                                      $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
                                      //$"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}" +
                                      $"**<:counting_warning:962007085426556989>BAN ABGELEHNT von {result.Result.Interaction.User.Mention}<:counting_warning:962007085426556989>\n\n" +
@@ -342,7 +414,7 @@ namespace AGC_Management.Commands.Moderation
                 DiscordEmbed declineEmbed = declineEmbedBuilder.Build();
                 DiscordMessageBuilder DeclineMessage = new DiscordMessageBuilder()
                     .WithEmbed(declineEmbed)//.AddComponents(buttons)
-                    .WithReply(ctx.Message.Id, true);
+                    .WithReply(ctx.Message.Id, false);
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 
                 await message.ModifyAsync(DeclineMessage);
