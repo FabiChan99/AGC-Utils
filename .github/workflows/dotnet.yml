@@ -27,9 +27,17 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - run: Compress-Archive -Path bin/* -Destination Release.zip
-    - uses: actions/upload-artifact@v3
+    - name: Store artifacts (Release Files)
+      uses: actions/upload-artifact@v3
       with:
         name: debug
-        path: |
-          bin/Release/net7.0-windows/
-          config.ini.example
+        path: bin/Release/net7.0-windows
+    - name: Store artifacts (Example Config)
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug
+        path: config.ini.example
+
+
+
+                  
