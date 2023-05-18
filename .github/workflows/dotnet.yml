@@ -30,4 +30,6 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: rel-build
-        path: bin/
+        path: |
+          bin/
+          config.ini.example
