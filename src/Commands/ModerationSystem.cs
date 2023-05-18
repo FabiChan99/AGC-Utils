@@ -233,7 +233,15 @@ namespace AGC_Management.Commands.Moderation
             }
             else
             {
-                staffMentionString = "Kein Moderator online | <@_&750365462235316244> | <@_&760211373921271918>";
+                if (!GlobalProperties.DebugMode)
+                {
+                    staffMentionString = $"Kein Moderator online | {GlobalProperties.ConfigIni["ServerConfig"]["AdminRoleId"]} | {GlobalProperties.ConfigIni["ServerConfig"]["ModRoleId"]}";
+                }
+                else
+                {
+                    staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
+                }
+                
             }
 
             DiscordEmbed embed = embedBuilder.Build();
