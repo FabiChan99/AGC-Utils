@@ -27,7 +27,16 @@ namespace AGC_Management
         {
             var parser = new FileIniDataParser();
             IniData iniData = parser.ReadFile("config.ini");
-            string DcApiToken = iniData["MainConfig"]["Discord_API_Token"];
+            bool DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
+            string DcApiToken;
+            if (DebugMode)
+            {
+                DcApiToken = iniData["MainConfig"]["Discord_API_Token_DEB"];
+            }
+            else
+            {
+                DcApiToken = iniData["MainConfig"]["Discord_API_Token_REL"];
+            }
             DatabaseService.OpenConnection();
             var discord = new DiscordClient(new DiscordConfiguration
             {
