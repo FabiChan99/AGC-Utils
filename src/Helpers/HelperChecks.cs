@@ -36,7 +36,6 @@ namespace AGC_Management.Helper.Checks
         public static async Task<bool> TicketUrlCheck(CommandContext ctx, string reason)
         {
             string TicketUrl = "modtickets.animegamingcafe.de";
-            Console.WriteLine($"Ticket-URL Check {reason}");
             if (reason == null)
             {
                 return false;
@@ -55,7 +54,6 @@ namespace AGC_Management.Helper.Checks
             }
             else
             {
-                Console.WriteLine("Keine URL gefunden");
                 return false;
             }
         }
