@@ -23,10 +23,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet publish --no-restore --configuration RELEASE --output bin/Release/net7.0-windows/publish/win-x64 --self-contained true -p:PublishSingleFile=true
+      run: dotnet build --no-restore --configuration RELEASE
     - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - run: Compress-Archive -Path bin/* -Destination Release.zip
+      run: dotnet test --no-build --verbosity detailed
     - name: Store artifacts (Release Files)
       uses: actions/upload-artifact@v3
       with:
