@@ -23,6 +23,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -configuration RELEASE 
+      run: dotnet build --no-restore --configuration RELEASE 
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - run: Compress-Archive -Path bin/* -Destination Release.zip
