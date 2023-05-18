@@ -23,7 +23,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration RELEASE p:PublishSingleFile=true
+      run: dotnet build AGC-Utils\AGC-Utils\AGC Management.csproj --no-restore --configuration RELEASE p:PublishSingleFile=true
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - run: Compress-Archive -Path bin/* -Destination Release.zip
