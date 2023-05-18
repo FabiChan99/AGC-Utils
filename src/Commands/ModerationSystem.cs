@@ -104,31 +104,75 @@ namespace AGC_Management.Commands.Moderation
             }
             else
             {
-                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt")
-                    .WithDescription($"Grund: {reason}\n\n" +
-                    $"__Du möchtest einen Entbannungsantrag stellen?__\n" +
-                    $"**Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen**")
-                    .WithColor(DiscordColor.Red);
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
+                        .WithDescription($"**Begründung:**\n```\n{reason}\n```\n\n" +
+                                         $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
+                                         $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen").WithColor(DiscordColor.Red);
                 DiscordEmbed embed = embedBuilder.Build();
-                string sent = "Nein";
+                bool sent;
                 string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                string sentEmoji;
+                string sentString;
                 try
                 {
-                    await user.SendMessageAsync(embed: embed);
-                    sent = "Ja";
+
+                    await user.SendMessageAsync(embed:embed);
+                    sent = true;
+                    sentString = "Ja";
                 }
-                catch (UnauthorizedException)
+                catch (Exception e)
                 {
-                    sent = "Nein. Nutzer hat DMs deaktiviert oder den Bot blockiert.";
+                    sentString = $"Nein. Fehlergrund: ```{e.Message}```";
+                    sent = false;
                 }
 
-                await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
-                DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder()
-                                    .WithTitle($"{user.UsernameWithDiscriminator} wurde gebannt")
-                                    .WithDescription($"User: {user.UsernameWithDiscriminator}\n" +
-                                                     $"Begründung: {reason}\n" +
-                                                     $"Nutzer benachrichtigt: {sent}")
-                                    .WithColor(GlobalProperties.EmbedColor);
+                string SentEmoji;
+
+                if (sent)
+                {
+                    SentEmoji = "<:yes:861266772665040917>";
+                }
+                else
+                {
+                    SentEmoji = "<:no:861266772724023296>";
+                }
+                try
+                {
+                    await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
+                }
+                catch (UnauthorizedException e)
+                {
+                    DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle($"Ban Result: <:counting_warning:962007085426556989>")
+                    .WithDescription($"**Grund:** ```{reason}```\n" +
+                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
+                     $"**Punished User:** **Kein User gepunisched!**\n" +
+                     $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
+                     $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
+                     $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
+                    .WithColor(DiscordColor.Red);
+                    DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
+                    DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
+                        .WithEmbed(failsuccessEmbed)//.AddComponents(buttons)
+                        .WithReply(ctx.Message.Id, true);
+
+                    await ctx.Channel.SendMessageAsync(failSuccessMessage);
+                    return;
+
+                }
+                DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle($"Ban Result:")
+                    .WithDescription($"**Grund:** ```{reason}```\n" +
+                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
+                                     $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
+                                     $"**Not Punished User:** **Alle User gepunished**\n" +
+                                     $"**User DM'd:** {SentEmoji} {sentString}").WithFooter("AGC Moderation System")
+                    .WithColor(DiscordColor.Green);
+                DiscordEmbed successEmbed = successEmbedBuilder.Build();
+                DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
+                    .WithEmbed(successEmbed)//.AddComponents(buttons)
+                    .WithReply(ctx.Message.Id, true);
+                await ctx.Channel.SendMessageAsync(SuccessMessage);
             }
         }
 
