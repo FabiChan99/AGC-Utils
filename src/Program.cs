@@ -13,6 +13,7 @@ using AGC_Management.Commands.Moderation;
 using DisCatSharp.Entities;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using System.Linq;
 
 namespace AGC_Management
 {
@@ -64,7 +65,7 @@ namespace AGC_Management
             discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new List<string>() { "!!!" }
+                StringPrefixes = new List<string>() { $"{GlobalProperties.CommandPrefixe}" }
             });
             var interactivity = discord.UseInteractivity(new InteractivityConfiguration()
             {
@@ -100,6 +101,9 @@ namespace AGC_Management
 
         // Debug Mode
         public static bool DebugMode { get; } = bool.Parse(ConfigIni["MainConfig"]["DebugMode"]);
+
+        // Commandprefix
+        public static string CommandPrefixe { get; } = ConfigIni["MainConfig"]["CommandPrefix"];
     }
 
 }
