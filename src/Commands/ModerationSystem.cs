@@ -88,6 +88,7 @@ namespace AGC_Management.Commands
         }
 
         [Command("ban")]
+        [RequireDatabase]
         [RequirePermissions(Permissions.BanMembers)]
         public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
         {

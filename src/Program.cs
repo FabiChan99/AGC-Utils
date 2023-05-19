@@ -100,6 +100,9 @@ namespace AGC_Management
 
         // Debug Mode
         public static bool DebugMode { get; } = bool.Parse(ConfigIni["MainConfig"]["DebugMode"]);
+
+        // Bot Owner ID
+        public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
     }
 
 }

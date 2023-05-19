@@ -1,6 +1,7 @@
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using AGC_Management.Services.DatabaseHandler;
+using DisCatSharp.Entities;
 
 namespace AGC_Management.Helper
 {
@@ -34,6 +35,13 @@ namespace AGC_Management.Helper
             else
             {
                 Console.WriteLine("Database is not connected! Command disabled.");
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Datenbank nicht verbunden!").
+                    WithDescription($"Command deaktiviert. Bitte informiere den Botentwickler ``{ctx.Client.GetUserAsync(GlobalProperties.BotOwnerId).Result.UsernameWithDiscriminator}``").
+                    WithColor(DiscordColor.Red);
+                DiscordEmbed embed = embedBuilder.Build();
+                DiscordMessageBuilder msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id, false);
+                await ctx.Channel.SendMessageAsync(msg_e);
+                    
                 return false;
             }
         }
