@@ -47,6 +47,25 @@ namespace AGC_Management.Services.DatabaseHandler
             }
         }
 
+        public static bool IsConnected()
+        {
+            try
+            {
+                if (dbConnection.State == System.Data.ConnectionState.Open)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         // Change DBContent
         public static void ExecuteCommand(string sql)
         {
