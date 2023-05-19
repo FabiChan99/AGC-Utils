@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
+﻿using System.Reflection;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
-using DisCatSharp.Common.Utilities;
 using DisCatSharp.Enums;
 using IniParser;
 using IniParser.Model;
 using AGC_Management.Services.DatabaseHandler;
-using AGC_Management.Commands.Moderation;
 using DisCatSharp.Entities;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using System.Linq;
 
 namespace AGC_Management
 {

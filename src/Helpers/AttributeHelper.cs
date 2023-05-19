@@ -15,7 +15,7 @@ using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 
 
-namespace AGC_Management.Helper.AttributeHelper
+namespace AGC_Management.Helper
 {
     public class RequireStaffRole : CheckBaseAttribute
     {

@@ -1,23 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DisCatSharp.CommandsNext;
+﻿using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
-using IniParser;
-using IniParser.Model;
-using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using AGC_Management.Helper.AttributeHelper;
-using Sentry;
-using AGC_Management.Helper.Checks;
+using AGC_Management.Helper;
 
-namespace AGC_Management.Commands.Moderation
+namespace AGC_Management.Commands
 {
     public class ModerationSystem : BaseCommandModule
     {
