@@ -5,6 +5,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using AGC_Management.Helper;
+using Sentry;
 
 namespace AGC_Management.Commands
 {
@@ -56,14 +57,8 @@ namespace AGC_Management.Commands
             catch (UnauthorizedException e)
             {
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Punish result")
-                    .WithDescription($"**Grund:** ```{reason}```\n" +
-                                     $"**Action:** Kick\n" +
-                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
-                                     $"**Punished User:** **Kein User gepunisched!**\n" +
-                                     $"**Not Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n\n" +
-                                     $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
-                                     $"**User DM'd:** {SentEmoji} {sentString}")
+                    .WithTitle($"{member.UsernameWithDiscriminator} nicht gekickt")
+                    .WithDescription($"Der User ``{member.UsernameWithDiscriminator} ({member.Id})`` konnte nicht gekickt werden!\n\n")
                     .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Red);
 
@@ -77,15 +72,12 @@ namespace AGC_Management.Commands
             }
 
             DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle($"Punish result")
-                .WithDescription($"**Grund:** ```{reason}```\n" +
-                                 $"**Action**: Kick\n" +
-                                 $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
-                                 $"**Punished User:** {member.Mention} {member.UsernameWithDiscriminator}\n" +
-                                 $"**Not Punished User:** **Alle User gepunished**\n" +
-                                 $"**User DM'd:** {SentEmoji} {sentString}")
-                .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
-                .WithColor(DiscordColor.Green);
+                                   .WithTitle($"{member.UsernameWithDiscriminator} wurde erfolgreich gekickt")
+                    .WithDescription($"Der User ``{member.UsernameWithDiscriminator} ({member.Id})`` wurde erfolgreich gekickt!\n\n" +
+                                          $"Grund: ``{reason}``\n\n" +
+                                          $"User wurde über den kick benachrichtigt? {SentEmoji}")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
             DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
@@ -142,14 +134,8 @@ namespace AGC_Management.Commands
             catch (UnauthorizedException e)
             {
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Punish result")
-                    .WithDescription($"**Grund:** ```{reason}```\n" +
-                                     $"**Action:** Ban\n" +
-                                     $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
-                                     $"**Punished User:** **Kein User gepunisched!**\n" +
-                                     $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
-                                     $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
-                                     $"**User DM'd:** {SentEmoji} {sentString}")
+                    .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
+                    .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
                     .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Red);
 
@@ -163,15 +149,12 @@ namespace AGC_Management.Commands
             }
 
             DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle($"Punish result")
-                .WithDescription($"**Grund:** ```{reason}```\n" +
-                                 $"**Action**: Ban\n" +
-                                 $"**Moderator:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n\n" +
-                                 $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
-                                 $"**Not Punished User:** **Alle User gepunished**\n" +
-                                 $"**User DM'd:** {SentEmoji} {sentString}")
-                .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
-                .WithColor(DiscordColor.Green);
+                                                   .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
+                    .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
+                                          $"Grund: ``{reason}``\n\n" +
+                                          $"User wurde über den kick benachrichtigt? {SentEmoji}")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
             DiscordMessageBuilder SuccessMessage = new DiscordMessageBuilder()
@@ -302,17 +285,10 @@ namespace AGC_Management.Commands
                     buttons.ForEach(x => x.Disable());
                     await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                     DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                        .WithTitle($"Punish result <:counting_warning:962007085426556989>")
-                        .WithDescription($"**Grund:** ```{reason}```\n" +
-                        $"**Action:** Ban\n" +
-                        $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
-                        $"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}\n\n" +
-                        $"**Punished User:** **Kein User gepunisched!**\n" +
-                        $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n\n" +
-                        $"**Fehler:** <:counting_warning:962007085426556989><:counting_warning:962007085426556989><:counting_warning:962007085426556989>```{e.Message}```\n" +
-                        $"**User DM'd:** {SentEmoji} {sentString}")
-                        .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
-                        .WithColor(DiscordColor.Red);
+                    .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
+                    .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
+                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithColor(DiscordColor.Red);
 
                     DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
                     DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
@@ -325,14 +301,10 @@ namespace AGC_Management.Commands
                 buttons.ForEach(x => x.Disable());
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Punish result")
-                    .WithDescription($"**Grund:** ```{reason}```\n" +
-                    $"**Action:** Ban\n" +
-                    $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
-                    $"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}\n\n" +
-                    $"**Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
-                    $"**Not Punished User:** **Alle User gepunished**\n" +
-                    $"**User DM'd:** {SentEmoji} {sentString}")
+                                              .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
+                    .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
+                                          $"Grund: ``{reason}``\n\n" +
+                                          $"User wurde über den kick benachrichtigt? {SentEmoji}")
                     .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
                     .WithColor(DiscordColor.Green);
 
