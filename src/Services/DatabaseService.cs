@@ -60,7 +60,7 @@ namespace AGC_Management.Services.DatabaseHandler
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

@@ -30,22 +30,16 @@ namespace AGC_Management.Commands
                 .WithColor(DiscordColor.Red);
             DiscordEmbed embed = embedBuilder.Build();
 
-            bool sent;
             string SentEmoji;
-            string sentString;
             string ReasonString = $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
 
             try
             {
                 await member.SendMessageAsync(embed: embed);
-                sent = true;
-                sentString = "Ja";
                 SentEmoji = "<:yes:861266772665040917>";
             }
             catch (UnauthorizedException)
             {
-                sentString = "Nein. Nutzer hat DMs deaktiviert oder den Bot blockiert.";
-                sent = false;
                 SentEmoji = "<:no:861266772724023296>";
             }
 
@@ -53,7 +47,7 @@ namespace AGC_Management.Commands
             {
                 await member.RemoveAsync(ReasonString);
             }
-            catch (UnauthorizedException e)
+            catch (UnauthorizedException)
             {
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"{member.UsernameWithDiscriminator} nicht gekickt")
@@ -131,7 +125,7 @@ namespace AGC_Management.Commands
             {
                 await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
             }
-            catch (UnauthorizedException e)
+            catch (UnauthorizedException)
             {
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
@@ -241,7 +235,6 @@ namespace AGC_Management.Commands
                     users_to_ban.Add(user);
                 }
             }
-            string busers = "\n";
             string busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
             var caseid = HelperChecks.GenerateCaseID();
             DiscordEmbedBuilder confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -504,7 +497,7 @@ namespace AGC_Management.Commands
                 {
                     await ctx.Guild.BanMemberAsync(user, reason: $"Grund: {reason} | Banrequestor: {ctx.User} | Banapprover: {result.Result.User} | Datum: {now}");
                 }
-                catch (UnauthorizedException e)
+                catch (UnauthorizedException)
                 {
                     buttons.ForEach(x => x.Disable());
                     await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
