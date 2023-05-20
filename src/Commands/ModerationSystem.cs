@@ -59,7 +59,7 @@ namespace AGC_Management.Commands
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"{member.UsernameWithDiscriminator} nicht gekickt")
                     .WithDescription($"Der User ``{member.UsernameWithDiscriminator} ({member.Id})`` konnte nicht gekickt werden!\n\n")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -76,7 +76,7 @@ namespace AGC_Management.Commands
                     .WithDescription($"Der User ``{member.UsernameWithDiscriminator} ({member.Id})`` wurde erfolgreich gekickt!\n\n" +
                                           $"Grund: ``{reason}``\n\n" +
                                           $"User wurde über den kick benachrichtigt? {SentEmoji}")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
@@ -137,7 +137,7 @@ namespace AGC_Management.Commands
                 DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
                     .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -154,7 +154,7 @@ namespace AGC_Management.Commands
                     .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
                                           $"Grund: ``{reason}``\n\n" +
                                           $"User wurde über den kick benachrichtigt? {SentEmoji}")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Green);
 
             DiscordEmbed successEmbed = successEmbedBuilder.Build();
@@ -385,7 +385,7 @@ namespace AGC_Management.Commands
                     DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
                     .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
                     DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
@@ -426,7 +426,7 @@ namespace AGC_Management.Commands
                     $"**Punished User:** **Kein User gepunisched!**\n" +
                     $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
                     $"**User DM'd:** /-/")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
                 DiscordEmbed declineEmbed = declineEmbedBuilder.Build();
