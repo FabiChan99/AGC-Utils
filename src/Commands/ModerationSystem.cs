@@ -534,17 +534,12 @@ namespace AGC_Management.Commands
             }
             else if (result.Result.Id == $"banrequest_deny_{caseid}")
             {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 buttons.ForEach(x => x.Disable());
                 DiscordEmbedBuilder declineEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"Punish result")
-                    .WithDescription($"**Grund:** ```{reason}```\n" +
-                    $"**Action:** Ban\n" +
-                    $"**Banrequestor:** {ctx.User.Mention} {ctx.User.UsernameWithDiscriminator}\n" +
-                    //$"**Banapprover:** {result.Result.Interaction.User.Mention} {result.Result.Interaction.User.UsernameWithDiscriminator}" +
-                    $"**<:counting_warning:962007085426556989>BAN ABGELEHNT von {result.Result.Interaction.User.Mention}<:counting_warning:962007085426556989>\n\n" +
-                    $"**Punished User:** **Kein User gepunisched!**\n" +
-                    $"**Not Punished User:** {user.Mention} {user.UsernameWithDiscriminator}\n" +
-                    $"**User DM'd:** /-/")
+                    .WithTitle($"Bannanfrage abgebrochen")
+                    .WithDescription($"Die Bannanfrage für {user} (``{user.Id}``) wurde abgebrochen.\n\n"
+                                                                                   $"Grund: Ban wurde abgelehnt von `{result.Result.User.UsernameWithDiscriminator}`")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
