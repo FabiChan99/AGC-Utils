@@ -1,11 +1,10 @@
-﻿using DisCatSharp.CommandsNext;
+﻿using AGC_Management.Helper;
+using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using AGC_Management.Helper;
-using Sentry;
 
 namespace AGC_Management.Commands
 {
@@ -215,6 +214,7 @@ namespace AGC_Management.Commands
             {
                 return;
             }
+            reason = reason.TrimEnd(' ');
             List<DiscordUser> users_to_ban = new List<DiscordUser>();
             string reasonString = $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
             foreach (ulong id in ids)
@@ -235,10 +235,18 @@ namespace AGC_Management.Commands
                 $"```{busers_formatted}```\nGrund:```{reason}```")
                 .WithColor(GlobalProperties.EmbedColor);
             DiscordEmbed confirmEmbed = confirmEmbedBuilder.Build();
+
+            DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder()
+            .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
+            .WithDescription($"**Begründung:**\n```\n{reason}\n```\n\n" +
+                             $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
+                             $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
+            .WithColor(DiscordColor.Red);
+            DiscordEmbed UserEmbed = embedBuilder.Build();
             List<DiscordButtonComponent> buttons = new(2)
     {
-        new DiscordButtonComponent(ButtonStyle.Success, $"multiban_accept_{caseid}", "✅"),
-        new DiscordButtonComponent(ButtonStyle.Danger, $"multiban_deny_{caseid}", "❌")
+        new DiscordButtonComponent(ButtonStyle.Secondary, $"multiban_accept_{caseid}", "✅"),
+        new DiscordButtonComponent(ButtonStyle.Primary, $"multiban_deny_{caseid}", "❌")
     };
             var builder = new DiscordMessageBuilder()
                             .WithEmbed(confirmEmbed)
@@ -256,9 +264,94 @@ namespace AGC_Management.Commands
                 await message.ModifyAsync(embed_);
                 return;
             }
+            if (result.Result.Id == $"multiban_deny_{caseid}")
+            {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var embed_ = new DiscordMessageBuilder()
+                    .WithEmbed(confirmEmbedBuilder.WithTitle("Bannanfrage abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                                       .WithDescription($"Der Multiban wurde abgebrochen.\n\nGrund: Abgebrochen. <:counting_warning:962007085426556989>").WithColor(DiscordColor.Red).Build());
+                await message.ModifyAsync(embed_);
+                return;
+            }
+            if (result.Result.Id == $"multiban_accept_{caseid}")
+            {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+                DiscordEmbedBuilder loadingEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle("Multiban wird bearbeitet").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithDescription($"Der Multiban wird bearbeitet. Bitte warten...")
+                    .WithColor(DiscordColor.Yellow);
 
 
+                string b_users = "";
+                string n_users = "";
+                foreach (DiscordUser user in users_to_ban)
+                {
+                    bool sent = false;
+                    try
+                    {
+                        await user.SendMessageAsync(UserEmbed);
+                        sent = true;
+                    }
+                    catch
+                    {
+                        sent = false;
+                    }
+                    string semoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
+                    try
+                    {
+                        await ctx.Guild.BanMemberAsync(user.Id, 7, reasonString);
+                        b_users += $"{user.UsernameWithDiscriminator}\n";
+                    }
+                    catch (UnauthorizedException)
+                    {
+                        DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
+                        .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
+                        .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
+                        .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                        .WithColor(DiscordColor.Red);
 
+                        DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
+                        DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
+                            .WithEmbed(failsuccessEmbed)
+                            .WithReply(ctx.Message.Id, false);
+                        await ctx.Channel.SendMessageAsync(failSuccessMessage);
+                        continue;
+                        n_users += $"{user.UsernameWithDiscriminator}\n";
+                    }
+
+                    buttons.ForEach(x => x.Disable());
+                    DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
+                                                  .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
+                        .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
+                                              $"Grund: ``{reason}``\n\n" +
+                                              $"User wurde über den ban benachrichtigt? {semoji}")
+                        .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                        .WithColor(DiscordColor.Green);
+                    DiscordEmbed successEmbed = successEmbedBuilder.Build();
+                    DiscordMessageBuilder successMessage = new DiscordMessageBuilder()
+                        .WithEmbed(successEmbed)
+                        .WithReply(ctx.Message.Id, false);
+                    await ctx.Channel.SendMessageAsync(successMessage);
+                }
+                // edit initial embed
+                string e_string = $"Der Multiban wurde erfolgreich abgeschlossen.\n\n" +
+                $"Grund: {reason}\n\n" +
+                $"Gebannte User:\n" +
+                $"```{b_users}```";
+                if (n_users != "")
+                {
+                    e_string += $"Nicht gebannte User:\n" +
+                    $"```{n_users}```";
+                }
+                DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle("Bannanfrage abgeschlossen")
+                    .WithDescription(e_string)
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithColor(DiscordColor.Green);
+                DiscordEmbed discordEmbed = discordEmbedBuilder.Build();
+                await message.ModifyAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed));
+            }
         }
 
 
@@ -311,7 +404,7 @@ namespace AGC_Management.Commands
                 {
                     staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
                 }
-                
+
             }
 
             DiscordEmbed embed = embedBuilder.Build();
@@ -402,8 +495,8 @@ namespace AGC_Management.Commands
                                               .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
                     .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
                                           $"Grund: ``{reason}``\n\n" +
-                                          $"User wurde über den kick benachrichtigt? {SentEmoji}")
-                    .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
+                                          $"User wurde über den ban benachrichtigt? {SentEmoji}")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Green);
 
                 DiscordEmbed successEmbed = successEmbedBuilder.Build();
