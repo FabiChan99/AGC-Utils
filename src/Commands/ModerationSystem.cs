@@ -166,6 +166,103 @@ namespace AGC_Management.Commands
         }
 
 
+        [Command("multiban")]
+        [RequirePermissions(Permissions.BanMembers)]
+        public async Task MultiBan(CommandContext ctx, [RemainingText] string ids_and_reason)
+        {
+            List<ulong> ids = new List<ulong>();
+            string reason = "";
+
+            string[] parts = ids_and_reason.Split(' ');
+            bool isReasonStarted = false;
+
+            foreach (string part in parts)
+            {
+                if (!isReasonStarted)
+                {
+                    if (part.StartsWith("<@") && part.EndsWith(">"))
+                    {
+                        string idString = part.Substring(2, part.Length - 3);
+                        if (ulong.TryParse(idString, out ulong id))
+                        {
+                            ids.Add(id);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    else if (ulong.TryParse(part, out ulong id))
+                    {
+                        ids.Add(id);
+                    }
+                    else
+                    {
+                        isReasonStarted = true;
+                        reason += part + " ";
+                    }
+                }
+                else
+                {
+                    reason += part + " ";
+                }
+            }
+            if (await HelperChecks.CheckForReason(ctx, reason))
+            {
+                return;
+            }
+            if (await HelperChecks.TicketUrlCheck(ctx, reason))
+            {
+                return;
+            }
+            List<DiscordUser> users_to_ban = new List<DiscordUser>();
+            string reasonString = $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+            foreach (ulong id in ids)
+            {
+                DiscordUser? user = await ctx.Client.TryGetUserAsync(id);
+                if (user != null)
+                {
+                    users_to_ban.Add(user);
+                }
+            }
+            string busers = "\n";
+            string busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
+            var caseid = HelperChecks.GenerateCaseID();
+            DiscordEmbedBuilder confirmEmbedBuilder = new DiscordEmbedBuilder()
+                .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅, um fortzufahren.\n\n" +
+                $"Users:\n" +
+                $"```{busers_formatted}```\nGrund:```{reason}```")
+                .WithColor(GlobalProperties.EmbedColor);
+            DiscordEmbed confirmEmbed = confirmEmbedBuilder.Build();
+            List<DiscordButtonComponent> buttons = new(2)
+    {
+        new DiscordButtonComponent(ButtonStyle.Success, $"multiban_accept_{caseid}", "✅"),
+        new DiscordButtonComponent(ButtonStyle.Danger, $"multiban_deny_{caseid}", "❌")
+    };
+            var builder = new DiscordMessageBuilder()
+                            .WithEmbed(confirmEmbed)
+                            .AddComponents(buttons)
+                            .WithReply(ctx.Message.Id, false);
+            var interactivity = ctx.Client.GetInteractivity();
+            var message = await ctx.Channel.SendMessageAsync(builder);
+
+            var result = await interactivity.WaitForButtonAsync(message, ctx.User, TimeSpan.FromSeconds(10));
+            if (result.TimedOut)
+            {
+                var embed_ = new DiscordMessageBuilder()
+                    .WithEmbed(confirmEmbedBuilder.WithTitle("Bannanfrage abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithDescription($"Der Multiban wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>").WithColor(DiscordColor.Red).Build());
+                await message.ModifyAsync(embed_);
+                return;
+            }
+
+
+
+        }
+
+
+
         [Command("banrequest")]
         [Aliases("banreq")]
         [RequireStaffRole]
@@ -241,7 +338,7 @@ namespace AGC_Management.Commands
                 }
 
                 return false;
-            }, TimeSpan.FromSeconds(10));
+            }, TimeSpan.FromHours(6));
 
             if (result.TimedOut)
             {
@@ -341,17 +438,6 @@ namespace AGC_Management.Commands
                 await message.ModifyAsync(DeclineMessage);
             }
         }
-
-
-
-
-
-
-
-
-
-
-
     }
 }
 
