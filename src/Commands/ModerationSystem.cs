@@ -239,7 +239,7 @@ namespace AGC_Management.Commands
             var caseid = HelperChecks.GenerateCaseID();
             DiscordEmbedBuilder confirmEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
-                .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅, um fortzufahren.\n\n" +
+                .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                 $"__Users:__\n" +
                 $"```{busers_formatted}```\n__Grund:__```{reason}```")
                 .WithColor(GlobalProperties.EmbedColor);
