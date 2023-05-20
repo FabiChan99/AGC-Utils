@@ -268,7 +268,7 @@ namespace AGC_Management.Commands
             if (result.TimedOut)
             {
                 var embed_ = new DiscordMessageBuilder()
-                    .WithEmbed(confirmEmbedBuilder.WithTitle("Bannanfrage abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithEmbed(confirmEmbedBuilder.WithTitle("Multiban abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithDescription($"Der Multiban wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>").WithColor(DiscordColor.Red).Build());
                 await message.ModifyAsync(embed_);
                 return;
@@ -277,7 +277,7 @@ namespace AGC_Management.Commands
             {
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var embed_ = new DiscordMessageBuilder()
-                    .WithEmbed(confirmEmbedBuilder.WithTitle("Bannanfrage abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithEmbed(confirmEmbedBuilder.WithTitle("Multiban abgebrochen").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                                        .WithDescription($"Der Multiban wurde abgebrochen.\n\nGrund: Abgebrochen. <:counting_warning:962007085426556989>").WithColor(DiscordColor.Red).Build());
                 await message.ModifyAsync(embed_);
                 return;
@@ -371,7 +371,7 @@ namespace AGC_Management.Commands
                     ec = DiscordColor.Green;
                 }
                 DiscordEmbedBuilder discordEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle("Bannanfrage abgeschlossen")
+                    .WithTitle("Multiban abgeschlossen")
                     .WithDescription(e_string)
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(ec);
@@ -538,7 +538,7 @@ namespace AGC_Management.Commands
                 buttons.ForEach(x => x.Disable());
                 DiscordEmbedBuilder declineEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"Bannanfrage abgebrochen")
-                    .WithDescription($"Die Bannanfrage für {user} (``{user.Id}``) wurde abgebrochen.\n\n"
+                    .WithDescription($"Die Bannanfrage für {user} (``{user.Id}``) wurde abgebrochen.\n\n" + 
                                                                                    $"Grund: Ban wurde abgelehnt von `{result.Result.User.UsernameWithDiscriminator}`")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
