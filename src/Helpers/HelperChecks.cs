@@ -12,11 +12,24 @@ namespace AGC_Management.Helper
             {
                 DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Kein Grund angegeben!")
                     .WithDescription("Bitte gebe einen Grund an")
-                    .WithColor(DiscordColor.Red).WithFooter($"{ctx.User.UsernameWithDiscriminator}");
+                    .WithColor(DiscordColor.Red).WithFooter($"{ctx.User.UsernameWithDiscriminator}", ctx.User.AvatarUrl);
                 DiscordMessageBuilder msg = new DiscordMessageBuilder().WithEmbed(embedBuilder.Build()).WithReply(ctx.Message.Id, false);
                 await ctx.Channel.SendMessageAsync(msg);
 
 
+                return true;
+            }
+            else
+            {
+
+            }
+            if (reason == "")
+            {
+                DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Kein Grund angegeben!")
+                  .WithDescription("Bitte gebe einen Grund an")
+                  .WithColor(DiscordColor.Red).WithFooter($"{ctx.User.UsernameWithDiscriminator}", ctx.User.AvatarUrl);
+                DiscordMessageBuilder msg = new DiscordMessageBuilder().WithEmbed(embedBuilder.Build()).WithReply(ctx.Message.Id, false);
+                await ctx.Channel.SendMessageAsync(msg);
                 return true;
             }
             else

@@ -10,7 +10,7 @@ namespace AGC_Management.Services.DatabaseHandler
         {
             try
             {
-                
+
                 string DbHost = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Host"];
                 string DbUser = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_User"];
                 string DbPass = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Password"];
@@ -22,7 +22,7 @@ namespace AGC_Management.Services.DatabaseHandler
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("An error occurred while opening the database connection: " + ex.Message+ "\nFunctionality will be restricted and the Program can be Unstable, Continue at own risk!\nPress any key to Continue");
+                    Console.WriteLine("An error occurred while opening the database connection: " + ex.Message + "\nFunctionality will be restricted and the Program can be Unstable, Continue at own risk!\nPress any key to Continue");
                     Console.ReadKey();
                 }
             }
