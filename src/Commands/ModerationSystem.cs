@@ -102,7 +102,7 @@ namespace AGC_Management.Commands
 
             DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
-                .WithDescription($"**Begründung:**\n```\n{reason}\n```\n" +
+                .WithDescription($"**Begründung:**```{reason}```\n" +
                                  $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
                                  $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
                 .WithColor(DiscordColor.Red);
@@ -254,7 +254,7 @@ namespace AGC_Management.Commands
 
             DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
-            .WithDescription($"**Begründung:**\n```\n{reason}\n```\n\n" +
+            .WithDescription($"**Begründung:**```{reason}```\n" +
                              $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
                              $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
             .WithColor(DiscordColor.Red);
@@ -362,7 +362,7 @@ namespace AGC_Management.Commands
                 if (n_users != "")
                 {
                     e_string = $"Der Multiban wurde mit Fehlern abgeschlossen.\n" +
-                    $"__Grund:__ ```{reason}```\n\n" +
+                    $"__Grund:__ ```{reason}```\n" +
                     $"__Gebannte User:__\n" +
                     $"```{b_users}```";
                     e_string += $"__Nicht gebannte User:__\n" +
@@ -372,7 +372,7 @@ namespace AGC_Management.Commands
                 else
                 {
                     e_string = $"Der Multiban wurde erfolgreich abgeschlossen.\n" +
-                    $"__Grund:__ ```{reason}```\n\n" +
+                    $"__Grund:__ ```{reason}```\n" +
                     $"__Gebannte User:__\n" +
                     $"```{b_users}```";
                     ec = DiscordColor.Green;
@@ -480,7 +480,7 @@ namespace AGC_Management.Commands
                 string now = DateTime.Now.ToString("dd.MM.yyyy");
                 DiscordEmbedBuilder banEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
-                    .WithDescription($"**Begründung:**\n```\n{reason}\n```\n" +
+                    .WithDescription($"**Begründung:**```{reason}```\n" +
                                      $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
                                      $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen");
 
