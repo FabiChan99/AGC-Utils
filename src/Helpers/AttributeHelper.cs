@@ -36,3 +36,19 @@ public class RequireDatabase : CheckBaseAttribute
         return false;
     }
 }
+
+public class RequireTeamCat : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        ulong teamAreaCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["TeamAreaCategoryId"]);
+        ulong logCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["LogCategoryId"]);
+        ulong modMailCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["ModMailCategoryId"]);
+
+        bool isChannelInValidCategory = ctx.Channel.ParentId == teamAreaCategoryId ||
+                                        ctx.Channel.ParentId == logCategoryId ||
+                                        ctx.Channel.ParentId == modMailCategoryId;
+
+        return (isChannelInValidCategory);
+    }
+}

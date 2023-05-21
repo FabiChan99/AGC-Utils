@@ -414,7 +414,7 @@ public class ModerationSystem : BaseCommandModule
         if (result.Result.Id == $"multibanrequest_accept_{caseid}")
         {
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            var now = DateTime.Now.ToString("dd.MM.yyyy");
+            var now = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
             var banEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!").WithColor(DiscordColor.Red)
                 .WithDescription($"**Begründung:**```{reason}```\n" +
@@ -688,7 +688,7 @@ public class ModerationSystem : BaseCommandModule
 
         if (result.Result.Id == $"banrequest_accept_{caseid}")
         {
-            var now = DateTime.Now.ToString("dd.MM.yyyy");
+            var now = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
             var banEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
                 .WithDescription($"**Begründung:**```{reason}```\n" +

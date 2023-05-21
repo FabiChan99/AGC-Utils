@@ -27,7 +27,7 @@ public static class DatabaseService
             dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             try
             {
-                if(dbConnection.State != ConnectionState.Open)
+                if (dbConnection.State != ConnectionState.Open)
                     dbConnection.Open();
             }
             catch (Exception ex)
@@ -103,5 +103,10 @@ public static class DatabaseService
             Console.WriteLine("An error occurred while executing the database query: " + ex.Message);
             throw;
         }
+    }
+    // expose dbConnection
+    public static NpgsqlConnection GetConnection()
+    {
+        return dbConnection;
     }
 }
