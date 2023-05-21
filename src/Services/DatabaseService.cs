@@ -15,15 +15,25 @@ public static class DatabaseService
             var DbUser = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_User"];
             var DbPass = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Password"];
             var DbName = GlobalProperties.ConfigIni["DatabaseCfg"]["Database"];
+
+            if (GlobalProperties.DebugMode)
+            {
+                DbHost = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_Host"];
+                DbUser = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_User"];
+                DbPass = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_Password"];
+                DbName = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database"];
+            }
+
             dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             try
             {
-                dbConnection.Open();
+                if(dbConnection.State != ConnectionState.Open)
+                    dbConnection.Open();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred while opening the database connection: " + ex.Message +
-                                  "\nFunctionality will be restricted and the Program can be Unstable, Continue at own risk!\nPress any key to Continue");
+                                  "\nFunctionality will be restricted and the Program can be Unstable. Continue at your own risk!\nPress any key to continue");
                 Console.ReadKey();
             }
         }
@@ -33,6 +43,7 @@ public static class DatabaseService
             throw;
         }
     }
+
 
     public static void CloseConnection()
     {
