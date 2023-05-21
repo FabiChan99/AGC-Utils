@@ -163,44 +163,9 @@ namespace AGC_Management.Commands
         [RequirePermissions(Permissions.BanMembers)]
         public async Task MultiBan(CommandContext ctx, [RemainingText] string ids_and_reason)
         {
-            List<ulong> ids = new List<ulong>();
-            string reason = "";
-
-            string[] parts = ids_and_reason.Split(' ');
-            bool isReasonStarted = false;
-
-            foreach (string part in parts)
-            {
-                if (!isReasonStarted)
-                {
-                    if (part.StartsWith("<@") && part.EndsWith(">"))
-                    {
-                        string idString = part.Substring(2, part.Length - 3);
-                        if (ulong.TryParse(idString, out ulong id))
-                        {
-                            ids.Add(id);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else if (ulong.TryParse(part, out ulong id))
-                    {
-                        ids.Add(id);
-                    }
-                    else
-                    {
-                        isReasonStarted = true;
-                        reason += part + " ";
-                    }
-                }
-                else
-                {
-                    reason += part + " ";
-                }
-            }
-            Console.WriteLine($"G: '{reason}'");
+            List<ulong> ids;
+            string reason;
+            Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
             if (await HelperChecks.CheckForReason(ctx, reason))
             {
                 return;
