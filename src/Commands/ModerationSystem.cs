@@ -286,34 +286,9 @@ namespace AGC_Management.Commands
                     }
                     catch (UnauthorizedException)
                     {
-                        /*   DiscordEmbedBuilder failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                           .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
-                           .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
-                           .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
-                           .WithColor(DiscordColor.Red);
-
-                           DiscordEmbed failsuccessEmbed = failsuccessEmbedBuilder.Build();
-                           DiscordMessageBuilder failSuccessMessage = new DiscordMessageBuilder()
-                               .WithEmbed(failsuccessEmbed)
-                               .WithReply(ctx.Message.Id, false);
-                           await ctx.Channel.SendMessageAsync(failSuccessMessage); */
                         n_users += $"{user.UsernameWithDiscriminator}\n";
                         continue;
                     }
-
-
-                    /* DiscordEmbedBuilder successEmbedBuilder = new DiscordEmbedBuilder()
-                                                  .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
-                        .WithDescription($"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
-                                              $"Grund: ``{reason}``\n\n" +
-                                              $"User wurde über den ban benachrichtigt? {semoji}")
-                        .WithFooter($"{GlobalProperties.ServerNameInitals} Moderation System")
-                        .WithColor(DiscordColor.Green);
-                    DiscordEmbed successEmbed = successEmbedBuilder.Build();
-                    DiscordMessageBuilder successMessage = new DiscordMessageBuilder()
-                        .WithEmbed(successEmbed)
-                        .WithReply(ctx.Message.Id, false);
-                    await ctx.Channel.SendMessageAsync(successMessage); */
                 }
                 string e_string;
                 var ec = DiscordColor.Red;
@@ -756,7 +731,7 @@ namespace AGC_Management.Commands
 
                 try
                 {
-                    await ctx.Guild.BanMemberAsync(user, reason: $"Grund: {reason} | Banrequestor: {ctx.User} | Banapprover: {result.Result.User} | Datum: {now}");
+                    await ctx.Guild.BanMemberAsync(user,7,  reason: $"Grund: {reason} | Banrequestor: {ctx.User} | Banapprover: {result.Result.User} | Datum: {now}");
                 }
                 catch (UnauthorizedException)
                 {
