@@ -52,7 +52,7 @@ namespace AGC_Management
                 Token = DcApiToken,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information,
                 Intents = DiscordIntents.All,
                 LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt"
             });

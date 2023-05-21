@@ -41,7 +41,6 @@ namespace AGC_Management.Helper
                 DiscordEmbed embed = embedBuilder.Build();
                 DiscordMessageBuilder msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id, false);
                 await ctx.Channel.SendMessageAsync(msg_e);
-                    
                 return false;
             }
         }
