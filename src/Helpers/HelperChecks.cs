@@ -34,7 +34,7 @@ public class HelperChecks
 
 
     public static string GenerateCaseID()
-        // Generate CaseID with mix from current time and random number
+    // Generate CaseID with mix from current time and random number
     {
         var rnd = new Random();
         var CaseID = DateTime.Now.ToString("yyyyMMddHHmmss") + rnd.Next(1000, 9999);

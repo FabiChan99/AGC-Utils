@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using AGC_Management.Services.DatabaseHandler;
+﻿using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
@@ -9,6 +8,7 @@ using DisCatSharp.Interactivity.Extensions;
 using IniParser;
 using IniParser.Model;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace AGC_Management;
 
@@ -51,7 +51,7 @@ internal class Program : BaseCommandModule
             Token = DcApiToken,
             TokenType = TokenType.Bot,
             AutoReconnect = true,
-            MinimumLogLevel = LogLevel.Information,
+            MinimumLogLevel = LogLevel.Debug,
             Intents = DiscordIntents.All,
             LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt"
         });

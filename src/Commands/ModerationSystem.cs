@@ -476,7 +476,7 @@ public class ModerationSystem : BaseCommandModule
                 .WithReply(ctx.Message.Id);
 
             var interactivity = ctx.Client.GetInteractivity();
-            var staffmessage = await message.ModifyAsync(builder);
+            await message.ModifyAsync(builder);
 
             var pingmsg = await ctx.Channel.SendMessageAsync(staffMentionString);
             await pingmsg.DeleteAsync();
