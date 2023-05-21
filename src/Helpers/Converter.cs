@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AGC_Management.Helper;
+﻿namespace AGC_Management.Helper;
 
 public class Converter
 {
@@ -12,26 +6,21 @@ public class Converter
     {
         ids = new List<ulong>();
         reason = "";
-        string[] parts = ids_and_reason.Split(' ');
-        bool isReasonStarted = false;
+        var parts = ids_and_reason.Split(' ');
+        var isReasonStarted = false;
 
-        foreach (string part in parts)
-        {
+        foreach (var part in parts)
             if (!isReasonStarted)
             {
                 if (part.StartsWith("<@") && part.EndsWith(">"))
                 {
-                    string idString = part.Substring(2, part.Length - 3);
-                    if (ulong.TryParse(idString, out ulong id))
-                    {
+                    var idString = part.Substring(2, part.Length - 3);
+                    if (ulong.TryParse(idString, out var id))
                         ids.Add(id);
-                    }
                     else
-                    {
                         break;
-                    }
                 }
-                else if (ulong.TryParse(part, out ulong id))
+                else if (ulong.TryParse(part, out var id))
                 {
                     ids.Add(id);
                 }
@@ -45,6 +34,5 @@ public class Converter
             {
                 reason += part + " ";
             }
-        }
     }
 }
