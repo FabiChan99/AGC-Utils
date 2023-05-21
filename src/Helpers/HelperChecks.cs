@@ -1,7 +1,7 @@
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 
-namespace AGC_Management.Helper;
+namespace AGC_Management.Helpers;
 
 public class HelperChecks
 {

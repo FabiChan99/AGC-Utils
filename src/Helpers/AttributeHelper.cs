@@ -3,7 +3,7 @@ using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 
-namespace AGC_Management.Helper;
+namespace AGC_Management.Helpers;
 
 public class RequireStaffRole : CheckBaseAttribute
 {
@@ -23,10 +23,7 @@ public class RequireDatabase : CheckBaseAttribute
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
         // Check if database is connected
-        if (DatabaseService.IsConnected())
-        {
-            return true;
-        }
+        if (DatabaseService.IsConnected()) return true;
 
         Console.WriteLine("Database is not connected! Command disabled.");
         var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Datenbank nicht verbunden!")

@@ -1,4 +1,4 @@
-﻿namespace AGC_Management.Helper;
+﻿namespace AGC_Management.Helpers;
 
 public class Converter
 {
