@@ -5,24 +5,17 @@ namespace AGC_Management.Services.DatabaseHandler;
 
 public static class DatabaseService
 {
-    private static NpgsqlConnection dbConnection;
+    public static NpgsqlConnection? dbConnection;
 
     public static void OpenConnection()
     {
         try
         {
-            var DbHost = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Host"];
-            var DbUser = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_User"];
-            var DbPass = GlobalProperties.ConfigIni["DatabaseCfg"]["Database_Password"];
-            var DbName = GlobalProperties.ConfigIni["DatabaseCfg"]["Database"];
-
-            if (GlobalProperties.DebugMode)
-            {
-                DbHost = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_Host"];
-                DbUser = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_User"];
-                DbPass = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database_Password"];
-                DbName = GlobalProperties.ConfigIni["DatabaseCfgDBG"]["Database"];
-            }
+            var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
+            var DbHost = GlobalProperties.ConfigIni[dbConfigSection]["Database_Host"];
+            var DbUser = GlobalProperties.ConfigIni[dbConfigSection]["Database_User"];
+            var DbPass = GlobalProperties.ConfigIni[dbConfigSection]["Database_Password"];
+            var DbName = GlobalProperties.ConfigIni[dbConfigSection]["Database"];
 
             dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             try
@@ -103,10 +96,5 @@ public static class DatabaseService
             Console.WriteLine("An error occurred while executing the database query: " + ex.Message);
             throw;
         }
-    }
-    // expose dbConnection
-    public static NpgsqlConnection GetConnection()
-    {
-        return dbConnection;
     }
 }
