@@ -6,7 +6,6 @@ using DisCatSharp.Entities;
 using DisCatSharp.Exceptions;
 using Npgsql;
 
-
 namespace AGC_Management.Commands;
 
 public class ExtendedModerationSystem : ModerationSystem
@@ -18,29 +17,27 @@ public class ExtendedModerationSystem : ModerationSystem
         return formattedDate;
     }
 
-    public static async Task<(bool, object)> CheckBannsystem(DiscordUser user)
+    private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
         using HttpClient client = new();
-        client.DefaultRequestHeaders.Add("Authorization", GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"]);
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
+            GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"]);
         HttpResponseMessage response =
             await client.GetAsync($"{GlobalProperties.ConfigIni["ModHQConfig"]["API_URL"]}{user.Id}");
+        Console.WriteLine(response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
             string json = await response.Content.ReadAsStringAsync();
             var data = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
             if (data.reports != null && data.reports.Count > 0)
             {
-                return (true, data.reports);
+                return (true, data.reports, true);
             }
-            else
-            {
-                return (false, data.reports);
-            }
+
+            return (false, data.reports, true);
         }
-        else
-        {
-            return (false, null);
-        }
+
+        return (false, null, false);
     }
 
 
@@ -75,9 +72,11 @@ public class ExtendedModerationSystem : ModerationSystem
             _ => "<:offline:946831431798227056>",
         };
         bool bs_status = false; // Default value
+        bool bs_success = false;
+        /*
         try
         {
-            (bool temp_bs_status, object bs) = await CheckBannsystem(user);
+            (bool temp_bs_status, object bs, bs_success) = await CheckBannsystem(user);
             bs_status = temp_bs_status;
             if (bs_status == true)
             {
@@ -88,15 +87,18 @@ public class ExtendedModerationSystem : ModerationSystem
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine(ex.Message);
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Ignore
+            Console.WriteLine(ex.Message);
         }
+
+        Console.WriteLine(bs_success);
         string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";
+        */
         Console.WriteLine(isMember);
         if (isMember)
         {
@@ -143,6 +145,7 @@ public class ExtendedModerationSystem : ModerationSystem
                         warnlist.Add(warn);
                     }
                 }
+
                 Console.WriteLine(memberID + "11111djkafsg");
 
                 string flagQuery =
@@ -162,6 +165,7 @@ public class ExtendedModerationSystem : ModerationSystem
                         flaglist.Add(flag);
                     }
                 }
+
                 Console.WriteLine(memberID + "djkafsg");
 
                 string permawarnQuery =
@@ -181,6 +185,7 @@ public class ExtendedModerationSystem : ModerationSystem
                         permawarnlist.Add(permawarn);
                     }
                 }
+
                 Console.WriteLine("0 work");
 
                 int warncount = warnlist.Count;
@@ -222,7 +227,8 @@ public class ExtendedModerationSystem : ModerationSystem
                     ulong ulongValue = (ulong)intValue;
                     Console.WriteLine(ulongValue);
                     var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
-                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {flag.Description}";
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {flag.Description}";
                     flagResults.Add(FlagStr);
                     Console.WriteLine(FlagStr);
                 }
@@ -233,7 +239,8 @@ public class ExtendedModerationSystem : ModerationSystem
                     ulong ulongValue = (ulong)intValue;
                     Console.WriteLine(ulongValue);
                     var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
-                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{warn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(warn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {warn.Description}";
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{warn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(warn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {warn.Description}";
                     flagResults.Add(FlagStr);
                     Console.WriteLine(FlagStr);
                 }
@@ -244,7 +251,8 @@ public class ExtendedModerationSystem : ModerationSystem
                     ulong ulongValue = (ulong)intValue;
                     Console.WriteLine(ulongValue);
                     var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
-                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {pwarn.Description}";
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {pwarn.Description}";
                     flagResults.Add(FlagStr);
                     Console.WriteLine(FlagStr);
                 }
@@ -252,44 +260,221 @@ public class ExtendedModerationSystem : ModerationSystem
 
 
                 // if booster_seit
-                string boost_string = member.PremiumSince.HasValue ? $"\nBoostet seit: {DisCatSharp.Formatter.Timestamp(member.PremiumSince.Value)}" : "";
+                string boost_string = member.PremiumSince.HasValue
+                    ? $"\nBoostet seit: {DisCatSharp.Formatter.Timestamp(member.PremiumSince.Value)}"
+                    : "";
                 // discord native format
-                string userinfostring = $"**Das Mitglied**\nUsername: {member.UsernameWithDiscriminator}\nUser ID: ``{member.Id}``{boost_string}\n\n";
+                string userinfostring =
+                    $"**Das Mitglied**\n{member.UsernameWithDiscriminator} ``{member.Id}``{boost_string}\n\n";
                 userinfostring += $"**Erstellung, Beitritt und mehr**\n";
-                userinfostring += $"**Erstellt:** {member.CreationTimestamp.ToString("dd.MM.yyyy - HH:mm")}\n";
-                userinfostring += $"**Beitritt:** {member.JoinedAt.ToString("dd.MM.yyyy - HH:mm")}\n";
-                userinfostring += $"**Infobadges:** {bs_icon} {booster_icon} {teamler_ico} {bot_indicator} {vc_icon} {timeout_icon}\n\n";
+                userinfostring += $"**Erstellt:** {DisCatSharp.Formatter.Timestamp(member.CreationTimestamp)}\n";
+                userinfostring += $"**Beitritt:** {DisCatSharp.Formatter.Timestamp(member.JoinedAt)}\n";
+                userinfostring +=
+                    $"**Infobadges:**  {booster_icon} {teamler_ico} {bot_indicator} {vc_icon} {timeout_icon}\n\n";
                 userinfostring += $"**Kommunikations-Timeout**\n";
-                userinfostring += $"{(member.CommunicationDisabledUntil.HasValue ? $"Nutzer getimeouted bis: {DisCatSharp.Formatter.Timestamp(member.CommunicationDisabledUntil.Value)}" : "Nutzer nicht getimeouted")}\n\n";
-                userinfostring += $"**Aktueller Voice-Channel**\n{(member.VoiceState != null && member.VoiceState.Channel != null ? member.VoiceState.Channel.Mention : "Mitglied nicht in einem Voice-Channel")}\n\n";
+                userinfostring +=
+                    $"{(member.CommunicationDisabledUntil.HasValue ? $"Nutzer getimeouted bis: {DisCatSharp.Formatter.Timestamp(member.CommunicationDisabledUntil.Value)}" : "Nutzer nicht getimeouted")}\n\n";
+                userinfostring +=
+                    $"**Aktueller Voice-Channel**\n{(member.VoiceState != null && member.VoiceState.Channel != null ? member.VoiceState.Channel.Mention : "Mitglied nicht in einem Voice-Channel")}\n\n";
                 userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
-                userinfostring += (warnlist.Count == 0 ? "Es wurden keine gefunden.\n" : string.Join("\n", warnlist.Select(warn => $"[{ctx.Client.TryGetUserAsync(warn.PunisherId)}, ``{warn.CaseId}``] {warn.Datum.ToString("dd.MM.yyyy - HH:mm")} - {warn.Description}")));
+                userinfostring += (warnlist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", warnResults) + "\n");
                 userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
-                userinfostring += (permawarnlist.Count == 0 ? "Es wurden keine gefunden.\n" : string.Join("\n", permawarnlist.Select(permawarn => $"[{permawarn.PunisherId}, ``{permawarn.CaseId}``] {permawarn.Datum.ToString("dd.MM.yyyy - HH:mm")} - {permawarn.Description}\n")));
+                userinfostring += (permawarnlist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", permawarnResults) + "\n");
                 userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
-                userinfostring += (flaglist.Count == 0 ? "Es wurden keine gefunden.\n" : string.Join("\n", flagResults) + "\n");
+                userinfostring += (flaglist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", flagResults) + "\n");
 
                 /*
-                if (bs_cfg)
+                if (bs_success)
                 {
                     userinfostring += $"\n**BannSystem-Status**\n";
                     userinfostring += (bs_status ? "**__Nutzer ist gemeldet - Siehe BS-Bericht__**" : "Nutzer ist nicht gemeldet");
                 } */
                 DiscordEmbedBuilder embedbuilder = new DiscordEmbedBuilder();
                 embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitals} Mitglied");
-                embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" + userinfostring);
+                embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
+                                             userinfostring);
                 embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
                 embedbuilder.WithThumbnail(member.AvatarUrl);
-                embedbuilder.WithFooter($"Bericht angefordert von {ctx.User.UsernameWithDiscriminator}", ctx.User.AvatarUrl);
+                embedbuilder.WithFooter($"Bericht angefordert von {ctx.User.UsernameWithDiscriminator}",
+                    ctx.User.AvatarUrl);
                 await ctx.RespondAsync(embed: embedbuilder.Build());
+                Console.WriteLine(bs_success);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Message + ex.StackTrace);
             }
 
             // TODO: NOT FINISHED
+        }
 
+        if (!isMember)
+        {
+
+            List<dynamic> warnlist = new List<dynamic>();
+            List<dynamic> flaglist = new List<dynamic>();
+            List<dynamic> permawarnlist = new List<dynamic>();
+            ulong memberID = user.Id;
+            Console.WriteLine(memberID);
+            NpgsqlConnection conn = DatabaseService.dbConnection;
+
+            try
+            {
+                string warnQuery =
+                    $"SELECT userid, punisherid, datum, description, caseid FROM warns WHERE userid = '{memberID}' AND perma = '0' ORDER BY datum ASC";
+                await using (NpgsqlDataReader warnReader = DatabaseService.ExecuteQuery(warnQuery))
+                {
+                    while (warnReader.Read())
+                    {
+                        var warn = new
+                        {
+                            UserId = warnReader.GetInt64(0),
+                            PunisherId = warnReader.GetInt64(1),
+                            Datum = warnReader.GetInt32(2),
+                            Description = warnReader.GetString(3),
+                            CaseId = warnReader.GetInt32(4)
+                        };
+                        warnlist.Add(warn);
+                    }
+                }
+
+                Console.WriteLine(memberID + "11111djkafsg");
+
+                string flagQuery =
+                    $"SELECT userid, punisherid, datum, description, caseid FROM flags WHERE userid = '{memberID}' ORDER BY datum ASC";
+                await using (NpgsqlDataReader flagReader = DatabaseService.ExecuteQuery(flagQuery))
+                {
+                    while (flagReader.Read())
+                    {
+                        var flag = new
+                        {
+                            UserId = flagReader.GetInt64(0),
+                            PunisherId = flagReader.GetInt64(1),
+                            Datum = flagReader.GetInt32(2),
+                            Description = flagReader.GetString(3),
+                            CaseId = flagReader.GetString(4)
+                        };
+                        flaglist.Add(flag);
+                    }
+                }
+
+                Console.WriteLine(memberID + "djkafsg");
+
+                string permawarnQuery =
+                    $"SELECT userid, punisherid, datum, description, caseid FROM warns WHERE userid = '{memberID}' AND perma = '1' ORDER BY datum ASC";
+                await using (NpgsqlDataReader permawarnReader = DatabaseService.ExecuteQuery(permawarnQuery))
+                {
+                    while (permawarnReader.Read())
+                    {
+                        var permawarn = new
+                        {
+                            UserId = permawarnReader.GetInt64(0),
+                            PunisherId = permawarnReader.GetInt64(1),
+                            Datum = permawarnReader.GetInt32(2),
+                            Description = permawarnReader.GetString(3),
+                            CaseId = permawarnReader.GetString(4)
+                        };
+                        permawarnlist.Add(permawarn);
+                    }
+                }
+
+                Console.WriteLine("0 work");
+
+                int warncount = warnlist.Count;
+                int flagcount = flaglist.Count;
+                int permawarncount = permawarnlist.Count;
+
+                List<string> warnResults = new List<string>();
+                List<string> permawarnResults = new List<string>();
+                List<string> flagResults = new List<string>();
+
+                foreach (var flag in flaglist)
+                {
+                    long intValue = flag.PunisherId;
+                    ulong ulongValue = (ulong)intValue;
+                    Console.WriteLine(ulongValue);
+                    var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {flag.Description}";
+                    flagResults.Add(FlagStr);
+                    Console.WriteLine(FlagStr);
+                }
+
+                foreach (var warn in warnlist)
+                {
+                    long intValue = warn.PunisherId;
+                    ulong ulongValue = (ulong)intValue;
+                    Console.WriteLine(ulongValue);
+                    var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{warn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(warn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {warn.Description}";
+                    flagResults.Add(FlagStr);
+                    Console.WriteLine(FlagStr);
+                }
+
+                foreach (var pwarn in permawarnlist)
+                {
+                    long intValue = pwarn.PunisherId;
+                    ulong ulongValue = (ulong)intValue;
+                    Console.WriteLine(ulongValue);
+                    var puser = await ctx.Client.TryGetUserAsync(ulongValue, fetch: false);
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn.CaseId}``] {DisCatSharp.Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn.Datum), DisCatSharp.Enums.TimestampFormat.RelativeTime)} - {pwarn.Description}";
+                    flagResults.Add(FlagStr);
+                    Console.WriteLine(FlagStr);
+                }
+
+
+
+
+                string userinfostring =
+                    $"**Das Mitglied**\nUsername: {user.UsernameWithDiscriminator} ``{user.Id}``\n\n";
+                userinfostring += $"**Erstellung, Beitritt und mehr**\n";
+                userinfostring += $"**Erstellt:** {DisCatSharp.Formatter.Timestamp(user.CreationTimestamp)}\n";
+                userinfostring += $"**Beitritt:** *User nicht auf dem Server*\n";
+                userinfostring += $"**Infobadges:**  {bot_indicator}\n\n";
+                userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
+                userinfostring += (warnlist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", warnResults) + "\n");
+                userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
+                userinfostring += (permawarnlist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", permawarnResults) + "\n");
+                userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
+                userinfostring += (flaglist.Count == 0
+                    ? "Es wurden keine gefunden.\n"
+                    : string.Join("\n", flagResults) + "\n");
+
+                /*
+                if (bs_success)
+                {
+                    userinfostring += $"\n**BannSystem-Status**\n";
+                    userinfostring += (bs_status ? "**__Nutzer ist gemeldet - Siehe BS-Bericht__**" : "Nutzer ist nicht gemeldet");
+                } */
+                DiscordEmbedBuilder embedbuilder = new DiscordEmbedBuilder();
+                embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitals} Mitglied");
+                embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
+                                             userinfostring);
+                embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
+                embedbuilder.WithThumbnail(user.AvatarUrl);
+                embedbuilder.WithFooter($"Bericht angefordert von {ctx.User.UsernameWithDiscriminator}",
+                    ctx.User.AvatarUrl);
+                await ctx.RespondAsync(embed: embedbuilder.Build());
+                Console.WriteLine(bs_success);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + ex.StackTrace);
+            }
         }
     }
+
+
 }
