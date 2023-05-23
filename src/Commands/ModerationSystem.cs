@@ -11,6 +11,7 @@ namespace AGC_Management.Commands;
 public class ModerationSystem : BaseCommandModule
 {
     [Command("kick")]
+    [RequireTeamCat]
     [RequirePermissions(Permissions.KickMembers)]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
@@ -152,6 +153,7 @@ public class ModerationSystem : BaseCommandModule
     }
 
     [Command("ban")]
+    [RequireDatabase]
     [RequirePermissions(Permissions.BanMembers)]
     public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
