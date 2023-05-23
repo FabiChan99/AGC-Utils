@@ -413,6 +413,24 @@ public class ExtendedModerationSystem : ModerationSystem
                     Console.WriteLine(FlagStr);
                 }
                 
+                bool isBanned = false;
+                string banStatus = "Nutzer nicht Lokal gebannt.";
+                try
+                {
+                    var ban_entry = await ctx.Guild.GetBanAsync(user.Id);
+                    banStatus = $"**Nutzer ist Lokal gebannt!** ```{ban_entry.Reason}```";
+                    isBanned = true;
+                }
+                catch (NotFoundException)
+                {
+                    banStatus = "Nutzer nicht Lokal gebannt.";
+                }
+                catch (Exception)
+                {
+                    banStatus = "Ban-Status konnte nicht abgerufen werden.";
+                }
+
+                string banicon = isBanned ? "<:banicon:1012003595727671337>" : "";
 
 
                 var userinfostring =
@@ -420,7 +438,9 @@ public class ExtendedModerationSystem : ModerationSystem
                 userinfostring += "**Erstellung, Beitritt und mehr**\n";
                 userinfostring += $"**Erstellt:** {user.CreationTimestamp.Timestamp()}\n";
                 userinfostring += "**Beitritt:** *User nicht auf dem Server*\n";
-                userinfostring += $"**Infobadges:**  {bot_indicator}\n\n";
+                userinfostring += $"**Infobadges:**  {bot_indicator} {bs_icon} {banicon}\n\n";
+                userinfostring += "**Der Online-Status und die Plattform**\n";
+                userinfostring += $"{status_indicator} | Nicht ermittelbar - User ist nicht auf dem Server\n\n";
                 userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
                 userinfostring += warnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
@@ -433,6 +453,8 @@ public class ExtendedModerationSystem : ModerationSystem
                 userinfostring += flaglist.Count == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n", flagResults) + "\n";
+                userinfostring += $"\n**Lokaler Bannstatus**\n";
+                userinfostring += banStatus + "\n";
 
                 if (bs_success)
                 {
