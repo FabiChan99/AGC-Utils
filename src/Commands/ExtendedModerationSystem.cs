@@ -18,30 +18,29 @@ public class ExtendedModerationSystem : ModerationSystem
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
+        using HttpClient client = new HttpClient();
+
+        string apiKey = GlobalProperties.DebugMode
+            ? GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]
+            : GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"];
+
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
+
+        string apiUrl = GlobalProperties.DebugMode
+            ? GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_URL"]
+            : GlobalProperties.ConfigIni["ModHQConfig"]["API_URL"];
+
+        HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+
+        if (response.IsSuccessStatusCode)
         {
-            using HttpClient client = new();
-            if (!GlobalProperties.DebugMode)
-            {
-                client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
-                    GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"]);
-            }
+            string json = await response.Content.ReadAsStringAsync();
+            dynamic data = JsonConvert.DeserializeObject(json);
 
-            if (GlobalProperties.DebugMode)
-            {
-                client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
-                                       GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]);
-            }
-            HttpResponseMessage response =
-                await client.GetAsync($"{GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_URL"]}{user.Id}");
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<dynamic>(json);
-                if (data.reports != null && data.reports.Count > 0)
-                    return (true, data.reports, true);
+            if (data.reports != null && data.reports.Count > 0)
+                return (true, data.reports, true);
 
-                return (false, data.reports, true);
-            }
+            return (false, data.reports, true);
         }
 
         return (false, null, false);
