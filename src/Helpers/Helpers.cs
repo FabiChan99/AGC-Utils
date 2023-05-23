@@ -3,7 +3,7 @@ using DisCatSharp.Entities;
 
 namespace AGC_Management.Helpers;
 
-public class HelperChecks
+public class Helpers
 {
     public static async Task<bool> CheckForReason(CommandContext ctx, string reason)
     {

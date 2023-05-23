@@ -15,9 +15,9 @@ public class ModerationSystem : BaseCommandModule
     [RequirePermissions(Permissions.KickMembers)]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        if (await HelperChecks.TicketUrlCheck(ctx, reason)) return;
-        var caseid = HelperChecks.GenerateCaseID();
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        var caseid = Helpers.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt!")
             .WithDescription($"**Begründung:**```{reason}```")
@@ -157,9 +157,9 @@ public class ModerationSystem : BaseCommandModule
     [RequirePermissions(Permissions.BanMembers)]
     public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        if (await HelperChecks.TicketUrlCheck(ctx, reason)) return;
-        var caseid = HelperChecks.GenerateCaseID();
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        var caseid = Helpers.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +
@@ -304,8 +304,8 @@ public class ModerationSystem : BaseCommandModule
         List<ulong> ids;
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        if (await HelperChecks.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
         var reasonString =
@@ -333,7 +333,7 @@ public class ModerationSystem : BaseCommandModule
         }
 
         var busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
-        var caseid = HelperChecks.GenerateCaseID();
+        var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
@@ -472,8 +472,8 @@ public class ModerationSystem : BaseCommandModule
         List<ulong> ids;
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        if (await HelperChecks.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
         var reasonString =
@@ -501,7 +501,7 @@ public class ModerationSystem : BaseCommandModule
         }
 
         var busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
-        var caseid = HelperChecks.GenerateCaseID();
+        var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
@@ -755,9 +755,9 @@ public class ModerationSystem : BaseCommandModule
     [RequireStaffRole]
     public async Task BanRequest(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        if (await HelperChecks.TicketUrlCheck(ctx, reason)) return;
-        var caseid = HelperChecks.GenerateCaseID();
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        var caseid = Helpers.Helpers.GenerateCaseID();
         Console.WriteLine(
             $"[BAN] {ctx.User.UsernameWithDiscriminator} banned {user.UsernameWithDiscriminator} for {reason}");
         var staffrole = ctx.Guild.GetRole(ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["StaffRoleId"]));
