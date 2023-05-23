@@ -42,4 +42,10 @@ public class Converter
         return timestamp;
     }
 
+    public static string GetDateFromTimestamp(long timestamp)
+    {
+        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp);
+        var formattedDate = dateTimeOffset.ToString("dd.MM.yyyy - HH:mm:ss");
+        return formattedDate;
+    }
 }

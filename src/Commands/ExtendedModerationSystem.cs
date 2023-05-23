@@ -13,7 +13,7 @@ namespace AGC_Management.Commands;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-    public static string GetReportDateFromTimestamp(long timestamp)
+    public static string GetDateFromTimestamp(long timestamp)
     {
         DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp);
         var formattedDate = dateTimeOffset.ToString("dd.MM.yyyy - HH:mm:ss");
