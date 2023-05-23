@@ -123,10 +123,6 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             bs_enabled = false;
         }
-        if (GlobalProperties.DebugMode)
-            bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_ACCESS_ENABLED"]);
-        if (!GlobalProperties.DebugMode)
-            bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfig"]["API_ACCESS_ENABLED"]);
 
         if (bs_enabled)
         {
