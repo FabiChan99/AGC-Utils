@@ -53,7 +53,10 @@ internal class Program : BaseCommandModule
             AutoReconnect = true,
             MinimumLogLevel = LogLevel.Debug,
             Intents = DiscordIntents.All,
-            LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt"
+            LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt",
+            DeveloperUserId = GlobalProperties.BotOwnerId,
+            AutoRefreshChannelCache = true,
+            Locale = "de"
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
@@ -65,6 +68,7 @@ internal class Program : BaseCommandModule
             EnableDms = false,
             EnableMentionPrefix = true
         });
+        discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
         {
             Timeout = TimeSpan.FromMinutes(2)
@@ -72,6 +76,13 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         await discord.ConnectAsync();
         await Task.Delay(-1);
+    }
+
+
+    private static Task Discord_ClientErrored(DiscordClient sender, DisCatSharp.EventArgs.ClientErrorEventArgs e)
+    {
+        Console.WriteLine($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        return Task.CompletedTask;
     }
 }
 

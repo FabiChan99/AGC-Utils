@@ -13,12 +13,6 @@ namespace AGC_Management.Commands;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-    public static string GetDateFromTimestamp(long timestamp)
-    {
-        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp);
-        var formattedDate = dateTimeOffset.ToString("dd.MM.yyyy - HH:mm:ss");
-        return formattedDate;
-    }
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
@@ -524,7 +518,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireTeamCat]
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (await HelperChecks.CheckForReason(ctx, reason)) return;
-        string caseid = HelperChecks.GenerateCaseID();
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        string caseid = Helpers.Helpers.GenerateCaseID();
     }
 }
