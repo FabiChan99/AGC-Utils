@@ -153,7 +153,7 @@ public class ModerationSystem : BaseCommandModule
     }
 
     [Command("ban")]
-    [RequireDatabase]
+        [RequireDatabase]
     [RequirePermissions(Permissions.BanMembers)]
     public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
@@ -775,143 +775,214 @@ public class ModerationSystem : BaseCommandModule
                              $"Bitte warte, während diese Anfrage von jemandem mit Bannberechtigung bestätigt wird <a:loading_agc:1084157150747697203>")
             .WithColor(GlobalProperties.EmbedColor)
             .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
-
-        string staffMentionString;
-        if (onlineStaffWithBanPerms.Count > 0)
+        var interactivity_ = ctx.Client.GetInteractivity();
+        var confirmEmbedBuilder = new DiscordEmbedBuilder()
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Banrequest").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
+                             $"__Users:__\n" +
+                             $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
+            .WithColor(GlobalProperties.EmbedColor);
+        var embed__ = confirmEmbedBuilder.Build();
+        List<DiscordButtonComponent> buttons_ = new(2)
         {
-            if (!GlobalProperties.DebugMode)
-                staffMentionString = string.Join(" ", onlineStaffWithBanPerms
-                    .Where(member => member.Id != 441192596325531648)
-                    .Select(member => member.Mention));
-            else
-                staffMentionString = "DEBUG MODE AKTIV | Kein Ping wird ausgeführt";
-        }
-        else
-        {
-            if (!GlobalProperties.DebugMode)
-                staffMentionString =
-                    $"Kein Moderator online | <@&{GlobalProperties.ConfigIni["ServerConfig"]["AdminRoleId"]}> | <@&{GlobalProperties.ConfigIni["ServerConfig"]["ModRoleId"]}>";
-            else
-                staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
-        }
-
-        var embed = embedBuilder.Build();
-        List<DiscordButtonComponent> buttons = new(2)
-        {
-            new DiscordButtonComponent(ButtonStyle.Success, $"banrequest_accept_{caseid}", "Annehmen"),
-            new DiscordButtonComponent(ButtonStyle.Danger, $"banrequest_deny_{caseid}", "Ablehnen")
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"br_accept_{caseid}", "✅"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"br_deny_{caseid}", "❌")
         };
-
-        var builder = new DiscordMessageBuilder()
-            .WithEmbed(embed)
-            .AddComponents(buttons)
-            .WithContent(staffMentionString)
-            .WithReply(ctx.Message.Id);
-
-        var interactivity = ctx.Client.GetInteractivity();
-        var message = await ctx.Channel.SendMessageAsync(builder);
-
-        var result = await interactivity.WaitForButtonAsync(message, interaction =>
+        var confirmMessage = new DiscordMessageBuilder()
+            .WithEmbed(embed__).AddComponents(buttons_).WithReply(ctx.Message.Id);
+        var confirm = await ctx.Channel.SendMessageAsync(confirmMessage);
+        var interaction = await interactivity_.WaitForButtonAsync(confirm, ctx.User, TimeSpan.FromSeconds(60));
+        buttons_.ForEach(x => x.Disable());
+        if (interaction.TimedOut)
         {
-            if (interaction.User is DiscordMember guildUser)
-                return guildUser.Permissions.HasPermission(Permissions.BanMembers);
 
-            return false;
-        }, TimeSpan.FromHours(6));
-
-        if (result.TimedOut)
-        {
             var embed_ = new DiscordMessageBuilder()
-                .WithEmbed(embedBuilder.WithTitle("Bannanfrage abgebrochen")
+                .WithEmbed(confirmEmbedBuilder.WithTitle("Banrequest abgebrochen")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithDescription(
-                        $"Die Bannanfrage für {user} (``{user.Id}``) wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>")
+                        "Der Banrequest wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>")
                     .WithColor(DiscordColor.Red).Build());
-            await message.ModifyAsync(embed_);
+            await confirm.ModifyAsync(embed_);
             return;
         }
 
-        if (result.Result.Id == $"banrequest_accept_{caseid}")
+        if (interaction.Result.Id == $"br_deny_{caseid}")
         {
-            var now = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
-            var banEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
-                .WithDescription($"**Begründung:**```{reason}```\n" +
-                                 $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                                 $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
-                .WithColor(DiscordColor.Red);
-
-            bool sent;
-            try
-            {
-                await user.SendMessageAsync(banEmbedBuilder.Build());
-                sent = true;
-            }
-            catch (UnauthorizedException)
-            {
-                sent = false;
-            }
-
-            var SentEmoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
-
-            try
-            {
-                await ctx.Guild.BanMemberAsync(user, 7,
-                    $"Grund: {reason} | Banrequestor: {ctx.User} | Banapprover: {result.Result.User} | Datum: {now}");
-            }
-            catch (UnauthorizedException)
-            {
-                buttons.ForEach(x => x.Disable());
-                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                var failsuccessEmbedBuilder = new DiscordEmbedBuilder()
-                    .WithTitle($"{user.UsernameWithDiscriminator} nicht gebannt")
+            await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            var sembed_ = new DiscordMessageBuilder()
+                .WithEmbed(confirmEmbedBuilder.WithTitle("Banrequest abgebrochen")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithDescription(
-                        $"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` konnte nicht gebannt werden!\n\n")
+                        "Der Banrequest wurde abgebrochen.\n\nGrund: Abgebrochen. <:counting_warning:962007085426556989>")
+                    .WithColor(DiscordColor.Red).Build());
+            await confirm.ModifyAsync(sembed_);
+            return;
+        }
+
+        if (interaction.Result.Id == $"br_accept_{caseid}")
+        {
+            await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            string staffMentionString;
+            if (onlineStaffWithBanPerms.Count > 0)
+            {
+                if (!GlobalProperties.DebugMode)
+                    staffMentionString = string.Join(" ", onlineStaffWithBanPerms
+                        .Where(member => member.Id != 441192596325531648)
+                        .Select(member => member.Mention));
+                else
+                    staffMentionString = "DEBUG MODE AKTIV | Kein Ping wird ausgeführt";
+            }
+            else
+            {
+                if (!GlobalProperties.DebugMode)
+                    staffMentionString =
+                        $"Kein Moderator online | <@&{GlobalProperties.ConfigIni["ServerConfig"]["AdminRoleId"]}> | <@&{GlobalProperties.ConfigIni["ServerConfig"]["ModRoleId"]}>";
+                else
+                    staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
+            }
+
+            var embed = embedBuilder.Build();
+            List<DiscordButtonComponent> buttons = new(2)
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"banrequest_accept_{caseid}", "Annehmen"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"banrequest_deny_{caseid}", "Ablehnen")
+            };
+
+            var builder = new DiscordMessageBuilder()
+                .WithEmbed(embed)
+                .AddComponents(buttons)
+                .WithContent(staffMentionString)
+                .WithReply(ctx.Message.Id);
+
+            var interactivity = ctx.Client.GetInteractivity();
+            var message = await confirm.ModifyAsync(builder);
+            buttons.ForEach(x => x.Disable());
+            var result = await interactivity.WaitForButtonAsync(message, interaction =>
+            {
+                if (interaction.User is DiscordMember guildUser)
+                    return guildUser.Permissions.HasPermission(Permissions.BanMembers);
+
+                return false;
+            }, TimeSpan.FromHours(6));
+
+            if (result.TimedOut)
+            {
+                var embed_ = new DiscordMessageBuilder()
+                    .WithEmbed(embedBuilder.WithTitle("Bannanfrage abgebrochen")
+                        .WithDescription(
+                            $"Die Bannanfrage für {user} (``{user.Id}``) wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>")
+                        .WithColor(DiscordColor.Red).Build());
+                await message.ModifyAsync(embed_);
+                return;
+            }
+
+            if (result.Result.Id == $"banrequest_accept_{caseid}")
+            {
+                var now = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
+                var banEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
+                    .WithDescription($"**Begründung:**```{reason}```\n" +
+                                     $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
+                                     $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
+                    .WithColor(DiscordColor.Red);
+
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var loadingEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle("Ban wird bearbeitet")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithDescription("Der Ban wird bearbeitet. Bitte warten...")
+                    .WithColor(DiscordColor.Yellow);
+                var loadingEmbed = loadingEmbedBuilder.Build();
+                var loadingMessage = new DiscordMessageBuilder()
+                    .WithEmbed(loadingEmbed).AddComponents(buttons)
+                    .WithReply(ctx.Message.Id);
+                await confirm.ModifyAsync(loadingMessage);
+
+                var b_users = "";
+                var n_users = "";
+                string e_string;
+                bool sent;
+                var ReasonString =
+                    $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                var ec = DiscordColor.Red;
+                DiscordMessage? umsg = null;
+                try
+                {
+                    umsg = await user.SendMessageAsync(embed);
+                    sent = true;
+                }
+                catch
+                {
+                    sent = false;
+                }
+
+                var semoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
+                try
+                {
+                    await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
+                    var dm = sent ? "✅" : "❌";
+                    b_users += $"{user.UsernameWithDiscriminator} | DM: {dm}\n";
+                }
+                catch (UnauthorizedException)
+                {
+                    n_users += $"{user.UsernameWithDiscriminator}\n";
+                }
+                if (n_users != "")
+                {
+                    e_string = $"Der Ban war nicht erfolgreich!\n" +
+                               $"Bestätigt von ``{result.Result.User.UsernameWithDiscriminator}``\n\n" +
+                               $"__Grund:__ ```{reason}```\n";
+                    e_string += $"__Nicht gebannte User:__\n" +
+                                $"```{n_users}```";
+                    ec = DiscordColor.Red;
+                    if (sent)
+                    {
+                        try
+                        {
+                            await umsg.DeleteAsync();
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+
+                    }
+                }
+                else
+                {
+                    e_string = $"Der Ban wurde erfolgreich abgeschlossen.\n" +
+                               $"Bestätigt von ``{result.Result.User.UsernameWithDiscriminator}``\n\n" +
+                               $"__Grund:__ ```{reason}```\n" +
+                               $"__Gebannte User:__\n" +
+                               $"```{b_users}```";
+                    ec = DiscordColor.Green;
+                }
+                var discordEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle("Ban abgeschlossen")
+                    .WithDescription(e_string)
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithColor(ec);
+                var discordEmbed = discordEmbedBuilder.Build();
+                await confirm.ModifyAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed));
+            }
+            else if (result.Result.Id == $"banrequest_deny_{caseid}")
+            {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                buttons.ForEach(x => x.Disable());
+                var declineEmbedBuilder = new DiscordEmbedBuilder()
+                    .WithTitle("Bannanfrage abgebrochen")
+                    .WithDescription(
+                        $"Die Bannanfrage für {user.UsernameWithDiscriminator} (``{user.Id}``) wurde abgebrochen.\n\n" +
+                        $"Grund: Ban wurde abgelehnt von `{result.Result.User.UsernameWithDiscriminator}`")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                     .WithColor(DiscordColor.Red);
 
-                var failsuccessEmbed = failsuccessEmbedBuilder.Build();
-                var failSuccessMessage = new DiscordMessageBuilder()
-                    .WithEmbed(failsuccessEmbed)
+                var declineEmbed = declineEmbedBuilder.Build();
+                var DeclineMessage = new DiscordMessageBuilder()
+                    .WithEmbed(declineEmbed)
                     .WithReply(ctx.Message.Id);
-
-                await message.ModifyAsync(failSuccessMessage);
+                await message.ModifyAsync(DeclineMessage);
             }
-
-            buttons.ForEach(x => x.Disable());
-            await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            var successEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle($"{user.UsernameWithDiscriminator} wurde erfolgreich gebannt")
-                .WithDescription(
-                    $"Der User ``{user.UsernameWithDiscriminator} ({user.Id})`` wurde erfolgreich gebannt!\n\n" +
-                    $"Grund: ``{reason}``\n\n" +
-                    $"User wurde über den ban benachrichtigt? {SentEmoji}")
-                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
-                .WithColor(DiscordColor.Green);
-
-            var successEmbed = successEmbedBuilder.Build();
-            var SuccessMessage = new DiscordMessageBuilder()
-                .WithEmbed(successEmbed)
-                .WithReply(ctx.Message.Id);
-
-            await message.ModifyAsync(SuccessMessage);
-        }
-        else if (result.Result.Id == $"banrequest_deny_{caseid}")
-        {
-            await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            buttons.ForEach(x => x.Disable());
-            var declineEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle("Bannanfrage abgebrochen")
-                .WithDescription(
-                    $"Die Bannanfrage für {user.UsernameWithDiscriminator} (``{user.Id}``) wurde abgebrochen.\n\n" +
-                    $"Grund: Ban wurde abgelehnt von `{result.Result.User.UsernameWithDiscriminator}`")
-                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
-                .WithColor(DiscordColor.Red);
-
-            var declineEmbed = declineEmbedBuilder.Build();
-            var DeclineMessage = new DiscordMessageBuilder()
-                .WithEmbed(declineEmbed)
-                .WithReply(ctx.Message.Id);
-            await message.ModifyAsync(DeclineMessage);
         }
     }
 }
