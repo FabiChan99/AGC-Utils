@@ -22,7 +22,7 @@ public class ExtendedModerationSystem : ModerationSystem
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
-        if (!GlobalProperties.DebugMode)
+        if (GlobalProperties.DebugMode)
         {
             using HttpClient client = new();
             client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
@@ -33,16 +33,33 @@ public class ExtendedModerationSystem : ModerationSystem
             {
                 string json = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<dynamic>(json);
-                if (data.reports != null && data.reports.Count > 0) return (true, data.reports, true);
+                if (data.reports != null && data.reports.Count > 0)
+                    return (true, data.reports, true);
 
                 return (false, data.reports, true);
             }
+        }
+        else
+        {
+            using HttpClient _client = new();
+            _client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
+                GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]);
+            HttpResponseMessage _response =
+                await _client.GetAsync($"{GlobalProperties.ConfigIni["ModHQConfig"]["API_URL"]}{user.Id}");
+            if (_response.IsSuccessStatusCode)
+            {
+                string json = await _response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<dynamic>(json);
+                if (data.reports != null && data.reports.Count > 0)
+                    return (true, data.reports, true);
 
-            return (false, null, false);
+                return (false, data.reports, true);
+            }
         }
 
         return (false, null, false);
     }
+
 
 
     [Command("userinfo")]
@@ -91,14 +108,34 @@ public class ExtendedModerationSystem : ModerationSystem
             platform = "Nicht ermittelbar. User nicht auf Server";
         }
 
-        bool bs_status = false; // Default value
+        bool bs_status = false;
         bool bs_success = false;
+        bool bs_enabled = false;
+
+        try
+        {
+            if (GlobalProperties.DebugMode)
+                bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_ACCESS_ENABLED"]);
+            if (!GlobalProperties.DebugMode)
+                bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfig"]["API_ACCESS_ENABLED"]);
+        }
+        catch (Exception)
+        {
+            bs_enabled = false;
+        }
+        if (GlobalProperties.DebugMode)
+            bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_ACCESS_ENABLED"]);
         if (!GlobalProperties.DebugMode)
+            bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfig"]["API_ACCESS_ENABLED"]);
+
+        if (bs_enabled)
+        {
             try
             {
                 (bool temp_bs_status, object bs, bs_success) = await CheckBannsystem(user);
                 bs_status = temp_bs_status;
                 if (bs_status)
+                {
                     try
                     {
                         DiscordColor clr = DiscordColor.Red;
@@ -108,11 +145,15 @@ public class ExtendedModerationSystem : ModerationSystem
                     {
                         Console.WriteLine(ex.Message);
                     }
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+
 
         string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";
         if (isMember)
@@ -273,15 +314,15 @@ public class ExtendedModerationSystem : ModerationSystem
                 userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
                 userinfostring += warnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", warnResults) + "\n";
+                    : string.Join("\n\n", warnResults) + "\n";
                 userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
                 userinfostring += permawarnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", permawarnResults) + "\n";
+                    : string.Join("\n\n", permawarnResults) + "\n";
                 userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
                 userinfostring += flaglist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", flagResults) + "\n";
+                    : string.Join("\n\n", flagResults) + "\n";
 
 
                 if (bs_success)
@@ -444,17 +485,17 @@ public class ExtendedModerationSystem : ModerationSystem
                 userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
                 userinfostring += warnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", warnResults) + "\n";
+                    : string.Join("\n\n", warnResults) + "\n";
                 userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
                 userinfostring += permawarnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", permawarnResults) + "\n";
+                    : string.Join("\n\n", permawarnResults) + "\n";
                 userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
                 userinfostring += flaglist.Count == 0
                     ? "Es wurden keine gefunden.\n"
-                    : string.Join("\n", flagResults) + "\n";
+                    : string.Join("\n\n", flagResults) + "\n";
                 userinfostring += $"\n**Lokaler Bannstatus**\n";
-                userinfostring += banStatus + "\n";
+                userinfostring += banStatus + "";
 
                 if (bs_success)
                 {
