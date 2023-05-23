@@ -455,7 +455,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 }
                 
                 bool isBanned = false;
-                string banStatus = "Nutzer nicht Lokal gebannt.";
+                string banStatus;
                 try
                 {
                     var ban_entry = await ctx.Guild.GetBanAsync(user.Id);
