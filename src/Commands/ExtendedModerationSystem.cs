@@ -8,6 +8,8 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
+using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace AGC_Management.Commands;
 
@@ -16,33 +18,24 @@ public class ExtendedModerationSystem : ModerationSystem
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
-        if (GlobalProperties.DebugMode)
         {
             using HttpClient client = new();
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
-                GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]);
+            if (!GlobalProperties.DebugMode)
+            {
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
+                    GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"]);
+            }
+
+            if (GlobalProperties.DebugMode)
+            {
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
+                                       GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]);
+            }
             HttpResponseMessage response =
                 await client.GetAsync($"{GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_URL"]}{user.Id}");
             if (response.IsSuccessStatusCode)
             {
                 string json = await response.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<dynamic>(json);
-                if (data.reports != null && data.reports.Count > 0)
-                    return (true, data.reports, true);
-
-                return (false, data.reports, true);
-            }
-        }
-        else
-        {
-            using HttpClient _client = new();
-            _client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization",
-                GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]);
-            HttpResponseMessage _response =
-                await _client.GetAsync($"{GlobalProperties.ConfigIni["ModHQConfig"]["API_URL"]}{user.Id}");
-            if (_response.IsSuccessStatusCode)
-            {
-                string json = await _response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<dynamic>(json);
                 if (data.reports != null && data.reports.Count > 0)
                     return (true, data.reports, true);
