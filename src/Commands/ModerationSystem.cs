@@ -11,7 +11,7 @@ namespace AGC_Management.Commands;
 public class ModerationSystem : BaseCommandModule
 {
     [Command("kick")]
-    [RequirePermissions(Permissions.BanMembers)]
+    [RequirePermissions(Permissions.KickMembers)]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
         if (await HelperChecks.CheckForReason(ctx, reason)) return;
