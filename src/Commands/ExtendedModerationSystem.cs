@@ -459,5 +459,13 @@ public class ExtendedModerationSystem : ModerationSystem
         }
     }
 
-
+    [Command("flag")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [RequireTeamCat]
+    public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
+    {
+        if (await HelperChecks.CheckForReason(ctx, reason)) return;
+        string caseid = HelperChecks.GenerateCaseID();
+    }
 }
