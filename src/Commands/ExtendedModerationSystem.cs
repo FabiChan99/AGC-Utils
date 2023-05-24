@@ -47,6 +47,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [Command("userinfo")]
     [RequireDatabase]
     [RequireStaffRole]
+    [Description("Zeigt Informationen über einen User an.")]
     [RequireTeamCat]
     public async Task UserInfoCommand(CommandContext ctx, DiscordUser user)
     {
@@ -491,6 +492,7 @@ public class ExtendedModerationSystem : ModerationSystem
     }
 
     [Command("flag")]
+    [Description("Flaggt einen Nutzer")]
     [RequireDatabase]
     [RequireStaffRole]
     [RequireTeamCat]

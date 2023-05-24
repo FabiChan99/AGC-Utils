@@ -13,6 +13,7 @@ public class ModerationSystem : BaseCommandModule
     [Command("kick")]
     [RequireTeamCat]
     [RequirePermissions(Permissions.KickMembers)]
+    [Description("Kickt einen User vom Server.")]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
@@ -149,6 +150,7 @@ public class ModerationSystem : BaseCommandModule
     }
 
     [Command("ban")]
+    [Description("Bannt einen User vom Server")]
     [RequirePermissions(Permissions.BanMembers)]
     public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
@@ -290,6 +292,7 @@ public class ModerationSystem : BaseCommandModule
 
 
     [Command("multiban")]
+    [Description("Bannt mehrere User gleichzeitig.")]
     [RequirePermissions(Permissions.BanMembers)]
     public async Task MultiBan(CommandContext ctx, [RemainingText] string ids_and_reason)
     {
@@ -459,6 +462,7 @@ public class ModerationSystem : BaseCommandModule
 
     [Command("multibanrequest")]
     [Aliases("multibanreq")]
+    [Description("Erstellt einen Multiban-Request")]
     [RequireStaffRole]
     public async Task MultiBanRequest(CommandContext ctx, [RemainingText] string ids_and_reason)
     {
@@ -746,6 +750,7 @@ public class ModerationSystem : BaseCommandModule
 
     [Command("banrequest")]
     [Aliases("banreq")]
+    [Description("Erstellt einen Banrequest")]
     [RequireStaffRole]
     public async Task BanRequest(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
