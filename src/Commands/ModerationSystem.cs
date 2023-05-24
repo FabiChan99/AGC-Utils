@@ -173,7 +173,7 @@ public class ModerationSystem : BaseCommandModule
         // abfrage
         var interactivity = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
-            .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Ban").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
@@ -330,7 +330,7 @@ public class ModerationSystem : BaseCommandModule
         var busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
         var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
-            .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Multiban").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{busers_formatted}```\n__Grund:__```{reason}```")
@@ -498,7 +498,7 @@ public class ModerationSystem : BaseCommandModule
         var busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
         var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
-            .WithTitle("Überprüfe deine Eingabe").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Multibanrequest").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{busers_formatted}```\n__Grund:__```{reason}```")
