@@ -8,8 +8,12 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
+using Serilog.Debugging;
+using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Commands;
 
@@ -123,15 +127,15 @@ public class ExtendedModerationSystem : ModerationSystem
                         DiscordColor clr = DiscordColor.Red;
                         var report_data = (List<object>)bs;
                     }
-                    catch (Exception ex)
+                    catch (Exception )
                     {
-                        Console.WriteLine(ex.Message);
+                        
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
+                
             }
         }
 
@@ -177,7 +181,7 @@ public class ExtendedModerationSystem : ModerationSystem
                             PunisherId = warnReader.GetInt64(1),
                             Datum = warnReader.GetInt32(2),
                             Description = warnReader.GetString(3),
-                            CaseId = warnReader.GetInt32(4)
+                            CaseId = warnReader.GetString(4)
                         };
                         warnlist.Add(warn);
                     }
@@ -260,7 +264,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     DiscordUser? puser = await ctx.Client.TryGetUserAsync(ulongValue, false);
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{warn.CaseId}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(warn.Datum), TimestampFormat.RelativeTime)} - {warn.Description}";
-                    flagResults.Add(FlagStr);
+                    warnResults.Add(FlagStr);
                 }
 
                 foreach (dynamic pwarn in permawarnlist)
@@ -270,7 +274,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     DiscordUser? puser = await ctx.Client.TryGetUserAsync(ulongValue, false);
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn.CaseId}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn.Datum), TimestampFormat.RelativeTime)} - {pwarn.Description}";
-                    flagResults.Add(FlagStr);
+                    permawarnResults.Add(FlagStr);
                 }
 
 

@@ -81,6 +81,16 @@ public static class DatabaseService
         }
     }
 
+    public static string GetConnectionString()
+    {
+        var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
+        var DbHost = GlobalProperties.ConfigIni[dbConfigSection]["Database_Host"];
+        var DbUser = GlobalProperties.ConfigIni[dbConfigSection]["Database_User"];
+        var DbPass = GlobalProperties.ConfigIni[dbConfigSection]["Database_Password"];
+        var DbName = GlobalProperties.ConfigIni[dbConfigSection]["Database"];
+        return $"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}";
+    }
+
     // Read DBContent
     public static NpgsqlDataReader ExecuteQuery(string sql)
     {

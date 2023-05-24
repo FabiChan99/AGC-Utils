@@ -1,4 +1,5 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿using AGC_Management.Commands;
+using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
@@ -75,6 +76,12 @@ internal class Program : BaseCommandModule
         });
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         await discord.ConnectAsync();
+
+        // Start the Task to remove warns older than 7 days
+        ModerationSystemTasks instance = new();
+        await instance.StartRemovingWarnsPeriodically(discord);
+
+
         await Task.Delay(-1);
     }
 
@@ -109,4 +116,8 @@ public class GlobalProperties
 
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
+
+    // DB ConnectionString
+    public static string DbConnectionString { get; } = ConfigIni["DatabaseConfig"]["ConnectionString"];
+
 }
