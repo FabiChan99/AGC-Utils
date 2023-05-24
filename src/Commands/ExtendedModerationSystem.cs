@@ -306,7 +306,7 @@ public class ExtendedModerationSystem : ModerationSystem
 
                 var embedbuilder = new DiscordEmbedBuilder();
                 embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitals} Mitglied");
-                embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
+                embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
                                              userinfostring);
                 embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
                 embedbuilder.WithThumbnail(member.AvatarUrl);
