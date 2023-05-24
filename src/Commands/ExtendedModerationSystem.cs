@@ -498,14 +498,16 @@ public class ExtendedModerationSystem : ModerationSystem
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
         var caseid = Helpers.Helpers.GenerateCaseID();
-        Dictionary<string, object> data = new Dictionary<string, object>();
-        data.Add("userid", (long)user.Id);
-        data.Add("punisherid", (long)ctx.User.Id);
-        data.Add("datum", DateTimeOffset.Now.ToUnixTimeSeconds());
-        data.Add("description", reason);
-        data.Add("caseid", caseid);
+        Dictionary<string, object> data = new Dictionary<string, object>
+        {
+            { "userid", (long)user.Id },
+            { "punisherid", (long)ctx.User.Id },
+            { "datum", (long)DateTimeOffset.Now.ToUnixTimeSeconds() },
+            { "description", reason },
+            { "caseid", caseid }
+        };
         await DatabaseService.InsertDataIntoTable("flags", data);
-
+        Console.WriteLine($"User {user.Username}#{user.Discriminator} flagged by {ctx.User.Username}#{ctx.User.Discriminator} for {reason}");
         var flaglist = new List<dynamic>();
         await using (var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
         {
@@ -516,16 +518,16 @@ public class ExtendedModerationSystem : ModerationSystem
             await using (var command = new NpgsqlCommand("SELECT * FROM flags WHERE userid = @userid ORDER BY datum DESC",
                        connection))
             {
-                command.Parameters.AddWithValue("userid", user.Id);
+                command.Parameters.AddWithValue("userid", (long)user.Id);
 
                 await using var reader = await command.ExecuteReaderAsync();
                 while (reader.Read())
                 {
                     var flag = new
                     {
-                        userid = (ulong)reader.GetInt64("userid"),
-                        punisherid = (ulong)reader.GetInt64("punisherid"),
-                        datum = reader.GetInt64(reader.GetOrdinal("datum")),
+                        userid = (long)reader.GetInt64("userid"),
+                        punisherid = (long)reader.GetInt64("punisherid"),
+                        datum = (long)reader.GetInt64(reader.GetOrdinal("datum")),
                         description = reader.GetString(reader.GetOrdinal("description")),
                         caseid = reader.GetString(reader.GetOrdinal("caseid"))
                     };
@@ -533,8 +535,6 @@ public class ExtendedModerationSystem : ModerationSystem
                     flaglist.Add(flag);
                 }
             }
-
-            connection.Close();
         }
 
         var flagcount = flaglist.Count;
