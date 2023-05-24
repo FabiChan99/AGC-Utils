@@ -11,15 +11,13 @@ public class ModerationSystemTasks
     public async Task StartRemovingWarnsPeriodically(DiscordClient discord)
     {
         if (DatabaseService.IsConnected())
-        {
             while (true)
             {
                 await RemoveWarnsOlderThan7Days(discord);
                 await Task.Delay(TimeSpan.FromMinutes(5));
             }
-        }
-        else
-            discord.Logger.LogWarning("Database not connected.. Disable Periodically Expired Warn check.");
+
+        discord.Logger.LogWarning("Database not connected.. Disable Periodically Expired Warn check.");
     }
 
     private async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
@@ -79,7 +77,6 @@ public class ModerationSystemTasks
                 {
                     int remWarn = await commandDelete.ExecuteNonQueryAsync();
                     discord.Logger.LogInformation($"{remWarn} Abgelaufene Verwarnungen in Flags verschoben.");
-
                 }
             }
         }

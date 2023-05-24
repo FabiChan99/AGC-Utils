@@ -113,15 +113,15 @@ public static class DatabaseService
         string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
                              $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
 
-        await using (NpgsqlConnection connection = new NpgsqlConnection(GetConnectionString()))
+        await using (NpgsqlConnection connection = new(GetConnectionString()))
         {
             await connection.OpenAsync();
 
-            await using (NpgsqlCommand command = new NpgsqlCommand(insertQuery, connection))
+            await using (NpgsqlCommand command = new(insertQuery, connection))
             {
                 foreach (var kvp in columnValuePairs)
                 {
-                    NpgsqlParameter parameter = new NpgsqlParameter($"@{kvp.Key}", kvp.Value);
+                    NpgsqlParameter parameter = new($"@{kvp.Key}", kvp.Value);
                     command.Parameters.Add(parameter);
                 }
 
@@ -130,7 +130,8 @@ public static class DatabaseService
         }
     }
 
-    public static async Task<List<Dictionary<string, object>>> SelectDataFromTable(string tableName, List<string> columns, Dictionary<string, object> whereConditions)
+    public static async Task<List<Dictionary<string, object>>> SelectDataFromTable(string tableName,
+        List<string> columns, Dictionary<string, object> whereConditions)
     {
         string selectQuery;
         if (columns.Contains("*"))
@@ -149,28 +150,26 @@ public static class DatabaseService
             selectQuery += $" WHERE {whereClause}";
         }
 
-        List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
+        List<Dictionary<string, object>> results = new();
 
-        await using (NpgsqlConnection connection = new NpgsqlConnection(GetConnectionString()))
+        await using (NpgsqlConnection connection = new(GetConnectionString()))
         {
             await connection.OpenAsync();
 
-            await using (NpgsqlCommand command = new NpgsqlCommand(selectQuery, connection))
+            await using (NpgsqlCommand command = new(selectQuery, connection))
             {
                 if (whereConditions != null && whereConditions.Count > 0)
-                {
                     foreach (var condition in whereConditions)
                     {
-                        NpgsqlParameter parameter = new NpgsqlParameter($"@{condition.Key}", condition.Value);
+                        NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value);
                         command.Parameters.Add(parameter);
                     }
-                }
 
                 await using (NpgsqlDataReader reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        Dictionary<string, object> row = new();
 
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
@@ -188,8 +187,4 @@ public static class DatabaseService
 
         return results;
     }
-
-
-
-
 }

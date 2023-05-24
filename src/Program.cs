@@ -1,15 +1,16 @@
-﻿using AGC_Management.Commands;
+﻿using System.Reflection;
+using AGC_Management.Commands;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using IniParser;
 using IniParser.Model;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 namespace AGC_Management;
 
@@ -57,7 +58,7 @@ internal class Program : BaseCommandModule
             catch
             {
                 Console.WriteLine(
-                                       "Der Discord API Token konnte nicht geladen werden.");
+                    "Der Discord API Token konnte nicht geladen werden.");
                 Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
                 Console.ReadKey();
                 Environment.Exit(0);
@@ -105,12 +106,13 @@ internal class Program : BaseCommandModule
     }
 
 
-    private static Task Discord_ClientErrored(DiscordClient sender, DisCatSharp.EventArgs.ClientErrorEventArgs e)
+    private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
     {
         sender.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         return Task.CompletedTask;
     }
-    private static Task Commands_CommandErrored(CommandsNextExtension cn,CommandErrorEventArgs e)
+
+    private static Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         return Task.CompletedTask;
@@ -140,5 +142,4 @@ public class GlobalProperties
 
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
-
 }

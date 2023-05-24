@@ -6,10 +6,8 @@ using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Npgsql;
-using System.Data;
 
 namespace AGC_Management.Commands;
 
@@ -500,35 +498,34 @@ public class ExtendedModerationSystem : ModerationSystem
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
-        Dictionary<string, object> data = new Dictionary<string, object>
+        Dictionary<string, object> data = new()
         {
             { "userid", (long)user.Id },
             { "punisherid", (long)ctx.User.Id },
-            { "datum", (long)DateTimeOffset.Now.ToUnixTimeSeconds() },
+            { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
             { "description", reason },
             { "caseid", caseid }
         };
         await DatabaseService.InsertDataIntoTable("flags", data);
         var flaglist = new List<dynamic>();
 
-        List<string> selectedFlags = new List<string>
+        List<string> selectedFlags = new()
         {
             "*"
         };
-        List<Dictionary<string,object>> results = await DatabaseService.SelectDataFromTable("flags", selectedFlags, null);
-        foreach (var result in results)
-        {
-            flaglist.Add(result);
-        }
-               
+        List<Dictionary<string, object>> results =
+            await DatabaseService.SelectDataFromTable("flags", selectedFlags, null);
+        foreach (var result in results) flaglist.Add(result);
 
 
         var flagcount = flaglist.Count;
 
         var embed = new DiscordEmbedBuilder()
             .WithTitle("Nutzer geflaggt")
-            .WithDescription($"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flags__. \nDie ID des Flags: ``{caseid}``").WithColor(GlobalProperties.EmbedColor)
+            .WithDescription(
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flags__. \nDie ID des Flags: ``{caseid}``")
+            .WithColor(GlobalProperties.EmbedColor)
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
-        await ctx.RespondAsync(embed: embed);
+        await ctx.RespondAsync(embed);
     }
 }

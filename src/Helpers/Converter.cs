@@ -35,9 +35,10 @@ public class Converter
                 reason += part + " ";
             }
     }
+
     public static DateTime ConvertUnixTimestamp(long unixTimestamp)
     {
-        DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        DateTime unixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         DateTime timestamp = unixEpoch.AddSeconds(unixTimestamp).ToLocalTime();
         return timestamp;
     }

@@ -49,6 +49,6 @@ public class RequireTeamCat : CheckBaseAttribute
                                         ctx.Channel.ParentId == logCategoryId ||
                                         ctx.Channel.ParentId == modMailCategoryId;
 
-        return (isChannelInValidCategory);
+        return isChannelInValidCategory;
     }
 }
