@@ -32,7 +32,7 @@ internal class Program : BaseCommandModule
         {
             // handle if no Ini present
             Console.WriteLine(
-                "Die Konfigurationsdatei konnte nicht gefunden werden, bitte lade das neueste Release herunter und verwende die .ini Datei.");
+                "Die Konfigurationsdatei konnte nicht geladen werden.");
             Console.WriteLine("Fehlermeldung: " + ex.Message);
             Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
             Console.ReadKey();
@@ -41,11 +41,30 @@ internal class Program : BaseCommandModule
 
         iniData = parser.ReadFile("config.ini");
         var DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
-        string DcApiToken;
-        if (DebugMode)
-            DcApiToken = iniData["MainConfig"]["Discord_API_Token_DEB"];
-        else
-            DcApiToken = iniData["MainConfig"]["Discord_API_Token_REL"];
+        string DcApiToken = "";
+        try
+        {
+            DcApiToken = DebugMode
+                ? iniData["MainConfig"]["Discord_API_Token_DEB"]
+                : iniData["MainConfig"]["Discord_API_Token_REL"];
+        }
+        catch
+        {
+            try
+            {
+                DcApiToken = iniData["MainConfig"]["Discord_API_Token_REL"];
+            }
+            catch
+            {
+                Console.WriteLine(
+                                       "Der Discord API Token konnte nicht geladen werden.");
+                Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
+        }
+
+
         DatabaseService.OpenConnection();
         var discord = new DiscordClient(new DiscordConfiguration
         {
@@ -88,12 +107,12 @@ internal class Program : BaseCommandModule
 
     private static Task Discord_ClientErrored(DiscordClient sender, DisCatSharp.EventArgs.ClientErrorEventArgs e)
     {
-        Console.WriteLine($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        sender.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         return Task.CompletedTask;
     }
     private static Task Commands_CommandErrored(CommandsNextExtension cn,CommandErrorEventArgs e)
     {
-        Console.WriteLine($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message} {e.Exception.StackTrace}");
+        cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         return Task.CompletedTask;
     }
 }
@@ -121,8 +140,5 @@ public class GlobalProperties
 
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
-
-    // DB ConnectionString
-    public static string DbConnectionString { get; } = ConfigIni["DatabaseConfig"]["ConnectionString"];
 
 }
