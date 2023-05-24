@@ -509,33 +509,7 @@ public class ExtendedModerationSystem : ModerationSystem
         await DatabaseService.InsertDataIntoTable("flags", data);
         Console.WriteLine($"User {user.Username}#{user.Discriminator} flagged by {ctx.User.Username}#{ctx.User.Discriminator} for {reason}");
         var flaglist = new List<dynamic>();
-        await using (var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
-        {
-            if (connection.State != ConnectionState.Open)
-                await connection.OpenAsync();
-
-
-            await using (var command = new NpgsqlCommand("SELECT * FROM flags WHERE userid = @userid ORDER BY datum DESC",
-                       connection))
-            {
-                command.Parameters.AddWithValue("userid", (long)user.Id);
-
-                await using var reader = await command.ExecuteReaderAsync();
-                while (reader.Read())
-                {
-                    var flag = new
-                    {
-                        userid = (long)reader.GetInt64("userid"),
-                        punisherid = (long)reader.GetInt64("punisherid"),
-                        datum = (long)reader.GetInt64(reader.GetOrdinal("datum")),
-                        description = reader.GetString(reader.GetOrdinal("description")),
-                        caseid = reader.GetString(reader.GetOrdinal("caseid"))
-                    };
-
-                    flaglist.Add(flag);
-                }
-            }
-        }
+        
 
         var flagcount = flaglist.Count;
 
