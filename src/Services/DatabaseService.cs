@@ -143,7 +143,7 @@ public static class DatabaseService
 
         List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
 
-        await using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
+        await using (NpgsqlConnection connection = new NpgsqlConnection(GetConnectionString()))
         {
             await connection.OpenAsync();
 
