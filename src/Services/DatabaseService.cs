@@ -130,5 +130,57 @@ public static class DatabaseService
         }
     }
 
+    public static async Task<List<Dictionary<string, object>>> SelectDataFromTable(string tableName, List<string> columns, Dictionary<string, object> whereConditions)
+    {
+        string columnNames = string.Join(", ", columns.Select(c => $"\"{c}\""));
+        string selectQuery = $"SELECT {columnNames} FROM \"{tableName}\"";
+
+        if (whereConditions != null && whereConditions.Count > 0)
+        {
+            string whereClause = string.Join(" AND ", whereConditions.Select(c => $"\"{c.Key}\" = @{c.Key}"));
+            selectQuery += $" WHERE {whereClause}";
+        }
+
+        List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
+
+        await using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
+        {
+            await connection.OpenAsync();
+
+            await using (NpgsqlCommand command = new NpgsqlCommand(selectQuery, connection))
+            {
+                if (whereConditions != null && whereConditions.Count > 0)
+                {
+                    foreach (var condition in whereConditions)
+                    {
+                        NpgsqlParameter parameter = new NpgsqlParameter($"@{condition.Key}", condition.Value);
+                        command.Parameters.Add(parameter);
+                    }
+                }
+
+                await using (NpgsqlDataReader reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string columnName = reader.GetName(i);
+                            object columnValue = reader.GetValue(i);
+
+                            row[columnName] = columnValue;
+                        }
+
+                        results.Add(row);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+
 
 }
