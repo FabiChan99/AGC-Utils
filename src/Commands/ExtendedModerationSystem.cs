@@ -442,6 +442,23 @@ public class ExtendedModerationSystem : ModerationSystem
         }
     }
 
+    [Command("multiuserinfo")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [Description("Zeigt Informationen über mehrere User an.")]
+    [RequireTeamCat]
+    public async Task MultiUserInfo(CommandContext ctx,[RemainingText] string users)
+    {
+        string[] usersToCheck = users.Split(' ');
+        foreach (string member in usersToCheck)
+        {
+            await Task.Delay(1000);
+            var us = await ctx.Client.TryGetUserAsync(ulong.Parse(member), false);
+            if (us == null) continue;
+            await UserInfoCommand(ctx, us);
+        }
+    }
+
     [Command("flag")]
     [Description("Flaggt einen Nutzer")]
     [RequireDatabase]
