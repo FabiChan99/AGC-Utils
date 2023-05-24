@@ -507,7 +507,6 @@ public class ExtendedModerationSystem : ModerationSystem
             { "caseid", caseid }
         };
         await DatabaseService.InsertDataIntoTable("flags", data);
-        Console.WriteLine($"User {user.Username}#{user.Discriminator} flagged by {ctx.User.Username}#{ctx.User.Discriminator} for {reason}");
         var flaglist = new List<dynamic>();
         
 
