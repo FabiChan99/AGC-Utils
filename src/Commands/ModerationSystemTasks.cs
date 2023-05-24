@@ -1,6 +1,7 @@
 using System.Data;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace AGC_Management.Commands;
@@ -18,12 +19,12 @@ public class ModerationSystemTasks
             }
         }
         else
-            Console.WriteLine("Database is not connected! Skipping periodic warn removal...");
+            discord.Logger.LogWarning("Database not connected.. Disable Periodically Expired Warn check.");
     }
 
     private async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
     {
-        Console.WriteLine("Checking for expired warns...");
+        discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
         int expireTime = (int)DateTimeOffset.UtcNow.AddSeconds(-604800).ToUnixTimeSeconds();
         string deleteQuery = $"DELETE FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
@@ -76,10 +77,9 @@ public class ModerationSystemTasks
 
                 using (NpgsqlCommand commandDelete = new(deleteQuery, connectionDelete))
                 {
-                    int rowsAffected = await commandDelete.ExecuteNonQueryAsync();
-                    // 'rowsAffected' contains the number of deleted rows
+                    int remWarn = await commandDelete.ExecuteNonQueryAsync();
+                    discord.Logger.LogInformation($"{remWarn} Abgelaufene Verwarnungen in Flags verschoben.");
 
-                    Console.WriteLine($"Anzahl der gelöschten Zeilen: {rowsAffected}");
                 }
             }
         }
