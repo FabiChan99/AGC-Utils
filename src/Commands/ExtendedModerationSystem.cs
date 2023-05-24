@@ -508,7 +508,13 @@ public class ExtendedModerationSystem : ModerationSystem
         };
         await DatabaseService.InsertDataIntoTable("flags", data);
         var flaglist = new List<dynamic>();
-        
+
+        List<string> selectedFlags = new List<string>
+        {
+            "caseid"
+        };
+        List<Dictionary<string,object>> results = await DatabaseService.SelectDataFromTable("flags", selectedFlags, null);
+
 
         var flagcount = flaglist.Count;
 
@@ -520,7 +526,6 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithThumbnail(user.AvatarUrl)
             .Build();
-
         await ctx.RespondAsync(embed: embed);
     }
 }
