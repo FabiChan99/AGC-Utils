@@ -498,6 +498,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireTeamCat]
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
         Dictionary<string, object> data = new Dictionary<string, object>
         {
@@ -525,13 +526,9 @@ public class ExtendedModerationSystem : ModerationSystem
         var flagcount = flaglist.Count;
 
         var embed = new DiscordEmbedBuilder()
-            .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} ``{user.Id}`` wurde gerade erfolgreich geflaggt.\nGrund: ``{reason}``. Dies ist die {flagcount}. Markierung mit der ID: `{caseid}`")
-            .WithColor(GlobalProperties.EmbedColor)
-            .WithTitle($"{user.UsernameWithDiscriminator} wurde geflaggt")
-            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
-            .WithThumbnail(user.AvatarUrl)
-            .Build();
+            .WithTitle("Nutzer geflaggt")
+            .WithDescription($"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flags__. \nDie ID des Flags: ``{caseid}``").WithColor(GlobalProperties.EmbedColor)
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed: embed);
     }
 }
