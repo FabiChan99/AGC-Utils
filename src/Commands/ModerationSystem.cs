@@ -27,7 +27,7 @@ public class ModerationSystem : BaseCommandModule
         var embed = embedBuilder.Build();
         bool sent;
         var ReasonString =
-            $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+            $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         var interactivity = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Überprüfe deine Eingabe | Aktion: Kick")
@@ -167,7 +167,7 @@ public class ModerationSystem : BaseCommandModule
         var embed = embedBuilder.Build();
         bool sent;
         var ReasonString =
-            $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+            $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         // abfrage
         var interactivity = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -902,7 +902,7 @@ public class ModerationSystem : BaseCommandModule
                 string e_string;
                 bool sent;
                 var ReasonString =
-                    $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                    $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 var ec = DiscordColor.Red;
                 DiscordMessage? umsg = null;
                 try
