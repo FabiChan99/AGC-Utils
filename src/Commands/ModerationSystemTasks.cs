@@ -16,14 +16,12 @@ public class ModerationSystemTasks
                 await RemoveWarnsOlderThan7Days(discord);
                 await Task.Delay(TimeSpan.FromMinutes(5));
             }
-
         }
-
         else
             Console.WriteLine("Database is not connected! Skipping periodic warn removal...");
     }
 
-    public async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
+    private async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
     {
         Console.WriteLine("Checking for expired warns...");
         var warnlist = new List<dynamic>();
