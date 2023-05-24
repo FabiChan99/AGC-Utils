@@ -8,6 +8,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
+using System.Data;
 
 namespace AGC_Management.Commands;
 
@@ -496,7 +497,77 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireTeamCat]
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        string caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Helpers.Helpers.GenerateCaseID();
+        var sql =
+            "INSERT INTO flags (userid, punisherid, datum, description, caseid) VALUES (@userid, @punisherid, @datum, @description, @caseid)";
+        var val = new
+        {
+            userid = user.Id, punisherid = ctx.User.Id, datum = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            description = reason, caseid
+        };
+
+        await using(var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
+        {
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+
+            await using (var command = new NpgsqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("userid", val.userid);
+                command.Parameters.AddWithValue("punisherid", val.punisherid);
+                command.Parameters.AddWithValue("datum", val.datum);
+                command.Parameters.AddWithValue("description", val.description);
+                command.Parameters.AddWithValue("caseid", val.caseid);
+
+                await command.ExecuteNonQueryAsync();
+            }
+
+            connection.Close();
+        }
+
+        var flaglist = new List<dynamic>();
+        await using (var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
+        {
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+
+            await using (var command = new NpgsqlCommand("SELECT * FROM flags WHERE userid = @userid ORDER BY datum DESC",
+                       connection))
+            {
+                command.Parameters.AddWithValue("userid", user.Id);
+
+                await using var reader = await command.ExecuteReaderAsync();
+                while (reader.Read())
+                {
+                    var flag = new
+                    {
+                        userid = (ulong)reader.GetInt64("userid"),
+                        punisherid = (ulong)reader.GetInt64("punisherid"),
+                        datum = reader.GetInt64(reader.GetOrdinal("datum")),
+                        description = reader.GetString(reader.GetOrdinal("description")),
+                        caseid = reader.GetString(reader.GetOrdinal("caseid"))
+                    };
+
+                    flaglist.Add(flag);
+                }
+            }
+
+            connection.Close();
+        }
+
+        var flagcount = flaglist.Count;
+
+        var embed = new DiscordEmbedBuilder()
+            .WithDescription(
+                $"Der Nutzer {user.UsernameWithDiscriminator} ``{user.Id}`` wurde gerade erfolgreich geflaggt.\nGrund: ``{reason}``. Dies ist die {flagcount}. Markierung mit der ID: `{caseid}`")
+            .WithColor(GlobalProperties.EmbedColor)
+            .WithTitle($"{user.UsernameWithDiscriminator} wurde geflaggt")
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithThumbnail(user.AvatarUrl)
+            .Build();
+
+        await ctx.RespondAsync(embed: embed);
     }
 }

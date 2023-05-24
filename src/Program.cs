@@ -56,7 +56,6 @@ internal class Program : BaseCommandModule
             Intents = DiscordIntents.All,
             LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt",
             DeveloperUserId = GlobalProperties.BotOwnerId,
-            AutoRefreshChannelCache = true,
             Locale = "de"
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
@@ -75,6 +74,7 @@ internal class Program : BaseCommandModule
             Timeout = TimeSpan.FromMinutes(2)
         });
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
+        commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
 
         // Start the Task to remove warns older than 7 days
@@ -89,6 +89,11 @@ internal class Program : BaseCommandModule
     private static Task Discord_ClientErrored(DiscordClient sender, DisCatSharp.EventArgs.ClientErrorEventArgs e)
     {
         Console.WriteLine($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        return Task.CompletedTask;
+    }
+    private static Task Commands_CommandErrored(CommandsNextExtension cn,CommandErrorEventArgs e)
+    {
+        Console.WriteLine($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message} {e.Exception.StackTrace}");
         return Task.CompletedTask;
     }
 }
