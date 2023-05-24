@@ -400,7 +400,6 @@ public class ExtendedModerationSystem : ModerationSystem
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag.CaseId}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag.Datum), TimestampFormat.RelativeTime)} - {flag.Description}";
                     flagResults.Add(FlagStr);
-                    Console.WriteLine(FlagStr);
                 }
 
                 foreach (dynamic warn in warnlist)
@@ -410,8 +409,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     DiscordUser? puser = await ctx.Client.TryGetUserAsync(ulongValue, false);
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{warn.CaseId}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(warn.Datum), TimestampFormat.RelativeTime)} - {warn.Description}";
-                    flagResults.Add(FlagStr);
-                    Console.WriteLine(FlagStr);
+                    warnResults.Add(FlagStr);
                 }
 
                 foreach (dynamic pwarn in permawarnlist)
@@ -421,8 +419,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     DiscordUser? puser = await ctx.Client.TryGetUserAsync(ulongValue, false);
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn.CaseId}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn.Datum), TimestampFormat.RelativeTime)} - {pwarn.Description}";
-                    flagResults.Add(FlagStr);
-                    Console.WriteLine(FlagStr);
+                    permawarnResults.Add(FlagStr);
                 }
 
                 bool isBanned = false;

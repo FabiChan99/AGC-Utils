@@ -167,9 +167,6 @@ public class ModerationSystem : BaseCommandModule
         bool sent;
         var ReasonString =
             $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
-        string sentString;
-        var username = user.UsernameWithDiscriminator;
-
         // abfrage
         var interactivity = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
