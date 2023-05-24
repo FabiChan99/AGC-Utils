@@ -9,11 +9,18 @@ public class ModerationSystemTasks
 {
     public async Task StartRemovingWarnsPeriodically(DiscordClient discord)
     {
-        while (true)
+        if (DatabaseService.IsConnected())
         {
-            await RemoveWarnsOlderThan7Days(discord);
-            await Task.Delay(TimeSpan.FromMinutes(5));
+            while (true)
+            {
+                await RemoveWarnsOlderThan7Days(discord);
+                await Task.Delay(TimeSpan.FromMinutes(5));
+            }
+
         }
+
+        else
+            Console.WriteLine("Database is not connected! Skipping periodic warn removal...");
     }
 
     public async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
