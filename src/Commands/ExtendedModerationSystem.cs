@@ -498,33 +498,13 @@ public class ExtendedModerationSystem : ModerationSystem
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
         var caseid = Helpers.Helpers.GenerateCaseID();
-        var sql =
-            "INSERT INTO flags (userid, punisherid, datum, description, caseid) VALUES (@userid, @punisherid, @datum, @description, @caseid)";
-        var val = new
-        {
-            userid = user.Id, punisherid = ctx.User.Id, datum = DateTimeOffset.Now.ToUnixTimeSeconds(),
-            description = reason, caseid
-        };
-
-        await using(var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
-        {
-            if (connection.State != ConnectionState.Open)
-                await connection.OpenAsync();
-
-
-            await using (var command = new NpgsqlCommand(sql, connection))
-            {
-                command.Parameters.AddWithValue("userid", val.userid);
-                command.Parameters.AddWithValue("punisherid", val.punisherid);
-                command.Parameters.AddWithValue("datum", val.datum);
-                command.Parameters.AddWithValue("description", val.description);
-                command.Parameters.AddWithValue("caseid", val.caseid);
-
-                await command.ExecuteNonQueryAsync();
-            }
-
-            connection.Close();
-        }
+        Dictionary<string, object> data = new Dictionary<string, object>();
+        data.Add("userid", (long)user.Id);
+        data.Add("punisherid", (long)ctx.User.Id);
+        data.Add("datum", DateTimeOffset.Now.ToUnixTimeSeconds());
+        data.Add("description", reason);
+        data.Add("caseid", caseid);
+        await DatabaseService.InsertDataIntoTable("flags", data);
 
         var flaglist = new List<dynamic>();
         await using (var connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))

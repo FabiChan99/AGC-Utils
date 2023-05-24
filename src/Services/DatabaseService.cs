@@ -107,4 +107,28 @@ public static class DatabaseService
             throw;
         }
     }
+
+    public static async Task InsertDataIntoTable(string tableName, Dictionary<string, object> columnValuePairs)
+    {
+        string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
+                             $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
+
+        await using (NpgsqlConnection connection = new NpgsqlConnection(GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            await using (NpgsqlCommand command = new NpgsqlCommand(insertQuery, connection))
+            {
+                foreach (var kvp in columnValuePairs)
+                {
+                    NpgsqlParameter parameter = new NpgsqlParameter($"@{kvp.Key}", kvp.Value);
+                    command.Parameters.Add(parameter);
+                }
+
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+
 }
