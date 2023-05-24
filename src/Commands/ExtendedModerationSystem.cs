@@ -447,17 +447,39 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireStaffRole]
     [Description("Zeigt Informationen über mehrere User an.")]
     [RequireTeamCat]
-    public async Task MultiUserInfo(CommandContext ctx,[RemainingText] string users)
+    public async Task MultiUserInfo(CommandContext ctx, [RemainingText] string users)
     {
         string[] usersToCheck = users.Split(' ');
+        var uniqueUserIds = new HashSet<ulong>();
+
         foreach (string member in usersToCheck)
         {
-            await Task.Delay(1000);
-            var us = await ctx.Client.TryGetUserAsync(ulong.Parse(member), false);
+            if (!ulong.TryParse(member, out ulong memberId)) continue;
+
+            uniqueUserIds.Add(memberId);
+        }
+
+        if (uniqueUserIds.Count == 0)
+        {
+            await ctx.RespondAsync("Keine gültigen User-IDs gefunden.");
+            return;
+        }
+
+        if (uniqueUserIds.Count > 6)
+        {
+            await ctx.RespondAsync("Maximal 6 User können gleichzeitig abgefragt werden.");
+            return;
+        }
+
+        foreach (ulong memberId in uniqueUserIds)
+        {
+            //await Task.Delay(1000);
+            var us = await ctx.Client.TryGetUserAsync(memberId, false);
             if (us == null) continue;
             await UserInfoCommand(ctx, us);
         }
     }
+
 
     [Command("flag")]
     [Description("Flaggt einen Nutzer")]
