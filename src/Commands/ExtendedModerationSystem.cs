@@ -262,15 +262,15 @@ public class ExtendedModerationSystem : ModerationSystem
                 $"{(member.CommunicationDisabledUntil.HasValue ? $"Nutzer getimeouted bis: {member.CommunicationDisabledUntil.Value.Timestamp()}" : "Nutzer nicht getimeouted")}\n\n";
             userinfostring +=
                 $"**Aktueller Voice-Channel**\n{(member.VoiceState != null && member.VoiceState.Channel != null ? member.VoiceState.Channel.Mention : "Mitglied nicht in einem Voice-Channel")}\n\n";
-            userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
+            userinfostring += $"**__Alle Verwarnungen ({warncount})__**\n";
             userinfostring += warnlist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", warnResults) + "\n";
-            userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
+            userinfostring += $"\n**__Alle Perma-Verwarnungen ({permawarncount})__**\n";
             userinfostring += permawarnlist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", permawarnResults) + "\n";
-            userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
+            userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
             userinfostring += flaglist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", flagResults) + "\n";
@@ -407,15 +407,15 @@ public class ExtendedModerationSystem : ModerationSystem
             userinfostring += $"**Infobadges:**  {bot_indicator} {bs_icon} {banicon}\n\n";
             userinfostring += "**Der Online-Status und die Plattform**\n";
             userinfostring += $"{status_indicator} | Nicht ermittelbar - User ist nicht auf dem Server\n\n";
-            userinfostring += $"**Alle Verwarnungen ({warncount})**\n";
+            userinfostring += $"**__Alle Verwarnungen ({warncount})__**\n";
             userinfostring += warnlist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", warnResults) + "\n";
-            userinfostring += $"\n**Alle Perma-Verwarnungen ({permawarncount})**\n";
+            userinfostring += $"\n**__Alle Perma-Verwarnungen ({permawarncount})__**\n";
             userinfostring += permawarnlist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", permawarnResults) + "\n";
-            userinfostring += $"\n**Alle Markierungen ({flagcount})**\n";
+            userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
             userinfostring += flaglist.Count == 0
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", flagResults) + "\n";
