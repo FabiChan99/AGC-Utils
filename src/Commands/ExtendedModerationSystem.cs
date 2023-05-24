@@ -6,6 +6,7 @@ using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Npgsql;
 using System.Data;
@@ -511,9 +512,14 @@ public class ExtendedModerationSystem : ModerationSystem
 
         List<string> selectedFlags = new List<string>
         {
-            "caseid"
+            "*"
         };
         List<Dictionary<string,object>> results = await DatabaseService.SelectDataFromTable("flags", selectedFlags, null);
+        foreach (var result in results)
+        {
+            flaglist.Add(result);
+        }
+               
 
 
         var flagcount = flaglist.Count;
