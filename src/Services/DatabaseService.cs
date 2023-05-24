@@ -132,8 +132,16 @@ public static class DatabaseService
 
     public static async Task<List<Dictionary<string, object>>> SelectDataFromTable(string tableName, List<string> columns, Dictionary<string, object> whereConditions)
     {
-        string columnNames = string.Join(", ", columns.Select(c => $"\"{c}\""));
-        string selectQuery = $"SELECT {columnNames} FROM \"{tableName}\"";
+        string selectQuery;
+        if (columns.Contains("*"))
+        {
+            selectQuery = $"SELECT * FROM \"{tableName}\"";
+        }
+        else
+        {
+            string columnNames = string.Join(", ", columns.Select(c => $"\"{c}\""));
+            selectQuery = $"SELECT {columnNames} FROM \"{tableName}\"";
+        }
 
         if (whereConditions != null && whereConditions.Count > 0)
         {
@@ -180,6 +188,7 @@ public static class DatabaseService
 
         return results;
     }
+
 
 
 
