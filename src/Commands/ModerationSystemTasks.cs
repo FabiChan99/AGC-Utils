@@ -31,26 +31,27 @@ public class ModerationSystemTasks
                 var warn = new
                 {
                     UserId = warnReader.GetInt64(0),
-                    PunisherId = warnReader.GetInt64(1),
+                    PunisherId = discord.CurrentUser.Id,
                     Datum = warnReader.GetInt32(2),
-                    Description = warnReader.GetString(3) + $" **[AUTO] !ABGELAUFENE VERWARNUNG!**",
+                    Description = warnReader.GetString(3) + " **[AUTO] EXPIRED WARN!**",
                     Perma = warnReader.GetBoolean(4),
                     CaseId = "EXPIRED-" + warnReader.GetString(5)
                 };
                 warnlist.Add(warn);
             }
         }
+
         foreach (var warn in warnlist)
         {
             string insertQuery = "INSERT INTO flags (userid, punisherid, datum, description, caseid) VALUES " +
                                  "(@UserId, @PunisherId, @Datum, @Description, @CaseId)";
 
-            await using (NpgsqlConnection connection = new NpgsqlConnection(DatabaseService.GetConnectionString()))
+            await using (NpgsqlConnection connection = new(DatabaseService.GetConnectionString()))
             {
                 if (connection.State != ConnectionState.Open)
                     await connection.OpenAsync();
 
-                await using (NpgsqlCommand command = new NpgsqlCommand(insertQuery, connection))
+                await using (NpgsqlCommand command = new(insertQuery, connection))
                 {
                     command.Parameters.AddWithValue("@UserId", warn.UserId);
                     command.Parameters.AddWithValue("@PunisherId", warn.PunisherId);
@@ -63,12 +64,12 @@ public class ModerationSystemTasks
             }
 
             // Create a new connection for the delete query
-            await using (NpgsqlConnection connectionDelete = new NpgsqlConnection(DatabaseService.GetConnectionString()))
+            await using (NpgsqlConnection connectionDelete = new(DatabaseService.GetConnectionString()))
             {
                 if (connectionDelete.State != ConnectionState.Open)
                     await connectionDelete.OpenAsync();
 
-                using (NpgsqlCommand commandDelete = new NpgsqlCommand(deleteQuery, connectionDelete))
+                using (NpgsqlCommand commandDelete = new(deleteQuery, connectionDelete))
                 {
                     int rowsAffected = await commandDelete.ExecuteNonQueryAsync();
                     // 'rowsAffected' contains the number of deleted rows
@@ -76,8 +77,6 @@ public class ModerationSystemTasks
                     Console.WriteLine($"Anzahl der gelöschten Zeilen: {rowsAffected}");
                 }
             }
-
-
         }
     }
 }

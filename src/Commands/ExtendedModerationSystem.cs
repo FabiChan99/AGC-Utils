@@ -8,21 +8,14 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
-using Serilog.Debugging;
-using System.Data;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Commands;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
-        using HttpClient client = new HttpClient();
+        using HttpClient client = new();
 
         string apiKey = GlobalProperties.DebugMode
             ? GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]
@@ -49,7 +42,6 @@ public class ExtendedModerationSystem : ModerationSystem
 
         return (false, null, false);
     }
-
 
 
     [Command("userinfo")]
@@ -115,30 +107,23 @@ public class ExtendedModerationSystem : ModerationSystem
         }
 
         if (bs_enabled)
-        {
             try
             {
                 (bool temp_bs_status, object bs, bs_success) = await CheckBannsystem(user);
                 bs_status = temp_bs_status;
                 if (bs_status)
-                {
                     try
                     {
                         DiscordColor clr = DiscordColor.Red;
                         var report_data = (List<object>)bs;
                     }
-                    catch (Exception )
+                    catch (Exception)
                     {
-                        
                     }
-                }
             }
             catch (Exception)
             {
-                
             }
-        }
-
 
 
         string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";
@@ -439,7 +424,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     flagResults.Add(FlagStr);
                     Console.WriteLine(FlagStr);
                 }
-                
+
                 bool isBanned = false;
                 string banStatus;
                 try
@@ -480,7 +465,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 userinfostring += flaglist.Count == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", flagResults) + "\n";
-                userinfostring += $"\n**Lokaler Bannstatus**\n";
+                userinfostring += "\n**Lokaler Bannstatus**\n";
                 userinfostring += banStatus + "";
 
                 if (bs_success)

@@ -27,13 +27,10 @@ public class ModerationSystem : BaseCommandModule
         bool sent;
         var ReasonString =
             $"Grund {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
-        string sentString;
-        var username = user.UsernameWithDiscriminator;
-
-        // abfrage
         var interactivity = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
-            .WithTitle("Überprüfe deine Eingabe | Aktion: Kick").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Kick")
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
@@ -51,7 +48,6 @@ public class ModerationSystem : BaseCommandModule
         buttons.ForEach(x => x.Disable());
         if (interaction.TimedOut)
         {
-
             var embed_ = new DiscordMessageBuilder()
                 .WithEmbed(confirmEmbedBuilder.WithTitle("Kick abgebrochen")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
@@ -61,6 +57,7 @@ public class ModerationSystem : BaseCommandModule
             await confirm.ModifyAsync(embed_);
             return;
         }
+
         if (interaction.Result.Id == $"kick_deny_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -73,6 +70,7 @@ public class ModerationSystem : BaseCommandModule
             await confirm.ModifyAsync(embed_);
             return;
         }
+
         if (interaction.Result.Id == $"kick_accept_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -113,6 +111,7 @@ public class ModerationSystem : BaseCommandModule
             {
                 n_users += $"{user.UsernameWithDiscriminator}\n";
             }
+
             if (n_users != "")
             {
                 e_string = $"Der Kick war nicht erfolgreich.\n" +
@@ -121,7 +120,6 @@ public class ModerationSystem : BaseCommandModule
                             $"```{n_users}```";
                 ec = DiscordColor.Red;
                 if (sent)
-                {
                     try
                     {
                         await umsg.DeleteAsync();
@@ -130,8 +128,6 @@ public class ModerationSystem : BaseCommandModule
                     {
                         // ignored
                     }
-
-                }
             }
             else
             {
@@ -141,6 +137,7 @@ public class ModerationSystem : BaseCommandModule
                            $"```{b_users}```";
                 ec = DiscordColor.Green;
             }
+
             var discordEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Kick abgeschlossen")
                 .WithDescription(e_string)
@@ -149,11 +146,10 @@ public class ModerationSystem : BaseCommandModule
             var discordEmbed = discordEmbedBuilder.Build();
             await confirm.ModifyAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed));
         }
-
     }
 
     [Command("ban")]
-        [RequireDatabase]
+    [RequireDatabase]
     [RequirePermissions(Permissions.BanMembers)]
     public async Task BanMember(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
@@ -191,11 +187,10 @@ public class ModerationSystem : BaseCommandModule
         var confirmMessage = new DiscordMessageBuilder()
             .WithEmbed(embed__).AddComponents(buttons).WithReply(ctx.Message.Id);
         var confirm = await ctx.Channel.SendMessageAsync(confirmMessage);
-        var interaction = await interactivity.WaitForButtonAsync(confirm, ctx.User, TimeSpan.FromSeconds(60)); 
+        var interaction = await interactivity.WaitForButtonAsync(confirm, ctx.User, TimeSpan.FromSeconds(60));
         buttons.ForEach(x => x.Disable());
         if (interaction.TimedOut)
         {
-            
             var embed_ = new DiscordMessageBuilder()
                 .WithEmbed(confirmEmbedBuilder.WithTitle("Ban abgebrochen")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
@@ -205,6 +200,7 @@ public class ModerationSystem : BaseCommandModule
             await confirm.ModifyAsync(embed_);
             return;
         }
+
         if (interaction.Result.Id == $"ban_deny_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -217,6 +213,7 @@ public class ModerationSystem : BaseCommandModule
             await confirm.ModifyAsync(embed_);
             return;
         }
+
         if (interaction.Result.Id == $"ban_accept_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -257,25 +254,23 @@ public class ModerationSystem : BaseCommandModule
             {
                 n_users += $"{user.UsernameWithDiscriminator}\n";
             }
+
             if (n_users != "")
             {
                 e_string = $"Der Ban war nicht erfolgreich.\n" +
                            $"__Grund:__ ```{reason}```\n";
-                           e_string += $"__Nicht gebannte User:__\n" +
-                                       $"```{n_users}```";
+                e_string += $"__Nicht gebannte User:__\n" +
+                            $"```{n_users}```";
                 ec = DiscordColor.Red;
                 if (sent)
-                {
                     try
                     {
                         await umsg.DeleteAsync();
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         // ignored
                     }
-
-                }
             }
             else
             {
@@ -285,6 +280,7 @@ public class ModerationSystem : BaseCommandModule
                            $"```{b_users}```";
                 ec = DiscordColor.Green;
             }
+
             var discordEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Ban abgeschlossen")
                 .WithDescription(e_string)
@@ -293,7 +289,6 @@ public class ModerationSystem : BaseCommandModule
             var discordEmbed = discordEmbedBuilder.Build();
             await confirm.ModifyAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed));
         }
-        
     }
 
 
@@ -777,7 +772,8 @@ public class ModerationSystem : BaseCommandModule
             .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
         var interactivity_ = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
-            .WithTitle("Überprüfe deine Eingabe | Aktion: Banrequest").WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Banrequest")
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
@@ -795,7 +791,6 @@ public class ModerationSystem : BaseCommandModule
         buttons_.ForEach(x => x.Disable());
         if (interaction.TimedOut)
         {
-
             var embed_ = new DiscordMessageBuilder()
                 .WithEmbed(confirmEmbedBuilder.WithTitle("Banrequest abgebrochen")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
@@ -927,6 +922,7 @@ public class ModerationSystem : BaseCommandModule
                 {
                     n_users += $"{user.UsernameWithDiscriminator}\n";
                 }
+
                 if (n_users != "")
                 {
                     e_string = $"Der Ban war nicht erfolgreich!\n" +
@@ -936,7 +932,6 @@ public class ModerationSystem : BaseCommandModule
                                 $"```{n_users}```";
                     ec = DiscordColor.Red;
                     if (sent)
-                    {
                         try
                         {
                             await umsg.DeleteAsync();
@@ -945,8 +940,6 @@ public class ModerationSystem : BaseCommandModule
                         {
                             // ignored
                         }
-
-                    }
                 }
                 else
                 {
@@ -957,6 +950,7 @@ public class ModerationSystem : BaseCommandModule
                                $"```{b_users}```";
                     ec = DiscordColor.Green;
                 }
+
                 var discordEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle("Ban abgeschlossen")
                     .WithDescription(e_string)
