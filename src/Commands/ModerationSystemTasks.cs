@@ -1,8 +1,6 @@
-using System.Data;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
 namespace AGC_Management.Commands;
 
@@ -29,7 +27,6 @@ public class ModerationSystemTasks
         discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
         int expireTime = (int)DateTimeOffset.UtcNow.AddSeconds(-604800).ToUnixTimeSeconds();
-        string deleteQuery = $"DELETE FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
 
         List<string> WarnQuery = new()
         {
@@ -55,13 +52,13 @@ public class ModerationSystemTasks
             await DatabaseService.InsertDataIntoTable("flags", data);
         }
 
-        Dictionary<string, (object value, string comparisonOperator)> whereConditions = new Dictionary<string, (object value, string comparisonOperator)>
+        Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
         {
             { "datum", (expireTime, "<") },
             { "perma", (false, "=") }
         };
 
-        int rowsDeleted = await DatabaseService.DeleteDataFromTable("warns", whereConditions, "AND");
+        int rowsDeleted = await DatabaseService.DeleteDataFromTable("warns", whereConditions);
 
         discord.Logger.LogInformation($"{rowsDeleted} Abgelaufene Verwarnungen in Flags verschoben.");
     }
