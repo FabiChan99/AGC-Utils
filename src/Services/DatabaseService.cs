@@ -187,4 +187,39 @@ public static class DatabaseService
 
         return results;
     }
+
+    public static async Task<int> DeleteDataFromTable(string tableName, Dictionary<string, (object value, string comparisonOperator)> whereConditions, string logicalOperator = "AND")
+    {
+        string deleteQuery = $"DELETE FROM \"{tableName}\"";
+
+        if (whereConditions != null && whereConditions.Count > 0)
+        {
+            string whereClause = string.Join($" {logicalOperator} ", whereConditions.Select(c => $"\"{c.Key}\" {c.Value.comparisonOperator} @{c.Key}"));
+            deleteQuery += $" WHERE {whereClause}";
+        }
+
+        int rowsAffected;
+
+        await using (NpgsqlConnection connection = new NpgsqlConnection(GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            await using (NpgsqlCommand command = new NpgsqlCommand(deleteQuery, connection))
+            {
+                if (whereConditions != null && whereConditions.Count > 0)
+                {
+                    foreach (var condition in whereConditions)
+                    {
+                        NpgsqlParameter parameter = new NpgsqlParameter($"@{condition.Key}", condition.Value.value);
+                        command.Parameters.Add(parameter);
+                    }
+                }
+
+                rowsAffected = await command.ExecuteNonQueryAsync();
+            }
+        }
+
+        return rowsAffected;
+    }
+
 }
