@@ -285,7 +285,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitals} Mitglied");
+            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
             embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
@@ -431,7 +431,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitals} Mitglied");
+            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
             embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);

@@ -39,21 +39,29 @@ internal class Program : BaseCommandModule
             Console.ReadKey();
             Environment.Exit(0);
         }
-
+        bool DebugMode;
         iniData = parser.ReadFile("config.ini");
-        var DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
+        try
+        {
+            DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
+        }
+        catch
+        {
+            DebugMode = false;
+        }
+        
         string DcApiToken = "";
         try
         {
             DcApiToken = DebugMode
                 ? iniData["MainConfig"]["Discord_API_Token_DEB"]
-                : iniData["MainConfig"]["Discord_API_Token_REL"];
+                : iniData["MainConfig"]["Discord_API_Token"];
         }
         catch
         {
             try
             {
-                DcApiToken = iniData["MainConfig"]["Discord_API_Token_REL"];
+                DcApiToken = iniData["MainConfig"]["Discord_API_Token"];
             }
             catch
             {
@@ -135,11 +143,23 @@ public class GlobalProperties
     public static string StaffRoleName { get; } = ConfigIni["ServerConfig"]["StaffRoleName"];
 
     // Servername Initals for embeds
-    public static string ServerNameInitals { get; } = ConfigIni["ServerConfig"]["ServerNameInitials"];
+    public static string ServerNameInitials { get; } = ConfigIni["ServerConfig"]["ServerNameInitials"];
 
     // Debug Mode
-    public static bool DebugMode { get; } = bool.Parse(ConfigIni["MainConfig"]["DebugMode"]);
+    public static bool DebugMode { get; } = ParseBoolean(ConfigIni["MainConfig"]["DebugMode"]);
 
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
+    
+    private static bool ParseBoolean(string boolString)
+    {
+        if (bool.TryParse(boolString, out bool parsedBool))
+        {
+            return parsedBool;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
