@@ -828,7 +828,6 @@ public class CaseManagement : BaseCommandModule
             if (wcase) discordEmbedbuilder.AddField(new DiscordEmbedField("Permanent:", perma ? "✅" : "❌"));
             await ctx.RespondAsync(discordEmbedbuilder.Build());
             return;
-
         }
 
         if (fcase)
@@ -845,8 +844,6 @@ public class CaseManagement : BaseCommandModule
                 .AddField(new DiscordEmbedField("Datum:", datum.Timestamp()))
                 .AddField(new DiscordEmbedField("Grund:", $"```{reason}```"));
             await ctx.RespondAsync(discordEmbedbuilder.Build());
-            return;
-
         }
     }
 
@@ -931,6 +928,7 @@ public class CaseManagement : BaseCommandModule
                     await ctx.RespondAsync(ue);
                 }
             }
+
             return;
         }
 
@@ -955,17 +953,16 @@ public class CaseManagement : BaseCommandModule
                     await ctx.RespondAsync(ue);
                 }
             }
+
             return;
         }
-        else
-        {
-            DiscordEmbed embed = new DiscordEmbedBuilder()
-                .WithTitle("Fehler")
-                .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
-                .WithColor(DiscordColor.Red)
-                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
-            await ctx.RespondAsync(embed);
-        }
+
+        DiscordEmbed embed = new DiscordEmbedBuilder()
+            .WithTitle("Fehler")
+            .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
+            .WithColor(DiscordColor.Red)
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+        await ctx.RespondAsync(embed);
     }
 
     [Command("delete")]
@@ -1047,6 +1044,7 @@ public class CaseManagement : BaseCommandModule
                     await ctx.RespondAsync(ue);
                 }
             }
+
             return;
         }
 
@@ -1069,18 +1067,16 @@ public class CaseManagement : BaseCommandModule
                             $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
                     await ctx.RespondAsync(ue);
                 }
-
             }
+
             return;
         }
-        else
-        {
-            DiscordEmbed embed = new DiscordEmbedBuilder()
-                .WithTitle("Fehler")
-                .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
-                .WithColor(DiscordColor.Red)
-                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
-            await ctx.RespondAsync(embed);
-        }
+
+        DiscordEmbed embed = new DiscordEmbedBuilder()
+            .WithTitle("Fehler")
+            .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
+            .WithColor(DiscordColor.Red)
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+        await ctx.RespondAsync(embed);
     }
 }
