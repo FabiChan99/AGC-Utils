@@ -15,7 +15,7 @@ public class ModerationSystemTasks
             while (true)
             {
                 await RemoveWarnsOlderThan7Days(discord);
-                await Task.Delay(TimeSpan.FromMinutes(1));
+                await Task.Delay(TimeSpan.FromMinutes(5));
             }
         }
 
