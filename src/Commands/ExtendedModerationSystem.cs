@@ -546,10 +546,11 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             "*"
         };
-
+        Dictionary<string, object> whereConditions = new Dictionary<string, object>();
+        whereConditions.Add("userid", (long)user.Id);
 
         List<Dictionary<string, object>> results =
-            await DatabaseService.SelectDataFromTable("warns", selectedWarns, null);
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
         foreach (var result in results) warnlist.Add(result);
 
 
@@ -633,9 +634,12 @@ public class ExtendedModerationSystem : ModerationSystem
             "*"
         };
 
+        Dictionary<string, object> whereConditions = new Dictionary<string, object>();
+        whereConditions.Add("userid", (long)user.Id);
+
 
         List<Dictionary<string, object>> results =
-            await DatabaseService.SelectDataFromTable("warns", selectedWarns, null);
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
         foreach (var result in results) warnlist.Add(result);
 
 
