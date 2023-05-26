@@ -582,7 +582,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-                Console.WriteLine("User konnte nicht gebannt werden");
+
             }
         else if (warncount >= warnsToKick)
             try
@@ -592,7 +592,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-                Console.WriteLine("Neuer User konnte nicht gekickt werden");
+
             }
 
 
