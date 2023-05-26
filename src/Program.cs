@@ -132,6 +132,12 @@ internal class Program : BaseCommandModule
 
     private static Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
+        // check if error is DisCatSharp.CommandsNext.Exceptions.CommandNotFoundException
+        if (e.Exception is DisCatSharp.CommandsNext.Exceptions.CommandNotFoundException)
+        {
+            // ignore the error silently
+            return Task.CompletedTask;
+        }
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.StackTrace}");
 
