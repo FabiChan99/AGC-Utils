@@ -79,13 +79,14 @@ namespace AGC_Management.Helpers
 
         public static async Task<DiscordEmbed> GenerateWarnEmbed(CommandContext ctx, DiscordUser user, DiscordUser mod, int warnCount, string caseid, bool isManual, string reason)
         {
+            string unbanurl = GetUnbanURL();
             var (warnsToKick, warnsToBan) = await GetWarnKickValues();
             DiscordEmbed embed;
             if (warnCount >= warnsToBan)
             {
                 return new DiscordEmbedBuilder()
                     .WithDescription(
-                        $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter($"").WithFooter(isManual ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben." : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
                     .WithTitle("Du wurdest verwarnt!")
                     .Build();
@@ -144,12 +145,13 @@ namespace AGC_Management.Helpers
             bool isManual, string reason)
         {
             var (warnsToKick, warnsToBan) = await GetWarnKickValues();
+            string unbanurl = GetUnbanURL();
             DiscordEmbed embed;
             if (warnCount >= warnsToBan)
             {
                 return new DiscordEmbedBuilder()
                     .WithDescription(
-                        $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter($"").WithFooter(isManual ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben." : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
                     .WithTitle("Du wurdest permanent verwarnt!")
                     .Build();
@@ -205,5 +207,20 @@ namespace AGC_Management.Helpers
 
         }
 
+
+        public static string GetUnbanURL()
+        {
+            string unbanurl;
+            try
+            {
+                unbanurl = BotConfig.GetConfig()["ServerConfig"]["BanAppealURL"];
+            }
+            catch
+            {
+                unbanurl = "";
+            }
+
+            return unbanurl;
+        }
     }
 }

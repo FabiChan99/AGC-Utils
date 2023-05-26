@@ -681,7 +681,6 @@ public class ExtendedModerationSystem : ModerationSystem
             {
                 if (BanEnabled)
                 {
-                    Console.WriteLine("Banning");
                     await ctx.Guild.BanMemberAsync(user, 7, reasonString);
                     uAction = "Gebannt";
                 }

@@ -161,7 +161,7 @@ public class ModerationSystem : BaseCommandModule
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +
                              $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                             $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
+                             $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
             .WithColor(DiscordColor.Red);
 
         var embed = embedBuilder.Build();
@@ -342,7 +342,7 @@ public class ModerationSystem : BaseCommandModule
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +
                              $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                             $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
+                             $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
             .WithColor(DiscordColor.Red);
         var UserEmbed = embedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
@@ -559,7 +559,7 @@ public class ModerationSystem : BaseCommandModule
                 .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!").WithColor(DiscordColor.Red)
                 .WithDescription($"**Begründung:**```{reason}```\n" +
                                  $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                                 $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen");
+                                 $"Dann kannst du eine Entbannung beim [Entbannportal]( {ModerationHelper.GetUnbanURL()} ) beantragenen");
             var banEmbed = banEmbedBuilder.Build();
             var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
             var staffmembers = ctx.Guild.Members
@@ -871,7 +871,7 @@ public class ModerationSystem : BaseCommandModule
                     .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
                     .WithDescription($"**Begründung:**```{reason}```\n" +
                                      $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                                     $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen")
+                                     $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
                     .WithColor(DiscordColor.Red);
 
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);

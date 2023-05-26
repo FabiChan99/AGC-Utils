@@ -113,7 +113,7 @@ internal class Program : BaseCommandModule
                 }
                 catch
                 {
-                    prefix = "!!!";
+                    prefix = "!!!"; //Fallback Config
                 }
             }
             int CommandStart = -1;
