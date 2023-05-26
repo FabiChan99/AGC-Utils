@@ -473,8 +473,8 @@ public class ModerationSystem : BaseCommandModule
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
-        var reasonString =
-            $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+        var ReasonString =
+            $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {result.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         var setids = ids.ToHashSet().ToList();
         if (setids.Count < 2)
         {
@@ -563,9 +563,7 @@ public class ModerationSystem : BaseCommandModule
                                  $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
                                  $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen");
             var banEmbed = banEmbedBuilder.Build();
-            Console.WriteLine($"[BAN] {ctx.User.UsernameWithDiscriminator} banned {busers_formatted} for {reason}");
             var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
-            Console.WriteLine(staffrole.Id);
             var staffmembers = ctx.Guild.Members
                 .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))
                 .Select(x => x.Value)
@@ -574,7 +572,6 @@ public class ModerationSystem : BaseCommandModule
                 staffmembers.Where(x => x.Permissions.HasPermission(Permissions.BanMembers)).ToList();
             var onlineStaffWithBanPerms = staffWithBanPerms
                 .Where(member => (member.Presence?.Status ?? UserStatus.Offline) != UserStatus.Offline).ToList();
-            Console.WriteLine($"[BAN] {ctx.User.UsernameWithDiscriminator} banned {busers_formatted} for {reason}");
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Bannanfrage")
                 .WithDescription($"Ban-Anfrage für mehrere Benutzer: {busers_formatted}\n" +
@@ -666,12 +663,7 @@ public class ModerationSystem : BaseCommandModule
             if (staffresult.Result.Id == $"modbanrequest_accept_{caseid}")
             {
                 await staffresult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                Console.WriteLine("1");
                 var disbtn = buttons;
-                Console.WriteLine("223");
-
-                // disbtn.ForEach(x => x.Disable());
-                Console.WriteLine("22");
                 var loadingEmbedBuilder = new DiscordEmbedBuilder()
                     .WithTitle("Multiban wird bearbeitet")
                     .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
@@ -688,7 +680,6 @@ public class ModerationSystem : BaseCommandModule
                 var n_users = "";
                 foreach (var user in users_to_ban)
                 {
-                    Console.WriteLine("");
                     var sent = false;
                     try
                     {
@@ -757,8 +748,6 @@ public class ModerationSystem : BaseCommandModule
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
-        Console.WriteLine(
-            $"[BAN] {ctx.User.UsernameWithDiscriminator} banned {user.UsernameWithDiscriminator} for {reason}");
         var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         var staffmembers = ctx.Guild.Members
             .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))
@@ -902,7 +891,7 @@ public class ModerationSystem : BaseCommandModule
                 string e_string;
                 bool sent;
                 var ReasonString =
-                    $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                    $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {result.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 var ec = DiscordColor.Red;
                 DiscordMessage? umsg = null;
                 try
