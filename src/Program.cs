@@ -138,12 +138,6 @@ public static class GlobalProperties
     // Server Staffrole ID
     public static ulong StaffRoleId { get; } = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
 
-    // Server Staffrole Name
-    public static string StaffRoleName { get; } = BotConfig.GetConfig()["ServerConfig"]["StaffRoleName"];
-
-    // Servername Initals for embeds
-    public static string ServerNameInitials { get; } = BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"];
-
     // Debug Mode
     public static bool DebugMode { get; } = ParseBoolean(BotConfig.GetConfig()["MainConfig"]["DebugMode"]);
 
