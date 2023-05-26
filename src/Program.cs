@@ -79,6 +79,7 @@ internal class Program : BaseCommandModule
             EnableDms = false,
             EnableMentionPrefix = true,
             IgnoreExtraArguments = true,
+            EnableDefaultHelp = false,
         });
         discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
