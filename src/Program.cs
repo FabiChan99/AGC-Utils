@@ -133,12 +133,8 @@ public static class BotConfig
 }
 
 
-public class GlobalProperties
+public static class GlobalProperties
 {
-
-    // Default Embed Color
-    public static DiscordColor EmbedColor { get; } = new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]);
-
     // Server Staffrole ID
     public static ulong StaffRoleId { get; } = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
 
