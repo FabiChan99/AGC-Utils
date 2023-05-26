@@ -7,6 +7,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
+using Npgsql;
 
 namespace AGC_Management.Commands;
 
@@ -283,7 +284,8 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
+            embedbuilder.WithTitle(
+                $"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : BotConfig.GetEmbedColor());
@@ -428,7 +430,8 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
+            embedbuilder.WithTitle(
+                $"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : BotConfig.GetEmbedColor());
@@ -531,6 +534,7 @@ public class ExtendedModerationSystem : ModerationSystem
     public async Task WarnUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
         var caseid = Helpers.Helpers.GenerateCaseID();
         Dictionary<string, object> data = new()
@@ -587,11 +591,9 @@ public class ExtendedModerationSystem : ModerationSystem
             {
                 if (BanEnabled)
                 {
-                    Console.WriteLine("Banning");
                     await ctx.Guild.BanMemberAsync(user, 7, reasonString);
                     uAction = "Gebannt";
                 }
-
             }
             catch (Exception)
             {
@@ -628,6 +630,7 @@ public class ExtendedModerationSystem : ModerationSystem
     public async Task PermaWarn(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
         var caseid = Helpers.Helpers.GenerateCaseID();
         Dictionary<string, object> data = new()
@@ -689,7 +692,6 @@ public class ExtendedModerationSystem : ModerationSystem
                     await ctx.Guild.BanMemberAsync(user, 7, reasonString);
                     uAction = "Gebannt";
                 }
-
             }
             catch (Exception)
             {
@@ -716,8 +718,369 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(sembed);
     }
+}
+
+[Group("case")]
+public class CaseManagement : BaseCommandModule
+{
+    [Command("info")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [RequireTeamCat]
+    public async Task CaseInfo(CommandContext ctx, string caseid)
+    {
+        List<dynamic> wlist = new();
+        List<dynamic> flist = new();
+        List<string> selectedWarns = new()
+        {
+            "*"
+        };
+
+        Dictionary<string, object> whereConditions = new()
+        {
+            { "caseid", caseid }
+        };
+        List<Dictionary<string, object>> wresult =
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
+        List<Dictionary<string, object>> fresult =
+            await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
 
 
+        foreach (var result in wresult) wlist.Add(result);
+        foreach (var result in fresult) flist.Add(result);
+        dynamic warn;
+        dynamic flag;
+        string ctyp = null;
+        bool wcase = false;
+        bool fcase = false;
+        try
+        {
+            warn = wlist[0];
+            ctyp = "Verwarnung";
+            wcase = true;
+        }
+        catch (Exception)
+        {
+            warn = null;
+        }
+
+        try
+        {
+            flag = flist[0];
+            ctyp = "Markierung";
+            fcase = true;
+        }
+        catch (Exception)
+        {
+            flag = null;
+        }
+
+        string case_type;
+        DiscordUser user;
+        DiscordUser punisher;
+        DateTime datum;
+        string reason;
+        bool perma;
+
+        if (wcase)
+        {
+            case_type = "Verwarnung";
+            user = await ctx.Client.GetUserAsync((ulong)warn["userid"]);
+            punisher = await ctx.Client.GetUserAsync((ulong)warn["punisherid"]);
+            datum = DateTimeOffset.FromUnixTimeSeconds(warn["datum"]).DateTime;
+            reason = warn["description"];
+            perma = warn["perma"];
+        }
+        else if (fcase)
+        {
+            case_type = "Markierung";
+            user = await ctx.Client.GetUserAsync((ulong)flag["userid"]);
+            punisher = await ctx.Client.GetUserAsync((ulong)flag["punisherid"]);
+            datum = DateTimeOffset.FromUnixTimeSeconds(flag["datum"]).DateTime;
+            reason = flag["description"];
+            perma = false;
+        }
+        else
+        {
+            DiscordEmbed embed = new DiscordEmbedBuilder()
+                .WithTitle("Fehler")
+                .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
+                .WithColor(DiscordColor.Red)
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+            await ctx.RespondAsync(embed);
+            return;
+        }
 
 
+        if (wcase)
+        {
+            DiscordEmbedBuilder discordEmbedbuilder = new DiscordEmbedBuilder()
+                .WithTitle("Case Informationen").WithColor(BotConfig.GetEmbedColor())
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                .AddField(new DiscordEmbedField("Case-Typ:", case_type)).WithThumbnail(user.AvatarUrl)
+                .AddField(new DiscordEmbedField("Case-ID:", $"``{caseid}``"))
+                .AddField(new DiscordEmbedField("Der betroffene Nutzer:",
+                    user.UsernameWithDiscriminator + "\n" + $"``{user.Id}``"))
+                .AddField(new DiscordEmbedField("Ausgeführt von:",
+                    punisher.UsernameWithDiscriminator + "\n" + $"``{punisher.Id}``"))
+                .AddField(new DiscordEmbedField("Datum:", datum.Timestamp()))
+                .AddField(new DiscordEmbedField("Grund:", $"```{reason}```"));
+            if (wcase) discordEmbedbuilder.AddField(new DiscordEmbedField("Permanent:", perma ? "✅" : "❌"));
+            await ctx.RespondAsync(discordEmbedbuilder.Build());
+            return;
+
+        }
+
+        if (fcase)
+        {
+            DiscordEmbedBuilder discordEmbedbuilder = new DiscordEmbedBuilder()
+                .WithTitle("Case Informationen").WithColor(BotConfig.GetEmbedColor())
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                .AddField(new DiscordEmbedField("Case-Typ:", case_type)).WithThumbnail(user.AvatarUrl)
+                .AddField(new DiscordEmbedField("Case-ID:", $"``{caseid}``"))
+                .AddField(new DiscordEmbedField("Der betroffene Nutzer:",
+                    user.UsernameWithDiscriminator + "\n" + $"``{user.Id}``"))
+                .AddField(new DiscordEmbedField("Ausgeführt von::",
+                    punisher.UsernameWithDiscriminator + "\n" + $"``{punisher.Id}``"))
+                .AddField(new DiscordEmbedField("Datum:", datum.Timestamp()))
+                .AddField(new DiscordEmbedField("Grund:", $"```{reason}```"));
+            await ctx.RespondAsync(discordEmbedbuilder.Build());
+            return;
+
+        }
+    }
+
+    [Command("edit")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [RequireTeamCat]
+    public async Task CaseEdit(CommandContext ctx, string caseid, [RemainingText] string newreason)
+    {
+        List<dynamic> wlist = new();
+        List<dynamic> flist = new();
+        List<string> selectedWarns = new()
+        {
+            "*"
+        };
+
+        Dictionary<string, object> whereConditions = new()
+        {
+            { "caseid", caseid }
+        };
+        List<Dictionary<string, object>> wresult =
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
+        List<Dictionary<string, object>> fresult =
+            await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
+
+
+        foreach (var result in wresult) wlist.Add(result);
+        foreach (var result in fresult) flist.Add(result);
+        dynamic warn;
+        dynamic flag;
+        string ctyp = null;
+        bool wcase = false;
+        bool fcase = false;
+        try
+        {
+            warn = wlist[0];
+            ctyp = "Verwarnung";
+            wcase = true;
+        }
+        catch (Exception)
+        {
+            warn = null;
+        }
+
+        try
+        {
+            flag = flist[0];
+            ctyp = "Markierung";
+            fcase = true;
+        }
+        catch (Exception)
+        {
+            flag = null;
+        }
+
+        string case_type;
+        DiscordUser user;
+        DiscordUser punisher;
+        DateTime datum;
+        string reason = newreason;
+        bool perma;
+        string sql;
+        if (wcase)
+        {
+            if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                sql = "UPDATE warns SET description = @description WHERE caseid = @caseid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@description", newreason);
+                    command.Parameters.AddWithValue("@caseid", caseid);
+
+                    int affected = await command.ExecuteNonQueryAsync();
+
+                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                        .WithTitle("Case Update").WithDescription(
+                            $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
+                            $"Case-Typ: {ctyp}\n" +
+                            $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
+                    await ctx.RespondAsync(ue);
+                }
+            }
+            return;
+        }
+
+        if (fcase)
+        {
+            if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@description", newreason);
+                    command.Parameters.AddWithValue("@caseid", caseid);
+
+                    int affected = await command.ExecuteNonQueryAsync();
+                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                        .WithTitle("Case Update").WithDescription(
+                            $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
+                            $"Case-Typ: {ctyp}\n" +
+                            $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
+                    await ctx.RespondAsync(ue);
+                }
+            }
+            return;
+        }
+        else
+        {
+            DiscordEmbed embed = new DiscordEmbedBuilder()
+                .WithTitle("Fehler")
+                .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
+                .WithColor(DiscordColor.Red)
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+            await ctx.RespondAsync(embed);
+        }
+    }
+
+    [Command("delete")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [RequireTeamCat]
+    public async Task CaseDelete(CommandContext ctx, string caseid, [RemainingText] string deletereason)
+    {
+        List<dynamic> wlist = new();
+        List<dynamic> flist = new();
+        List<string> selectedWarns = new()
+        {
+            "*"
+        };
+
+        Dictionary<string, object> whereConditions = new()
+        {
+            { "caseid", caseid }
+        };
+        List<Dictionary<string, object>> wresult =
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
+        List<Dictionary<string, object>> fresult =
+            await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
+
+
+        foreach (var result in wresult) wlist.Add(result);
+        foreach (var result in fresult) flist.Add(result);
+        dynamic warn;
+        dynamic flag;
+        string ctyp = null;
+        bool wcase = false;
+        bool fcase = false;
+        try
+        {
+            warn = wlist[0];
+            ctyp = "Verwarnung";
+            wcase = true;
+        }
+        catch (Exception)
+        {
+            warn = null;
+        }
+
+        try
+        {
+            flag = flist[0];
+            ctyp = "Markierung";
+            fcase = true;
+        }
+        catch (Exception)
+        {
+            flag = null;
+        }
+
+        string case_type;
+        DiscordUser user;
+        DiscordUser punisher;
+        DateTime datum;
+        string reason = deletereason;
+        bool perma;
+        string sql;
+        if (wcase)
+        {
+            if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                sql = "DELETE FROM warns WHERE caseid = @caseid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@caseid", caseid);
+
+                    int affected = await command.ExecuteNonQueryAsync();
+
+                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                        .WithTitle("Case Update").WithDescription(
+                            $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
+                            $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
+                    await ctx.RespondAsync(ue);
+                }
+            }
+            return;
+        }
+
+        if (fcase)
+        {
+            if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                sql = "DELETE FROM flags WHERE caseid = @caseid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@caseid", caseid);
+
+                    int affected = await command.ExecuteNonQueryAsync();
+
+                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                        .WithTitle("Case Update").WithDescription(
+                            $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
+                            $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
+                    await ctx.RespondAsync(ue);
+                }
+
+            }
+            return;
+        }
+        else
+        {
+            DiscordEmbed embed = new DiscordEmbedBuilder()
+                .WithTitle("Fehler")
+                .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
+                .WithColor(DiscordColor.Red)
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+            await ctx.RespondAsync(embed);
+        }
+    }
 }

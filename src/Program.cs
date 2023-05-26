@@ -133,6 +133,8 @@ internal class Program : BaseCommandModule
     private static Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.StackTrace}");
+
         return Task.CompletedTask;
     }
 }
