@@ -502,8 +502,13 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             "*"
         };
+
+        Dictionary<string, object> whereConditions = new()
+        {
+            { "userid", (long)user.Id }
+        };
         List<Dictionary<string, object>> results =
-            await DatabaseService.SelectDataFromTable("flags", selectedFlags, null);
+            await DatabaseService.SelectDataFromTable("flags", selectedFlags, whereConditions);
         foreach (var result in results) flaglist.Add(result);
 
 
