@@ -2,6 +2,7 @@ using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Commands;
 
@@ -23,11 +24,32 @@ public class ModerationSystemTasks
             "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf abgelaufene warns.");
     }
 
+    private async Task<int> GetWarnExpiringTime()
+    {
+        int fallback = 7;
+        int days_;
+
+        try
+        {
+            var days = GlobalProperties.ConfigIni["ModerationConfig"]["WarnExpireDays"];
+            short.TryParse(days, out short parsedDays);
+            days_ = parsedDays;
+        }
+        catch (Exception)
+        {
+            return fallback;
+        }
+
+        return days_;
+    }
+
     private async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
     {
         discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
-        int expireTime = (int)DateTimeOffset.UtcNow.AddSeconds(-604800).ToUnixTimeSeconds();
+        int days = await GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
+        int expireTime = (int)DateTimeOffset.UtcNow.AddDays(-days).ToUnixTimeSeconds();
+
 
         string selectQuery = $"SELECT * FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
 
