@@ -5,7 +5,7 @@ namespace AGC_Management.Services.DatabaseHandler;
 
 public static class DatabaseService
 {
-    public static NpgsqlConnection? dbConnection;
+    private static NpgsqlConnection? dbConnection;
 
     public static void OpenConnection()
     {

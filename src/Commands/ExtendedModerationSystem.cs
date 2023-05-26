@@ -152,7 +152,6 @@ public class ExtendedModerationSystem : ModerationSystem
             var permawarnlist = new List<dynamic>();
 
             ulong memberID = member.Id;
-            NpgsqlConnection conn = DatabaseService.dbConnection;
             List<string> WarnQuery = new()
             {
                 "*"
@@ -302,7 +301,6 @@ public class ExtendedModerationSystem : ModerationSystem
             var flaglist = new List<dynamic>();
             var permawarnlist = new List<dynamic>();
             ulong memberID = user.Id;
-            NpgsqlConnection conn = DatabaseService.dbConnection;
             List<string> WarnQuery = new()
             {
                 "*"

@@ -23,11 +23,11 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
-        var parser = new FileIniDataParser();
+        
         IniData iniData;
         try
         {
-            iniData = parser.ReadFile("config.ini");
+            iniData = GlobalProperties.parser.ReadFile("config.ini");
         }
         catch (Exception ex)
         {
@@ -40,7 +40,7 @@ internal class Program : BaseCommandModule
             Environment.Exit(0);
         }
         bool DebugMode;
-        iniData = parser.ReadFile("config.ini");
+        iniData = GlobalProperties.parser.ReadFile("config.ini");
         try
         {
             DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
@@ -130,8 +130,8 @@ internal class Program : BaseCommandModule
 public class GlobalProperties
 {
     // IniReader
-    private static readonly FileIniDataParser parser = new();
-    public static IniData ConfigIni = parser.ReadFile("config.ini");
+    public static readonly FileIniDataParser parser = new();
+    public static readonly IniData ConfigIni = parser.ReadFile("config.ini");
 
     // Default Embed Color
     public static DiscordColor EmbedColor { get; } = new(ConfigIni["EmbedConfig"]["DefaultEmbedColor"]);
