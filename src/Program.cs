@@ -79,7 +79,7 @@ internal class Program : BaseCommandModule
             EnableDms = false,
             EnableMentionPrefix = true,
             IgnoreExtraArguments = true,
-            EnableDefaultHelp = false,
+            EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"]),
         });
         discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
