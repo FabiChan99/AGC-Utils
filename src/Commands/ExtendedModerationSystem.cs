@@ -286,7 +286,7 @@ public class ExtendedModerationSystem : ModerationSystem
             embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
                                          userinfostring);
-            embedbuilder.WithColor(bs_status ? DiscordColor.Red : new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            embedbuilder.WithColor(bs_status ? DiscordColor.Red : BotConfig.GetEmbedColor());
             embedbuilder.WithThumbnail(member.AvatarUrl);
             embedbuilder.WithFooter($"Bericht angefordert von {ctx.User.UsernameWithDiscriminator}",
                 ctx.User.AvatarUrl);
@@ -431,7 +431,7 @@ public class ExtendedModerationSystem : ModerationSystem
             embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
                                          userinfostring);
-            embedbuilder.WithColor(bs_status ? DiscordColor.Red : new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            embedbuilder.WithColor(bs_status ? DiscordColor.Red : BotConfig.GetEmbedColor());
             embedbuilder.WithThumbnail(user.AvatarUrl);
             embedbuilder.WithFooter($"Bericht angefordert von {ctx.User.UsernameWithDiscriminator}",
                 ctx.User.AvatarUrl);
@@ -513,7 +513,7 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithTitle("Nutzer geflaggt")
             .WithDescription(
                 $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flag(s)__. \nID des Flags: ``{caseid}``")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]))
+            .WithColor(BotConfig.GetEmbedColor())
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed);
     }
@@ -609,7 +609,7 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithTitle("Nutzer verwarnt")
             .WithDescription(
                 $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]))
+            .WithColor(BotConfig.GetEmbedColor())
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(sembed);
     }
@@ -708,8 +708,12 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithTitle("Nutzer permanent verwarnt")
             .WithDescription(
                 $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde permanent verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]))
+            .WithColor(BotConfig.GetEmbedColor())
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(sembed);
     }
+
+
+
+
 }

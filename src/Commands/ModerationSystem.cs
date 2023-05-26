@@ -35,7 +35,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            .WithColor(BotConfig.GetEmbedColor());
         var embed__ = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
         {
@@ -176,7 +176,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            .WithColor(BotConfig.GetEmbedColor());
         var embed__ = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
         {
@@ -335,7 +335,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{busers_formatted}```\n__Grund:__```{reason}```")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            .WithColor(BotConfig.GetEmbedColor());
         var confirmEmbed = confirmEmbedBuilder.Build();
 
         var embedBuilder = new DiscordEmbedBuilder()
@@ -505,7 +505,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{busers_formatted}```\n__Grund:__```{reason}```")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            .WithColor(BotConfig.GetEmbedColor());
         var embed = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
         {
@@ -580,7 +580,7 @@ public class ModerationSystem : BaseCommandModule
                 .WithDescription($"Ban-Anfrage für mehrere Benutzer: {busers_formatted}\n" +
                                  $"```{busers_formatted}```\n__Grund:__```{reason}```" +
                                  $"Bitte warte, während diese Anfrage von jemandem mit Bannberechtigung bestätigt wird <a:loading_agc:1084157150747697203>")
-                .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]))
+                .WithColor(BotConfig.GetEmbedColor())
                 .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
 
             string staffMentionString;
@@ -772,7 +772,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Ban-Anfrage für Benutzer: ``{user.UsernameWithDiscriminator}`` ``({user.Id})``\n" +
                              $"Banngrund:\n```\n{reason}\n```\n" +
                              $"Bitte warte, während diese Anfrage von jemandem mit Bannberechtigung bestätigt wird <a:loading_agc:1084157150747697203>")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]))
+            .WithColor(BotConfig.GetEmbedColor())
             .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
         var interactivity_ = ctx.Client.GetInteractivity();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -781,7 +781,7 @@ public class ModerationSystem : BaseCommandModule
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
                              $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
-            .WithColor(new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]));
+            .WithColor(BotConfig.GetEmbedColor());
         var embed__ = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons_ = new(2)
         {

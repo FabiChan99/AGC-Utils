@@ -110,27 +110,7 @@ internal class Program : BaseCommandModule
     }
 }
 
-public static class BotConfig
-{
-    public static IniData GetConfig()
-    {
-        IniData ConfigIni;
-        FileIniDataParser parser = new();
-        try
-        {
-            ConfigIni = parser.ReadFile("config.ini");
-        }
-        catch
-        {
-            Console.WriteLine("Die Konfigurationsdatei konnte nicht geladen werden.");
-            Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
-            Console.ReadKey();
-            Environment.Exit(0);
-            return null;
-        }
-        return ConfigIni;
-    }
-}
+
 
 
 public static class GlobalProperties
