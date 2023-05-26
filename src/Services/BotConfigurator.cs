@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AGC_Management.Helpers;
 
 namespace AGC_Management;
 public static class BotConfig
@@ -32,25 +33,34 @@ public static class BotConfig
     public static DiscordColor GetEmbedColor()
     {
         string fallbackColor = "000000";
-        string colorstring;
+        string colorString;
 
         try
         {
-            string colorString = GetConfig()["EmbedConfig"]["DefaultEmbedColor"];
-            if (colorString.StartsWith("#"))
+            string colorConfig = GetConfig()["EmbedConfig"]["DefaultEmbedColor"];
+            if (colorConfig.StartsWith("#"))
             {
-                colorString = colorString.Remove(0, 1);
+                colorConfig = colorConfig.Remove(0, 1);
             }
 
-            colorstring = colorString;
+            if (string.IsNullOrEmpty(colorConfig) || !HexCheck.IsHexColor(colorConfig))
+            {
+                colorString = fallbackColor;
+                return new DiscordColor(colorString);
+            }
+
+            colorString = colorConfig;
         }
         catch
         {
-            colorstring = fallbackColor;
+            colorString = fallbackColor;
         }
 
-        return new DiscordColor(colorstring);
+        return new DiscordColor(colorString);
     }
+
+   
+
 
 }
 
