@@ -473,8 +473,6 @@ public class ModerationSystem : BaseCommandModule
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
-        var ReasonString =
-            $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {result.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         var setids = ids.ToHashSet().ToList();
         if (setids.Count < 2)
         {
@@ -662,6 +660,8 @@ public class ModerationSystem : BaseCommandModule
 
             if (staffresult.Result.Id == $"modbanrequest_accept_{caseid}")
             {
+                var ReasonString =
+                    $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {staffresult.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 await staffresult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var disbtn = buttons;
                 var loadingEmbedBuilder = new DiscordEmbedBuilder()
@@ -694,7 +694,7 @@ public class ModerationSystem : BaseCommandModule
                     var semoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
                     try
                     {
-                        await ctx.Guild.BanMemberAsync(user.Id, 7, reasonString);
+                        await ctx.Guild.BanMemberAsync(user.Id, 7, ReasonString);
                         var dm = sent ? "✅" : "❌";
                         b_users += $"{user.UsernameWithDiscriminator} | DM: {dm}\n";
                     }
