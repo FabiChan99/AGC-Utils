@@ -1,14 +1,10 @@
-﻿using DisCatSharp.Entities;
-using IniParser.Model;
+﻿using AGC_Management.Helpers;
+using DisCatSharp.Entities;
 using IniParser;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AGC_Management.Helpers;
+using IniParser.Model;
 
 namespace AGC_Management;
+
 public static class BotConfig
 {
     public static IniData GetConfig()
@@ -27,6 +23,7 @@ public static class BotConfig
             Environment.Exit(0);
             return null;
         }
+
         return ConfigIni;
     }
 
@@ -38,10 +35,7 @@ public static class BotConfig
         try
         {
             string colorConfig = GetConfig()["EmbedConfig"]["DefaultEmbedColor"];
-            if (colorConfig.StartsWith("#"))
-            {
-                colorConfig = colorConfig.Remove(0, 1);
-            }
+            if (colorConfig.StartsWith("#")) colorConfig = colorConfig.Remove(0, 1);
 
             if (string.IsNullOrEmpty(colorConfig) || !HexCheck.IsHexColor(colorConfig))
             {
@@ -58,9 +52,4 @@ public static class BotConfig
 
         return new DiscordColor(colorString);
     }
-
-   
-
-
 }
-
