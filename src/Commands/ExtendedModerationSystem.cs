@@ -8,6 +8,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AGC_Management.Commands;
 
@@ -519,5 +520,90 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithColor(GlobalProperties.EmbedColor)
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed);
+    }
+
+    [Command("warn")]
+    [Description("Verwarnt einen Nutzer")]
+    [RequireDatabase]
+    [RequireStaffRole]
+    [RequireTeamCat]
+    public async Task WarnUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
+    {
+        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
+        var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
+        var caseid = Helpers.Helpers.GenerateCaseID();
+        Dictionary<string, object> data = new()
+        {
+            { "userid", (long)user.Id },
+            { "punisherid", (long)ctx.User.Id },
+            { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
+            { "description", reason },
+            { "caseid", caseid },
+            { "perma", false}
+        };
+
+        var warnlist = new List<dynamic>();
+
+        List<string> selectedWarns = new()
+        {
+            "*"
+        };
+
+
+        List<Dictionary<string, object>> results =
+            await DatabaseService.SelectDataFromTable("warns", selectedWarns, null);
+        foreach (var result in results) warnlist.Add(result);
+
+
+        var warncount = warnlist.Count+1;
+
+        await DatabaseService.InsertDataIntoTable("warns", data);
+        DiscordEmbed uembed = await ModerationHelper.GenerateWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
+        string reasonString = $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+        bool sent;
+        try
+        {
+            await user.SendMessageAsync(embed: uembed);
+            sent = true;
+        }
+        catch (Exception)
+        {
+            sent = false;
+        }
+
+        var dmsent = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
+        string uAction = "Keine";
+
+        if (warncount >= warnsToBan)
+            try
+            {
+                await ctx.Guild.BanMemberAsync(user, 7, reasonString);
+                uAction = "Gebannt";
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("User konnte nicht gebannt werden");
+            }
+        else if (warncount >= warnsToKick)
+            try
+            {
+                await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
+                uAction = "Gekickt";
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Neuer User konnte nicht gekickt werden");
+            }
+
+
+
+        var sembed = new DiscordEmbedBuilder()
+            .WithTitle("Nutzer verwarnt")
+            .WithDescription(
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nAusgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
+            .WithColor(GlobalProperties.EmbedColor)
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
+        await ctx.RespondAsync(sembed);
+
     }
 }

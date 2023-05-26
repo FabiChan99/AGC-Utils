@@ -1,6 +1,7 @@
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace AGC_Management.Commands;
 
@@ -14,7 +15,7 @@ public class ModerationSystemTasks
             while (true)
             {
                 await RemoveWarnsOlderThan7Days(discord);
-                await Task.Delay(TimeSpan.FromMinutes(5));
+                await Task.Delay(TimeSpan.FromMinutes(1));
             }
         }
 
@@ -28,26 +29,34 @@ public class ModerationSystemTasks
         var warnlist = new List<dynamic>();
         int expireTime = (int)DateTimeOffset.UtcNow.AddSeconds(-604800).ToUnixTimeSeconds();
 
-        List<string> WarnQuery = new()
+        string selectQuery = $"SELECT * FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
+
+        await using (NpgsqlDataReader warnReader = DatabaseService.ExecuteQuery(selectQuery))
         {
-            "*"
-        };
-        Dictionary<string, object> warnWhereConditions = new()
-        {
-            { "perma", false }
-        };
-        List<Dictionary<string, object>> WarnResults =
-            await DatabaseService.SelectDataFromTable("warns", WarnQuery, warnWhereConditions);
-        foreach (var result in WarnResults) warnlist.Add(result);
+            while (warnReader.Read())
+            {
+                var warn = new
+                {
+                    UserId = warnReader.GetInt64(0),
+                    PunisherId = warnReader.GetInt64(1),
+                    Datum = warnReader.GetInt32(2),
+                    Description = warnReader.GetString(3),
+                    Perma = warnReader.GetBoolean(4),
+                    CaseId = warnReader.GetString(5)
+                };
+                warnlist.Add(warn);
+            }
+        }
+
         foreach (var warn in warnlist)
         {
             Dictionary<string, object> data = new()
             {
-                { "userid", (long)warn["userid"] },
-                { "punisherid", (long)warn["punisherid"] },
-                { "datum", warn["datum"] },
-                { "description", "[AUTO] Warn Abgelaufen: " + warn["description"] },
-                { "caseid", "EXPIRED-" + warn["caseid"] }
+                { "userid", (long)warn.UserId },
+                { "punisherid", (long)warn.PunisherId },
+                { "datum", warn.Datum },
+                { "description", "[AUTO] Warn Abgelaufen: " + warn.Description },
+                { "caseid", "EXPIRED-" + warn.CaseId }
             };
             await DatabaseService.InsertDataIntoTable("flags", data);
         }
