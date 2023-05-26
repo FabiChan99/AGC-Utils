@@ -632,8 +632,10 @@ public class ExtendedModerationSystem : ModerationSystem
             "*"
         };
 
-        Dictionary<string, object> whereConditions = new();
-        whereConditions.Add("userid", (long)user.Id);
+        Dictionary<string, object> whereConditions = new()
+        {
+            { "userid", (long)user.Id }
+        };
 
 
         List<Dictionary<string, object>> results =
