@@ -1,4 +1,4 @@
-using AGC_Management.Helpers;
+ï»¿using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
@@ -7,8 +7,6 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using Newtonsoft.Json;
-using Npgsql;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AGC_Management.Commands;
 
@@ -48,7 +46,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [Command("userinfo")]
     [RequireDatabase]
     [RequireStaffRole]
-    [Description("Zeigt Informationen über einen User an.")]
+    [Description("Zeigt Informationen Ã¼ber einen User an.")]
     [RequireTeamCat]
     public async Task UserInfoCommand(CommandContext ctx, DiscordUser user)
     {
@@ -285,8 +283,8 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
-            embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
+            embedbuilder.WithTitle($"Infos Ã¼ber ein {GlobalProperties.ServerNameInitials} Mitglied");
+            embedbuilder.WithDescription($"Ich konnte folgende Informationen Ã¼ber {userindicator} finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
             embedbuilder.WithThumbnail(member.AvatarUrl);
@@ -430,8 +428,8 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
-            embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
+            embedbuilder.WithTitle($"Infos Ã¼ber ein {GlobalProperties.ServerNameInitials} Mitglied");
+            embedbuilder.WithDescription("Ich konnte folgende Informationen Ã¼ber den User finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
             embedbuilder.WithThumbnail(user.AvatarUrl);
@@ -444,7 +442,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [Command("multiuserinfo")]
     [RequireDatabase]
     [RequireStaffRole]
-    [Description("Zeigt Informationen über mehrere User an.")]
+    [Description("Zeigt Informationen Ã¼ber mehrere User an.")]
     [RequireTeamCat]
     public async Task MultiUserInfo(CommandContext ctx, [RemainingText] string users)
     {
@@ -460,13 +458,13 @@ public class ExtendedModerationSystem : ModerationSystem
 
         if (uniqueUserIds.Count == 0)
         {
-            await ctx.RespondAsync("Keine gültigen User-IDs gefunden.");
+            await ctx.RespondAsync("Keine gÃ¼ltigen User-IDs gefunden.");
             return;
         }
 
         if (uniqueUserIds.Count > 6)
         {
-            await ctx.RespondAsync("Maximal 6 User können gleichzeitig abgefragt werden.");
+            await ctx.RespondAsync("Maximal 6 User kÃ¶nnen gleichzeitig abgefragt werden.");
             return;
         }
 
@@ -514,7 +512,7 @@ public class ExtendedModerationSystem : ModerationSystem
         var embed = new DiscordEmbedBuilder()
             .WithTitle("Nutzer geflaggt")
             .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flag(s)__. \nDie ID des Flags: ``{caseid}``")
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flag(s)__. \nID des Flags: ``{caseid}``")
             .WithColor(GlobalProperties.EmbedColor)
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed);
@@ -537,7 +535,7 @@ public class ExtendedModerationSystem : ModerationSystem
             { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
             { "description", reason },
             { "caseid", caseid },
-            { "perma", false}
+            { "perma", false }
         };
 
         var warnlist = new List<dynamic>();
@@ -546,7 +544,7 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             "*"
         };
-        Dictionary<string, object> whereConditions = new Dictionary<string, object>();
+        Dictionary<string, object> whereConditions = new();
         whereConditions.Add("userid", (long)user.Id);
 
         List<Dictionary<string, object>> results =
@@ -554,15 +552,17 @@ public class ExtendedModerationSystem : ModerationSystem
         foreach (var result in results) warnlist.Add(result);
 
 
-        var warncount = warnlist.Count+1;
+        var warncount = warnlist.Count + 1;
 
         await DatabaseService.InsertDataIntoTable("warns", data);
-        DiscordEmbed uembed = await ModerationHelper.GenerateWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
-        string reasonString = $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+        DiscordEmbed uembed =
+            await ModerationHelper.GenerateWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
+        string reasonString =
+            $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         bool sent;
         try
         {
-            await user.SendMessageAsync(embed: uembed);
+            await user.SendMessageAsync(uembed);
             sent = true;
         }
         catch (Exception)
@@ -570,7 +570,7 @@ public class ExtendedModerationSystem : ModerationSystem
             sent = false;
         }
 
-        var dmsent = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
+        var dmsent = sent ? "âœ…" : "âŒ";
         string uAction = "Keine";
 
         if (warncount >= warnsToBan)
@@ -581,7 +581,6 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-
             }
         else if (warncount >= warnsToKick)
             try
@@ -591,19 +590,16 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-
             }
-
 
 
         var sembed = new DiscordEmbedBuilder()
             .WithTitle("Nutzer verwarnt")
             .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nAusgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundÃ¤re ausgefÃ¼hrte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
             .WithColor(GlobalProperties.EmbedColor)
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(sembed);
-
     }
 
 
@@ -624,7 +620,7 @@ public class ExtendedModerationSystem : ModerationSystem
             { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
             { "description", reason },
             { "caseid", caseid },
-            { "perma", true}
+            { "perma", true }
         };
 
         var warnlist = new List<dynamic>();
@@ -634,7 +630,7 @@ public class ExtendedModerationSystem : ModerationSystem
             "*"
         };
 
-        Dictionary<string, object> whereConditions = new Dictionary<string, object>();
+        Dictionary<string, object> whereConditions = new();
         whereConditions.Add("userid", (long)user.Id);
 
 
@@ -646,12 +642,14 @@ public class ExtendedModerationSystem : ModerationSystem
         var warncount = warnlist.Count + 1;
 
         await DatabaseService.InsertDataIntoTable("warns", data);
-        DiscordEmbed uembed = await ModerationHelper.GeneratePermaWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
-        string reasonString = $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+        DiscordEmbed uembed =
+            await ModerationHelper.GeneratePermaWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
+        string reasonString =
+            $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         bool sent;
         try
         {
-            await user.SendMessageAsync(embed: uembed);
+            await user.SendMessageAsync(uembed);
             sent = true;
         }
         catch (Exception)
@@ -659,7 +657,7 @@ public class ExtendedModerationSystem : ModerationSystem
             sent = false;
         }
 
-        var dmsent = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
+        var dmsent = sent ? "âœ…" : "âŒ";
         string uAction = "Keine";
 
         if (warncount >= warnsToBan)
@@ -670,7 +668,6 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-
             }
         else if (warncount >= warnsToKick)
             try
@@ -680,18 +677,15 @@ public class ExtendedModerationSystem : ModerationSystem
             }
             catch (Exception)
             {
-
             }
-
 
 
         var sembed = new DiscordEmbedBuilder()
             .WithTitle("Nutzer permanent verwarnt")
             .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde permanent verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nAusgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde permanent verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundÃ¤re ausgefÃ¼hrte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
             .WithColor(GlobalProperties.EmbedColor)
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(sembed);
-
     }
 }
