@@ -36,11 +36,7 @@ jobs:
       with:
         name: debug
         path: config.ini
-    - name: Store artifacts (Example Settings)
-      uses: actions/upload-artifact@v3
-      with:
-        name: debug
-        path: settings.json
+
 
 
 
