@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Xml.Linq;
 using AGC_Management.Commands;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
@@ -113,8 +114,20 @@ public static class BotConfig
 {
     public static IniData GetConfig()
     {
+        IniData ConfigIni;
         FileIniDataParser parser = new();
-        IniData ConfigIni = parser.ReadFile("config.ini");
+        try
+        {
+            ConfigIni = parser.ReadFile("config.ini");
+        }
+        catch
+        {
+            Console.WriteLine("Die Konfigurationsdatei konnte nicht geladen werden.");
+            Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
+            Console.ReadKey();
+            Environment.Exit(0);
+            return null;
+        }
         return ConfigIni;
     }
 }
