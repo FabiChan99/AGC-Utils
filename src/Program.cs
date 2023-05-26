@@ -24,26 +24,10 @@ internal class Program : BaseCommandModule
     private static async Task MainAsync()
     {
         
-        IniData iniData;
-        try
-        {
-            iniData = GlobalProperties.parser.ReadFile("config.ini");
-        }
-        catch (Exception ex)
-        {
-            // handle if no Ini present
-            Console.WriteLine(
-                "Die Konfigurationsdatei konnte nicht geladen werden.");
-            Console.WriteLine("Fehlermeldung: " + ex.Message);
-            Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
-            Console.ReadKey();
-            Environment.Exit(0);
-        }
         bool DebugMode;
-        iniData = GlobalProperties.parser.ReadFile("config.ini");
         try
         {
-            DebugMode = bool.Parse(iniData["MainConfig"]["DebugMode"]);
+            DebugMode = bool.Parse(BotConfig.GetConfig()["MainConfig"]["DebugMode"]);
         }
         catch
         {
@@ -54,14 +38,14 @@ internal class Program : BaseCommandModule
         try
         {
             DcApiToken = DebugMode
-                ? iniData["MainConfig"]["Discord_API_Token_DEB"]
-                : iniData["MainConfig"]["Discord_API_Token"];
+                ? BotConfig.GetConfig()["MainConfig"]["Discord_API_Token_DEB"]
+                : BotConfig.GetConfig()["MainConfig"]["Discord_API_Token"];
         }
         catch
         {
             try
             {
-                DcApiToken = iniData["MainConfig"]["Discord_API_Token"];
+                DcApiToken = BotConfig.GetConfig()["MainConfig"]["Discord_API_Token"];
             }
             catch
             {
@@ -108,8 +92,6 @@ internal class Program : BaseCommandModule
         // Start the Task to remove warns older than 7 days
         ModerationSystemTasks instance = new();
         await instance.StartRemovingWarnsPeriodically(discord);
-
-
         await Task.Delay(-1);
     }
 
@@ -127,29 +109,37 @@ internal class Program : BaseCommandModule
     }
 }
 
+public static class BotConfig
+{
+    public static IniData GetConfig()
+    {
+        FileIniDataParser parser = new();
+        IniData ConfigIni = parser.ReadFile("config.ini");
+        return ConfigIni;
+    }
+}
+
+
 public class GlobalProperties
 {
-    // IniReader
-    public static readonly FileIniDataParser parser = new();
-    public static readonly IniData ConfigIni = parser.ReadFile("config.ini");
 
     // Default Embed Color
-    public static DiscordColor EmbedColor { get; } = new(ConfigIni["EmbedConfig"]["DefaultEmbedColor"]);
+    public static DiscordColor EmbedColor { get; } = new(BotConfig.GetConfig()["EmbedConfig"]["DefaultEmbedColor"]);
 
     // Server Staffrole ID
-    public static ulong StaffRoleId { get; } = ulong.Parse(ConfigIni["ServerConfig"]["StaffRoleId"]);
+    public static ulong StaffRoleId { get; } = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
 
     // Server Staffrole Name
-    public static string StaffRoleName { get; } = ConfigIni["ServerConfig"]["StaffRoleName"];
+    public static string StaffRoleName { get; } = BotConfig.GetConfig()["ServerConfig"]["StaffRoleName"];
 
     // Servername Initals for embeds
-    public static string ServerNameInitials { get; } = ConfigIni["ServerConfig"]["ServerNameInitials"];
+    public static string ServerNameInitials { get; } = BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"];
 
     // Debug Mode
-    public static bool DebugMode { get; } = ParseBoolean(ConfigIni["MainConfig"]["DebugMode"]);
+    public static bool DebugMode { get; } = ParseBoolean(BotConfig.GetConfig()["MainConfig"]["DebugMode"]);
 
     // Bot Owner ID
-    public static ulong BotOwnerId { get; } = ulong.Parse(ConfigIni["MainConfig"]["BotOwnerId"]);
+    public static ulong BotOwnerId { get; } = ulong.Parse(BotConfig.GetConfig()["MainConfig"]["BotOwnerId"]);
     
     private static bool ParseBoolean(string boolString)
     {

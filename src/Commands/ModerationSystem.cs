@@ -564,7 +564,7 @@ public class ModerationSystem : BaseCommandModule
                                  $"Dann kannst du eine Entbannung beim [Entbannportal](https://unban.animegamingcafe.de) beantragen");
             var banEmbed = banEmbedBuilder.Build();
             Console.WriteLine($"[BAN] {ctx.User.UsernameWithDiscriminator} banned {busers_formatted} for {reason}");
-            var staffrole = ctx.Guild.GetRole(ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["StaffRoleId"]));
+            var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
             Console.WriteLine(staffrole.Id);
             var staffmembers = ctx.Guild.Members
                 .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))
@@ -597,7 +597,7 @@ public class ModerationSystem : BaseCommandModule
             {
                 if (!GlobalProperties.DebugMode)
                     staffMentionString =
-                        $"Kein Moderator online | <@&{GlobalProperties.ConfigIni["ServerConfig"]["AdminRoleId"]}> | <@&{GlobalProperties.ConfigIni["ServerConfig"]["ModRoleId"]}>";
+                        $"Kein Moderator online | <@&{BotConfig.GetConfig()["ServerConfig"]["AdminRoleId"]}> | <@&{BotConfig.GetConfig()["ServerConfig"]["ModRoleId"]}>";
                 else
                     staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
             }
@@ -759,7 +759,7 @@ public class ModerationSystem : BaseCommandModule
         var caseid = Helpers.Helpers.GenerateCaseID();
         Console.WriteLine(
             $"[BAN] {ctx.User.UsernameWithDiscriminator} banned {user.UsernameWithDiscriminator} for {reason}");
-        var staffrole = ctx.Guild.GetRole(ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["StaffRoleId"]));
+        var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         var staffmembers = ctx.Guild.Members
             .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))
             .Select(x => x.Value)
@@ -835,7 +835,7 @@ public class ModerationSystem : BaseCommandModule
             {
                 if (!GlobalProperties.DebugMode)
                     staffMentionString =
-                        $"Kein Moderator online | <@&{GlobalProperties.ConfigIni["ServerConfig"]["AdminRoleId"]}> | <@&{GlobalProperties.ConfigIni["ServerConfig"]["ModRoleId"]}>";
+                        $"Kein Moderator online | <@&{BotConfig.GetConfig()["ServerConfig"]["AdminRoleId"]}> | <@&{BotConfig.GetConfig()["ServerConfig"]["ModRoleId"]}>";
                 else
                     staffMentionString = "Kein Moderator online | DEBUG MODE AKTIV";
             }

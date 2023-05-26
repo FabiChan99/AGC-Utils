@@ -17,14 +17,14 @@ public class ExtendedModerationSystem : ModerationSystem
         using HttpClient client = new();
 
         string apiKey = GlobalProperties.DebugMode
-            ? GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_Key"]
-            : GlobalProperties.ConfigIni["ModHQConfig"]["API_Key"];
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
 
         string apiUrl = GlobalProperties.DebugMode
-            ? GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_URL"]
-            : GlobalProperties.ConfigIni["ModHQConfig"]["API_URL"];
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
 
         HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
 
@@ -97,9 +97,9 @@ public class ExtendedModerationSystem : ModerationSystem
         try
         {
             if (GlobalProperties.DebugMode)
-                bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfigDBG"]["API_ACCESS_ENABLED"]);
+                bs_enabled = bool.Parse(BotConfig.GetConfig()["ModHQConfigDBG"]["API_ACCESS_ENABLED"]);
             if (!GlobalProperties.DebugMode)
-                bs_enabled = bool.Parse(GlobalProperties.ConfigIni["ModHQConfig"]["API_ACCESS_ENABLED"]);
+                bs_enabled = bool.Parse(BotConfig.GetConfig()["ModHQConfig"]["API_ACCESS_ENABLED"]);
         }
         catch (Exception)
         {
@@ -283,7 +283,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
+            embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription($"Ich konnte folgende Informationen über {userindicator} finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);
@@ -428,7 +428,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             var embedbuilder = new DiscordEmbedBuilder();
-            embedbuilder.WithTitle($"Infos über ein {GlobalProperties.ServerNameInitials} Mitglied");
+            embedbuilder.WithTitle($"Infos über ein {BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Mitglied");
             embedbuilder.WithDescription("Ich konnte folgende Informationen über den User finden.\n\n" +
                                          userinfostring);
             embedbuilder.WithColor(bs_status ? DiscordColor.Red : GlobalProperties.EmbedColor);

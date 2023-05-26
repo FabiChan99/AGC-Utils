@@ -31,7 +31,7 @@ public class ModerationSystemTasks
 
         try
         {
-            var days = GlobalProperties.ConfigIni["ModerationConfig"]["WarnExpireDays"];
+            var days = BotConfig.GetConfig()["ModerationConfig"]["WarnExpireDays"];
             short.TryParse(days, out short parsedDays);
             days_ = parsedDays;
         }

@@ -12,10 +12,10 @@ public static class DatabaseService
         try
         {
             var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
-            var DbHost = GlobalProperties.ConfigIni[dbConfigSection]["Database_Host"];
-            var DbUser = GlobalProperties.ConfigIni[dbConfigSection]["Database_User"];
-            var DbPass = GlobalProperties.ConfigIni[dbConfigSection]["Database_Password"];
-            var DbName = GlobalProperties.ConfigIni[dbConfigSection]["Database"];
+            var DbHost = BotConfig.GetConfig()[dbConfigSection]["Database_Host"];
+            var DbUser = BotConfig.GetConfig()[dbConfigSection]["Database_User"];
+            var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
+            var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
 
             dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             try
@@ -84,10 +84,10 @@ public static class DatabaseService
     public static string GetConnectionString()
     {
         var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
-        var DbHost = GlobalProperties.ConfigIni[dbConfigSection]["Database_Host"];
-        var DbUser = GlobalProperties.ConfigIni[dbConfigSection]["Database_User"];
-        var DbPass = GlobalProperties.ConfigIni[dbConfigSection]["Database_Password"];
-        var DbName = GlobalProperties.ConfigIni[dbConfigSection]["Database"];
+        var DbHost = BotConfig.GetConfig()[dbConfigSection]["Database_Host"];
+        var DbUser = BotConfig.GetConfig()[dbConfigSection]["Database_User"];
+        var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
+        var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
         return $"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}";
     }
 

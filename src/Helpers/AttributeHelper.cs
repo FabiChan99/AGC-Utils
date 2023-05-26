@@ -7,7 +7,7 @@ namespace AGC_Management.Helpers;
 
 public class RequireStaffRole : CheckBaseAttribute
 {
-    private readonly ulong RoleId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["StaffRoleId"]);
+    private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
@@ -41,9 +41,9 @@ public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
-        ulong teamAreaCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["TeamAreaCategoryId"]);
-        ulong logCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["LogCategoryId"]);
-        ulong modMailCategoryId = ulong.Parse(GlobalProperties.ConfigIni["ServerConfig"]["ModMailCategoryId"]);
+        ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
+        ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
+        ulong modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);
 
         bool isChannelInValidCategory = ctx.Channel.ParentId == teamAreaCategoryId ||
                                         ctx.Channel.ParentId == logCategoryId ||

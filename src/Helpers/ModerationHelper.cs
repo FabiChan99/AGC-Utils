@@ -23,7 +23,7 @@ namespace AGC_Management.Helpers
             bool WarnsToBanEnabled;
             try
             {
-                WarnsToBanEnabled = bool.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToBanEnabled"]);
+                WarnsToBanEnabled = bool.Parse(BotConfig.GetConfig()["ModerationConfig"]["WarnsToBanEnabled"]);
             }
             catch
             {
@@ -32,7 +32,7 @@ namespace AGC_Management.Helpers
 
             try
             {
-                WarnsToKickEnabled = bool.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToKickEnabled"]);
+                WarnsToKickEnabled = bool.Parse(BotConfig.GetConfig()["ModerationConfig"]["WarnsToKickEnabled"]);
             }
             catch
             {
@@ -47,7 +47,7 @@ namespace AGC_Management.Helpers
             int WarnsToBan;
             try
             {
-                WarnsToKick = int.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToKick"]);
+                WarnsToKick = int.Parse(BotConfig.GetConfig()["ModerationConfig"]["WarnsToKick"]);
             }
             catch
             {
@@ -56,7 +56,7 @@ namespace AGC_Management.Helpers
 
             try
             {
-                WarnsToBan = int.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToBan"]);
+                WarnsToBan = int.Parse(BotConfig.GetConfig()["ModerationConfig"]["WarnsToBan"]);
             }
             catch
             {
