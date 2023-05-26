@@ -13,6 +13,33 @@ namespace AGC_Management.Helpers
     {
         protected static readonly int FallbackWarnsToKick = 2;
         protected static readonly int FallbackWarnsToBan = 3;
+        protected static readonly bool FallbackWarnsToBanEnabled = false;
+        protected static readonly bool FallbackWarnsToKickEnabled = false;
+
+
+        public static async Task<(bool, bool)> UserActioningEnabled()
+        {
+            bool WarnsToKickEnabled;
+            bool WarnsToBanEnabled;
+            try
+            {
+                WarnsToBanEnabled = bool.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToBanEnabled"]);
+            }
+            catch
+            {
+                WarnsToBanEnabled = FallbackWarnsToBanEnabled;
+            }
+
+            try
+            {
+                WarnsToKickEnabled = bool.Parse(GlobalProperties.ConfigIni["ModerationConfig"]["WarnsToKickEnabled"]);
+            }
+            catch
+            {
+                WarnsToKickEnabled = FallbackWarnsToKickEnabled;
+            }
+            return (WarnsToKickEnabled, WarnsToBanEnabled);
+        }
 
         public static async Task<(int, int)> GetWarnKickValues()
         {

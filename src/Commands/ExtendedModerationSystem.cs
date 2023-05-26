@@ -575,11 +575,18 @@ public class ExtendedModerationSystem : ModerationSystem
         var dmsent = sent ? "✅" : "❌";
         string uAction = "Keine";
 
+        var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
+
         if (warncount >= warnsToBan)
             try
             {
-                await ctx.Guild.BanMemberAsync(user, 7, reasonString);
-                uAction = "Gebannt";
+                if (BanEnabled)
+                {
+                    Console.WriteLine("Banning");
+                    await ctx.Guild.BanMemberAsync(user, 7, reasonString);
+                    uAction = "Gebannt";
+                }
+
             }
             catch (Exception)
             {
@@ -587,8 +594,11 @@ public class ExtendedModerationSystem : ModerationSystem
         else if (warncount >= warnsToKick)
             try
             {
-                await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
-                uAction = "Gekickt";
+                if (KickEnabled)
+                {
+                    await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
+                    uAction = "Gekickt";
+                }
             }
             catch (Exception)
             {
@@ -664,11 +674,18 @@ public class ExtendedModerationSystem : ModerationSystem
         var dmsent = sent ? "✅" : "❌";
         string uAction = "Keine";
 
+        var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
+
         if (warncount >= warnsToBan)
             try
             {
-                await ctx.Guild.BanMemberAsync(user, 7, reasonString);
-                uAction = "Gebannt";
+                if (BanEnabled)
+                {
+                    Console.WriteLine("Banning");
+                    await ctx.Guild.BanMemberAsync(user, 7, reasonString);
+                    uAction = "Gebannt";
+                }
+
             }
             catch (Exception)
             {
@@ -676,8 +693,11 @@ public class ExtendedModerationSystem : ModerationSystem
         else if (warncount >= warnsToKick)
             try
             {
-                await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
-                uAction = "Gekickt";
+                if (KickEnabled)
+                {
+                    await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
+                    uAction = "Gekickt";
+                }
             }
             catch (Exception)
             {
