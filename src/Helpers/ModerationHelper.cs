@@ -85,7 +85,7 @@ namespace AGC_Management.Helpers
             {
                 return new DiscordEmbedBuilder()
                     .WithDescription(
-                        $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einrichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter($"").WithFooter(isManual ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben." : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
                     .WithTitle("Du wurdest verwarnt!")
                     .Build();
@@ -149,7 +149,7 @@ namespace AGC_Management.Helpers
             {
                 return new DiscordEmbedBuilder()
                     .WithDescription(
-                        $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einrichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen](https://unban.animegamingcafe.de). Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter($"").WithFooter(isManual ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben." : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
                     .WithTitle("Du wurdest permanent verwarnt!")
                     .Build();

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Xml.Linq;
 using AGC_Management.Commands;
 using AGC_Management.Services.DatabaseHandler;
@@ -74,12 +75,10 @@ internal class Program : BaseCommandModule
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
-            StringPrefixes = new List<string>
-            {
-                "!!!"
-            },
+            PrefixResolver = new PrefixResolverDelegate(GetPrefix),
             EnableDms = false,
-            EnableMentionPrefix = true
+            EnableMentionPrefix = true,
+            IgnoreExtraArguments = true,
         });
         discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
@@ -95,6 +94,34 @@ internal class Program : BaseCommandModule
         await instance.StartRemovingWarnsPeriodically(discord);
         await Task.Delay(-1);
     }
+
+    private static Task<int> GetPrefix(DiscordMessage message)
+    {
+        return Task.Run(() =>
+        {
+            
+            string prefix;
+            if (GlobalProperties.DebugMode)
+            {
+                prefix = "!!!";
+            }
+            else
+            {
+                try
+                {
+                    prefix = BotConfig.GetConfig()["MainConfig"]["BotPrefix"];
+                }
+                catch
+                {
+                    prefix = "!!!";
+                }
+            }
+            int CommandStart = -1;
+            CommandStart = CommandsNextUtilities.GetStringPrefixLength(message, prefix);
+            return CommandStart;
+        });
+    }
+
 
 
     private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
