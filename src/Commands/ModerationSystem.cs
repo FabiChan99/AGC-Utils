@@ -844,6 +844,16 @@ public class ModerationSystem : BaseCommandModule
 
             var interactivity = ctx.Client.GetInteractivity();
             var message = await confirm.ModifyAsync(builder);
+            try
+            {
+                var pmsg = await ctx.RespondAsync(staffMentionString);
+                await pmsg.DeleteAsync();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
             buttons.ForEach(x => x.Disable());
             var result = await interactivity.WaitForButtonAsync(message, interaction =>
             {
