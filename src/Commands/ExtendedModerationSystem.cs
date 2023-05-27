@@ -1038,7 +1038,7 @@ public class CaseManagement : BaseCommandModule
                     int affected = await command.ExecuteNonQueryAsync();
 
                     DiscordEmbed ue = new DiscordEmbedBuilder()
-                        .WithTitle("Case Update").WithDescription(
+                        .WithTitle("Case Gelöscht").WithDescription(
                             $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
                             $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
                     await ctx.RespondAsync(ue);
@@ -1062,7 +1062,7 @@ public class CaseManagement : BaseCommandModule
                     int affected = await command.ExecuteNonQueryAsync();
 
                     DiscordEmbed ue = new DiscordEmbedBuilder()
-                        .WithTitle("Case Update").WithDescription(
+                        .WithTitle("Case Gelöscht").WithDescription(
                             $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
                             $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
                     await ctx.RespondAsync(ue);
