@@ -420,7 +420,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", flagResults) + "\n";
             userinfostring += "\n**Lokaler Bannstatus**\n";
-            userinfostring += banStatus + "";
+            userinfostring += banStatus + "\n";
 
             if (bs_success)
             {
