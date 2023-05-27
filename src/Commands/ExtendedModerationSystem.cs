@@ -642,13 +642,14 @@ public class ExtendedModerationSystem : ModerationSystem
 
             foreach (var user in users_to_flag_obj)
             {
+                var caseid_ = Helpers.Helpers.GenerateCaseID();
                 Dictionary<string, object> data = new()
                 {
                     { "userid", (long)user.Id },
                     { "punisherid", (long)ctx.User.Id },
                     { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
                     { "description", reason },
-                    { "caseid", caseid }
+                    { "caseid", caseid_ }
                 };
                 await DatabaseService.InsertDataIntoTable("flags", data);
                 var flaglist = new List<dynamic>();
@@ -666,7 +667,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     await DatabaseService.SelectDataFromTable("flags", selectedFlags, whereConditions);
                 foreach (var lresult in results) flaglist.Add(lresult);
                 var flagcount = flaglist.Count;
-                string stringtoadd = $"{user.UsernameWithDiscriminator} {user.Id} | {flagcount} Flag(s)\n";
+                string stringtoadd = $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {flagcount} Flag(s)\n\n";
                 for_str += stringtoadd;
             }
             string e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
