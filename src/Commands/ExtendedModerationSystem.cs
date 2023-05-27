@@ -245,11 +245,13 @@ public class ExtendedModerationSystem : ModerationSystem
 
             // if booster_seit
             string boost_string = member.PremiumSince.HasValue
-                ? $"\nBoostet seit: {member.PremiumSince.Value.Timestamp()}"
+                ? $"Boostet seit: {member.PremiumSince.Value.Timestamp()}\n"
                 : "";
             // discord native format
+            string servernick = member.Nickname != null ? $" \n*Aka. **{member.Nickname}***" : "";
             var userinfostring =
-                $"**Das Mitglied**\n{member.UsernameWithDiscriminator} ``{member.Id}``{boost_string}\n\n";
+                $"**Das Mitglied**" + $"\n{member.UsernameWithDiscriminator} ``{member.Id}``{servernick}\n" +
+                $"{boost_string}\n";
             userinfostring += "**Erstellung, Beitritt und mehr**\n";
             userinfostring += $"**Erstellt:** {member.CreationTimestamp.Timestamp()}\n";
             userinfostring += $"**Beitritt:** {member.JoinedAt.Timestamp()}\n";
@@ -633,7 +635,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 .WithReply(ctx.Message.Id);
             await message.ModifyAsync(loadingMessage);
             string for_str = "";
-            List<DiscordMember> users_to_flag_obj = new List<DiscordMember>();
+            List<DiscordMember> users_to_flag_obj = new();
             foreach (var id in setids)
             {
                 var user = await ctx.Guild.GetMemberAsync(id);
@@ -667,13 +669,15 @@ public class ExtendedModerationSystem : ModerationSystem
                     await DatabaseService.SelectDataFromTable("flags", selectedFlags, whereConditions);
                 foreach (var lresult in results) flaglist.Add(lresult);
                 var flagcount = flaglist.Count;
-                string stringtoadd = $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {flagcount} Flag(s)\n\n";
+                string stringtoadd =
+                    $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {flagcount} Flag(s)\n\n";
                 for_str += stringtoadd;
             }
+
             string e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
-                       $"__Grund:__ ```{reason}```\n" +
-                       $"__Geflaggte User:__\n" +
-                       $"```{for_str}```";
+                              $"__Grund:__ ```{reason}```\n" +
+                              $"__Geflaggte User:__\n" +
+                              $"```{for_str}```";
             DiscordColor ec = DiscordColor.Green;
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Multiflag abgeschlossen")
@@ -686,8 +690,6 @@ public class ExtendedModerationSystem : ModerationSystem
                 .WithReply(ctx.Message.Id);
             await message.ModifyAsync(smessageBuilder);
         }
-        
-
     }
 
 
