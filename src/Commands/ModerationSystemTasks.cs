@@ -10,6 +10,12 @@ public class ModerationSystemTasks
 {
     public async Task StartRemovingWarnsPeriodically(DiscordClient discord)
     {
+        if (GlobalProperties.DebugMode)
+        {
+            discord.Logger.LogWarning(
+                               "Debugmodus aktiviert. Deaktiviere automatische überprüfung auf abgelaufene warns.");
+            return;
+        }
         if (DatabaseService.IsConnected())
         {
             discord.Logger.LogInformation("Starte überprüfung auf abgelaufene Warns..");
