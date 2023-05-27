@@ -386,7 +386,7 @@ public class ExtendedModerationSystem : ModerationSystem
             try
             {
                 var ban_entry = await ctx.Guild.GetBanAsync(user.Id);
-                banStatus = $"**Nutzer ist Lokal gebannt!** ```{ban_entry.Reason}```";
+                banStatus = $"**Nutzer ist Lokal gebannt!** ```{ban_entry.Reason}```\n";
                 isBanned = true;
             }
             catch (NotFoundException)
@@ -422,7 +422,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 ? "Es wurden keine gefunden.\n"
                 : string.Join("\n\n", flagResults) + "\n";
             userinfostring += "\n**Lokaler Bannstatus**\n";
-            userinfostring += banStatus + "\n";
+            userinfostring += banStatus + "";
 
             if (bs_success)
             {
