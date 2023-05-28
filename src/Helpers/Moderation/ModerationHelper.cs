@@ -75,7 +75,7 @@ public static class ModerationHelper
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. __Du wirst nun aus dem Server gebannt.__ Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red).WithFooter("").WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -86,7 +86,7 @@ public static class ModerationHelper
             return new DiscordEmbedBuilder()
                 .WithDescription(
                     $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, " +
-                    $"beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst. Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"__beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst.__ Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red)
                 .WithTitle("Du wurdest verwarnt!")
                 .Build();
@@ -97,7 +97,7 @@ public static class ModerationHelper
                 return new DiscordEmbedBuilder()
                     .WithDescription(
                         $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, " +
-                        $"beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst. Du wirst nun aus dem Server gekickt. Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"__beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst.__ __Du wirst nun aus dem Server gekickt.__ Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter(isManual
                         ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                         : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -105,7 +105,7 @@ public static class ModerationHelper
                     .Build();
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Du wirst nun aus dem Server gekickt. Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. __Du wirst nun aus dem Server gekickt.__ Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red).WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -116,7 +116,7 @@ public static class ModerationHelper
         if (warnCount == warnsToKick - 1)
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gekickt wirst. Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"Du hast eine Verwarnung vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, __beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gekickt wirst.__ Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red).WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -143,7 +143,7 @@ public static class ModerationHelper
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. Du wirst nun aus dem Server gebannt. Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**. __Du wirst nun aus dem Server gebannt.__ Du kannst einen [Entbannungsantrag einreichen]({unbanurl}). Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red).WithFooter("").WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -154,7 +154,7 @@ public static class ModerationHelper
             return new DiscordEmbedBuilder()
                 .WithDescription(
                     $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, " +
-                    $"beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst. Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"__beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst.__ Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red)
                 .WithTitle("Du wurdest permanent verwarnt!")
                 .Build();
@@ -165,7 +165,7 @@ public static class ModerationHelper
                 return new DiscordEmbedBuilder()
                     .WithDescription(
                         $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, " +
-                        $"beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst. Du wirst nun aus dem Server gekickt. Der Grund für die Verwarnung ist: ```{reason}```")
+                        $"__beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gebannt wirst.__ Du wirst nun aus dem Server gekickt. Der Grund für die Verwarnung ist: ```{reason}```")
                     .WithColor(DiscordColor.Red).WithFooter(isManual
                         ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                         : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -173,7 +173,7 @@ public static class ModerationHelper
                     .Build();
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, Du wirst nun aus dem Server gekickt. Der Grund für die Verwarnung ist: ```{reason}```")
+                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, __Du wirst nun aus dem Server gekickt.__ Der Grund für die Verwarnung ist: ```{reason}```")
                 .WithColor(DiscordColor.Red).WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
@@ -184,7 +184,7 @@ public static class ModerationHelper
         if (warnCount == warnsToKick - 1)
             return new DiscordEmbedBuilder()
                 .WithDescription(
-                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gekickt wirst. Der Grund für die Verwarnung ist: ```{reason}```*")
+                    $"Du hast eine permanente Verwarnung (sie läuft nicht ab) vom Serverteam erhalten, bitte beachte, dass Verwarnungen immer Folgen mit sich ziehen. Dies ist deine **{warnCount}. Verwarnung**, __beachte bitte, dass Du bei der nächsten Verwarnung aus **{ctx.Guild.Name}** gekickt wirst.__ Der Grund für die Verwarnung ist: ```{reason}```*")
                 .WithColor(DiscordColor.Red).WithFooter(isManual
                     ? $"Manuelle Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben."
                     : $"Automatische Verwarnung | Warnungs-ID: {caseid} <- Bei Fragen bitte ein Ticket eröffnen und diese ID angeben.")
