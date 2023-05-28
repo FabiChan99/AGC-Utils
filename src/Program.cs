@@ -1,17 +1,14 @@
-﻿using System;
-using System.Reflection;
-using System.Xml.Linq;
-using AGC_Management.Commands;
+﻿using System.Reflection;
 using AGC_Management.Services.DatabaseHandler;
+using AGC_Management.Tasks;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
+using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using IniParser;
-using IniParser.Model;
 using Microsoft.Extensions.Logging;
 
 namespace AGC_Management;
@@ -25,7 +22,6 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
-        
         bool DebugMode;
         try
         {
@@ -35,7 +31,7 @@ internal class Program : BaseCommandModule
         {
             DebugMode = false;
         }
-        
+
         string DcApiToken = "";
         try
         {
@@ -75,11 +71,11 @@ internal class Program : BaseCommandModule
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
-            PrefixResolver = new PrefixResolverDelegate(GetPrefix),
+            PrefixResolver = GetPrefix,
             EnableDms = false,
             EnableMentionPrefix = true,
             IgnoreExtraArguments = true,
-            EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"]),
+            EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"])
         });
         discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
@@ -100,14 +96,10 @@ internal class Program : BaseCommandModule
     {
         return Task.Run(() =>
         {
-            
             string prefix;
             if (GlobalProperties.DebugMode)
-            {
                 prefix = "!!!";
-            }
             else
-            {
                 try
                 {
                     prefix = BotConfig.GetConfig()["MainConfig"]["BotPrefix"];
@@ -116,13 +108,12 @@ internal class Program : BaseCommandModule
                 {
                     prefix = "!!!"; //Fallback Config
                 }
-            }
+
             int CommandStart = -1;
-            CommandStart = CommandsNextUtilities.GetStringPrefixLength(message, prefix);
+            CommandStart = message.GetStringPrefixLength(prefix);
             return CommandStart;
         });
     }
-
 
 
     private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
@@ -134,20 +125,15 @@ internal class Program : BaseCommandModule
     private static Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
         // check if error is DisCatSharp.CommandsNext.Exceptions.CommandNotFoundException
-        if (e.Exception is DisCatSharp.CommandsNext.Exceptions.CommandNotFoundException)
-        {
+        if (e.Exception is CommandNotFoundException)
             // ignore the error silently
             return Task.CompletedTask;
-        }
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.StackTrace}");
 
         return Task.CompletedTask;
     }
 }
-
-
-
 
 public static class GlobalProperties
 {
@@ -159,16 +145,11 @@ public static class GlobalProperties
 
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(BotConfig.GetConfig()["MainConfig"]["BotOwnerId"]);
-    
+
     private static bool ParseBoolean(string boolString)
     {
         if (bool.TryParse(boolString, out bool parsedBool))
-        {
             return parsedBool;
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 }

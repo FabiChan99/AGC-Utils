@@ -2,9 +2,8 @@ using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using System.Runtime.CompilerServices;
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Tasks;
 
 public class ModerationSystemTasks
 {
@@ -13,9 +12,10 @@ public class ModerationSystemTasks
         if (GlobalProperties.DebugMode)
         {
             discord.Logger.LogWarning(
-                               "Debugmodus aktiviert. Deaktiviere automatische überprüfung auf abgelaufene warns.");
+                "Debugmodus aktiviert. Deaktiviere automatische überprüfung auf abgelaufene warns.");
             return;
         }
+
         if (DatabaseService.IsConnected())
         {
             discord.Logger.LogInformation("Starte überprüfung auf abgelaufene Warns..");
