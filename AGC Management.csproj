@@ -38,4 +38,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="src\Commands\TempVC\" />
+  </ItemGroup>
+
 </Project>
