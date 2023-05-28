@@ -2,7 +2,6 @@
 using DisCatSharp.Entities;
 using IniParser;
 using IniParser.Model;
-using Microsoft.Extensions.Configuration.Ini;
 
 namespace AGC_Management;
 
