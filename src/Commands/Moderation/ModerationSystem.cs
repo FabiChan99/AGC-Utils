@@ -6,7 +6,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Moderation;
 
 public class ModerationSystem : BaseCommandModule
 {
