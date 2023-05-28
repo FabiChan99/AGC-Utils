@@ -10,7 +10,7 @@ using DisCatSharp.Interactivity.Extensions;
 using Newtonsoft.Json;
 using Npgsql;
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Moderation;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
