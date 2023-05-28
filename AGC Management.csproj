@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <Folder Include="src\Commands\TempVC\" />
+    <Folder Include="src\Helpers\TempVoice\" />
   </ItemGroup>
 
 </Project>

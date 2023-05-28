@@ -3,12 +3,12 @@ using DisCatSharp.Entities;
 
 namespace AGC_Management.Helpers;
 
-public class ModerationHelper
+public static class ModerationHelper
 {
-    protected static readonly int FallbackWarnsToKick = 2;
-    protected static readonly int FallbackWarnsToBan = 3;
-    protected static readonly bool FallbackWarnsToBanEnabled = false;
-    protected static readonly bool FallbackWarnsToKickEnabled = false;
+    private static readonly int FallbackWarnsToKick = 2;
+    private static readonly int FallbackWarnsToBan = 3;
+    private static readonly bool FallbackWarnsToBanEnabled = false;
+    private static readonly bool FallbackWarnsToKickEnabled = false;
 
 
     public static async Task<(bool, bool)> UserActioningEnabled()
