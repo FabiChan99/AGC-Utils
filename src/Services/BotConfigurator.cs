@@ -2,6 +2,7 @@
 using DisCatSharp.Entities;
 using IniParser;
 using IniParser.Model;
+using Microsoft.Extensions.Configuration.Ini;
 
 namespace AGC_Management;
 
@@ -17,7 +18,7 @@ public static class BotConfig
         }
         catch
         {
-            Console.WriteLine("Die Konfigurationsdatei konnte nicht geladen werden.");
+            Console.WriteLine("Die Konfigurationsdatei konnte nicht geladen werden. Bitte überprüfe die config.");
             Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
             Console.ReadKey();
             Environment.Exit(0);
