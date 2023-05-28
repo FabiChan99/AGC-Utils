@@ -196,7 +196,7 @@ public class ExtendedModerationSystem : ModerationSystem
             int permawarncount = permawarnlist.Count;
 
             string booster_icon = member.PremiumSince.HasValue ? "<:Booster:995060205178060960>" : "";
-            string timeout_icon = member.IsTimedOut()
+            string timeout_icon = member.IsCommunicationDisabled
                 ? "<:timeout:1012038546024059021>"
                 : "";
             string vc_icon = member.VoiceState?.Channel != null
@@ -262,7 +262,7 @@ public class ExtendedModerationSystem : ModerationSystem
             userinfostring += $"{status_indicator} | {platform}\n\n";
             userinfostring += "**Kommunikations-Timeout**\n";
             userinfostring +=
-                $"{(member.IsTimedOut() ? $"Nutzer getimeouted bis: {member.CommunicationDisabledUntil.Value.Timestamp()}" : "Nutzer nicht getimeouted")}\n\n";
+                $"{(member.IsCommunicationDisabled ? $"Nutzer getimeouted bis: {member.CommunicationDisabledUntil.Value.Timestamp()}" : "Nutzer nicht getimeouted")}\n\n";
             userinfostring +=
                 $"**Aktueller Voice-Channel**\n{(member.VoiceState != null && member.VoiceState.Channel != null ? member.VoiceState.Channel.Mention : "Mitglied nicht in einem Voice-Channel")}\n\n";
             userinfostring += $"**__Alle Verwarnungen ({warncount})__**\n";

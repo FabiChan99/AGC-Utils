@@ -9,7 +9,6 @@ namespace AGC_Management.Helpers
 {
     internal static class DiscordExtension
     {
-        public static bool IsTimedOut(this DiscordMember mem)
-            => mem.CommunicationDisabledUntil is not null && mem.CommunicationDisabledUntil.Value > DateTime.UtcNow;
+
     }
 }
