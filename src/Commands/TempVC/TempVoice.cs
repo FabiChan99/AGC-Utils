@@ -266,6 +266,7 @@ public class TempVoiceCommands : TempVoiceHelper
         foreach (long channel in dbChannels)
         {
         }
+
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
         if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
         {
@@ -275,13 +276,64 @@ public class TempVoiceCommands : TempVoiceHelper
 
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
-            var msg = await ctx.RespondAsync("<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu sperren...");
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu sperren...");
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite != null && !overwrite.CheckPermission(Permissions.UseVoice).Equals(false))
+            if (overwrite != null && overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Denied))
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
+                return;
+            }
+
+            int vclimit = (int)channel.UserLimit;
+            await channel.ModifyAsync(x =>
+            {
+                x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
+                {
+                    new DiscordOverwriteBuilder()
+                        .For(default_role)
+                        .Deny(Permissions.UseVoice)
+                };
+                x.UserLimit = vclimit;
+            });
+
+            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
+
+        }
+    }
+
+    [Command("unlock")]
+    [RequireDatabase]
+    //[RequireVoiceChannel]
+    public async Task VoiceUnlock(CommandContext ctx)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        foreach (long channel in dbChannels)
+        {
+        }
+
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu entsperren...");
+            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            Console.WriteLine(overwrite.CheckPermission(Permissions.UseVoice));
+            Console.WriteLine(overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Unset));
+
+            if (overwrite != null && overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Unset))
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **entsperrt**!");
                 return;
             }
             int vclimit = (int)channel.UserLimit;
@@ -291,16 +343,16 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     new DiscordOverwriteBuilder()
                         .For(default_role)
-                        .Deny(Permissions.UseVoice)
-                }; x.UserLimit = vclimit;
+                        .Allow(Permissions.UseVoice)
+
+                };
+                x.UserLimit = vclimit;
             });
 
-            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
-            
+            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **entsperrt**!");
         }
     }
 }
-
 
 
 
