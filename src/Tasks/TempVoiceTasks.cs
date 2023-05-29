@@ -13,6 +13,7 @@ public class TempVoiceTasks
 
         if (DatabaseService.IsConnected())
         {
+            await Task.Delay(TimeSpan.FromSeconds(15));
             discord.Logger.LogInformation(
                                "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
             while (true)
