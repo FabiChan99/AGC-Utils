@@ -1,6 +1,7 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
+using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -252,6 +253,23 @@ public class TempVoiceHelper : BaseCommandModule
             return true;
         }
         return false;
+    }
+
+    protected static async Task<List<long>> GetAllTempChannels()
+    {
+        var list = new List<long>();
+        List<string> query = new List<string>()
+        {
+            "channelid"
+        };
+        List<Dictionary<string, object>> result = await DatabaseService.SelectDataFromTable("tempvoice", query, null);
+        foreach (var item in result)
+        {
+            long ChannelId = (long)item["channelid"];
+            list.Add(ChannelId);
+        }
+        return list;
+
     }
     
 }
