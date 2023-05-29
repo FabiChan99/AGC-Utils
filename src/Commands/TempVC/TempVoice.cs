@@ -328,9 +328,6 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            Console.WriteLine(overwrite.CheckPermission(Permissions.UseVoice));
-            Console.WriteLine(overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Unset));
-
             if (overwrite != null && overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Unset))
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **entsperrt**!");
@@ -339,13 +336,7 @@ public class TempVoiceCommands : TempVoiceHelper
             int vclimit = (int)channel.UserLimit;
             await channel.ModifyAsync(x =>
             {
-                x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
-                {
-                    new DiscordOverwriteBuilder()
-                        .For(default_role)
-                        .Allow(Permissions.UseVoice)
-
-                };
+                x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole, Permissions.None) // TODO: Fix this
                 x.UserLimit = vclimit;
             });
 
