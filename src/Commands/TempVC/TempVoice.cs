@@ -68,8 +68,19 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
+
+                                DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
+
+                                string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
+                                defaultVcName = string.IsNullOrWhiteSpace(defaultVcName) ? $"{m.Username}'s Channel" : defaultVcName;
+                                defaultVcName = defaultVcName.Replace("{username}", m.Username)
+                                    .Replace("{discriminator}", m.Discriminator)
+                                    .Replace("{userid}", m.Id.ToString())
+                                    .Replace("{fullname}", m.UsernameWithDiscriminator);
+
+
                                 DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync
-                                ($"{e.After?.User.UsernameWithDiscriminator}'s Tisch", e.After.Channel.Parent,
+                                (defaultVcName, e.After.Channel.Parent,
                                     96000, 0, qualityMode: VideoQualityMode.Full);
                                 Dictionary<string, object> data = new()
                                 {
@@ -78,7 +89,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                     { "lastedited", (long)0 }
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
-                                DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
