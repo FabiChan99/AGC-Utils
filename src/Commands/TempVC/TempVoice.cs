@@ -3,15 +3,9 @@ using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
-using Sentry;
-using System.ComponentModel;
-using System.Diagnostics.Metrics;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using DisCatSharp.Exceptions;
 
 namespace AGC_Management.Commands.TempVC;
-
 
 [EventHandler]
 public class TempVCEventHandler : TempVoiceHelper
@@ -41,46 +35,42 @@ public class TempVCEventHandler : TempVoiceHelper
                 if (sessionresult.Count == 0)
                 {
                     List<long> all_channels = await GetAllTempChannels();
-                    if ((e.Before?.Channel != null && e.After?.Channel == null) ||(e.Before?.Channel != null && e.After?.Channel != null))
-                    {
+                    if ((e.Before?.Channel != null && e.After?.Channel == null) ||
+                        (e.Before?.Channel != null && e.After?.Channel != null))
                         if (all_channels.Contains((long)e.Before.Channel.Id))
-                        {
                             if (e.Before.Channel.Users.Count == 0)
-                            {
                                 try
                                 {
                                     Dictionary<string, (object value, string comparisonOperator)>
                                         DeletewhereConditions = new()
                                         {
-                                            { "channelid", ((long)e.Before.Channel.Id, "=")}
+                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
                                         };
-                                    
+
                                     await e.Before.Channel.DeleteAsync();
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
-                                catch (DisCatSharp.Exceptions.NotFoundException)
+                                catch (NotFoundException)
                                 {
                                     Dictionary<string, (object value, string comparisonOperator)>
                                         DeletewhereConditions = new()
                                         {
-                                            { "channelid", ((long)e.Before.Channel.Id, "=")}
+                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
                                         };
 
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
-                            }
-                        }
-                    }
-                    if ((e.After?.Channel != null && e.Before?.Channel == null) || (e.Before?.Channel != null && e.After?.Channel != null))
+
+                    if ((e.After?.Channel != null && e.Before?.Channel == null) ||
+                        (e.Before?.Channel != null && e.After?.Channel != null))
                     {
                         ulong creationChannelId;
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
-                        {
                             if (e.After.Channel.Id == creationChannelId)
                             {
-
                                 DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync
-                                    ($"{e.After?.User.UsernameWithDiscriminator}'s Tisch", e.After.Channel.Parent, default, null);
+                                ($"{e.After?.User.UsernameWithDiscriminator}'s Tisch", e.After.Channel.Parent,
+                                    96000, 0, qualityMode: VideoQualityMode.Full);
                                 Dictionary<string, object> data = new()
                                 {
                                     { "ownerid", (long)e.User.Id },
@@ -100,12 +90,144 @@ public class TempVCEventHandler : TempVoiceHelper
                                             .Allow(Permissions.AccessChannels)
                                             .Allow(Permissions.UseVoice)
                                     };
+                                    x.Position = e.After.Channel.Position + 1;
+                                    x.UserLimit = voice.UserLimit;
                                 });
                                 await m.ModifyAsync(x => x.VoiceChannel = voice);
-
                             }
-                        }
+                    }
+                }
+                else if (sessionresult.Count == 1)
+                {
+                    List<long> all_channels = await GetAllTempChannels();
+                    if ((e.Before?.Channel != null && e.After?.Channel == null) ||
+                        (e.Before?.Channel != null && e.After?.Channel != null))
+                        if (all_channels.Contains((long)e.Before.Channel.Id))
+                            if (e.Before.Channel.Users.Count == 0)
+                                try
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
+                                        };
 
+                                    await e.Before.Channel.DeleteAsync();
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                }
+                                catch (NotFoundException)
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
+                                        };
+
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                }
+
+                    if ((e.After?.Channel != null && e.Before?.Channel == null) ||
+                        (e.Before?.Channel != null && e.After?.Channel != null))
+                    {
+                        ulong creationChannelId;
+                        if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
+                            if (e.After.Channel.Id == creationChannelId)
+                            {
+                                long userId = 0;
+                                string channelName = string.Empty;
+                                int channelBitrate = 0;
+                                int channelLimit = 0;
+                                string blockedusers = string.Empty;
+                                string permitedusers = string.Empty;
+                                bool locked = false;
+                                bool hidden = false;
+                                string channelMods = string.Empty;
+                                foreach (var item in sessionresult)
+                                {
+                                    userId = (long)item["userid"];
+                                    channelName = (string)item["channelname"];
+                                    channelBitrate = (int)item["channelbitrate"];
+                                    channelLimit = (int)item["channellimit"];
+                                    blockedusers = item["blockedusers"] != null
+                                        ? (string)item["blockedusers"]
+                                        : string.Empty;
+                                    permitedusers = item["permitedusers"] != null
+                                        ? (string)item["permitedusers"]
+                                        : string.Empty;
+                                    locked = (bool)item["locked"];
+                                    hidden = item["hidden"] != null ? (bool)item["hidden"] : false;
+                                    channelMods = (string)item["channelmods"] != null
+                                        ? (string)item["channelmods"]
+                                        : string.Empty;
+                                    break;
+                                }
+
+                                List<string> blockeduserslist =
+                                    blockedusers.Split(new[] { ", " }, StringSplitOptions.None).ToList();
+                                List<string> permiteduserslist =
+                                    permitedusers.Split(new[] { ", " }, StringSplitOptions.None).ToList();
+
+                                DiscordMember m = await e.Guild.GetMemberAsync((ulong)userId);
+                                DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync(channelName,
+                                    e.After.Channel.Parent, channelBitrate, channelLimit,
+                                    qualityMode: VideoQualityMode.Full);
+                                await voice.ModifyAsync(async x =>
+                                {
+                                    x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
+                                    {
+                                        new DiscordOverwriteBuilder()
+                                            .For(m)
+                                            .Allow(Permissions.MoveMembers)
+                                            .Allow(Permissions.ManageChannels)
+                                            .Allow(Permissions.AccessChannels)
+                                            .Allow(Permissions.UseVoice)
+                                    };
+                                    x.Position = e.After.Channel.Position + 1;
+                                    x.UserLimit = voice.UserLimit;
+                                });
+                                await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                if (locked)
+                                {
+                                    await voice.AddOverwriteAsync(e.Guild.EveryoneRole, deny: Permissions.UseVoice);
+                                }
+
+                                if (hidden)
+                                {
+                                    await voice.AddOverwriteAsync(e.Guild.EveryoneRole,
+                                        deny: Permissions.AccessChannels);
+                                }
+
+                                foreach (string user in blockeduserslist)
+                                {
+                                    if (ulong.TryParse(user, out ulong blockeduser))
+                                    {
+                                        try
+                                        {
+                                            DiscordMember blockedmember = await e.Guild.GetMemberAsync(blockeduser);
+                                            await voice.AddOverwriteAsync(blockedmember, deny: Permissions.UseVoice);
+                                        }
+                                        catch (NotFoundException)
+                                        {
+                                        }
+                                    }
+                                }
+
+                                foreach (string user in permiteduserslist)
+                                {
+                                    if (ulong.TryParse(user, out ulong permiteduser))
+                                    {
+                                        try
+                                        {
+                                            DiscordMember permitedmember = await e.Guild.GetMemberAsync(permiteduser);
+                                            await voice.AddOverwriteAsync(permitedmember, Permissions.UseVoice);
+                                            await voice.AddOverwriteAsync(permitedmember, Permissions.AccessChannels);
+                                        }
+                                        catch (NotFoundException)
+                                        {
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
             }
@@ -117,10 +239,9 @@ public class TempVCEventHandler : TempVoiceHelper
     }
 }
 
-
 public class TempVoice : TempVoiceHelper
 {
-    private static List<ulong> LevelRoleIDs = new List<ulong>()
+    private static List<ulong> LevelRoleIDs = new()
     {
         750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
         750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
@@ -128,25 +249,8 @@ public class TempVoice : TempVoiceHelper
         810231454985486377, 810232899713630228, 810232892386705418
     };
 
-    private static List<string> lookup = new List<string>()
+    private static List<string> lookup = new()
     {
         "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
     };
-
-
 }
-
-
-
-/*  foreach (var item in sessionresult)
-                    {
-                        long userId = (long)item["userid"];
-                        string channelName = (string)item["channelname"];
-                        int channelBitrate = (int)item["channelbitrate"];
-                        int channelLimit = (int)item["channellimit"];
-                        string blockedusers = (string)item["blockedusers"];
-                        string permitedusers = (string)item["permitedusers"];
-                        bool locked = (bool)item["locked"];
-                        bool hidden = (bool)item["hidden"];
-                    }
-*/
