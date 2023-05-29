@@ -94,11 +94,12 @@ internal class Program : BaseCommandModule
     {
         //// start Warn Expire Task
         ModerationSystemTasks MST = new();
-        return MST.StartRemovingWarnsPeriodically(discord);
+        MST.StartRemovingWarnsPeriodically(discord);
 
         //// start TempVC Check Task
         TempVoiceTasks TVT = new();
-        return TVT.StartRemoveEmptyTempVoices(discord);
+        TVT.StartRemoveEmptyTempVoices(discord);
+        return Task.CompletedTask;
     }
 
     private static Task<int> GetPrefix(DiscordMessage message)

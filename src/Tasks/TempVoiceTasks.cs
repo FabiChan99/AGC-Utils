@@ -13,10 +13,12 @@ public class TempVoiceTasks : TempVoice
 
         if (DatabaseService.IsConnected())
         {
+            discord.Logger.LogInformation(
+                               "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
             while (true)
             {
                 await RemoveEmptyTempVoices(discord);
-                await Task.Delay(TimeSpan.FromMinutes(2));
+                await Task.Delay(TimeSpan.FromSeconds(10));
             }
         }
 
@@ -24,7 +26,7 @@ public class TempVoiceTasks : TempVoice
             "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf leere TempVoices.");
     }
 
-    private async Task RemoveEmptyTempVoices(DiscordClient discord)
+    private static async Task RemoveEmptyTempVoices(DiscordClient discord)
     {
         List<string> Query = new()
         {
@@ -34,11 +36,22 @@ public class TempVoiceTasks : TempVoice
             await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
         foreach (var listed_channel in all_channels)
         {
-            ulong channelid = (ulong)listed_channel["channelid"];
-            DiscordChannel channel = await discord.GetChannelAsync(channelid);
+            string channelid = listed_channel["channelid"].ToString();
             try
             {
-                if (channel.Users.Count == 0)
+                DiscordChannel channel = await discord.TryGetChannelAsync((ulong.Parse(channelid)));
+                if (channel == null)
+                {
+                    Dictionary<string, (object value, string comparisonOperator)>
+                        DeletewhereConditions = new()
+                        {
+                            { "channelid", (long.Parse(channelid), "=") }
+                        };
+                    //await channel.DeleteAsync();
+                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                    continue;
+                }
+                if (channel?.Users.Count == 0)
                 {
                     Dictionary<string, (object value, string comparisonOperator)>
                         DeletewhereConditions = new()
@@ -54,10 +67,11 @@ public class TempVoiceTasks : TempVoice
                 Dictionary<string, (object value, string comparisonOperator)>
                     DeletewhereConditions = new()
                     {
-                        { "channelid", ((long)channel.Id, "=") }
+                        { "channelid", (long.Parse(channelid), "=") }
                     };
                 //await channel.DeleteAsync();
                 await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                continue;
             }
         }
     }
