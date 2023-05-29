@@ -1,9 +1,15 @@
-﻿using AGC_Management.Helpers.TempVoice;
+﻿using AGC_Management.Helpers;
+using AGC_Management.Helpers.TempVoice;
 using AGC_Management.Services.DatabaseHandler;
+using DisCatSharp.CommandsNext;
+using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+using System.Data;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -248,6 +254,57 @@ public class TempVCEventHandler : TempVoiceHelper
         });
     }
 }
+
+public class TempVoiceCommands : TempVoiceHelper
+{
+    [Command("lock")]
+    [RequireDatabase]
+    //[RequireVoiceChannel]
+    public async Task VoiceLock(CommandContext ctx)
+    {
+        Console.WriteLine("lock");
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        foreach (long channel in dbChannels)
+        {
+            Console.WriteLine(channel);
+        }
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            Console.WriteLine(overwrite);
+            if (overwrite != null && !overwrite.CheckPermission(Permissions.UseVoice).Equals(false))
+            {
+                await ctx.RespondAsync("Channel is already locked.");
+                return;
+            }
+            int vclimit = (int)channel.UserLimit;
+            await channel.ModifyAsync(x =>
+            {
+                x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
+                {
+                    new DiscordOverwriteBuilder()
+                        .For(default_role)
+                        .Deny(Permissions.UseVoice)
+                }; x.UserLimit = vclimit;
+            });
+
+            await ctx.RespondAsync("Channel locked.");
+            
+        }
+    }
+}
+
+
+
 
 public class TempVoicePanel : TempVoiceHelper
 {

@@ -13,18 +13,19 @@ public class TempVoiceHelper : BaseCommandModule
     }
 
 
-    protected static async Task NoChannel(CommandContext ctx)
+    protected static async Task<bool> NoChannel(CommandContext ctx)
     {
         string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
                               $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
                               $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
 
         await ctx.RespondAsync(errorMessage);
+        return true;
     }
 
     protected static async Task<bool> CheckTeam(CommandContext ctx, DiscordMember user)
     {
-        DiscordRole staffRole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
+        DiscordRole staffRole = ctx.Guild.GetRole(long.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         if (staffRole.Members.Any(x => x.Key == user.Id))
         {
             ctx.RespondAsync(
@@ -35,9 +36,9 @@ public class TempVoiceHelper : BaseCommandModule
         return false;
     }
 
-    protected static ulong? GetUserChannel(CommandContext ctx)
+    protected static long? GetUserChannel(CommandContext ctx)
     {
-        ulong? userchannel;
+        long? userchannel;
         try
         {
             userchannel = ctx.Member.VoiceState?.Channel.Id;
@@ -50,9 +51,9 @@ public class TempVoiceHelper : BaseCommandModule
         return userchannel;
     }
 
-    protected static ulong? GetUserChannel(DiscordMember user)
+    protected static long? GetUserChannel(DiscordMember user)
     {
-        ulong? userchannel;
+        long? userchannel;
         try
         {
             userchannel = user.VoiceState?.Channel.Id;
@@ -95,9 +96,9 @@ public class TempVoiceHelper : BaseCommandModule
         return channel;
     }
 
-    protected static async Task<List<ulong>> GetChannelIDFromDB(CommandContext ctx)
+    protected static async Task<List<long>> GetChannelIDFromDB(CommandContext ctx)
     {
-        List<ulong> dbChannels = new List<ulong>();
+        List<long> dbChannels = new List<long>();
 
         List<string> Query = new List<string>()
         {
@@ -105,22 +106,21 @@ public class TempVoiceHelper : BaseCommandModule
         };
         Dictionary<string, object> QueryConditions = new Dictionary<string, object>()
         {
-            { "ownerid", ctx.User.Id }
+            { "ownerid", (long)ctx.User.Id }
         };
         List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
-            if (result.TryGetValue("channelid", out object channelIdObj) && channelIdObj is ulong channelId)
-            {
-                dbChannels.Add(channelId);
-            }
+            var chid = result["channelid"];
+            var id = (long)chid;
+            dbChannels.Add(id);
         }
         return dbChannels;
     }
 
-    protected static async Task<List<ulong>> GetChannelIDFromDB(DiscordMember member)
+    protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
     {
-        List<ulong> dbChannels = new List<ulong>();
+        List<long> dbChannels = new List<long>();
 
         List<string> Query = new List<string>()
         {
@@ -133,17 +133,16 @@ public class TempVoiceHelper : BaseCommandModule
         List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
-            if (result.TryGetValue("channelid", out object channelIdObj) && channelIdObj is ulong channelId)
-            {
-                dbChannels.Add(channelId);
-            }
+            var chid = result["channelid"];
+            var id = (long)chid;
+            dbChannels.Add(id);
         }
         return dbChannels;
     }
 
-    protected static async Task<ulong?> GetChannelOwnerID(CommandContext ctx)
+    protected static async Task<long?> GetChannelOwnerID(CommandContext ctx)
     {
-        ulong? channelownerid = null;
+        long? channelownerid = null;
         try
         {
             List<string> query = new List<string>()
@@ -161,7 +160,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             foreach (var result in queryResult)
             {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is ulong ownerId)
+                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break;
@@ -176,9 +175,9 @@ public class TempVoiceHelper : BaseCommandModule
         return channelownerid;
     }
 
-    protected static async Task<ulong?> GetChannelOwnerID(DiscordMember user)
+    protected static async Task<long?> GetChannelOwnerID(DiscordMember user)
     {
-        ulong? channelownerid = null;
+        long? channelownerid = null;
         try
         {
             List<string> query = new List<string>()
@@ -196,7 +195,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             foreach (var result in queryResult)
             {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is ulong ownerId)
+                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break; 
@@ -211,9 +210,9 @@ public class TempVoiceHelper : BaseCommandModule
         return channelownerid;
     }
 
-    protected static async Task<ulong?> GetChannelOwnerID(DiscordChannel channel)
+    protected static async Task<long?> GetChannelOwnerID(DiscordChannel channel)
     {
-        ulong? channelownerid = null;
+        long? channelownerid = null;
         try
         {
             List<string> query = new List<string>()
@@ -231,7 +230,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             foreach (var result in queryResult)
             {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is ulong ownerId)
+                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break; 

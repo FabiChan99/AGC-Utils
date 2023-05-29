@@ -37,6 +37,26 @@ public class RequireDatabase : CheckBaseAttribute
     }
 }
 
+public class RequireVoiceChannel : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        // Check if user is in voice channel
+        if (ctx.Member.VoiceState?.Channel != null) return true;
+
+        var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Du bist in keinem Sprachkanal!")
+            .WithDescription(
+                               $"Bitte betrete einen Sprachkanal und versuche es erneut.")
+            .WithColor(DiscordColor.Red);
+        var embed = embedBuilder.Build();
+        var msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id);
+        await ctx.Channel.SendMessageAsync(msg_e);
+        return false;
+    }
+
+
+}
+
 public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)

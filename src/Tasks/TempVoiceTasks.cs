@@ -6,7 +6,7 @@ using DisCatSharp.Entities;
 
 namespace AGC_Management.Tasks;
 
-public class TempVoiceTasks : TempVoice
+public class TempVoiceTasks
 {
     public async Task StartRemoveEmptyTempVoices(DiscordClient discord)
     {
@@ -18,7 +18,7 @@ public class TempVoiceTasks : TempVoice
             while (true)
             {
                 await RemoveEmptyTempVoices(discord);
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                await Task.Delay(TimeSpan.FromMinutes(5));
             }
         }
 
