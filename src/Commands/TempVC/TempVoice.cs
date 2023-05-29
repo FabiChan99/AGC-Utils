@@ -249,7 +249,7 @@ public class TempVCEventHandler : TempVoiceHelper
     }
 }
 
-public class TempVoice : TempVoiceHelper
+public class TempVoicePanel : TempVoiceHelper
 {
     private static List<ulong> LevelRoleIDs = new()
     {
