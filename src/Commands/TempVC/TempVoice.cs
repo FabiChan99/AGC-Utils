@@ -262,11 +262,9 @@ public class TempVoiceCommands : TempVoiceHelper
     //[RequireVoiceChannel]
     public async Task VoiceLock(CommandContext ctx)
     {
-        Console.WriteLine("lock");
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         foreach (long channel in dbChannels)
         {
-            Console.WriteLine(channel);
         }
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
         if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
@@ -281,7 +279,6 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            Console.WriteLine(overwrite);
             if (overwrite != null && !overwrite.CheckPermission(Permissions.UseVoice).Equals(false))
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
