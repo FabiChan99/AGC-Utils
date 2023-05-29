@@ -25,7 +25,7 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<bool> CheckTeam(CommandContext ctx, DiscordMember user)
     {
-        DiscordRole staffRole = ctx.Guild.GetRole(long.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
+        DiscordRole staffRole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         if (staffRole.Members.Any(x => x.Key == user.Id))
         {
             ctx.RespondAsync(
@@ -36,9 +36,9 @@ public class TempVoiceHelper : BaseCommandModule
         return false;
     }
 
-    protected static long? GetUserChannel(CommandContext ctx)
+    protected static ulong? GetUserChannel(CommandContext ctx)
     {
-        long? userchannel;
+        ulong? userchannel;
         try
         {
             userchannel = ctx.Member.VoiceState?.Channel.Id;
@@ -51,9 +51,9 @@ public class TempVoiceHelper : BaseCommandModule
         return userchannel;
     }
 
-    protected static long? GetUserChannel(DiscordMember user)
+    protected static ulong? GetUserChannel(DiscordMember user)
     {
-        long? userchannel;
+        ulong? userchannel;
         try
         {
             userchannel = user.VoiceState?.Channel.Id;

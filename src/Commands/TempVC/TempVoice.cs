@@ -277,13 +277,14 @@ public class TempVoiceCommands : TempVoiceHelper
 
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
+            var msg = await ctx.RespondAsync("<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu sperren...");
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             Console.WriteLine(overwrite);
             if (overwrite != null && !overwrite.CheckPermission(Permissions.UseVoice).Equals(false))
             {
-                await ctx.RespondAsync("Channel is already locked.");
+                await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
             int vclimit = (int)channel.UserLimit;
@@ -297,7 +298,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 }; x.UserLimit = vclimit;
             });
 
-            await ctx.RespondAsync("Channel locked.");
+            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
             
         }
     }
