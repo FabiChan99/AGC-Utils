@@ -86,10 +86,19 @@ internal class Program : BaseCommandModule
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
 
-        // Start the Task to remove warns older than 7 days
-        ModerationSystemTasks instance = new();
-        await instance.StartRemovingWarnsPeriodically(discord);
+        await StartTasks(discord);
         await Task.Delay(-1);
+    }
+
+    private static Task StartTasks(DiscordClient discord)
+    {
+        //// start Warn Expire Task
+        ModerationSystemTasks MST = new();
+        return MST.StartRemovingWarnsPeriodically(discord);
+
+        //// start TempVC Check Task
+        TempVoiceTasks TVT = new();
+        return TVT.StartRemoveEmptyTempVoices(discord);
     }
 
     private static Task<int> GetPrefix(DiscordMessage message)
