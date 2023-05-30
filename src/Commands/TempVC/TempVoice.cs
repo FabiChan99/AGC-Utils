@@ -286,8 +286,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
-
-            int vclimit = (int)channel.UserLimit;
             await channel.AddOverwriteAsync(default_role, deny: Permissions.UseVoice);
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
@@ -324,8 +322,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **entsperrt**!");
                 return;
             }
-            int vclimit = (int)channel.UserLimit;
-            var revokedperms = Permissions.UseVoice.Revoke(Permissions.UseVoice);
             await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.UseVoice.Revoke(Permissions.UseVoice));
            
 
