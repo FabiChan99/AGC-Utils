@@ -1,7 +1,6 @@
 ﻿using AGC_Management.Helpers;
 using AGC_Management.Helpers.TempVoice;
 using AGC_Management.Services.DatabaseHandler;
-using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -9,7 +8,6 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using Npgsql;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -498,9 +496,10 @@ public class TempVoiceCommands : TempVoiceHelper
                 "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
             return;
         }
+
         await userChannel.ModifyAsync(x => x.UserLimit = limit);
         await ctx.RespondAsync(
-                       $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
+            $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
     }
 
     public class TempVoicePanel : TempVoiceHelper
