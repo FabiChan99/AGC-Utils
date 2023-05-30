@@ -118,6 +118,24 @@ public class TempVoiceHelper : BaseCommandModule
         return dbChannels;
     }
 
+    protected static async Task<List<long>> GetAllChannelIDsFromDB()
+    {
+        List<long> dbChannels = new List<long>();
+
+        List<string> Query = new List<string>()
+        {
+            "channelid"
+        };
+        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
+        foreach (var result in QueryResult)
+        {
+            var chid = result["channelid"];
+            var id = (long)chid;
+            dbChannels.Add(id);
+        }
+        return dbChannels;
+    }
+
     protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
     {
         List<long> dbChannels = new List<long>();
@@ -152,7 +170,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             Dictionary<string, object> queryConditions = new Dictionary<string, object>()
             {
-                { "channelid", ctx.Member.VoiceState?.Channel.Id }
+                { "channelid", (long)ctx.Member.VoiceState?.Channel.Id }
             };
 
             List<Dictionary<string, object>> queryResult =

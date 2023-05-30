@@ -8,6 +8,10 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using Npgsql;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -506,10 +510,83 @@ public class TempVoiceCommands : TempVoiceHelper
         await ctx.RespondAsync(
             $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
     }
-}
 
-public class TempVoicePanel : TempVoiceHelper
+    [Command("claim")]
+    [RequireDatabase]
+    [Aliases("claimvc")]
+    public async Task ClaimVoice(CommandContext ctx)
     {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        List<long> all_dbChannels = await GetAllChannelIDsFromDB();
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        long? channelownerid = await GetChannelOwnerID(ctx);
+        var msg = await ctx.RespondAsync(
+            "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu übernehmen...");
+        if (channelownerid == (long)ctx.User.Id)
+        {
+            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist bereits der Besitzer des Channels.");
+            return;
+        }
+
+        if (ctx.Member.VoiceState?.Channel == null)
+        {
+            msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem Voice-Channel.");
+            return;
+        }
+
+        if (channelownerid == null)
+        {
+            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem TempVC Channel.");
+            return;
+        }
+        var channelowner = await ctx.Client.GetUserAsync((ulong)channelownerid);
+        DiscordMember channelownermember = await ctx.Guild.GetMemberAsync(channelowner.Id);
+        var orig_owner = channelownermember;
+        DiscordMember new_owner = ctx.Member;
+        DiscordChannel channel = ctx.Member.VoiceState?.Channel;
+
+        if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+        {
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
+                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                    int affected = await command.ExecuteNonQueryAsync();
+                }
+            }
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
+                .Where(x =>
+                {
+                    if (x.Target.Id == orig_owner.Id)
+                    {
+                        x.Allowed = x.Allowed.Revoke(Permissions.ManageChannels)
+                            .Revoke(Permissions.UseVoice).Revoke(Permissions.MoveMembers)
+                            .Revoke(Permissions.AccessChannels);
+                    }
+                    return true;
+                }));
+            await channel.ModifyAsync(x =>
+                x.PermissionOverwrites =
+                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Member,
+                        Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None));
+            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
+        }
+        if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+        {
+            await msg.ModifyAsync(
+                $"<:attention:1085333468688433232> Du kannst dein Channel nicht Claimen, da der Channel-Owner ``{orig_owner.UsernameWithDiscriminator}`` noch im Channel ist.");
+            return;
+        }
+
+
+    }
+}
+public class TempVoicePanel : TempVoiceHelper
+{
         private static List<ulong> LevelRoleIDs = new()
         {
             750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
