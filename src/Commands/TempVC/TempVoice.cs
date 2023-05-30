@@ -1,6 +1,7 @@
 ﻿using AGC_Management.Helpers;
 using AGC_Management.Helpers.TempVoice;
 using AGC_Management.Services.DatabaseHandler;
+using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -8,7 +9,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using Npgsql;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -467,9 +468,42 @@ public class TempVoiceCommands : TempVoiceHelper
                 "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
         }
     }
-}
 
-public class TempVoicePanel : TempVoiceHelper
+    [Command("limit")]
+    [RequireDatabase]
+    [Aliases("vclimit")]
+    public async Task VoiceLimit(CommandContext ctx, int limit)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            if (limit < 0 || limit > 99)
+            {
+                await ctx.RespondAsync(
+                    "<:attention:1085333468688433232> **Fehler!** Der Limit-Wert muss zwischen 0 und 99 liegen.");
+                return;
+            }
+        }
+
+        if (limit == 0)
+        {
+            await ctx.RespondAsync(
+                "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
+            return;
+        }
+        await userChannel.ModifyAsync(x => x.UserLimit = limit);
+        await ctx.RespondAsync(
+                       $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
+    }
+
+    public class TempVoicePanel : TempVoiceHelper
     {
         private static List<ulong> LevelRoleIDs = new()
         {
@@ -484,4 +518,3 @@ public class TempVoicePanel : TempVoiceHelper
             "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
         };
     }
-}
