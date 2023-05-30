@@ -357,6 +357,41 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **versteckt**!");
         }
     }
+
+    [Command("unhide")]
+    [RequireDatabase]
+    public async Task VoiceUnhide(CommandContext ctx)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var msg = await ctx.RespondAsync(
+                               "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel sichtbar zu machen...");
+            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **sichtbar**!");
+                return;
+            }
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder().Where(
+                x =>
+                {
+                if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
+                    x.Denied = x.Denied.Revoke(Permissions.AccessChannels);
+                return true;
+            }));
+            await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
+        }
+    }
 }
 
 public class TempVoicePanel : TempVoiceHelper
