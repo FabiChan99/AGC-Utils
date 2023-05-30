@@ -263,10 +263,6 @@ public class TempVoiceCommands : TempVoiceHelper
     public async Task VoiceLock(CommandContext ctx)
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        foreach (long channel in dbChannels)
-        {
-        }
-
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
         if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
         {
@@ -299,10 +295,6 @@ public class TempVoiceCommands : TempVoiceHelper
     public async Task VoiceUnlock(CommandContext ctx)
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        foreach (long channel in dbChannels)
-        {
-        }
-
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
         if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
         {
