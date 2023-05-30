@@ -203,13 +203,18 @@ public class TempVCEventHandler : TempVoiceHelper
                                 await m.ModifyAsync(x => x.VoiceChannel = voice);
                                 if (locked)
                                 {
-                                    await voice.AddOverwriteAsync(e.Guild.EveryoneRole, deny: Permissions.UseVoice);
+                                    voice.ModifyAsync(x =>
+                                        x.PermissionOverwrites =
+                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
+                                                Permissions.None, Permissions.UseVoice));
                                 }
 
                                 if (hidden)
                                 {
-                                    await voice.AddOverwriteAsync(e.Guild.EveryoneRole,
-                                        deny: Permissions.AccessChannels);
+                                    voice.ModifyAsync(x =>
+                                        x.PermissionOverwrites =
+                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
+                                                Permissions.None, Permissions.AccessChannels));
                                 }
 
                                 foreach (string user in blockeduserslist)
