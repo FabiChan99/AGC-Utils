@@ -8,6 +8,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using Npgsql;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -465,13 +466,10 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync(
                 "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
         }
-
-
-
-
     }
+}
 
-    public class TempVoicePanel : TempVoiceHelper
+public class TempVoicePanel : TempVoiceHelper
     {
         private static List<ulong> LevelRoleIDs = new()
         {
