@@ -7,9 +7,6 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
-using System.Data;
-using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -74,11 +71,12 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
-
                                 DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
 
                                 string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
-                                defaultVcName = string.IsNullOrWhiteSpace(defaultVcName) ? $"{m.Username}'s Channel" : defaultVcName;
+                                defaultVcName = string.IsNullOrWhiteSpace(defaultVcName)
+                                    ? $"{m.Username}'s Channel"
+                                    : defaultVcName;
                                 defaultVcName = defaultVcName.Replace("{username}", m.Username)
                                     .Replace("{discriminator}", m.Discriminator)
                                     .Replace("{userid}", m.Id.ToString())
@@ -264,7 +262,7 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
             await NoChannel(ctx);
             return;
@@ -282,10 +280,10 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
+
             await channel.AddOverwriteAsync(default_role, deny: Permissions.UseVoice);
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
-
         }
     }
 
@@ -296,7 +294,7 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)(userChannel?.Id)))
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
             await NoChannel(ctx);
             return;
@@ -309,20 +307,20 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite == null || overwrite != null && overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+            if (overwrite == null || (overwrite != null &&
+                                      overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset))
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **entsperrt**!");
                 return;
             }
+
             await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.UseVoice.Revoke(Permissions.UseVoice));
-           
+
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **entsperrt**!");
         }
     }
 }
-
-
 
 public class TempVoicePanel : TempVoiceHelper
 {
