@@ -275,13 +275,13 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite != null && overwrite.CheckPermission(Permissions.UseVoice).Equals(PermissionLevel.Denied))
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == (PermissionLevel.Denied))
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
 
-            await channel.AddOverwriteAsync(default_role, deny: Permissions.UseVoice);
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice));
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
         }
@@ -307,17 +307,54 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite == null || (overwrite != null &&
-                                      overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset))
+            if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **entsperrt**!");
                 return;
             }
 
-            await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.UseVoice.Revoke(Permissions.UseVoice));
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder().Where(x =>
+            {
+                if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
+                    x.Denied = x.Denied.Revoke(Permissions.UseVoice);
+                return true;
+            }));
 
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **entsperrt**!");
+        }
+    }
+
+
+
+    [Command("hide")]
+    [RequireDatabase]
+    public async Task VoiceHide(CommandContext ctx)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu verstecken...");
+            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **versteckt**!");
+                return;
+            }
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels));
+
+
+            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **versteckt**!");
         }
     }
 }
