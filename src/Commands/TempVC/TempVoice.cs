@@ -501,8 +501,9 @@ public class TempVoiceCommands : TempVoiceHelper
         await ctx.RespondAsync(
             $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
     }
+}
 
-    public class TempVoicePanel : TempVoiceHelper
+public class TempVoicePanel : TempVoiceHelper
     {
         private static List<ulong> LevelRoleIDs = new()
         {
