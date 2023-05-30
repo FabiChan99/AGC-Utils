@@ -7,6 +7,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+using Npgsql;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -275,13 +276,16 @@ public class TempVoiceCommands : TempVoiceHelper
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite?.CheckPermission(Permissions.UseVoice) == (PermissionLevel.Denied))
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
             {
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
 
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice));
+            await channel.ModifyAsync(x =>
+                x.PermissionOverwrites =
+                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole,
+                        Permissions.None, Permissions.UseVoice));
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
         }
@@ -313,18 +317,18 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
 
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder().Where(x =>
-            {
-                if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
-                    x.Denied = x.Denied.Revoke(Permissions.UseVoice);
-                return true;
-            }));
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
+                .Where(x =>
+                {
+                    if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
+                        x.Denied = x.Denied.Revoke(Permissions.UseVoice);
+                    return true;
+                }));
 
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **entsperrt**!");
         }
     }
-
 
 
     [Command("hide")]
@@ -351,7 +355,11 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **versteckt**!");
                 return;
             }
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels));
+
+            await channel.ModifyAsync(x =>
+                x.PermissionOverwrites =
+                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole,
+                        Permissions.None, Permissions.AccessChannels));
 
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **versteckt**!");
@@ -373,7 +381,7 @@ public class TempVoiceCommands : TempVoiceHelper
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
             var msg = await ctx.RespondAsync(
-                               "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel sichtbar zu machen...");
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel sichtbar zu machen...");
             DiscordRole default_role = ctx.Guild.EveryoneRole;
             DiscordChannel channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
@@ -382,30 +390,96 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **sichtbar**!");
                 return;
             }
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder().Where(
-                x =>
-                {
-                if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
-                    x.Denied = x.Denied.Revoke(Permissions.AccessChannels);
-                return true;
-            }));
+
+            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
+                .Where(
+                    x =>
+                    {
+                        if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
+                            x.Denied = x.Denied.Revoke(Permissions.AccessChannels);
+                        return true;
+                    }));
             await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
         }
     }
-}
 
-public class TempVoicePanel : TempVoiceHelper
-{
-    private static List<ulong> LevelRoleIDs = new()
-    {
-        750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
-        750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
-        776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
-        810231454985486377, 810232899713630228, 810232892386705418
-    };
 
-    private static List<string> lookup = new()
+    [Command("rename")]
+    [RequireDatabase]
+    [Aliases("vcname")]
+    public async Task VoiceRename(CommandContext ctx, [RemainingText] string name)
     {
-        "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
-    };
+        var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel umzubenennen...");
+            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            long timestampdata = 0;
+            List<string> Query = new()
+            {
+                "lastedited"
+            };
+            Dictionary<string, object> WhereCondiditons = new()
+            {
+                { "channelid", (long)channel.Id }
+            };
+            var dbtimestampdata = await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
+            foreach (var data in dbtimestampdata)
+            {
+                timestampdata = (long)data["lastedited"];
+            }
+
+            long edit_timestamp = timestampdata;
+            long math = current_timestamp - edit_timestamp;
+            if (math < 300)
+            {
+                long calc = edit_timestamp + 300;
+                await msg.ModifyAsync(
+                    $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
+                return;
+            }
+
+            string oldname = channel.Name;
+            await channel.ModifyAsync(x => x.Name = name);
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@timestamp", current_timestamp);
+                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                    int affected = await command.ExecuteNonQueryAsync();
+                }
+            }
+
+            await msg.ModifyAsync(
+                "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
+        }
+    }
+
+    public class TempVoicePanel : TempVoiceHelper
+    {
+        private static List<ulong> LevelRoleIDs = new()
+        {
+            750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
+            750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
+            776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
+            810231454985486377, 810232899713630228, 810232892386705418
+        };
+
+        private static List<string> lookup = new()
+        {
+            "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
+        };
+    }
 }
