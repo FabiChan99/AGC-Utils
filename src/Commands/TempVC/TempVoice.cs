@@ -26,7 +26,7 @@ public class TempVCEventHandler : TempVoiceHelper
             try
             {
                 //if (e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) return;
-                if (e.Guild.Id != 826878963354959933) return;
+                if (e.Guild.Id != 818699057878663168) return;
 
                 var sessionresult = new List<Dictionary<string, object>>();
                 var usersession = new List<dynamic>();
@@ -112,7 +112,22 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.Position = e.After.Channel.Position + 1;
                                     x.UserLimit = voice.UserLimit;
                                 });
-                                await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                try
+                                {
+                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                }
+                                catch (Exception)
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)voice.Id, "=") }
+                                        };
+                                    await voice.DeleteAsync();
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+
+                                }
+                                
                             }
                     }
                 }
