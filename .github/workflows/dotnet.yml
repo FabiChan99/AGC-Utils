@@ -26,16 +26,6 @@ jobs:
       run: dotnet build --no-restore --configuration RELEASE
     - name: Test
       run: dotnet test --no-build --verbosity detailed
-    - name: Store artifacts (Release Files)
-      uses: actions/upload-artifact@v3
-      with:
-        name: debug
-        path: bin/Release/net7.0-windows
-    - name: Store artifacts (Example Config)
-      uses: actions/upload-artifact@v3
-      with:
-        name: debug
-        path: config.ini
 
 
 
