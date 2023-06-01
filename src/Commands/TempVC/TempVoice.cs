@@ -225,7 +225,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                 
                                 if (locked)
                                 {
-                                    voice.ModifyAsync(x =>
+                                    await voice.ModifyAsync(x =>
                                         x.PermissionOverwrites =
                                             voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
                                                 Permissions.None, Permissions.UseVoice));
@@ -233,7 +233,7 @@ public class TempVCEventHandler : TempVoiceHelper
 
                                 if (hidden)
                                 {
-                                    voice.ModifyAsync(x =>
+                                    await voice.ModifyAsync(x =>
                                         x.PermissionOverwrites =
                                             voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
                                                 Permissions.None, Permissions.AccessChannels));

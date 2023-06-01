@@ -28,7 +28,7 @@ public class TempVoiceHelper : BaseCommandModule
         DiscordRole staffRole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         if (staffRole.Members.Any(x => x.Key == user.Id))
         {
-            ctx.RespondAsync(
+            await ctx.RespondAsync(
                 $"<:attention:1085333468688433232> **Fehler!** Du kannst den Befehl ``{ctx.Command.Name}`` nicht auf Teammitglieder anwenden!");
             return true;
         }
