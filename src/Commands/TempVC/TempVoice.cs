@@ -604,12 +604,13 @@ public class TempVoiceCommands : TempVoiceHelper
 
                 if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
                 {
-                    var msg = await ctx.RespondAsync(
-                        "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu blockieren...");
+                    
                     var blockedlist = new List<ulong>();
                     List<ulong> ids = new List<ulong>();
                     ids = Converter.ExtractUserIDsFromString(users);
                     var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                    var msg = await ctx.RespondAsync(
+                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu blockieren...");
                     var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
                     foreach (ulong id in ids)
@@ -669,12 +670,13 @@ public class TempVoiceCommands : TempVoiceHelper
 
             if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
             {
-                var msg = await ctx.RespondAsync(
-                    "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu entsperren...");
+                
                 var unblocklist = new List<ulong>();
                 List<ulong> ids = new List<ulong>();
                 ids = Converter.ExtractUserIDsFromString(users);
                 var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                var msg = await ctx.RespondAsync(
+                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu entsperren...");
                 var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
                 foreach (ulong id in ids)
