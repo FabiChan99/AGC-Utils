@@ -319,8 +319,6 @@ public class TempVoiceCommands : TempVoiceHelper
         }
     }
 
-    /*
-
     [Command("unlock")]
     [RequireDatabase]
     //[RequireVoiceChannel]
@@ -432,7 +430,7 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
         }
     }
-   */
+
 
     [Command("rename")]
     [RequireDatabase]
