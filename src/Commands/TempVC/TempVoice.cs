@@ -650,6 +650,63 @@ public class TempVoiceCommands : TempVoiceHelper
     }
 
 
+
+    [Command("unblock")]
+    [RequireDatabase]
+    [Aliases("vcunban", "multiunblock")]
+    public async Task VoiceUnlock(CommandContext ctx, [RemainingText] string users)
+    {
+        _ = Task.Run(async () =>
+        {
+            List<long> dbChannels = await GetChannelIDFromDB(ctx);
+            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+
+            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+            {
+                await NoChannel(ctx);
+                return;
+            }
+
+            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+            {
+                var msg = await ctx.RespondAsync(
+                    "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu entsperren...");
+                var unblocklist = new List<ulong>();
+                List<ulong> ids = new List<ulong>();
+                ids = Converter.ExtractUserIDsFromString(users);
+                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+                foreach (ulong id in ids)
+                {
+                    try
+                    {
+                        var user = await ctx.Guild.GetMemberAsync(id);
+
+
+                        overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice);
+
+
+                        unblocklist.Add(user.Id);
+                    }
+                    catch (NotFoundException)
+                    {
+                    }
+                }
+
+                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                int successCount = unblocklist.Count;
+                string endstring =
+                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **entsperrt**!";
+
+                await msg.ModifyAsync(endstring);
+            }
+        }
+
+        );
+    }
+
 }
 public class TempVoicePanel : TempVoiceHelper
 {
