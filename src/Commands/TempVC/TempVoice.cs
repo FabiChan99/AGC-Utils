@@ -622,7 +622,7 @@ public class TempVoiceCommands : TempVoiceHelper
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
             var msg = await ctx.RespondAsync(
-            ":loading_agc: **Lade...** Versuche Nutzer zu blockieren...");
+            "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu blockieren...");
             //var overwrites = new List<DiscordOverwriteBuilder>();
             var blockedlist = new List<ulong>();
             List<ulong> ids = new List<ulong>();
@@ -654,7 +654,7 @@ public class TempVoiceCommands : TempVoiceHelper
             }
 
             int successCount = blockedlist.Count;
-            string endstring = $":success: **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
+            string endstring = $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
 
             await msg.ModifyAsync(endstring);
         }
