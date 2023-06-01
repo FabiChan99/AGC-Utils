@@ -3,7 +3,7 @@ using DisCatSharp.Entities;
 
 namespace AGC_Management.Helpers;
 
-public class Helpers
+public static class Helpers
 {
     public static async Task<bool> CheckForReason(CommandContext ctx, string reason)
     {
@@ -31,6 +31,25 @@ public class Helpers
 
         return false;
     }
+
+
+
+
+
+    public static IEnumerable<DiscordOverwriteBuilder> MergeOverwrites(DiscordChannel userChannel, List<DiscordOverwriteBuilder> overwrites,
+        out IEnumerable<DiscordOverwriteBuilder> targetOverwrites)
+    {
+        targetOverwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder());
+        foreach (var overwrite in overwrites)
+        {
+            targetOverwrites =
+                targetOverwrites.Merge(overwrite.Type, overwrite.Target, overwrite.Allowed, overwrite.Denied);
+        }
+
+        var newOverwrites = targetOverwrites.ToList();
+        return newOverwrites;
+    }
+
 
 
     public static string GenerateCaseID()

@@ -7,7 +7,9 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+using Microsoft.Extensions.Logging;
 using Npgsql;
+using Sentry;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
@@ -220,6 +222,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.UserLimit = voice.UserLimit;
                                 });
                                 await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                
                                 if (locked)
                                 {
                                     voice.ModifyAsync(x =>
@@ -235,7 +238,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                             voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
                                                 Permissions.None, Permissions.AccessChannels));
                                 }
-
+                                
                                 foreach (string user in blockeduserslist)
                                 {
                                     if (ulong.TryParse(user, out ulong blockeduser))
@@ -280,6 +283,7 @@ public class TempVCEventHandler : TempVoiceHelper
 
 public class TempVoiceCommands : TempVoiceHelper
 {
+    
     [Command("lock")]
     [RequireDatabase]
     //[RequireVoiceChannel]
@@ -314,6 +318,8 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
         }
     }
+
+    /*
 
     [Command("unlock")]
     [RequireDatabase]
@@ -426,7 +432,7 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
         }
     }
-
+   */
 
     [Command("rename")]
     [RequireDatabase]
@@ -559,6 +565,7 @@ public class TempVoiceCommands : TempVoiceHelper
         var orig_owner = channelownermember;
         DiscordMember new_owner = ctx.Member;
         DiscordChannel channel = ctx.Member.VoiceState?.Channel;
+        var overwrites = new List<DiscordOverwriteBuilder>();
 
         if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
         {
@@ -573,21 +580,17 @@ public class TempVoiceCommands : TempVoiceHelper
                     int affected = await command.ExecuteNonQueryAsync();
                 }
             }
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
-                .Where(x =>
-                {
-                    if (x.Target.Id == orig_owner.Id)
-                    {
-                        x.Allowed = x.Allowed.Revoke(Permissions.ManageChannels)
-                            .Revoke(Permissions.UseVoice).Revoke(Permissions.MoveMembers)
-                            .Revoke(Permissions.AccessChannels);
-                    }
-                    return true;
-                }));
-            await channel.ModifyAsync(x =>
-                x.PermissionOverwrites =
-                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Member,
-                        Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None));
+
+            await userChannel.ModifyAsync(x =>
+                x.PermissionOverwrites = userChannel.PermissionOverwrites.Merge(orig_owner, Permissions.None,
+                    Permissions.None,
+                    Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                    Permissions.AccessChannels));
+            await userChannel.ModifyAsync(x =>
+                x.PermissionOverwrites = userChannel.PermissionOverwrites.Merge(new_owner, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                    Permissions.AccessChannels,
+                    Permissions.None));
+
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
         }
         if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
@@ -599,6 +602,65 @@ public class TempVoiceCommands : TempVoiceHelper
 
 
     }
+   
+    
+
+    [Command("block")]
+    [RequireDatabase]
+    [Aliases("vcban", "multiblock")]
+    public async Task VoiceBlock(CommandContext ctx, [RemainingText] string users)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(ctx);
+            return;
+        }
+        
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var msg = await ctx.RespondAsync(
+            ":loading_agc: **Lade...** Versuche Nutzer zu blockieren...");
+            //var overwrites = new List<DiscordOverwriteBuilder>();
+            var blockedlist = new List<ulong>();
+            List<ulong> ids = new List<ulong>();
+            ids = Converter.ExtractUserIDsFromString(users);
+            var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+            foreach (ulong id in ids)
+            {
+                try
+                {
+                    var user = await ctx.Guild.GetMemberAsync(id);
+                    
+                    if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                    {
+                        continue;
+                    }
+
+                    await userChannel.AddOverwriteAsync(user, deny: Permissions.UseVoice);
+
+                    //overwrites.Add(new DiscordOverwriteBuilder(id).Deny(Permissions.UseVoice));
+                    if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
+                    {
+                        //await user.DisconnectFromVoiceAsync();
+                    }
+                    blockedlist.Add(user.Id);
+                }
+                catch (NotFoundException)
+                {
+                }
+            }
+
+            int successCount = blockedlist.Count;
+            string endstring = $":success: **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
+
+            await msg.ModifyAsync(endstring);
+        }
+    }
+
+
 }
 public class TempVoicePanel : TempVoiceHelper
 {

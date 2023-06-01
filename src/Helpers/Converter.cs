@@ -36,6 +36,31 @@ public class Converter
             }
     }
 
+
+    public static List<ulong> ExtractUserIDsFromString(string users)
+    {
+        List<ulong> ids = new List<ulong>();
+        var parts = users.Split(' ');
+        foreach (var part in parts)
+        {
+            if (part.StartsWith("<@") && part.EndsWith(">"))
+            {
+                var idString = part.Substring(2, part.Length - 3);
+                if (ulong.TryParse(idString, out var id))
+                    ids.Add(id);
+                else
+                    break;
+            }
+            else if (ulong.TryParse(part, out var id))
+            {
+                ids.Add(id);
+            }
+        }
+
+        ids = ids.ToHashSet().ToList();
+        return ids;
+    }
+
     public static DateTime ConvertUnixTimestamp(long unixTimestamp)
     {
         DateTime unixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
