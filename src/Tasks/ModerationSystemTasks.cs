@@ -53,7 +53,7 @@ public class ModerationSystemTasks
     {
         discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
-        int days = await GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
+        int days = GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
         int expireTime = (int)DateTimeOffset.UtcNow.AddDays(-days).ToUnixTimeSeconds();
 
 
