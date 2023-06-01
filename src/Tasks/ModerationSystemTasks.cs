@@ -30,7 +30,7 @@ public class ModerationSystemTasks
             "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf abgelaufene warns.");
     }
 
-    private async Task<int> GetWarnExpiringTime()
+    private int GetWarnExpiringTime()
     {
         int fallback = 7;
         int days_;
