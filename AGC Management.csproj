@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <RootNamespace>AGC_Management</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -13,10 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DisCatSharp" Version="10.4.1-sentry-018" />
-    <PackageReference Include="DisCatSharp.CommandsNext" Version="10.4.1-sentry-018" />
-    <PackageReference Include="DisCatSharp.Common" Version="10.4.1-sentry-018" />
-    <PackageReference Include="DisCatSharp.Interactivity" Version="10.4.1-sentry-018" />
+    <PackageReference Include="DisCatSharp" Version="10.4.1-sentry-020" />
+    <PackageReference Include="DisCatSharp.CommandsNext" Version="10.4.1-sentry-020" />
+    <PackageReference Include="DisCatSharp.Common" Version="10.4.1-sentry-020" />
+    <PackageReference Include="DisCatSharp.Interactivity" Version="10.4.1-sentry-020" />
     <PackageReference Include="ini-parser-new" Version="2.6.2" />
     <PackageReference Include="Npgsql" Version="7.0.4" />
   </ItemGroup>

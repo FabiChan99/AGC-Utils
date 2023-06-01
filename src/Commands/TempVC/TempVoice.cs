@@ -629,11 +629,12 @@ public class TempVoiceCommands : TempVoiceHelper
         {
             var msg = await ctx.RespondAsync(
             "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu blockieren...");
-            //var overwrites = new List<DiscordOverwriteBuilder>();
             var blockedlist = new List<ulong>();
             List<ulong> ids = new List<ulong>();
             ids = Converter.ExtractUserIDsFromString(users);
             var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            
             foreach (ulong id in ids)
             {
                 try
@@ -645,12 +646,10 @@ public class TempVoiceCommands : TempVoiceHelper
                         continue;
                     }
 
-                    await userChannel.AddOverwriteAsync(user, deny: Permissions.UseVoice);
-
-                    //overwrites.Add(new DiscordOverwriteBuilder(id).Deny(Permissions.UseVoice));
+                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
                     if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                     {
-                        //await user.DisconnectFromVoiceAsync();
+                        await user.DisconnectFromVoiceAsync();
                     }
                     blockedlist.Add(user.Id);
                 }
@@ -658,6 +657,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                 }
             }
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
             int successCount = blockedlist.Count;
             string endstring = $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
