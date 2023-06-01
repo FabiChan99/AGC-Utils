@@ -565,7 +565,7 @@ public class TempVoiceCommands : TempVoiceHelper
         var orig_owner = channelownermember;
         DiscordMember new_owner = ctx.Member;
         DiscordChannel channel = ctx.Member.VoiceState?.Channel;
-        var overwrites = new List<DiscordOverwriteBuilder>();
+        var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
         if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
         {
@@ -581,22 +581,11 @@ public class TempVoiceCommands : TempVoiceHelper
                 }
             }
 
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
-                .Where(x =>
-                {
-                    if (x.Target == orig_owner.Id)
-                    {
-                        x.Allowed = x.Allowed.Revoke(Permissions.ManageChannels)
-                            .Revoke(Permissions.UseVoice).Revoke(Permissions.MoveMembers)
-                            .Revoke(Permissions.AccessChannels);
-                    }
-                    return true;
-                }));
-            await channel.ModifyAsync(x =>
-                x.PermissionOverwrites =
-                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Member,
-                        Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None));
+            overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels);
+            overwrites = overwrites.Merge(new_owner, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None);
 
+
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
         }
         if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
