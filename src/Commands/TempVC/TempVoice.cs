@@ -309,11 +309,9 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
-
-            await channel.ModifyAsync(x =>
-                x.PermissionOverwrites =
-                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole,
-                        Permissions.None, Permissions.UseVoice));
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.UseVoice);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **gesperrt**!");
         }
@@ -345,13 +343,9 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
 
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
-                .Where(x =>
-                {
-                    if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
-                        x.Denied = x.Denied.Revoke(Permissions.UseVoice);
-                    return true;
-                }));
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.UseVoice);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
 
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **entsperrt**!");
@@ -384,12 +378,10 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
 
-            await channel.ModifyAsync(x =>
-                x.PermissionOverwrites =
-                    channel.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(ctx.Guild.EveryoneRole,
-                        Permissions.None, Permissions.AccessChannels));
 
-
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.AccessChannels);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **versteckt**!");
         }
     }
@@ -418,20 +410,14 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **sichtbar**!");
                 return;
             }
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.AccessChannels);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-            await channel.ModifyAsync(x => x.PermissionOverwrites = channel.PermissionOverwrites.ConvertToBuilder()
-                .Where(
-                    x =>
-                    {
-                        if (x.Target.Id == ctx.Guild.EveryoneRole.Id)
-                            x.Denied = x.Denied.Revoke(Permissions.AccessChannels);
-                        return true;
-                    }));
             await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
         }
     }
-
-
+    
     [Command("rename")]
     [RequireDatabase]
     [Aliases("vcname")]
@@ -494,6 +480,8 @@ public class TempVoiceCommands : TempVoiceHelper
                 "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
         }
     }
+    
+    
 
     [Command("limit")]
     [RequireDatabase]
