@@ -591,54 +591,62 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("vcban", "multiblock")]
     public async Task VoiceBlock(CommandContext ctx, [RemainingText] string users)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
-        {
-            await NoChannel(ctx);
-            return;
-        }
-        
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
-        {
-            var msg = await ctx.RespondAsync(
-            "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu blockieren...");
-            var blockedlist = new List<ulong>();
-            List<ulong> ids = new List<ulong>();
-            ids = Converter.ExtractUserIDsFromString(users);
-            var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
-            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-            
-            foreach (ulong id in ids)
+        _ = Task.Run(async () =>
             {
-                try
+                List<long> dbChannels = await GetChannelIDFromDB(ctx);
+                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
                 {
-                    var user = await ctx.Guild.GetMemberAsync(id);
-                    
-                    if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                    await NoChannel(ctx);
+                    return;
+                }
+
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                {
+                    var msg = await ctx.RespondAsync(
+                        "<a:loading_agc:1084157150747697203> **Lade...** Versuche Nutzer zu blockieren...");
+                    var blockedlist = new List<ulong>();
+                    List<ulong> ids = new List<ulong>();
+                    ids = Converter.ExtractUserIDsFromString(users);
+                    var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                    var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+                    foreach (ulong id in ids)
                     {
-                        continue;
+                        try
+                        {
+                            var user = await ctx.Guild.GetMemberAsync(id);
+
+                            if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                            {
+                                continue;
+                            }
+
+                            overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
+                            if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
+                            {
+                                await user.DisconnectFromVoiceAsync();
+                            }
+
+                            blockedlist.Add(user.Id);
+                        }
+                        catch (NotFoundException)
+                        {
+                        }
                     }
 
-                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
-                    if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
-                    {
-                        await user.DisconnectFromVoiceAsync();
-                    }
-                    blockedlist.Add(user.Id);
-                }
-                catch (NotFoundException)
-                {
+                    await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                    int successCount = blockedlist.Count;
+                    string endstring =
+                        $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
+
+                    await msg.ModifyAsync(endstring);
                 }
             }
-            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-            int successCount = blockedlist.Count;
-            string endstring = $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
-
-            await msg.ModifyAsync(endstring);
-        }
+        );
     }
 
 
