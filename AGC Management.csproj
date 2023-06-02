@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -18,6 +18,12 @@
     <PackageReference Include="DisCatSharp.Common" Version="10.4.1-sentry-020" />
     <PackageReference Include="DisCatSharp.Interactivity" Version="10.4.1-sentry-020" />
     <PackageReference Include="ini-parser-new" Version="2.6.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.5-beta1.23225.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0-1.final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.7.0-1.final" />
     <PackageReference Include="Npgsql" Version="7.0.4" />
   </ItemGroup>
 
