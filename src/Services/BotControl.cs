@@ -61,7 +61,7 @@ namespace AGC_Management.Services
         /// <summary>
         /// The eval variables.
         /// </summary>
-        public class EvalVariables
+        private class EvalVariables
         {
             /// <summary>
             /// Gets or sets the message.
