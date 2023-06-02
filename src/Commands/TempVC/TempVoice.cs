@@ -7,13 +7,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
-using Microsoft.Extensions.Logging;
 using Npgsql;
-using Sentry;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -127,9 +121,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                         };
                                     await voice.DeleteAsync();
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-
                                 }
-                                
                             }
                     }
                 }
@@ -222,12 +214,13 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.UserLimit = voice.UserLimit;
                                 });
                                 await m.ModifyAsync(x => x.VoiceChannel = voice);
-                                
+
                                 if (locked)
                                 {
                                     await voice.ModifyAsync(x =>
                                         x.PermissionOverwrites =
-                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
+                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(
+                                                e.Guild.EveryoneRole,
                                                 Permissions.None, Permissions.UseVoice));
                                 }
 
@@ -235,10 +228,11 @@ public class TempVCEventHandler : TempVoiceHelper
                                 {
                                     await voice.ModifyAsync(x =>
                                         x.PermissionOverwrites =
-                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(e.Guild.EveryoneRole,
+                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(
+                                                e.Guild.EveryoneRole,
                                                 Permissions.None, Permissions.AccessChannels));
                                 }
-                                
+
                                 foreach (string user in blockeduserslist)
                                 {
                                     if (ulong.TryParse(user, out ulong blockeduser))
@@ -283,7 +277,6 @@ public class TempVCEventHandler : TempVoiceHelper
 
 public class TempVoiceCommands : TempVoiceHelper
 {
-    
     [Command("lock")]
     [RequireDatabase]
     //[RequireVoiceChannel]
@@ -309,6 +302,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **gesperrt**!");
                 return;
             }
+
             var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
             overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.UseVoice);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
@@ -410,6 +404,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync("<:attention:1085333468688433232> Der Channel ist bereits **sichtbar**!");
                 return;
             }
+
             var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
             overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.AccessChannels);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
@@ -417,7 +412,7 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:success:1085333481820790944> Der Channel ist nun **sichtbar**!");
         }
     }
-    
+
     [Command("rename")]
     [RequireDatabase]
     [Aliases("vcname")]
@@ -480,8 +475,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
         }
     }
-    
-    
+
 
     [Command("limit")]
     [RequireDatabase]
@@ -546,6 +540,7 @@ public class TempVoiceCommands : TempVoiceHelper
             await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem TempVC Channel.");
             return;
         }
+
         var channelowner = await ctx.Client.GetUserAsync((ulong)channelownerid);
         DiscordMember channelownermember = await ctx.Guild.GetMemberAsync(channelowner.Id);
         var orig_owner = channelownermember;
@@ -567,24 +562,25 @@ public class TempVoiceCommands : TempVoiceHelper
                 }
             }
 
-            overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels);
-            overwrites = overwrites.Merge(new_owner, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None);
+            overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None,
+                Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                Permissions.AccessChannels);
+            overwrites = overwrites.Merge(new_owner,
+                Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                Permissions.AccessChannels, Permissions.None);
 
 
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
         }
+
         if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
         {
             await msg.ModifyAsync(
                 $"<:attention:1085333468688433232> Du kannst dein Channel nicht Claimen, da der Channel-Owner ``{orig_owner.UsernameWithDiscriminator}`` noch im Channel ist.");
-            return;
         }
-
-
     }
-   
-    
+
 
     [Command("block")]
     [RequireDatabase]
@@ -604,9 +600,8 @@ public class TempVoiceCommands : TempVoiceHelper
 
                 if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
                 {
-                    
                     var blockedlist = new List<ulong>();
-                    List<ulong> ids = new List<ulong>();
+                    List<ulong> ids = new();
                     ids = Converter.ExtractUserIDsFromString(users);
                     var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
                     var msg = await ctx.RespondAsync(
@@ -646,10 +641,8 @@ public class TempVoiceCommands : TempVoiceHelper
                     await msg.ModifyAsync(endstring);
                 }
             }
-
         );
     }
-
 
 
     [Command("unblock")]
@@ -658,54 +651,53 @@ public class TempVoiceCommands : TempVoiceHelper
     public async Task VoiceUnlock(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
-        {
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-
-            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
             {
-                await NoChannel(ctx);
-                return;
-            }
+                List<long> dbChannels = await GetChannelIDFromDB(ctx);
+                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
-            {
-                
-                var unblocklist = new List<ulong>();
-                List<ulong> ids = new List<ulong>();
-                ids = Converter.ExtractUserIDsFromString(users);
-                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
-                var msg = await ctx.RespondAsync(
-                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu entsperren...");
-                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-
-                foreach (ulong id in ids)
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
                 {
-                    try
-                    {
-                        var user = await ctx.Guild.GetMemberAsync(id);
-
-
-                        overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice);
-
-
-                        unblocklist.Add(user.Id);
-                    }
-                    catch (NotFoundException)
-                    {
-                    }
+                    await NoChannel(ctx);
+                    return;
                 }
 
-                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                {
+                    var unblocklist = new List<ulong>();
+                    List<ulong> ids = new();
+                    ids = Converter.ExtractUserIDsFromString(users);
+                    var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                    var msg = await ctx.RespondAsync(
+                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu entsperren...");
+                    var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                int successCount = unblocklist.Count;
-                string endstring =
-                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **entsperrt**!";
+                    foreach (ulong id in ids)
+                    {
+                        try
+                        {
+                            var user = await ctx.Guild.GetMemberAsync(id);
 
-                await msg.ModifyAsync(endstring);
+
+                            overwrites = overwrites.Merge(user, Permissions.None, Permissions.None,
+                                Permissions.UseVoice);
+
+
+                            unblocklist.Add(user.Id);
+                        }
+                        catch (NotFoundException)
+                        {
+                        }
+                    }
+
+                    await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                    int successCount = unblocklist.Count;
+                    string endstring =
+                        $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **entsperrt**!";
+
+                    await msg.ModifyAsync(endstring);
+                }
             }
-        }
-
         );
     }
 
@@ -715,54 +707,53 @@ public class TempVoiceCommands : TempVoiceHelper
     public async Task VoicePermit(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
-        {
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-
-            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
             {
-                await NoChannel(ctx);
-                return;
-            }
+                List<long> dbChannels = await GetChannelIDFromDB(ctx);
+                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
-            {
-
-                var permitusers = new List<ulong>();
-                List<ulong> ids = new List<ulong>();
-                ids = Converter.ExtractUserIDsFromString(users);
-                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
-                var msg = await ctx.RespondAsync(
-                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zuzulassen...");
-                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-
-                foreach (ulong id in ids)
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
                 {
-                    try
-                    {
-                        var user = await ctx.Guild.GetMemberAsync(id);
-
-
-                        overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
-
-
-                        permitusers.Add(user.Id);
-                    }
-                    catch (NotFoundException)
-                    {
-                    }
+                    await NoChannel(ctx);
+                    return;
                 }
 
-                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                {
+                    var permitusers = new List<ulong>();
+                    List<ulong> ids = new();
+                    ids = Converter.ExtractUserIDsFromString(users);
+                    var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                    var msg = await ctx.RespondAsync(
+                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zuzulassen...");
+                    var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                int successCount = permitusers.Count;
-                string endstring =
-                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **zugelassen**!";
+                    foreach (ulong id in ids)
+                    {
+                        try
+                        {
+                            var user = await ctx.Guild.GetMemberAsync(id);
 
-                await msg.ModifyAsync(endstring);
+
+                            overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
+                                Permissions.None);
+
+
+                            permitusers.Add(user.Id);
+                        }
+                        catch (NotFoundException)
+                        {
+                        }
+                    }
+
+                    await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                    int successCount = permitusers.Count;
+                    string endstring =
+                        $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **zugelassen**!";
+
+                    await msg.ModifyAsync(endstring);
+                }
             }
-        }
-
         );
     }
 
@@ -772,70 +763,69 @@ public class TempVoiceCommands : TempVoiceHelper
     public async Task VoiceUnpermit(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
-        {
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-
-            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
             {
-                await NoChannel(ctx);
-                return;
-            }
+                List<long> dbChannels = await GetChannelIDFromDB(ctx);
+                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
-            {
-
-                var unpermitlist = new List<ulong>();
-                List<ulong> ids = new List<ulong>();
-                ids = Converter.ExtractUserIDsFromString(users);
-                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
-                var msg = await ctx.RespondAsync(
-                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer unzupermitten...");
-                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-
-                foreach (ulong id in ids)
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
                 {
-                    try
-                    {
-                        var user = await ctx.Guild.GetMemberAsync(id);
-
-
-                        overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
-
-
-                        unpermitlist.Add(user.Id);
-                    }
-                    catch (NotFoundException)
-                    {
-                    }
+                    await NoChannel(ctx);
+                    return;
                 }
 
-                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                {
+                    var unpermitlist = new List<ulong>();
+                    List<ulong> ids = new();
+                    ids = Converter.ExtractUserIDsFromString(users);
+                    var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                    var msg = await ctx.RespondAsync(
+                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer unzupermitten...");
+                    var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                int successCount = unpermitlist.Count;
-                string endstring =
-                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **unpermitted**!";
+                    foreach (ulong id in ids)
+                    {
+                        try
+                        {
+                            var user = await ctx.Guild.GetMemberAsync(id);
 
-                await msg.ModifyAsync(endstring);
+
+                            overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
+                                Permissions.None);
+
+
+                            unpermitlist.Add(user.Id);
+                        }
+                        catch (NotFoundException)
+                        {
+                        }
+                    }
+
+                    await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                    int successCount = unpermitlist.Count;
+                    string endstring =
+                        $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **unpermitted**!";
+
+                    await msg.ModifyAsync(endstring);
+                }
             }
-        }
-
         );
     }
-
 }
+
 public class TempVoicePanel : TempVoiceHelper
 {
-        private static List<ulong> LevelRoleIDs = new()
-        {
-            750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
-            750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
-            776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
-            810231454985486377, 810232899713630228, 810232892386705418
-        };
+    private static List<ulong> LevelRoleIDs = new()
+    {
+        750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
+        750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
+        776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
+        810231454985486377, 810232899713630228, 810232892386705418
+    };
 
-        private static List<string> lookup = new()
-        {
-            "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
-        };
-    }
+    private static List<string> lookup = new()
+    {
+        "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
+    };
+}
