@@ -728,7 +728,7 @@ public class TempVoiceCommands : TempVoiceHelper
             if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
             {
 
-                var unblocklist = new List<ulong>();
+                var permitusers = new List<ulong>();
                 List<ulong> ids = new List<ulong>();
                 ids = Converter.ExtractUserIDsFromString(users);
                 var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
@@ -746,7 +746,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
 
 
-                        unblocklist.Add(user.Id);
+                        permitusers.Add(user.Id);
                     }
                     catch (NotFoundException)
                     {
@@ -755,7 +755,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
                 await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-                int successCount = unblocklist.Count;
+                int successCount = permitusers.Count;
                 string endstring =
                     $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **zugelassen**!";
 
