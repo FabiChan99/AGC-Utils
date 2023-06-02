@@ -709,6 +709,63 @@ public class TempVoiceCommands : TempVoiceHelper
         );
     }
 
+    [Command("permit")]
+    [RequireDatabase]
+    [Aliases("allow", "whitelist")]
+    public async Task VoicePermit(CommandContext ctx, [RemainingText] string users)
+    {
+        _ = Task.Run(async () =>
+        {
+            List<long> dbChannels = await GetChannelIDFromDB(ctx);
+            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+
+            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+            {
+                await NoChannel(ctx);
+                return;
+            }
+
+            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+            {
+
+                var unblocklist = new List<ulong>();
+                List<ulong> ids = new List<ulong>();
+                ids = Converter.ExtractUserIDsFromString(users);
+                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                var msg = await ctx.RespondAsync(
+                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zuzulassen...");
+                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+                foreach (ulong id in ids)
+                {
+                    try
+                    {
+                        var user = await ctx.Guild.GetMemberAsync(id);
+
+
+                        overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
+
+
+                        unblocklist.Add(user.Id);
+                    }
+                    catch (NotFoundException)
+                    {
+                    }
+                }
+
+                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                int successCount = unblocklist.Count;
+                string endstring =
+                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **zugelassen**!";
+
+                await msg.ModifyAsync(endstring);
+            }
+        }
+
+        );
+    }
+
 }
 public class TempVoicePanel : TempVoiceHelper
 {
