@@ -15,7 +15,7 @@ namespace AGC_Management.Commands.TempVC;
 public class TempVCEventHandler : TempVoiceHelper
 {
     [Event]
-    private async Task VoiceStateUpdated(object sender, VoiceStateUpdateEventArgs e)
+    private Task VoiceStateUpdated(DiscordClient sender, VoiceStateUpdateEventArgs e)
     {
         _ = Task.Run(async () =>
         {
@@ -270,6 +270,8 @@ public class TempVCEventHandler : TempVoiceHelper
                 Console.WriteLine(ex.Message);
             }
         });
+        
+        return Task.CompletedTask;
     }
 }
 
