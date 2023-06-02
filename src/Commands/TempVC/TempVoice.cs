@@ -813,7 +813,15 @@ public class TempVoiceCommands : TempVoiceHelper
             }
         );
     }
+
+    [Group("session")]
+    public class SessionManagement : BaseCommandModule
+    {
+
+    }
 }
+
+
 
 public class TempVoicePanel : TempVoiceHelper
 {
