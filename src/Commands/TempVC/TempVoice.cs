@@ -757,9 +757,9 @@ public class TempVoiceCommands : TempVoiceHelper
         );
     }
 
-    [Command("permit")]
+    [Command("unpermit")]
     [RequireDatabase]
-    [Aliases("allow", "whitelist")]
+    [Aliases("unwhitelist")]
     public async Task VoiceUnpermit(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
