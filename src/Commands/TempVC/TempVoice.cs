@@ -532,7 +532,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
         if (ctx.Member.VoiceState?.Channel == null)
         {
-            msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem Voice-Channel.");
+            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem Voice-Channel.");
             return;
         }
 

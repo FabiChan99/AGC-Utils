@@ -2,3 +2,6 @@
 
 # CS1998: Bei der asynchronen Methode fehlen "await"-Operatoren. Die Methode wird synchron ausgeführt.
 dotnet_diagnostic.CS1998.severity = silent
+
+# DV2001: Kein Abhängigkeitsdiagramm verknüpft
+dotnet_diagnostic.DV2001.severity = silent

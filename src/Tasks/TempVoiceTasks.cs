@@ -63,7 +63,7 @@ public class TempVoiceTasks
                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Dictionary<string, (object value, string comparisonOperator)>
                     DeletewhereConditions = new()

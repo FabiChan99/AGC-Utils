@@ -918,13 +918,11 @@ public class CaseManagement : BaseCommandModule
         foreach (var result in fresult) flist.Add(result);
         dynamic warn;
         dynamic flag;
-        string ctyp = null;
         bool wcase = false;
         bool fcase = false;
         try
         {
             warn = wlist[0];
-            ctyp = "Verwarnung";
             wcase = true;
         }
         catch (Exception)
@@ -935,7 +933,6 @@ public class CaseManagement : BaseCommandModule
         try
         {
             flag = flist[0];
-            ctyp = "Markierung";
             fcase = true;
         }
         catch (Exception)
@@ -1067,12 +1064,9 @@ public class CaseManagement : BaseCommandModule
             flag = null;
         }
 
-        string case_type;
-        DiscordUser user;
-        DiscordUser punisher;
-        DateTime datum;
+
+
         string reason = newreason;
-        bool perma;
         string sql;
         if (wcase)
         {
@@ -1185,12 +1179,8 @@ public class CaseManagement : BaseCommandModule
             flag = null;
         }
 
-        string case_type;
-        DiscordUser user;
-        DiscordUser punisher;
-        DateTime datum;
+
         string reason = deletereason;
-        bool perma;
         string sql;
         if (wcase)
         {

@@ -71,7 +71,6 @@ public static class ModerationHelper
     {
         string unbanurl = GetUnbanURL();
         var (warnsToKick, warnsToBan) = await GetWarnKickValues();
-        DiscordEmbed embed;
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
                 .WithDescription(
@@ -139,7 +138,6 @@ public static class ModerationHelper
     {
         var (warnsToKick, warnsToBan) = await GetWarnKickValues();
         string unbanurl = GetUnbanURL();
-        DiscordEmbed embed;
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
                 .WithDescription(
