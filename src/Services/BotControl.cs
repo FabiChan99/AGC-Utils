@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace AGC_Management.Services
 {
-    public class BotControl
+    public class BotControl : BaseCommandModule
     {
         [Command("eval"), Description("Evaluates C# code."), Hidden, RequireOwner]
         public async Task EvalCSAsync(CommandContext ctx, [RemainingText] string code)
