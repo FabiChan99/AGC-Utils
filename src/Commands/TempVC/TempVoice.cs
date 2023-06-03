@@ -958,7 +958,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
 
                 var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-                overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
+                overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                     Permissions.None);
 
                 await userchannel.ModifyAsync(x =>
