@@ -97,6 +97,21 @@ public class TempVCEventHandler : TempVoiceHelper
                                     { "lastedited", (long)0 }
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
+                                try
+                                {
+                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                }
+                                catch (Exception)
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)voice.Id, "=") }
+                                        };
+                                    await voice.DeleteAsync();
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    return;
+                                }
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
