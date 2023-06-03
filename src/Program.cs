@@ -1,4 +1,5 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿using AGC_Management.Services;
+using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Tasks;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
@@ -8,6 +9,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using DisCatSharp.Lavalink;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 
@@ -87,6 +89,8 @@ internal class Program : BaseCommandModule
         await discord.ConnectAsync();
 
         await StartTasks(discord);
+        var lavalink = discord.UseLavalink();
+        await lavalink.ConnectAsync(LavalinkHandler.lavalinkconfig());
         await Task.Delay(-1);
     }
 
@@ -101,6 +105,7 @@ internal class Program : BaseCommandModule
         TVT.StartRemoveEmptyTempVoices(discord);
         return Task.CompletedTask;
     }
+
 
     private static Task<int> GetPrefix(DiscordMessage message)
     {
