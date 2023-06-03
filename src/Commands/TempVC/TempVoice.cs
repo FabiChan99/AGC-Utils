@@ -858,6 +858,8 @@ public class TempVoiceCommands : TempVoiceHelper
 
                 if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
                 {
+                    var msg = await ctx.RespondAsync(
+                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu speichern...");
                     List<string> Query = new()
                     {
                         "userid"
@@ -930,10 +932,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         { "hidden", hidden }
                     };
                     await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
-
-
-
-
+                    await msg.ModifyAsync($"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gespeichert**!");
                 }
             });
         }
