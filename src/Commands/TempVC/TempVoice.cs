@@ -987,6 +987,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     await msg.ModifyAsync(
                                                $"❌ Du hast keine gespeicherte Sitzung.");
+                    return;
                 }
 
 
