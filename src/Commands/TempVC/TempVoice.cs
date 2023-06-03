@@ -873,7 +873,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     {
                         hasSession = true;
                     }
-                    
+
 
                     if (hasSession)
                     {
@@ -884,35 +884,45 @@ public class TempVoiceCommands : TempVoiceHelper
                             { "userid", ((long)ctx.User.Id, "=") }
                         };
 
-                        int rowsDeleted = await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
+                        int rowsDeleted =
+                            await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
                     }
-                    var overwrite = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx.Guild.EveryoneRole.Id);
+
+                    var overwrite =
+                        userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx.Guild.EveryoneRole.Id);
                     if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
                     {
                         locked = true;
                     }
+
                     if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
                     {
                         locked = false;
                     }
+
                     if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
                     {
                         hidden = true;
                     }
-                    if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+
+                    if (overwrite == null ||
+                        overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
                     {
                         hidden = false;
                     }
-                   
+
                     string blocklist = string.Empty;
                     string permitlist = string.Empty;
-                    var buserow = userChannel.PermissionOverwrites.Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id).ToList();
-                    
+                    var buserow = userChannel.PermissionOverwrites
+                        .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+                        .ToList();
+
                     var puserow = userChannel.PermissionOverwrites
                         .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
                         .Where(x => x.Id != ctx.User.Id)
                         .Select(x => x.Id)
-                        .ToList(); foreach (var user in buserow)
+                        .ToList();
+                    foreach (var user in buserow)
                     {
                         blockedusers.Add(user);
                     }
@@ -921,6 +931,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     {
                         permittedusers.Add(user);
                     }
+
                     blocklist = string.Join(", ", blockedusers);
                     permitlist = string.Join(", ", permittedusers);
                     Dictionary<string, object> data = new()
@@ -935,10 +946,53 @@ public class TempVoiceCommands : TempVoiceHelper
                         { "hidden", hidden }
                     };
                     await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
-                    await msg.ModifyAsync($"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gespeichert**!");
+                    await msg.ModifyAsync(
+                        $"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gespeichert**!");
                 }
             });
         }
+
+
+        [Command("delete")]
+        [RequireDatabase]
+        public async Task SessionReset(CommandContext ctx)
+        {
+            _ = Task.Run(async () =>
+            {
+                var msg = await ctx.RespondAsync(
+                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu löschen...");
+                List<string> Query = new()
+                {
+                    "userid"
+                };
+                bool hasSession = false;
+                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                foreach (var user in usersession)
+                {
+                    hasSession = true;
+                }
+                Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
+                {
+                    { "userid", ((long)ctx.User.Id, "=") }
+                };
+
+                int rowsDeleted =
+                    await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
+
+                if (!hasSession)
+                {
+                    await msg.ModifyAsync(
+                                               $"❌ Du hast keine gespeicherte Sitzung.");
+                }
+
+
+                await msg.ModifyAsync(
+                    $"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gelöscht**!");
+
+
+            });
+        }
+
     }
 }
 
