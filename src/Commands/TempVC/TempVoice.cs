@@ -159,6 +159,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
                         (e.Before?.Channel != null && e.After?.Channel != null))
                     {
+                        var overwrites = e.After?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                         ulong creationChannelId;
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
@@ -235,20 +236,12 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
                                 if (locked)
                                 {
-                                    await voice.ModifyAsync(x =>
-                                        x.PermissionOverwrites =
-                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(
-                                                e.Guild.EveryoneRole,
-                                                Permissions.None, Permissions.UseVoice));
+                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice);
                                 }
 
                                 if (hidden)
                                 {
-                                    await voice.ModifyAsync(x =>
-                                        x.PermissionOverwrites =
-                                            voice.PermissionOverwrites.ConvertToBuilderWithNewOverwrites(
-                                                e.Guild.EveryoneRole,
-                                                Permissions.None, Permissions.AccessChannels));
+                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                                 }
 
                                 foreach (string user in blockeduserslist)
@@ -257,8 +250,13 @@ public class TempVCEventHandler : TempVoiceHelper
                                     {
                                         try
                                         {
-                                            DiscordMember blockedmember = await e.Guild.GetMemberAsync(blockeduser);
-                                            await voice.AddOverwriteAsync(blockedmember, deny: Permissions.UseVoice);
+                                            var userid = await e.After.Guild.GetMemberAsync(blockeduser);
+
+
+                                            overwrites = overwrites.Merge(userid, Permissions.None,
+                                                Permissions.UseVoice);
+
+
                                         }
                                         catch (NotFoundException)
                                         {
@@ -272,15 +270,20 @@ public class TempVCEventHandler : TempVoiceHelper
                                     {
                                         try
                                         {
-                                            DiscordMember permitedmember = await e.Guild.GetMemberAsync(permiteduser);
-                                            await voice.AddOverwriteAsync(permitedmember, Permissions.UseVoice);
-                                            await voice.AddOverwriteAsync(permitedmember, Permissions.AccessChannels);
+                                            var userid = await e.After.Guild.GetMemberAsync(permiteduser);
+
+
+                                            overwrites = overwrites.Merge(userid, Permissions.UseVoice | Permissions.AccessChannels,
+                                                Permissions.None);
+
+
                                         }
                                         catch (NotFoundException)
                                         {
                                         }
                                     }
                                 }
+                                await voice.ModifyAsync(x => x.PermissionOverwrites = overwrites);
                             }
                     }
                 }
