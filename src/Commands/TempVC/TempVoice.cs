@@ -198,6 +198,13 @@ public class TempVCEventHandler : TempVoiceHelper
                                 DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync(channelName,
                                     e.After.Channel.Parent, channelBitrate, channelLimit,
                                     qualityMode: VideoQualityMode.Full);
+                                Dictionary<string, object> data = new()
+                                {
+                                    { "ownerid", (long)e.User.Id },
+                                    { "channelid", (long)voice.Id },
+                                    { "lastedited", (long)0 }
+                                };
+                                await DatabaseService.InsertDataIntoTable("tempvoice", data);
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
@@ -212,8 +219,20 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.Position = e.After.Channel.Position + 1;
                                     x.UserLimit = voice.UserLimit;
                                 });
-                                await m.ModifyAsync(x => x.VoiceChannel = voice);
-
+                                try
+                                {
+                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                }
+                                catch (Exception)
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)voice.Id, "=") }
+                                        };
+                                    await voice.DeleteAsync();
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                }
                                 if (locked)
                                 {
                                     await voice.ModifyAsync(x =>
@@ -843,27 +862,13 @@ public class TempVoiceCommands : TempVoiceHelper
                     {
                         "userid"
                     };
-                    Dictionary<bool, ulong> sessionData = new();
+                    bool hasSession = false;
                     var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
                     foreach (var user in usersession)
                     {
-                        if (user["userid"] != null)
-                        {
-                            sessionData.Add(true, ulong.Parse((string)user["userid"]));
-                        }
-                    }
-                    var keyValuePairs = sessionData.ToList();
-                    bool hasSession = false;
-                    try
-                    {
-                        var datakey = keyValuePairs[0].Key;
-                        var datavalue = keyValuePairs[0].Value;
                         hasSession = true;
                     }
-                    catch
-                    {
-                        hasSession = false;
-                    }
+                    
 
                     if (hasSession)
                     {
@@ -893,12 +898,16 @@ public class TempVoiceCommands : TempVoiceHelper
                     {
                         hidden = false;
                     }
-
+                   
                     string blocklist = string.Empty;
                     string permitlist = string.Empty;
                     var buserow = userChannel.PermissionOverwrites.Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id).ToList();
-                    var puserow = userChannel.PermissionOverwrites.Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed).Select(x => x.Id).ToList();
-                    foreach (var user in buserow)
+                    
+                    var puserow = userChannel.PermissionOverwrites
+                        .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
+                        .Where(x => x.Id != ctx.User.Id)
+                        .Select(x => x.Id)
+                        .ToList(); foreach (var user in buserow)
                     {
                         blockedusers.Add(user);
                     }
