@@ -76,6 +76,7 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
+
                                 DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
 
                                 string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
@@ -91,7 +92,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                 DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync
                                 (defaultVcName, e.After.Channel.Parent,
                                     96000, 0, qualityMode: VideoQualityMode.Full);
-
+                                var overwrites = voice.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                                 Dictionary<string, object> data = new()
                                 {
                                     { "ownerid", (long)e.User.Id },
@@ -116,18 +117,9 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
                                 await voice.ModifyAsync(async x =>
                                 {
-                                    x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
-                                    {
-                                        new DiscordOverwriteBuilder()
-                                            .For(m)
-                                            .Allow(Permissions.MoveMembers)
-                                            .Allow(Permissions.ManageChannels)
-                                            .Allow(Permissions.AccessChannels)
-                                            .Allow(Permissions.UseVoice)
-                                    };
                                     x.Position = e.After.Channel.Position + 1;
-                                    x.UserLimit = voice.UserLimit;
                                 });
+                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
 
                             }
                     }
@@ -164,7 +156,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
                         (e.Before?.Channel != null && e.After?.Channel != null))
                     {
-                        var overwrites = e.After?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+                        
                         ulong creationChannelId;
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
@@ -226,19 +218,11 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                     return;
                                 }
+                                var overwrites = voice.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                                 await voice.ModifyAsync(async x =>
-                                {
-                                    x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
-                                    {
-                                        new DiscordOverwriteBuilder()
-                                            .For(m)
-                                            .Allow(Permissions.MoveMembers)
-                                            .Allow(Permissions.ManageChannels)
-                                            .Allow(Permissions.AccessChannels)
-                                            .Allow(Permissions.UseVoice)
-                                    };
-                                    x.Position = e.After.Channel.Position + 1;
+                                {x.Position = e.After.Channel.Position + 1;
                                 });
+                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
                                 if (locked)
                                 {
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice);
