@@ -652,7 +652,7 @@ public class TempVoiceCommands : TempVoiceHelper
     [Command("unblock")]
     [RequireDatabase]
     [Aliases("vcunban", "multiunblock")]
-    public async Task VoiceUnlock(CommandContext ctx, [RemainingText] string users)
+    public async Task VoiceUnblock(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
             {
