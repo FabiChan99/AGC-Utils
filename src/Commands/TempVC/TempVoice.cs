@@ -238,7 +238,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                             .Allow(Permissions.UseVoice)
                                     };
                                     x.Position = e.After.Channel.Position + 1;
-                                    x.UserLimit = voice.UserLimit;
                                 });
                                 if (locked)
                                 {
