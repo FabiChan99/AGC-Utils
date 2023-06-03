@@ -66,7 +66,7 @@ internal class Program : BaseCommandModule
             Intents = DiscordIntents.All,
             LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt",
             DeveloperUserId = GlobalProperties.BotOwnerId,
-            Locale = "de"
+            Locale = "de", EnableSentry = true, AttachUserInfo = true, MessageCacheSize = 10000, ReportMissingFields = true
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
