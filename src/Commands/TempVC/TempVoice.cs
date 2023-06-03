@@ -998,6 +998,74 @@ public class TempVoiceCommands : TempVoiceHelper
             });
         }
 
+
+        [Command("read")]
+        [RequireDatabase]
+        public async Task SessionRead(CommandContext ctx)
+        {
+            _ = Task.Run(async () =>
+            {
+                var msg = await ctx.RespondAsync(
+                                       $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu lesen...");
+                List<string> Query = new()
+                {
+                    "userid"
+                };
+                bool hasSession = false;
+                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                foreach (var user in usersession)
+                {
+                    hasSession = true;
+                }
+
+                if (!hasSession)
+                {
+                    await msg.ModifyAsync(
+                                               $"❌ Du hast keine gespeicherte Sitzung.");
+                    return;
+                }
+                List<string> dataQuery = new()
+                {
+                    "*"
+                };
+                var session = await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, null);
+                foreach (var user in session)
+                {
+                    if (user["userid"].ToString() == ctx.User.Id.ToString())
+                    {
+                        string channelname = user["channelname"].ToString();
+                        string channelbitrate = user["channelbitrate"].ToString();
+                        string channellimit = user["channellimit"].ToString();
+
+                        if (channellimit == "0")
+                        {
+                            channellimit = "Kein Limit";
+                        }
+                        string blockedusers = user["blockedusers"].ToString();
+                        string permitedusers = user["permitedusers"].ToString();
+                        string locked = user["locked"].ToString();
+                        string hidden = user["hidden"].ToString(); 
+                        string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
+                        string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
+
+                        DiscordEmbedBuilder ebb = new DiscordEmbedBuilder()
+                        {
+                            Title = $"{BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} TempVC Kanaleinstellungen",
+                            Description = $"**Kanalname:** {channelname}\n" +
+                                          $"**Kanalbitrate:** {channelbitrate} kbps\n" +
+                                          $"**Kanallimit:** {channellimit}\n\n" +
+                                          $"**Gesperrte Benutzer:** ```{bu}```\n" +
+                                          $"**Zugelassene Benutzer:** ```{pu}```\n" +
+                                          $"**Gesperrt:** {locked}\n" +
+                                          $"**Versteckt:** {hidden}\n",
+                            Color = BotConfig.GetEmbedColor()
+                        };
+                        await msg.ModifyAsync(embed: ebb.Build());
+                    }
+                }
+            });
+        }
+
     }
 }
 
@@ -1009,7 +1077,7 @@ public class TempVoicePanel : TempVoiceHelper
         750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
         776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
         810231454985486377, 810232899713630228, 810232892386705418
-    };
+    };  
 
     private static List<string> lookup = new()
     {
