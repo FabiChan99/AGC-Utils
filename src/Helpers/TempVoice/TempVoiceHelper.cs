@@ -1,7 +1,6 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
-using System.Runtime.CompilerServices;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -216,7 +215,7 @@ public class TempVoiceHelper : BaseCommandModule
                 if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
-                    break; 
+                    break;
                 }
             }
         }
@@ -251,7 +250,7 @@ public class TempVoiceHelper : BaseCommandModule
                 if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
-                    break; 
+                    break;
                 }
             }
         }

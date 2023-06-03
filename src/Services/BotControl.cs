@@ -1,14 +1,8 @@
-﻿using DisCatSharp.CommandsNext.Attributes;
+﻿using DisCatSharp;
 using DisCatSharp.CommandsNext;
+using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
-using DisCatSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 

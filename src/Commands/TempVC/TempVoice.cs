@@ -9,10 +9,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.CodeAnalysis.Operations;
 using Npgsql;
-using System.ComponentModel;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -76,7 +73,6 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
-
                                 DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
 
                                 string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
@@ -115,14 +111,15 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                     return;
                                 }
-                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
+
+                                overwrites = overwrites.Merge(m,
+                                    Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
+                                    Permissions.AccessChannels, Permissions.None);
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.Position = e.After.Channel.Position + 1;
                                     x.PermissionOverwrites = overwrites;
                                 });
-                                
-
                             }
                     }
                 }
@@ -158,7 +155,6 @@ public class TempVCEventHandler : TempVoiceHelper
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
                         (e.Before?.Channel != null && e.After?.Channel != null))
                     {
-                        
                         ulong creationChannelId;
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
@@ -220,19 +216,22 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                     return;
                                 }
+
                                 var overwrites = voice.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-                                await voice.ModifyAsync(async x =>
-                                {x.Position = e.After.Channel.Position + 1;
-                                });
-                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
+                                await voice.ModifyAsync(async x => { x.Position = e.After.Channel.Position + 1; });
+                                overwrites = overwrites.Merge(m,
+                                    Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
+                                    Permissions.AccessChannels, Permissions.None);
                                 if (locked)
                                 {
-                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice);
+                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
+                                        Permissions.UseVoice);
                                 }
 
                                 if (hidden)
                                 {
-                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels);
+                                    overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
+                                        Permissions.AccessChannels);
                                 }
 
                                 foreach (string user in blockeduserslist)
@@ -246,8 +245,6 @@ public class TempVCEventHandler : TempVoiceHelper
 
                                             overwrites = overwrites.Merge(userid, Permissions.None,
                                                 Permissions.UseVoice);
-
-
                                         }
                                         catch (NotFoundException)
                                         {
@@ -264,16 +261,16 @@ public class TempVCEventHandler : TempVoiceHelper
                                             var userid = await e.After.Guild.GetMemberAsync(permiteduser);
 
 
-                                            overwrites = overwrites.Merge(userid, Permissions.UseVoice | Permissions.AccessChannels,
+                                            overwrites = overwrites.Merge(userid,
+                                                Permissions.UseVoice | Permissions.AccessChannels,
                                                 Permissions.None);
-
-
                                         }
                                         catch (NotFoundException)
                                         {
                                         }
                                     }
                                 }
+
                                 await voice.ModifyAsync(x => x.PermissionOverwrites = overwrites);
                             }
                     }
@@ -872,7 +869,8 @@ public class TempVoiceCommands : TempVoiceHelper
             TargetUser = Owner;
             if (TargetUser.VoiceState?.Channel == null)
             {
-                await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist in keinem Voice Channel.");
+                await msg.ModifyAsync(
+                    "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist in keinem Voice Channel.");
                 return;
             }
 
@@ -880,7 +878,8 @@ public class TempVoiceCommands : TempVoiceHelper
             Console.WriteLine(userchannelid);
             if (TargetUser.VoiceState?.Channel != null && TargetUser.VoiceState?.Channel.Id != userchannelid)
             {
-                await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist nicht in dem gewünschten Channel.");
+                await msg.ModifyAsync(
+                    "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist nicht in dem gewünschten Channel.");
                 return;
             }
         }
@@ -946,10 +945,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                     Permissions.None);
 
-                await userchannel.ModifyAsync(x =>
-                {
-                    x.PermissionOverwrites = overwrites;
-                });
+                await userchannel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
                 eb_.WithTitle("Beitrittsanfrage angenommen");
                 eb_.WithDescription(
                     $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage akzeptiert. Klicke [hier beitreten]({invite}) (Diese Einladung ist 5 Minuten gültig)\\nDu wurdest außerdem für den Channel freigeschalten!");
@@ -964,10 +960,10 @@ public class TempVoiceCommands : TempVoiceHelper
 
             if (result.Result.Id == $"jr_deny_{caseid}")
             {
-                               DiscordEmbedBuilder eb_ = new();
+                DiscordEmbedBuilder eb_ = new();
                 eb_.WithTitle("Beitrittsanfrage abgelehnt");
                 eb_.WithDescription(
-                                       $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
+                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
                 eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
                 eb_.WithColor(DiscordColor.Red);
                 eb_.Build();
@@ -1005,7 +1001,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
                 {
                     var msg = await ctx.RespondAsync(
-                        $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu speichern...");
+                        "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu speichern...");
                     List<string> Query = new()
                     {
                         "userid"
@@ -1020,7 +1016,6 @@ public class TempVoiceCommands : TempVoiceHelper
 
                     if (hasSession)
                     {
-
                         // if session is there delete it
                         Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
                         {
@@ -1090,7 +1085,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     };
                     await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
                     await msg.ModifyAsync(
-                        $"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gespeichert**!");
+                        "<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gespeichert**!");
                 }
             });
         }
@@ -1103,7 +1098,7 @@ public class TempVoiceCommands : TempVoiceHelper
             _ = Task.Run(async () =>
             {
                 var msg = await ctx.RespondAsync(
-                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu löschen...");
+                    "<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu löschen...");
                 List<string> Query = new()
                 {
                     "userid"
@@ -1114,6 +1109,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     hasSession = true;
                 }
+
                 Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
                 {
                     { "userid", ((long)ctx.User.Id, "=") }
@@ -1125,15 +1121,13 @@ public class TempVoiceCommands : TempVoiceHelper
                 if (!hasSession)
                 {
                     await msg.ModifyAsync(
-                                               $"❌ Du hast keine gespeicherte Sitzung.");
+                        "\u274c Du hast keine gespeicherte Sitzung.");
                     return;
                 }
 
 
                 await msg.ModifyAsync(
-                    $"<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gelöscht**!");
-
-
+                    "<:success:1085333481820790944> **Erfolg!** Die Kanaleinstellungen wurden erfolgreich **gelöscht**!");
             });
         }
 
@@ -1145,7 +1139,7 @@ public class TempVoiceCommands : TempVoiceHelper
             _ = Task.Run(async () =>
             {
                 var msg = await ctx.RespondAsync(
-                                       $"<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu lesen...");
+                    "<a:loading_agc:1084157150747697203> **Lade...** Versuche Kanaleinstellungen zu lesen...");
                 List<string> Query = new()
                 {
                     "userid"
@@ -1160,9 +1154,10 @@ public class TempVoiceCommands : TempVoiceHelper
                 if (!hasSession)
                 {
                     await msg.ModifyAsync(
-                                               $"❌ Du hast keine gespeicherte Sitzung.");
+                        "\u274c Du hast keine gespeicherte Sitzung.");
                     return;
                 }
+
                 List<string> dataQuery = new()
                 {
                     "*"
@@ -1180,16 +1175,18 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             channellimit = "Kein Limit";
                         }
+
                         string blockedusers = user["blockedusers"].ToString();
                         string permitedusers = user["permitedusers"].ToString();
                         string locked = user["locked"].ToString();
-                        string hidden = user["hidden"].ToString(); 
+                        string hidden = user["hidden"].ToString();
                         string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
                         string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
 
-                        DiscordEmbedBuilder ebb = new DiscordEmbedBuilder()
+                        DiscordEmbedBuilder ebb = new()
                         {
-                            Title = $"{BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} TempVC Kanaleinstellungen",
+                            Title =
+                                $"{BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} TempVC Kanaleinstellungen",
                             Description = $"**Kanalname:** {channelname}\n" +
                                           $"**Kanalbitrate:** {channelbitrate} kbps\n" +
                                           $"**Kanallimit:** {channellimit}\n\n" +
@@ -1199,7 +1196,7 @@ public class TempVoiceCommands : TempVoiceHelper
                                           $"**Versteckt:** {hidden}\n",
                             Color = BotConfig.GetEmbedColor()
                         };
-                        await msg.ModifyAsync(embed: ebb.Build());
+                        await msg.ModifyAsync(ebb.Build());
                     }
                 }
             });
@@ -1215,7 +1212,7 @@ public class TempVoicePanel : TempVoiceHelper
         750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
         776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
         810231454985486377, 810232899713630228, 810232892386705418
-    };  
+    };
 
     private static List<string> lookup = new()
     {

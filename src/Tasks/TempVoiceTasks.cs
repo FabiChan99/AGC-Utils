@@ -1,8 +1,7 @@
-﻿using AGC_Management.Commands.TempVC;
+﻿using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
-using AGC_Management.Services.DatabaseHandler;
-using Microsoft.Extensions.Logging;
 using DisCatSharp.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace AGC_Management.Tasks;
 
