@@ -89,6 +89,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                 DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync
                                 (defaultVcName, e.After.Channel.Parent,
                                     96000, 0, qualityMode: VideoQualityMode.Full);
+
                                 Dictionary<string, object> data = new()
                                 {
                                     { "ownerid", (long)e.User.Id },
@@ -110,20 +111,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.Position = e.After.Channel.Position + 1;
                                     x.UserLimit = voice.UserLimit;
                                 });
-                                try
-                                {
-                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
-                                }
-                                catch (Exception)
-                                {
-                                    Dictionary<string, (object value, string comparisonOperator)>
-                                        DeletewhereConditions = new()
-                                        {
-                                            { "channelid", ((long)voice.Id, "=") }
-                                        };
-                                    await voice.DeleteAsync();
-                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-                                }
+
                             }
                     }
                 }
@@ -186,7 +174,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                         ? (string)item["permitedusers"]
                                         : string.Empty;
                                     locked = (bool)item["locked"];
-                                    hidden = item["hidden"] != null ? (bool)item["hidden"] : false;
+                                    hidden = (bool)item["hidden"];
                                     break;
                                 }
 
@@ -206,6 +194,21 @@ public class TempVCEventHandler : TempVoiceHelper
                                     { "lastedited", (long)0 }
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
+                                try
+                                {
+                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
+                                }
+                                catch (Exception)
+                                {
+                                    Dictionary<string, (object value, string comparisonOperator)>
+                                        DeletewhereConditions = new()
+                                        {
+                                            { "channelid", ((long)voice.Id, "=") }
+                                        };
+                                    await voice.DeleteAsync();
+                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    return;
+                                }
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.PermissionOverwrites = new List<DiscordOverwriteBuilder>
@@ -220,20 +223,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                     x.Position = e.After.Channel.Position + 1;
                                     x.UserLimit = voice.UserLimit;
                                 });
-                                try
-                                {
-                                    await m.ModifyAsync(x => x.VoiceChannel = voice);
-                                }
-                                catch (Exception)
-                                {
-                                    Dictionary<string, (object value, string comparisonOperator)>
-                                        DeletewhereConditions = new()
-                                        {
-                                            { "channelid", ((long)voice.Id, "=") }
-                                        };
-                                    await voice.DeleteAsync();
-                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-                                }
                                 if (locked)
                                 {
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None, Permissions.UseVoice);
