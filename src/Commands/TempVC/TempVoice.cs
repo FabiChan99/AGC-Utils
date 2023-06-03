@@ -948,7 +948,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 await userchannel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
                 eb_.WithTitle("Beitrittsanfrage angenommen");
                 eb_.WithDescription(
-                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage akzeptiert. Klicke [hier beitreten]({invite}) (Diese Einladung ist 5 Minuten gültig)\\nDu wurdest außerdem für den Channel freigeschalten!");
+                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage akzeptiert. Klicke [hier beitreten]({invite}) (Diese Einladung ist 5 Minuten gültig)\nDu wurdest außerdem für den Channel freigeschalten!");
                 eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
                 eb_.WithColor(BotConfig.GetEmbedColor());
                 eb_.Build();
