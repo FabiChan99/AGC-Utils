@@ -186,9 +186,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                         : string.Empty;
                                     locked = (bool)item["locked"];
                                     hidden = item["hidden"] != null ? (bool)item["hidden"] : false;
-                                    channelMods = (string)item["channelmods"] != null
-                                        ? (string)item["channelmods"]
-                                        : string.Empty;
                                     break;
                                 }
 
