@@ -8,7 +8,9 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+using Microsoft.CodeAnalysis.Operations;
 using Npgsql;
+using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -22,7 +24,8 @@ public class TempVCEventHandler : TempVoiceHelper
         {
             try
             {
-                if (e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]) | e.Guild.Id != 818699057878663168) return;
+                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) |
+                    (e.Guild.Id != 818699057878663168)) return;
                 var sessionresult = new List<Dictionary<string, object>>();
                 var usersession = new List<dynamic>();
                 List<string> Query = new()
@@ -271,7 +274,7 @@ public class TempVCEventHandler : TempVoiceHelper
                 Console.WriteLine(ex.Message);
             }
         });
-        
+
         return Task.CompletedTask;
     }
 }
@@ -817,11 +820,119 @@ public class TempVoiceCommands : TempVoiceHelper
     [Group("session")]
     public class SessionManagement : TempVoiceCommands
     {
+        [Command("save")]
+        [Aliases("safe")]
+        [RequireDatabase]
+        public async Task SessionSave(CommandContext ctx)
+        {
+            _ = Task.Run(async () =>
+            {
+                List<ulong> blockedusers = new();
+                List<ulong> permittedusers = new();
+                List<long> dbChannels = await GetChannelIDFromDB(ctx);
+                bool hidden = false;
+                bool locked = false;
+                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+                {
+                    await NoChannel(ctx);
+                    return;
+                }
+
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                {
+                    List<string> Query = new()
+                    {
+                        "userid"
+                    };
+                    Dictionary<bool, ulong> sessionData = new();
+                    var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                    foreach (var user in usersession)
+                    {
+                        if (user["userid"] != null)
+                        {
+                            sessionData.Add(true, ulong.Parse((string)user["userid"]));
+                        }
+                    }
+                    var keyValuePairs = sessionData.ToList();
+                    bool hasSession = false;
+                    try
+                    {
+                        var datakey = keyValuePairs[0].Key;
+                        var datavalue = keyValuePairs[0].Value;
+                        hasSession = true;
+                    }
+                    catch
+                    {
+                        hasSession = false;
+                    }
+
+                    if (hasSession)
+                    {
+
+                        // if session is there delete it
+                        Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
+                        {
+                            { "userid", ((long)ctx.User.Id, "=") }
+                        };
+
+                        int rowsDeleted = await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
+                    }
+                    var overwrite = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx.Guild.EveryoneRole.Id);
+                    if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+                    {
+                        locked = true;
+                    }
+                    if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+                    {
+                        locked = false;
+                    }
+                    if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
+                    {
+                        hidden = true;
+                    }
+                    if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+                    {
+                        hidden = false;
+                    }
+
+                    string blocklist = string.Empty;
+                    string permitlist = string.Empty;
+                    var buserow = userChannel.PermissionOverwrites.Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id).ToList();
+                    var puserow = userChannel.PermissionOverwrites.Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed).Select(x => x.Id).ToList();
+                    foreach (var user in buserow)
+                    {
+                        blockedusers.Add(user);
+                    }
+
+                    foreach (var user in puserow)
+                    {
+                        permittedusers.Add(user);
+                    }
+                    blocklist = string.Join(", ", blockedusers);
+                    permitlist = string.Join(", ", permittedusers);
+                    Dictionary<string, object> data = new()
+                    {
+                        { "userid", (long)ctx.User.Id },
+                        { "channelname", userChannel.Name },
+                        { "channelbitrate", userChannel.Bitrate },
+                        { "channellimit", userChannel.UserLimit },
+                        { "blockedusers", blocklist },
+                        { "permitedusers", permitlist },
+                        { "locked", locked },
+                        { "hidden", hidden }
+                    };
+                    await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
+
+
+
+
+                }
+            });
+        }
     }
 }
-
-
 
 public class TempVoicePanel : TempVoiceHelper
 {
