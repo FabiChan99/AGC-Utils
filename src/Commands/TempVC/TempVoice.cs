@@ -115,11 +115,13 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                     return;
                                 }
+                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
                                 await voice.ModifyAsync(async x =>
                                 {
                                     x.Position = e.After.Channel.Position + 1;
+                                    x.PermissionOverwrites = overwrites;
                                 });
-                                overwrites = overwrites.Merge(m, Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice | Permissions.AccessChannels, Permissions.None);
+                                
 
                             }
                     }
