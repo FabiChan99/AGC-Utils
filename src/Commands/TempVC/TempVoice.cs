@@ -8,8 +8,10 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+using DisCatSharp.Interactivity.Extensions;
 using Microsoft.CodeAnalysis.Operations;
 using Npgsql;
+using System.ComponentModel;
 using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
@@ -840,6 +842,158 @@ public class TempVoiceCommands : TempVoiceHelper
         );
     }
 
+    [Command("joinrequest")]
+    [Aliases("joinreq")]
+    public async Task JoinRequest(CommandContext ctx, DiscordMember user)
+    {
+        if (SelfCheck(ctx, user)) return;
+        var caseid = Helpers.Helpers.GenerateCaseID();
+        var db_channels = await GetAllChannelIDsFromDB();
+        var userchannel = user.VoiceState?.Channel;
+        var userchannelid = userchannel?.Id;
+        var channelownerid = await GetChannelOwnerID(user);
+        DiscordChannel channel = userchannel;
+        DiscordMember? TargetUser = null;
+        var msg = await ctx.RespondAsync(
+            "<a:loading_agc:1084157150747697203> **Lade...** Versuche eine Beitrittsanfrage zu stellen...");
+        if (user.IsBot)
+        {
+            await msg.ModifyAsync(
+                "<:attention:1085333468688433232> **Fehler!** Dieser User ist ein Bot!");
+            return;
+        }
+
+        Console.WriteLine(userchannel);
+        if (userchannel == null)
+        {
+            await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der user ist in keinem Voice Channel.");
+            return;
+        }
+
+        if (userchannel != null && !db_channels.Contains((long)userchannelid))
+        {
+            await msg.ModifyAsync(
+                "<:attention:1085333468688433232> **Fehler!** Der User ist nicht in einem Custom Voice Channel.");
+            return;
+        }
+
+        TargetUser = user;
+        if (db_channels.Contains((long)userchannelid) && channelownerid != (long)user.Id)
+        {
+            DiscordMember Owner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
+            await msg.ModifyAsync(
+                $"<:attention:1085333468688433232> **Fehler!** Der User ist nicht der Besitzer des Channels. Der Besitzer ist ``{Owner.UsernameWithDiscriminator}`` \nJoinanfrage wird umgeleitet...");
+            await Task.Delay(3000);
+            TargetUser = Owner;
+            if (TargetUser.VoiceState?.Channel == null)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist in keinem Voice Channel.");
+                return;
+            }
+
+            Console.WriteLine(TargetUser.VoiceState?.Channel.Id);
+            Console.WriteLine(userchannelid);
+            if (TargetUser.VoiceState?.Channel != null && TargetUser.VoiceState?.Channel.Id != userchannelid)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist nicht in dem gewünschten Channel.");
+                return;
+            }
+        }
+
+        if (db_channels.Contains((long)userchannelid) && channelownerid == (long)TargetUser.Id)
+        {
+            var ebb = new DiscordEmbedBuilder();
+            ebb.WithTitle("Beitrittsanfrage");
+            ebb.WithDescription(
+                $"{ctx.Member.UsernameWithDiscriminator} {ctx.Member.Mention} möchte gerne deinem Channel beitreten. Möchtest du die Beitrittsanfage annehmen?\n Du hast 300 Sekunden Zeit");
+            ebb.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+            List<DiscordButtonComponent> buttons = new(2)
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"jr_accept_{caseid}", "Ja"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"jr_deny_{caseid}", "Nein")
+            };
+            ebb.WithColor(BotConfig.GetEmbedColor());
+            var eb = ebb.Build();
+            DiscordMessageBuilder mb = new();
+            mb.WithEmbed(eb);
+            mb.WithContent($"{TargetUser.Mention}");
+            mb.AddComponents(buttons);
+
+            msg = await msg.ModifyAsync(mb);
+            var pingmsg = await ctx.RespondAsync($"{TargetUser.Mention}");
+            await pingmsg.DeleteAsync();
+            var interactivity = ctx.Client.GetInteractivity();
+            var result = await interactivity.WaitForButtonAsync(msg, TargetUser, TimeSpan.FromSeconds(300));
+            if (!userchannel.Users.Contains(TargetUser) && TargetUser != user)
+            {
+                DiscordMessageBuilder msgb = new();
+                msgb.WithEmbed(null);
+                msgb.WithContent(
+                    "<:attention:1085333468688433232> **Fehler!** Der User ist nicht mehr in deinem Channel.");
+                await msg.ModifyAsync(msgb);
+                return;
+            }
+
+            if (result.TimedOut)
+            {
+                DiscordEmbedBuilder eb_ = new();
+                eb_.WithTitle("Beitrittsanfrage abgelaufen");
+                eb_.WithDescription(
+                    $"Sorry {ctx.User.Username}, aber {TargetUser.Username} hat nicht in der benötigten Zeit reagiert");
+                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                eb_.WithColor(DiscordColor.Red);
+                eb_.Build();
+
+                DiscordMessageBuilder msgb = new();
+                msgb.WithEmbed(eb_);
+
+                await msg.ModifyAsync(msgb);
+                return;
+            }
+
+            if (result.Result.Id == $"jr_accept_{caseid}")
+            {
+                var invite = await userchannel.CreateInviteAsync(300, 1, false, true);
+                DiscordEmbedBuilder eb_ = new();
+
+
+                var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+                overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
+                    Permissions.None);
+
+                await userchannel.ModifyAsync(x =>
+                {
+                    x.PermissionOverwrites = overwrites;
+                });
+                eb_.WithTitle("Beitrittsanfrage angenommen");
+                eb_.WithDescription(
+                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage akzeptiert. Klicke [hier beitreten]({invite}) (Diese Einladung ist 5 Minuten gültig)\\nDu wurdest außerdem für den Channel freigeschalten!");
+                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                eb_.WithColor(BotConfig.GetEmbedColor());
+                eb_.Build();
+
+                DiscordMessageBuilder msgb = new();
+                msgb.WithEmbed(eb_);
+                await msg.ModifyAsync(msgb);
+            }
+
+            if (result.Result.Id == $"jr_deny_{caseid}")
+            {
+                               DiscordEmbedBuilder eb_ = new();
+                eb_.WithTitle("Beitrittsanfrage abgelehnt");
+                eb_.WithDescription(
+                                       $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
+                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                eb_.WithColor(DiscordColor.Red);
+                eb_.Build();
+
+                DiscordMessageBuilder msgb = new();
+                msgb.WithEmbed(eb_);
+                await msg.ModifyAsync(msgb);
+            }
+        }
+    }
+
     [Group("session")]
     public class SessionManagement : TempVoiceCommands
     {
@@ -1065,7 +1219,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 }
             });
         }
-
     }
 }
 
