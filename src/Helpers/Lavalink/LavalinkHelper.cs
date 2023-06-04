@@ -1,6 +1,5 @@
 ﻿using DisCatSharp.CommandsNext;
 using DisCatSharp.Lavalink;
-using DisCatSharp.Lavalink.EventArgs;
 using System.Web;
 
 namespace AGC_Management.Helpers.Lavalink;
@@ -25,6 +24,11 @@ public class LavalinkHelper : BaseCommandModule
     protected string GetTrackInfo(LavalinkTrack track)
     {
         return $"{track.Title} ({track.Length:mm\\:ss})";
+    }
+
+    protected string GetTrackUrl(LavalinkTrack track)
+    {
+        return $"https://www.youtube.com/watch?v={track.Identifier}";
     }
 
 

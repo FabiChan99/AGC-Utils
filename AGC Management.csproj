@@ -49,7 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="src\Commands\Music\" />
     <Folder Include="src\Commands\TempVC\" />
     <Folder Include="src\Helpers\Lavalink\" />
     <Folder Include="src\Helpers\TempVoice\" />

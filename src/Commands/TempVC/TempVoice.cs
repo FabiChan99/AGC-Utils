@@ -9,12 +9,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualBasic;
 using Npgsql;
-using System.Linq;
-using System.Text.Json.Nodes;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -631,7 +626,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
                         {
                             continue;
-                        } 
+                        }
                         if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                         {
                             await user.DisconnectFromVoiceAsync();
@@ -1331,7 +1326,7 @@ public class TempVoiceCommands : TempVoiceHelper
 public class TempVoicePanelEventHandler : TempVoiceHelper
 {
     [Event]
-    private static Task InteractionCreated(DiscordClient sender, InteractionCreateEventArgs e)
+    private static Task ComponentInteractionCreated(DiscordClient sender, InteractionCreateEventArgs e)
     {
         Console.WriteLine(e.Interaction.Type.ToString());
         Console.WriteLine(e.Interaction.Data.CustomId);

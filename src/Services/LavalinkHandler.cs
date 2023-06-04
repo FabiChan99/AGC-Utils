@@ -1,7 +1,6 @@
 ﻿using DisCatSharp;
-using DisCatSharp.Net;
 using DisCatSharp.Lavalink;
-using Sentry;
+using DisCatSharp.Net;
 using Microsoft.Extensions.Logging;
 
 namespace AGC_Management.Services;
@@ -13,7 +12,7 @@ public static class LavalinkHandler
         var endpoint = new ConnectionEndpoint
         {
             Hostname = BotConfig.GetConfig()["Lavalink"]["LavalinkAddr"],
-        Port = int.Parse(BotConfig.GetConfig()["Lavalink"]["LavalinkPort"]),
+            Port = int.Parse(BotConfig.GetConfig()["Lavalink"]["LavalinkPort"]),
         };
         return endpoint;
     }

@@ -9,12 +9,8 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using DisCatSharp.Common.Utilities;
-using DisCatSharp.Lavalink;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using DisCatSharp.ApplicationCommands;
 
 namespace AGC_Management;
 
@@ -71,7 +67,8 @@ internal class Program : BaseCommandModule
             Intents = DiscordIntents.All,
             LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt",
             DeveloperUserId = GlobalProperties.BotOwnerId,
-            Locale = "de", MessageCacheSize = 10000
+            Locale = "de",
+            MessageCacheSize = 10000
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
