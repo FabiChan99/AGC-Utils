@@ -288,4 +288,18 @@ public class TempVoiceHelper : BaseCommandModule
 
     }
 
+
+
+    protected bool NoChannelInter(DiscordInteraction interaction)
+    {
+        var builder = new DiscordInteractionResponseBuilder()
+        {
+            Content = "You are not in a voice channel!",
+            IsEphemeral = true
+        };
+        interaction.CreateResponseAsync(DisCatSharp.Enums.InteractionResponseType.ChannelMessageWithSource, builder);
+        return true;
+    }
+
+
 }

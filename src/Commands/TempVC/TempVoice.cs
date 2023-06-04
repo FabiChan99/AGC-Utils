@@ -1326,6 +1326,36 @@ public class TempVoiceCommands : TempVoiceHelper
     }
 }
 
+
+[EventHandler]
+public class TempVoicePanelEventHandler : TempVoiceHelper
+{
+    [Event]
+    private static Task InteractionCreated(DiscordClient sender, InteractionCreateEventArgs e)
+    {
+        Console.WriteLine(e.Interaction.Type.ToString());
+        Console.WriteLine(e.Interaction.Data.CustomId);
+        _ = Task.Run(async () =>
+        {
+            Console.WriteLine(e.Interaction.Type);
+            if (e.Interaction.Type == InteractionType.Component)
+            {
+                if (e.Interaction.Data.CustomId == "tempvoicepanel")
+                {
+                    var ib = new DiscordInteractionResponseBuilder();
+                    ib.WithContent("test");
+                    ib.IsEphemeral = true;
+                    await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, ib);
+
+                }
+            }
+        });
+        return Task.CompletedTask;
+    }
+}
+
+
+
 public class TempVoicePanel : TempVoiceHelper
 {
     /*
@@ -1341,9 +1371,28 @@ public class TempVoicePanel : TempVoiceHelper
     {
         "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
     };
-    */
+    */   //make it dynamically later
 
 
+
+
+    [Command("testpanel")]
+    [RequireDatabase]
+    public async Task SendPanel(CommandContext ctx)
+    {
+
+
+        List<DiscordButtonComponent> buttons = new(2)
+        {
+            new DiscordButtonComponent(ButtonStyle.Success, $"test1", "t1"),
+            new DiscordButtonComponent(ButtonStyle.Danger, $"test2", "t2")
+        };
+        var msgb = new DiscordMessageBuilder();
+        msgb.WithContent("test");
+        msgb.AddComponents(buttons);
+        await ctx.RespondAsync(msgb);
+
+    }
 
 
 }
