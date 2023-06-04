@@ -9,9 +9,12 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using DisCatSharp.Common.Utilities;
 using DisCatSharp.Lavalink;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using DisCatSharp.ApplicationCommands;
 
 namespace AGC_Management;
 
@@ -89,8 +92,7 @@ internal class Program : BaseCommandModule
         await discord.ConnectAsync();
 
         await StartTasks(discord);
-        //var lavalink = discord.UseLavalink();
-        //await lavalink.ConnectAsync(LavalinkHandler.lavalinkconfig());
+        var lavalink = await LavalinkHandler.InitLavalink(discord);
         await Task.Delay(-1);
     }
 
