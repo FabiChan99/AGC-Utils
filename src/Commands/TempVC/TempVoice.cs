@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualBasic;
 using Npgsql;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
@@ -1327,6 +1328,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
 public class TempVoicePanel : TempVoiceHelper
 {
+    /*
     private static List<ulong> LevelRoleIDs = new()
     {
         750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
@@ -1339,4 +1341,9 @@ public class TempVoicePanel : TempVoiceHelper
     {
         "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
     };
+    */
+
+
+
+
 }
