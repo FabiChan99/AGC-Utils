@@ -597,6 +597,65 @@ public class TempVoiceCommands : TempVoiceHelper
     }
 
 
+    [Command("vckick")]
+    public async Task VoiceKick(CommandContext ctx, [RemainingText] string users)
+    {
+        _ = Task.Run(async () =>
+        {
+            List<long> dbChannels = await GetChannelIDFromDB(ctx);
+            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+
+            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+            {
+                await NoChannel(ctx);
+                return;
+            }
+
+            if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+            {
+                var kicklist = new List<ulong>();
+                List<ulong> ids = new();
+                ids = Converter.ExtractUserIDsFromString(users);
+                var staffrole = ctx.Guild.GetRole(GlobalProperties.StaffRoleId);
+                var msg = await ctx.RespondAsync(
+                    $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu kicken...");
+                var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+                foreach (ulong id in ids)
+                {
+                    try
+                    {
+                        var user = await ctx.Guild.GetMemberAsync(id);
+
+                        if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                        {
+                            continue;
+                        } 
+                        if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
+                        {
+                            await user.DisconnectFromVoiceAsync();
+                        }
+
+                        kicklist.Add(user.Id);
+                    }
+                    catch (NotFoundException)
+                    {
+                    }
+                }
+
+                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                int successCount = kicklist.Count;
+                string endstring =
+                    $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **gekickt**!";
+
+                await msg.ModifyAsync(endstring);
+            }
+        }
+        );
+    }
+
+
     [Command("block")]
     [RequireDatabase]
     [Aliases("vcban", "multiblock")]
