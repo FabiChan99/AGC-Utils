@@ -22,6 +22,21 @@ public class TempVoiceHelper : BaseCommandModule
         return true;
     }
 
+    protected static async Task<bool> NoChannel(DiscordInteraction interaction)
+    {
+               string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
+                              $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
+                              $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
+        DiscordInteractionResponseBuilder ib = new()
+        {
+            IsEphemeral = true
+        };
+        await interaction.CreateResponseAsync(DisCatSharp.Enums.InteractionResponseType.ChannelMessageWithSource,
+                       ib.WithContent(errorMessage));
+        return true;
+    }
+
+
     protected static async Task<bool> CheckTeam(CommandContext ctx, DiscordMember user)
     {
         DiscordRole staffRole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
@@ -95,6 +110,29 @@ public class TempVoiceHelper : BaseCommandModule
         return channel;
     }
 
+    protected static async Task<List<long>> GetChannelIDFromDB(DiscordInteraction interaction)
+    {
+        List<long> dbChannels = new List<long>();
+
+        List<string> Query = new List<string>()
+        {
+            "channelid"
+        };
+        Dictionary<string, object> QueryConditions = new Dictionary<string, object>()
+        {
+            { "ownerid", (long)interaction.User.Id }
+        };
+        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
+        foreach (var result in QueryResult)
+        {
+            var chid = result["channelid"];
+            var id = (long)chid;
+            dbChannels.Add(id);
+        }
+        return dbChannels;
+    }
+
+
     protected static async Task<List<long>> GetChannelIDFromDB(CommandContext ctx)
     {
         List<long> dbChannels = new List<long>();
@@ -134,7 +172,7 @@ public class TempVoiceHelper : BaseCommandModule
         }
         return dbChannels;
     }
-
+    
     protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
     {
         List<long> dbChannels = new List<long>();
@@ -205,6 +243,43 @@ public class TempVoiceHelper : BaseCommandModule
             Dictionary<string, object> queryConditions = new Dictionary<string, object>()
             {
                 { "channelid", (long)user.VoiceState?.Channel.Id }
+            };
+
+            List<Dictionary<string, object>> queryResult =
+                await DatabaseService.SelectDataFromTable("tempvoice", query, queryConditions);
+
+            foreach (var result in queryResult)
+            {
+                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
+                {
+                    channelownerid = ownerId;
+                    break;
+                }
+            }
+        }
+        catch
+        {
+            // Handle exception
+        }
+
+        return channelownerid;
+    }
+
+
+    protected static async Task<long?> GetChannelOwnerID(DiscordInteraction interaction)
+    {
+        long? channelownerid = null;
+        try
+        {
+            List<string> query = new List<string>()
+            {
+                "ownerid"
+            };
+            DiscordGuild discordGuild = interaction.Guild;
+            DiscordMember discordMember = await discordGuild.GetMemberAsync(interaction.User.Id);
+            Dictionary<string, object> queryConditions = new Dictionary<string, object>()
+            {
+                { "channelid", (long)discordMember.VoiceState?.Channel.Id }
             };
 
             List<Dictionary<string, object>> queryResult =
