@@ -1328,22 +1328,9 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     [Event]
     private static Task ComponentInteractionCreated(DiscordClient sender, InteractionCreateEventArgs e)
     {
-        Console.WriteLine(e.Interaction.Type.ToString());
-        Console.WriteLine(e.Interaction.Data.CustomId);
         _ = Task.Run(async () =>
         {
-            Console.WriteLine(e.Interaction.Type);
-            if (e.Interaction.Type == InteractionType.Component)
-            {
-                if (e.Interaction.Data.CustomId == "tempvoicepanel")
-                {
-                    var ib = new DiscordInteractionResponseBuilder();
-                    ib.WithContent("test");
-                    ib.IsEphemeral = true;
-                    await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, ib);
-
-                }
-            }
+            // add code here later
         });
         return Task.CompletedTask;
     }
@@ -1369,25 +1356,6 @@ public class TempVoicePanel : TempVoiceHelper
     */   //make it dynamically later
 
 
-
-
-    [Command("testpanel")]
-    [RequireDatabase]
-    public async Task SendPanel(CommandContext ctx)
-    {
-
-
-        List<DiscordButtonComponent> buttons = new(2)
-        {
-            new DiscordButtonComponent(ButtonStyle.Success, $"test1", "t1"),
-            new DiscordButtonComponent(ButtonStyle.Danger, $"test2", "t2")
-        };
-        var msgb = new DiscordMessageBuilder();
-        msgb.WithContent("test");
-        msgb.AddComponents(buttons);
-        await ctx.RespondAsync(msgb);
-
-    }
 
 
 }
