@@ -10,9 +10,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using Npgsql;
-using System.ComponentModel.DataAnnotations;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -1339,7 +1337,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
             {
                 return;
             }*/
-            var Interaction  = e.Interaction;
+            var Interaction = e.Interaction;
             var PanelMsgId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelMessageID"]);
             var PanelMsgChannelId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelChannelID"]);
             if (PanelMsgChannelId == 0 && PanelMsgId == 0)
@@ -1363,7 +1361,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelUnlockChannel(Interaction);
                 }
-                
+
             }
         });
         return Task.CompletedTask;

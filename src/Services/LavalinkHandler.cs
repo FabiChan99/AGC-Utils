@@ -12,7 +12,7 @@ public static class LavalinkHandler
         var endpoint = new ConnectionEndpoint
         {
             Hostname = BotConfig.GetConfig()["Lavalink"]["LavalinkAddr"],
-            Port = int.Parse(BotConfig.GetConfig()["Lavalink"]["LavalinkPort"]),
+            Port = int.Parse(BotConfig.GetConfig()["Lavalink"]["LavalinkPort"])
         };
         return endpoint;
     }
@@ -46,18 +46,20 @@ public static class LavalinkHandler
             discord.Logger.LogWarning("Lavalink is disabled. Skipping Lavalink initialization...");
             return null;
         }
+
         discord.Logger.LogInformation("Lavalink is enabled. Registering Lavalink to Bot...");
         var lavalink = discord.UseLavalink();
         return await ConnectToLavalinkServer(discord, lavalink);
     }
 
-    private static async Task<LavalinkExtension> ConnectToLavalinkServer(DiscordClient discord, LavalinkExtension lavalink)
+    private static async Task<LavalinkExtension> ConnectToLavalinkServer(DiscordClient discord,
+        LavalinkExtension lavalink)
     {
         discord.Logger.LogInformation("Connecting to Lavalink Server...");
 
         try
         {
-            await lavalink.ConnectAsync(LavalinkHandler.lavalinkconfig());
+            await lavalink.ConnectAsync(lavalinkconfig());
         }
         catch
         {
@@ -76,6 +78,4 @@ public static class LavalinkHandler
 
         return lavalink;
     }
-
-
 }

@@ -26,14 +26,14 @@ public class TempVoiceHelper : BaseCommandModule
     protected static async Task<bool> NoChannel(DiscordInteraction interaction)
     {
         string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
-                       $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
-                       $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
+                              $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
+                              $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
         DiscordInteractionResponseBuilder ib = new()
         {
             IsEphemeral = true
         };
-        await interaction.CreateResponseAsync(DisCatSharp.Enums.InteractionResponseType.ChannelMessageWithSource,
-                       ib.WithContent(errorMessage));
+        await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            ib.WithContent(errorMessage));
         return true;
     }
 
@@ -113,86 +113,94 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<List<long>> GetChannelIDFromDB(DiscordInteraction interaction)
     {
-        List<long> dbChannels = new List<long>();
+        List<long> dbChannels = new();
 
-        List<string> Query = new List<string>()
+        List<string> Query = new()
         {
             "channelid"
         };
-        Dictionary<string, object> QueryConditions = new Dictionary<string, object>()
+        Dictionary<string, object> QueryConditions = new()
         {
             { "ownerid", (long)interaction.User.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
+        List<Dictionary<string, object>> QueryResult =
+            await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
             var chid = result["channelid"];
             var id = (long)chid;
             dbChannels.Add(id);
         }
+
         return dbChannels;
     }
 
 
     protected static async Task<List<long>> GetChannelIDFromDB(CommandContext ctx)
     {
-        List<long> dbChannels = new List<long>();
+        List<long> dbChannels = new();
 
-        List<string> Query = new List<string>()
+        List<string> Query = new()
         {
             "channelid"
         };
-        Dictionary<string, object> QueryConditions = new Dictionary<string, object>()
+        Dictionary<string, object> QueryConditions = new()
         {
             { "ownerid", (long)ctx.User.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
+        List<Dictionary<string, object>> QueryResult =
+            await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
             var chid = result["channelid"];
             var id = (long)chid;
             dbChannels.Add(id);
         }
+
         return dbChannels;
     }
 
     protected static async Task<List<long>> GetAllChannelIDsFromDB()
     {
-        List<long> dbChannels = new List<long>();
+        List<long> dbChannels = new();
 
-        List<string> Query = new List<string>()
+        List<string> Query = new()
         {
             "channelid"
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
+        List<Dictionary<string, object>> QueryResult =
+            await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
         foreach (var result in QueryResult)
         {
             var chid = result["channelid"];
             var id = (long)chid;
             dbChannels.Add(id);
         }
+
         return dbChannels;
     }
 
     protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
     {
-        List<long> dbChannels = new List<long>();
+        List<long> dbChannels = new();
 
-        List<string> Query = new List<string>()
+        List<string> Query = new()
         {
             "channelid"
         };
-        Dictionary<string, object> QueryConditions = new Dictionary<string, object>()
+        Dictionary<string, object> QueryConditions = new()
         {
             { "ownerid", member.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
+        List<Dictionary<string, object>> QueryResult =
+            await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
             var chid = result["channelid"];
             var id = (long)chid;
             dbChannels.Add(id);
         }
+
         return dbChannels;
     }
 
@@ -201,12 +209,12 @@ public class TempVoiceHelper : BaseCommandModule
         long? channelownerid = null;
         try
         {
-            List<string> query = new List<string>()
+            List<string> query = new()
             {
                 "ownerid"
             };
 
-            Dictionary<string, object> queryConditions = new Dictionary<string, object>()
+            Dictionary<string, object> queryConditions = new()
             {
                 { "channelid", (long)ctx.Member.VoiceState?.Channel.Id }
             };
@@ -236,12 +244,12 @@ public class TempVoiceHelper : BaseCommandModule
         long? channelownerid = null;
         try
         {
-            List<string> query = new List<string>()
+            List<string> query = new()
             {
                 "ownerid"
             };
 
-            Dictionary<string, object> queryConditions = new Dictionary<string, object>()
+            Dictionary<string, object> queryConditions = new()
             {
                 { "channelid", (long)user.VoiceState?.Channel.Id }
             };
@@ -272,13 +280,13 @@ public class TempVoiceHelper : BaseCommandModule
         long? channelownerid = null;
         try
         {
-            List<string> query = new List<string>()
+            List<string> query = new()
             {
                 "ownerid"
             };
             DiscordGuild discordGuild = interaction.Guild;
             DiscordMember discordMember = await discordGuild.GetMemberAsync(interaction.User.Id);
-            Dictionary<string, object> queryConditions = new Dictionary<string, object>()
+            Dictionary<string, object> queryConditions = new()
             {
                 { "channelid", (long)discordMember.VoiceState?.Channel.Id }
             };
@@ -308,12 +316,12 @@ public class TempVoiceHelper : BaseCommandModule
         long? channelownerid = null;
         try
         {
-            List<string> query = new List<string>()
+            List<string> query = new()
             {
                 "ownerid"
             };
 
-            Dictionary<string, object> queryConditions = new Dictionary<string, object>()
+            Dictionary<string, object> queryConditions = new()
             {
                 { "channelid", channel.Id }
             };
@@ -344,13 +352,14 @@ public class TempVoiceHelper : BaseCommandModule
         {
             return true;
         }
+
         return false;
     }
 
     protected static async Task<List<long>> GetAllTempChannels()
     {
         var list = new List<long>();
-        List<string> query = new List<string>()
+        List<string> query = new()
         {
             "channelid"
         };
@@ -360,24 +369,21 @@ public class TempVoiceHelper : BaseCommandModule
             long ChannelId = (long)item["channelid"];
             list.Add(ChannelId);
         }
+
         return list;
-
     }
-
 
 
     protected bool NoChannelInter(DiscordInteraction interaction)
     {
-        var builder = new DiscordInteractionResponseBuilder()
+        var builder = new DiscordInteractionResponseBuilder
         {
             Content = "You are not in a voice channel!",
             IsEphemeral = true
         };
-        interaction.CreateResponseAsync(DisCatSharp.Enums.InteractionResponseType.ChannelMessageWithSource, builder);
+        interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
         return true;
     }
-
-
 
 
     protected static async Task PanelLockChannel(DiscordInteraction interaction)
@@ -398,7 +404,7 @@ public class TempVoiceHelper : BaseCommandModule
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
             {
-                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
                     Content = "Der Channel ist bereits gesperrt!"
@@ -411,7 +417,7 @@ public class TempVoiceHelper : BaseCommandModule
             overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.UseVoice);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-            DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+            DiscordInteractionResponseBuilder builder_ = new()
             {
                 IsEphemeral = true,
                 Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **gesperrt**."
@@ -438,7 +444,7 @@ public class TempVoiceHelper : BaseCommandModule
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
             {
-                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
                     Content = "Der Channel ist bereits entsperrt!"
@@ -451,7 +457,7 @@ public class TempVoiceHelper : BaseCommandModule
             overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.UseVoice);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-            DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+            DiscordInteractionResponseBuilder builder_ = new()
             {
                 IsEphemeral = true,
                 Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **entsperrt**."
@@ -459,11 +465,4 @@ public class TempVoiceHelper : BaseCommandModule
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
         }
     }
-
-
-
-
-
-
-
 }

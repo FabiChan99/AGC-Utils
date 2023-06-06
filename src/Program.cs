@@ -1,4 +1,5 @@
-﻿using AGC_Management.Services;
+﻿using System.Reflection;
+using AGC_Management.Services;
 using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Tasks;
 using DisCatSharp;
@@ -10,7 +11,6 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 namespace AGC_Management;
 

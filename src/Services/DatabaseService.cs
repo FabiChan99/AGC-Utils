@@ -1,5 +1,5 @@
-﻿using Npgsql;
-using System.Data;
+﻿using System.Data;
+using Npgsql;
 
 namespace AGC_Management.Services.DatabaseHandler;
 

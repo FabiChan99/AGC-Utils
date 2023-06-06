@@ -9,12 +9,11 @@ public class TempVoiceTasks
 {
     public async Task StartRemoveEmptyTempVoices(DiscordClient discord)
     {
-
         if (DatabaseService.IsConnected())
         {
             await Task.Delay(TimeSpan.FromSeconds(15));
             discord.Logger.LogInformation(
-                               "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
+                "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
             while (true)
             {
                 await RemoveEmptyTempVoices(discord);
@@ -39,7 +38,7 @@ public class TempVoiceTasks
             string channelid = listed_channel["channelid"].ToString();
             try
             {
-                DiscordChannel channel = await discord.TryGetChannelAsync((ulong.Parse(channelid)));
+                DiscordChannel channel = await discord.TryGetChannelAsync(ulong.Parse(channelid));
                 if (channel == null)
                 {
                     Dictionary<string, (object value, string comparisonOperator)>
@@ -51,6 +50,7 @@ public class TempVoiceTasks
                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                     continue;
                 }
+
                 if (channel?.Users.Count == 0)
                 {
                     Dictionary<string, (object value, string comparisonOperator)>
@@ -71,7 +71,6 @@ public class TempVoiceTasks
                     };
                 //await channel.DeleteAsync();
                 await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-                continue;
             }
         }
     }

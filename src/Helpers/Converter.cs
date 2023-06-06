@@ -39,7 +39,7 @@ public class Converter
 
     public static List<ulong> ExtractUserIDsFromString(string users)
     {
-        List<ulong> ids = new List<ulong>();
+        List<ulong> ids = new();
         var parts = users.Split(' ');
         foreach (var part in parts)
         {

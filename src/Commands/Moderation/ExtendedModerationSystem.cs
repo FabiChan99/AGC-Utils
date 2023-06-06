@@ -1065,7 +1065,6 @@ public class CaseManagement : BaseCommandModule
         }
 
 
-
         string reason = newreason;
         string sql;
         if (wcase)
