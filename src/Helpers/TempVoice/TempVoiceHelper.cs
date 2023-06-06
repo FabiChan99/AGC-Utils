@@ -1,7 +1,12 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
+using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Interactivity.Extensions;
+using Microsoft.VisualBasic;
+using Npgsql;
+using System.Xml.Linq;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -463,6 +468,84 @@ public class TempVoiceHelper : BaseCommandModule
                 Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **entsperrt**."
             };
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
+        }
+    }
+
+    protected static async Task PanelChannelRename(DiscordInteraction interaction, DiscordClient client)
+    {
+        var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var caseid = Helpers.GenerateCaseID();
+            var idstring = $"RenameModal-{caseid}";
+            DiscordInteractionModalBuilder modal = new();
+            modal.WithTitle("Channel Rename");
+            modal.CustomId = idstring;
+            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small ,label: "Kanal umbenennen:"));
+            await interaction.CreateInteractionModalResponseAsync(modal);
+            var interactivity = client.GetInteractivity();
+            var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
+            var name = result.Result.Interaction.Data.Components[0].Value.ToString();
+            if (result.TimedOut)
+            {
+                return;
+            }
+            //Console.WriteLine(result.Result.Interaction.Data.Options.ToString());
+            await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            var channel = userChannel;
+            long timestampdata = 0;
+            List<string> Query = new()
+            {
+                "lastedited"
+            };
+            Dictionary<string, object> WhereCondiditons = new()
+            {
+                { "channelid", (long)channel.Id }
+            };
+            var dbtimestampdata = await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
+            foreach (var data in dbtimestampdata)
+            {
+                timestampdata = (long)data["lastedited"];
+            }
+
+            long edit_timestamp = timestampdata;
+            long math = current_timestamp - edit_timestamp;
+            if (math < 300)
+            {
+                long calc = edit_timestamp + 300;
+                var build = new DiscordFollowupMessageBuilder();
+                build.WithContent($"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
+                build.IsEphemeral = true;
+                await result.Result.Interaction.CreateFollowupMessageAsync(build);
+                return;
+            }
+            string oldname = channel.Name;
+            await channel.ModifyAsync(x => x.Name = name);
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@timestamp", current_timestamp);
+                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                    int affected = await command.ExecuteNonQueryAsync();
+                }
+            }
+            var builder = new DiscordFollowupMessageBuilder();
+            builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
+            builder.IsEphemeral = true;
+            await result.Result.Interaction.CreateFollowupMessageAsync(builder);
+            return;
         }
     }
 }

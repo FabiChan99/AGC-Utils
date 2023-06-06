@@ -56,7 +56,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await e.Before.Channel.DeleteAsync();
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
-                                catch (NotFoundException)
+                                catch (Exception)
                                 {
                                     Dictionary<string, (object value, string comparisonOperator)>
                                         DeletewhereConditions = new()
@@ -141,7 +141,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await e.Before.Channel.DeleteAsync();
                                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
-                                catch (NotFoundException)
+                                catch (Exception)
                                 {
                                     Dictionary<string, (object value, string comparisonOperator)>
                                         DeletewhereConditions = new()
@@ -1360,6 +1360,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
 
             if (Interaction.Channel.Id == PanelMsgChannelId)
             {
+                Console.WriteLine(Interaction.Data.CustomId);
                 var customid = Interaction.Data.CustomId;
                 //await Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 if (customid == "channel_lock")
@@ -1369,6 +1370,10 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 else if (customid == "unlock_lock")
                 {
                     await PanelUnlockChannel(Interaction);
+                }
+                else if (customid == "channel_rename")
+                {
+                    await PanelChannelRename(Interaction, sender);
                 }
             }
         });
