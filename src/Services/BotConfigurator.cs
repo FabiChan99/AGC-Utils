@@ -2,6 +2,7 @@
 using DisCatSharp.Entities;
 using IniParser;
 using IniParser.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AGC_Management;
 
@@ -26,6 +27,18 @@ public static class BotConfig
 
         return ConfigIni;
     }
+
+
+    public static void SetConfig(string key, string value, string data)  
+    {
+        IniData ConfigIni;
+        FileIniDataParser parser = new();
+        ConfigIni = parser.ReadFile("config.ini");
+        ConfigIni[key][value] = data.ToString();
+        parser.WriteFile("config.ini", ConfigIni);
+    }
+
+
 
     public static DiscordColor GetEmbedColor()
     {

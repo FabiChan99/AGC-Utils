@@ -9,7 +9,10 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using Npgsql;
+using System.ComponentModel.DataAnnotations;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -996,6 +999,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
             if (result.Result.Id == $"jr_accept_{caseid}")
             {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var invite = await userchannel.CreateInviteAsync(300, 1, false, true);
                 DiscordEmbedBuilder eb_ = new();
 
@@ -1019,6 +1023,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
             if (result.Result.Id == $"jr_deny_{caseid}")
             {
+                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 DiscordEmbedBuilder eb_ = new();
                 eb_.WithTitle("Beitrittsanfrage abgelehnt");
                 eb_.WithDescription(
@@ -1330,7 +1335,36 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
-            // add code here later
+            /*if (GlobalProperties.DebugMode)
+            {
+                return;
+            }*/
+            var Interaction  = e.Interaction;
+            var PanelMsgId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelMessageID"]);
+            var PanelMsgChannelId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelChannelID"]);
+            if (PanelMsgChannelId == 0 && PanelMsgId == 0)
+            {
+                sender.Logger.LogWarning($"Panel is not Initialized! Consider initializing with {BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}initpanel");
+                return;
+            }
+            else if (Interaction.Channel.Id != PanelMsgChannelId)
+            {
+                return;
+            }
+            else if (Interaction.Channel.Id == PanelMsgChannelId)
+            {
+                var customid = Interaction.Data.CustomId;
+                //await Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                if (customid == "channel_lock")
+                {
+                    await PanelLockChannel(Interaction);
+                }
+                else if (customid == "unlock_lock")
+                {
+                    await PanelUnlockChannel(Interaction);
+                }
+                
+            }
         });
         return Task.CompletedTask;
     }
@@ -1340,22 +1374,69 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
 
 public class TempVoicePanel : TempVoiceHelper
 {
-    /*
-    private static List<ulong> LevelRoleIDs = new()
+
+    [Command("initpanel")]
+    [RequirePermissions(Permissions.Administrator)]
+    public async Task InitVCPanel(CommandContext ctx)
     {
-        750402390691152005, 798562254408777739, 750450170189185024, 798555933089071154,
-        750450342474416249, 750450621492101280, 798555135071617024, 751134108893184072,
-        776055585912389673, 750458479793274950, 798554730988306483, 757683142894157904,
-        810231454985486377, 810232899713630228, 810232892386705418
-    };
+        List<DiscordButtonComponent> buttons = new List<DiscordButtonComponent>()
+        {
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_rename",
+                emoji: new DiscordComponentEmoji(1085333479732035664)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_limit",
+                emoji: new DiscordComponentEmoji(1085333471838343228)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_lock",
+                emoji: new DiscordComponentEmoji(1085333475625795605)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "unlock_lock",
+                emoji: new DiscordComponentEmoji(1085518424790286346)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_invite",
+                emoji: new DiscordComponentEmoji(1085333458840203314)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_delete",
+                emoji: new DiscordComponentEmoji(1085333454713004182)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_hide",
+                emoji: new DiscordComponentEmoji(1085333456487206973)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_show",
+                emoji: new DiscordComponentEmoji(1085333489416671242)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_permit",
+                emoji: new DiscordComponentEmoji(1085333477240615094)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_unpermit",
+                emoji: new DiscordComponentEmoji(1085333494105919560)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_claim",
+                emoji: new DiscordComponentEmoji(1085333451571466301)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_transfer",
+                emoji: new DiscordComponentEmoji(1085333484731629578)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_kick",
+                emoji: new DiscordComponentEmoji(1085333460366925914)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_ban",
+                emoji: new DiscordComponentEmoji(1085333473893556324)),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_unban",
+                emoji: new DiscordComponentEmoji(1085333487587971102))
+        };
 
-    private static List<string> lookup = new()
-    {
-        "5+", "10+", "15+", "20+", "25+", "30+", "35+", "40+", "45+", "50+", "60+", "70+", "80+", "90+", "100+"
-    };
-    */   //make it dynamically later
+        List<DiscordButtonComponent> buttons1 = buttons.Take(5).ToList();
+        List<DiscordButtonComponent> buttons2 = buttons.Skip(5).Take(5).ToList();
+        List<DiscordButtonComponent> buttons3 = buttons.Skip(10).ToList();
 
+        List<DiscordActionRowComponent> rowComponents = new List<DiscordActionRowComponent>()
+        {
+            new DiscordActionRowComponent(buttons1),
+            new DiscordActionRowComponent(buttons2),
+            new DiscordActionRowComponent(buttons3)
+        };
 
+        DiscordEmbedBuilder eb = new()
+        {
+            Title = $"{BotConfig.GetConfig()["ServerConfig"]["ServerNameInitials"]} Temp-Voice Panel",
+            Description =
+                $"Hier kannst du die Einstellungen deines Temporären Kanals verändern. \nDu kannst auch Commands in <#{BotConfig.GetConfig()["TempVC"]["CommandChannel_ID"]}> verwenden.",
+            Color = BotConfig.GetEmbedColor(),
+            ImageUrl = "https://cdn.discordapp.com/attachments/764921088689438771/1115554368574476288/panel.png"
+        };
+        DiscordMessageBuilder dmb = new DiscordMessageBuilder().AddComponents(rowComponents).AddEmbed(eb.Build());
+        var msg = await ctx.RespondAsync(dmb);
+        BotConfig.SetConfig("TempVC", "VCPanelMessageID", msg.Id.ToString());
+        BotConfig.SetConfig("TempVC", "VCPanelChannelID", ctx.Channel.Id.ToString());
 
+    }
 
 }

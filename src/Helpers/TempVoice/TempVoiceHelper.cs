@@ -1,6 +1,7 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
+using DisCatSharp.Enums;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -24,9 +25,9 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<bool> NoChannel(DiscordInteraction interaction)
     {
-               string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
-                              $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
-                              $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
+        string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
+                       $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
+                       $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
         DiscordInteractionResponseBuilder ib = new()
         {
             IsEphemeral = true
@@ -172,7 +173,7 @@ public class TempVoiceHelper : BaseCommandModule
         }
         return dbChannels;
     }
-    
+
     protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
     {
         List<long> dbChannels = new List<long>();
@@ -375,6 +376,94 @@ public class TempVoiceHelper : BaseCommandModule
         interaction.CreateResponseAsync(DisCatSharp.Enums.InteractionResponseType.ChannelMessageWithSource, builder);
         return true;
     }
+
+
+
+
+    protected static async Task PanelLockChannel(DiscordInteraction interaction)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            DiscordRole default_role = interaction.Guild.EveryoneRole;
+            DiscordChannel channel = member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+            {
+                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = "Der Channel ist bereits gesperrt!"
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+                return;
+            }
+
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.UseVoice);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+            DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **gesperrt**."
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
+        }
+    }
+
+    protected static async Task PanelUnlockChannel(DiscordInteraction interaction)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            DiscordRole default_role = interaction.Guild.EveryoneRole;
+            DiscordChannel channel = member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+            {
+                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = "Der Channel ist bereits entsperrt!"
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+                return;
+            }
+
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.UseVoice);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+            DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **entsperrt**."
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
+        }
+    }
+
+
+
+
+
 
 
 }

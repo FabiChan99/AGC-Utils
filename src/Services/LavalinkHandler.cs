@@ -63,7 +63,6 @@ public static class LavalinkHandler
         {
             discord.Logger.LogCritical(
                 "Lavalink is enabled but could not connect to Lavalink Server. Disabling Lavalink...");
-            discord.GetLavalink().Client.Dispose();
             return null;
         }
 
@@ -72,7 +71,6 @@ public static class LavalinkHandler
         if (!lava.ConnectedNodes.Any())
         {
             discord.Logger.LogCritical("Lavalink is enabled but no Lavalink Node is connected. Disabling Lavalink...");
-            discord.GetLavalink().Client.Dispose();
             return null;
         }
 
