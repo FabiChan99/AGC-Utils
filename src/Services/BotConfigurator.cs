@@ -33,10 +33,9 @@ public static class BotConfig
         IniData ConfigIni;
         FileIniDataParser parser = new();
         ConfigIni = parser.ReadFile("config.ini");
-        ConfigIni[key][value] = data.ToString();
+        ConfigIni[key][value] = data;
         parser.WriteFile("config.ini", ConfigIni);
     }
-
 
 
     public static DiscordColor GetEmbedColor()
