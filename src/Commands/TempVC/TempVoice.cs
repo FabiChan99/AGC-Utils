@@ -81,7 +81,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                     ? $"{m.Username}'s Channel"
                                     : defaultVcName;
                                 defaultVcName = defaultVcName.Replace("{username}", m.Username)
-                                    .Replace("{discriminator}", m.Discriminator)
                                     .Replace("{userid}", m.Id.ToString())
                                     .Replace("{fullname}", m.UsernameWithDiscriminator);
 
