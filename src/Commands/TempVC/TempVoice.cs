@@ -1335,7 +1335,7 @@ public class TempVoiceCommands : TempVoiceHelper
 public class TempVoicePanelEventHandler : TempVoiceHelper
 {
     [Event]
-    private static Task ComponentInteractionCreated(DiscordClient sender, InteractionCreateEventArgs e)
+    private static Task ComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs e)
     {
         _ = Task.Run(async () =>
         {
@@ -1353,7 +1353,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 return;
             }
 
-            if (Interaction.Channel.Id != PanelMsgChannelId)
+            if (Interaction.Channel.Id != PanelMsgChannelId || e.Message.Id != PanelMsgId)
             {
                 return;
             }
