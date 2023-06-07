@@ -447,7 +447,7 @@ public class TempVoiceHelper : BaseCommandModule
             DiscordRole default_role = interaction.Guild.EveryoneRole;
             DiscordChannel channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+            if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
             {
                 DiscordInteractionResponseBuilder builder = new()
                 {
@@ -528,7 +528,7 @@ public class TempVoiceHelper : BaseCommandModule
             DiscordRole default_role = interaction.Guild.EveryoneRole;
             DiscordChannel channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+            if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
             {
                 DiscordInteractionResponseBuilder builder = new()
                 {
