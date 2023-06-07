@@ -471,6 +471,87 @@ public class TempVoiceHelper : BaseCommandModule
         }
     }
 
+
+    protected static async Task PanelHideChannel(DiscordInteraction interaction)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            DiscordRole default_role = interaction.Guild.EveryoneRole;
+            DiscordChannel channel = member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
+            {
+                DiscordInteractionResponseBuilder builder = new()
+                {
+                    IsEphemeral = true,
+                    Content = "Der Channel ist bereits versteckt!"
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+                return;
+            }
+
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.AccessChannels);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+            DiscordInteractionResponseBuilder builder_ = new()
+            {
+                IsEphemeral = true,
+                Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **versteckt**."
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
+        }
+    }
+
+    protected static async Task PanelUnhideChannel(DiscordInteraction interaction)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            DiscordRole default_role = interaction.Guild.EveryoneRole;
+            DiscordChannel channel = member.VoiceState.Channel;
+            var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+            {
+                DiscordInteractionResponseBuilder builder = new()
+                {
+                    IsEphemeral = true,
+                    Content = "Der Channel ist bereits sichtbar!"
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+                return;
+            }
+
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(default_role, Permissions.None, Permissions.None, Permissions.AccessChannels);
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+            DiscordInteractionResponseBuilder builder_ = new()
+            {
+                IsEphemeral = true,
+                Content = $"<:success:1085333481820790944> <#{channel.Id}> ist nun **sichtbar**."
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder_);
+        }
+    }
+
     protected static async Task PanelChannelRename(DiscordInteraction interaction, DiscordClient client)
     {
         var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();

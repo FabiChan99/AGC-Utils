@@ -1375,6 +1375,14 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelRename(Interaction, sender);
                 }
+                else if (customid == "channel_hide")
+                {
+                    await PanelHideChannel(Interaction);
+                }
+                else if (customid == "channel_show")
+                {
+                    await PanelUnhideChannel(Interaction);
+                }
             }
         });
         return Task.CompletedTask;
