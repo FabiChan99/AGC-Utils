@@ -4,9 +4,7 @@ using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.VisualBasic;
 using Npgsql;
-using System.Xml.Linq;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -571,7 +569,7 @@ public class TempVoiceHelper : BaseCommandModule
             DiscordInteractionModalBuilder modal = new();
             modal.WithTitle("Channel Rename");
             modal.CustomId = idstring;
-            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small ,label: "Kanal umbenennen:"));
+            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Kanal umbenennen:"));
             await interaction.CreateInteractionModalResponseAsync(modal);
             var interactivity = client.GetInteractivity();
             var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));

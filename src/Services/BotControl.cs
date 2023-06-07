@@ -51,13 +51,15 @@ public class BotControl : BaseCommandModule
                 !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                 {
-                    Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
+                    Title = "Evaluation Result",
+                    Description = result.ReturnValue.ToString(),
                     Color = new DiscordColor("#007FFF")
                 }.Build()).ConfigureAwait(false);
             else
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                 {
-                    Title = "Evaluation Successful", Description = "No result was returned.",
+                    Title = "Evaluation Successful",
+                    Description = "No result was returned.",
                     Color = new DiscordColor("#007FFF")
                 }.Build()).ConfigureAwait(false);
         }
