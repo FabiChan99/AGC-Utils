@@ -3,8 +3,12 @@ using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.EventArgs;
+using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
+using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -573,11 +577,11 @@ public class TempVoiceHelper : BaseCommandModule
             await interaction.CreateInteractionModalResponseAsync(modal);
             var interactivity = client.GetInteractivity();
             var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
-            var name = result.Result.Interaction.Data.Components[0].Value.ToString();
             if (result.TimedOut)
             {
                 return;
             }
+            var name = result.Result.Interaction.Data.Components[0].Value.ToString();
             //Console.WriteLine(result.Result.Interaction.Data.Options.ToString());
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             var channel = userChannel;
@@ -627,4 +631,119 @@ public class TempVoiceHelper : BaseCommandModule
             return;
         }
     }
+
+    protected static async Task PanelChannelInvite(DiscordInteraction interaction)
+    {
+        var db_channels = await GetAllChannelIDsFromDB();
+        var my_db_channels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !my_db_channels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (!db_channels.Contains((long)userChannel?.Id))
+        {
+            string errorMessage = $"<:attention:1085333468688433232> Du musst in einem TempVoice Kanal sein um Mitglieder einladen zu können!";
+            DiscordInteractionResponseBuilder ib = new()
+            {
+                IsEphemeral = true
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                ib.WithContent(errorMessage));
+            return;
+        }
+
+        var options = new DiscordUserSelectComponent[]
+        {
+            new("Wähle den einzuladenden User aus.", customId: "invite_selector", minOptions: 1, maxOptions: 1)
+        };
+        DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+        {
+            IsEphemeral = true,
+            Content = $"Wähle die User aus, die du einladen möchtest.",
+        };
+        var builder = builder_.AddComponents(options);
+        await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+    }
+
+    protected static async Task PanelChannelInviteCallback(DiscordInteraction interaction, DiscordClient sender)
+    {
+        var userid = interaction.Data.Values[0];
+        DiscordMember user = await interaction.Guild.GetMemberAsync(ulong.Parse(userid));
+        DiscordMember executor = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        bool send = false;
+        if (user == interaction.User)
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:attention:1085333468688433232> Du kannst dich nicht selbst einladen!"
+            });
+            return;
+        }
+
+        if (user.IsBot)
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:attention:1085333468688433232> Du kannst keine Bots einladen!"
+            });
+            return;
+        }
+
+        if (user.VoiceState != null && user.VoiceState.Channel.Users.Contains(user))
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:attention:1085333468688433232> Der {user.Mention} ist bereits in deinem Channel!"
+            });
+            return;
+        }
+
+        try
+        {
+            DiscordEmbedBuilder eb = new DiscordEmbedBuilder()
+                .WithDescription(
+                    $"Du wurdest von {interaction.User.Mention} eingeladen <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState?.Channel.Id}> beizutreten.")
+                .WithColor(BotConfig.GetEmbedColor());
+            await user.SendMessageAsync(embed: eb);
+            send = true;
+        }
+        catch (UnauthorizedException)
+        {
+            send = false;
+        }
+
+        if (send)
+        {
+            DiscordRole role = interaction.Guild.EveryoneRole;
+            var overwrites = executor.VoiceState?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
+                Permissions.None);
+            await executor.VoiceState?.Channel.ModifyAsync(x =>
+            {
+                x.PermissionOverwrites = overwrites;
+            });
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:success:1085333481820790944> {user.Mention} wurde in <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState.Channel.Id}> eingeladen."
+            });
+            return;
+        }
+        else
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = $"<:attention:1085333468688433232> {user.Mention} konnte nicht eingeladen werden. Dieser User erlaubt keine DMs!"
+            });
+        }
+    }
+
 }

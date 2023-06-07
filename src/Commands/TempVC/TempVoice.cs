@@ -1353,7 +1353,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 return;
             }
 
-            if (Interaction.Channel.Id != PanelMsgChannelId || e.Message.Id != PanelMsgId)
+            if (Interaction.Channel.Id != PanelMsgChannelId)
             {
                 return;
             }
@@ -1382,6 +1382,14 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 else if (customid == "channel_show")
                 {
                     await PanelUnhideChannel(Interaction);
+                }
+                else if (customid == "channel_invite")
+                {
+                    await PanelChannelInvite(Interaction);
+                }
+                else if (customid == "invite_selector")
+                {
+                    await PanelChannelInviteCallback(Interaction, sender);
                 }
             }
         });
