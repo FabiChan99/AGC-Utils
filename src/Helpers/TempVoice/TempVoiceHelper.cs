@@ -412,7 +412,7 @@ public class TempVoiceHelper : BaseCommandModule
                 DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
-                    Content = "Der Channel ist bereits gesperrt!"
+                    Content = "<:attention:1085333468688433232> Der Channel ist bereits gesperrt!"
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
@@ -452,7 +452,7 @@ public class TempVoiceHelper : BaseCommandModule
                 DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
-                    Content = "Der Channel ist bereits entsperrt!"
+                    Content = "<:attention:1085333468688433232> Der Channel ist bereits entsperrt!"
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
@@ -493,7 +493,7 @@ public class TempVoiceHelper : BaseCommandModule
                 DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
-                    Content = "Der Channel ist bereits versteckt!"
+                    Content = "<:attention:1085333468688433232> Der Channel ist bereits versteckt!"
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
@@ -533,7 +533,7 @@ public class TempVoiceHelper : BaseCommandModule
                 DiscordInteractionResponseBuilder builder = new()
                 {
                     IsEphemeral = true,
-                    Content = "Der Channel ist bereits sichtbar!"
+                    Content = "<:attention:1085333468688433232> Der Channel ist bereits sichtbar!"
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
