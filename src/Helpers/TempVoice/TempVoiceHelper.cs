@@ -632,6 +632,78 @@ public class TempVoiceHelper : BaseCommandModule
         }
     }
 
+    protected static async Task PanelChannelLimit(DiscordInteraction interaction, DiscordClient client)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        {
+            var caseid = Helpers.GenerateCaseID();
+            var idstring = $"LimitModal-{caseid}";
+            DiscordInteractionModalBuilder modal = new();
+            modal.WithTitle("Channel Limit");
+            modal.CustomId = idstring;
+            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Kanal Limit festlegen:", minLength:1, maxLength:2, placeholder:"Limit zwischen 0 und 99 eingeben."));
+            await interaction.CreateInteractionModalResponseAsync(modal);
+            var interactivity = client.GetInteractivity();
+            var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
+            if (result.TimedOut)
+            {
+                return;
+            }
+            var limit = result.Result.Interaction.Data.Components[0].Value.ToString();
+            await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            int climit = 0;
+            try
+            {
+                climit = int.Parse(limit);
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine(ex.Message);
+                var errbuilder = new DiscordFollowupMessageBuilder();
+                errbuilder.WithContent($"<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
+                errbuilder.IsEphemeral = true;
+                await result.Result.Interaction.CreateFollowupMessageAsync(errbuilder);
+                return;
+            }
+            var channel = userChannel;
+            try
+            {
+                await channel.ModifyAsync(x => x.UserLimit = climit);
+            }
+            catch (BadRequestException ex)
+            {
+                Console.WriteLine(ex.Message);
+                var errbuilder = new DiscordFollowupMessageBuilder();
+                errbuilder.WithContent($"<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
+                errbuilder.IsEphemeral = true;
+                await result.Result.Interaction.CreateFollowupMessageAsync(errbuilder);
+                return;
+            }
+            var builder = new DiscordFollowupMessageBuilder();
+            if (climit == 0)
+            {
+                builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich entfernt.");
+                builder.IsEphemeral = true;
+                await result.Result.Interaction.CreateFollowupMessageAsync(builder);
+                return;
+            }
+            builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich auf {climit} gesetzt.");
+            builder.IsEphemeral = true;
+            await result.Result.Interaction.CreateFollowupMessageAsync(builder);
+            return;
+
+        }
+    }
+
     protected static async Task PanelChannelInvite(DiscordInteraction interaction)
     {
         var db_channels = await GetAllChannelIDsFromDB();

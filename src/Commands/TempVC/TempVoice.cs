@@ -1391,6 +1391,10 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelInviteCallback(Interaction, sender);
                 }
+                else if (customid == "channel_limit")
+                {
+                    await PanelChannelLimit(Interaction, sender);
+                }
             }
         });
         return Task.CompletedTask;
