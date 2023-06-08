@@ -3,12 +3,9 @@ using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
-using System.Diagnostics;
-using System.Threading.Channels;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -581,7 +578,8 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 return;
             }
-            var name = result.Result.Interaction.Data.Components[0].Value.ToString();
+
+            var name = result.Result.Interaction.Data.Components[0].Value;
             //Console.WriteLine(result.Result.Interaction.Data.Options.ToString());
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             var channel = userChannel;
@@ -606,11 +604,13 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 long calc = edit_timestamp + 300;
                 var build = new DiscordFollowupMessageBuilder();
-                build.WithContent($"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
+                build.WithContent(
+                    $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
                 build.IsEphemeral = true;
                 await result.Result.Interaction.CreateFollowupMessageAsync(build);
                 return;
             }
+
             string oldname = channel.Name;
             await channel.ModifyAsync(x => x.Name = name);
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
@@ -621,14 +621,14 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     command.Parameters.AddWithValue("@timestamp", current_timestamp);
                     command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                    int affected = await command.ExecuteNonQueryAsync();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
+
             var builder = new DiscordFollowupMessageBuilder();
-            builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
+            builder.WithContent("<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
             builder.IsEphemeral = true;
             await result.Result.Interaction.CreateFollowupMessageAsync(builder);
-            return;
         }
     }
 
@@ -650,7 +650,8 @@ public class TempVoiceHelper : BaseCommandModule
             DiscordInteractionModalBuilder modal = new();
             modal.WithTitle("Channel Limit");
             modal.CustomId = idstring;
-            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Kanal Limit festlegen:", minLength:1, maxLength:2, placeholder:"Limit zwischen 0 und 99 eingeben."));
+            modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Kanal Limit festlegen:",
+                minLength: 1, maxLength: 2, placeholder: "Limit zwischen 0 und 99 eingeben."));
             await interaction.CreateInteractionModalResponseAsync(modal);
             var interactivity = client.GetInteractivity();
             var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
@@ -658,7 +659,8 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 return;
             }
-            var limit = result.Result.Interaction.Data.Components[0].Value.ToString();
+
+            var limit = result.Result.Interaction.Data.Components[0].Value;
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             int climit = 0;
             try
@@ -669,11 +671,13 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 Console.WriteLine(ex.Message);
                 var errbuilder = new DiscordFollowupMessageBuilder();
-                errbuilder.WithContent($"<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
+                errbuilder.WithContent(
+                    "<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
                 errbuilder.IsEphemeral = true;
                 await result.Result.Interaction.CreateFollowupMessageAsync(errbuilder);
                 return;
             }
+
             var channel = userChannel;
             try
             {
@@ -683,24 +687,26 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 Console.WriteLine(ex.Message);
                 var errbuilder = new DiscordFollowupMessageBuilder();
-                errbuilder.WithContent($"<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
+                errbuilder.WithContent(
+                    "<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
                 errbuilder.IsEphemeral = true;
                 await result.Result.Interaction.CreateFollowupMessageAsync(errbuilder);
                 return;
             }
+
             var builder = new DiscordFollowupMessageBuilder();
             if (climit == 0)
             {
-                builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich entfernt.");
+                builder.WithContent("<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich entfernt.");
                 builder.IsEphemeral = true;
                 await result.Result.Interaction.CreateFollowupMessageAsync(builder);
                 return;
             }
-            builder.WithContent($"<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich auf {climit} gesetzt.");
+
+            builder.WithContent(
+                $"<:success:1085333481820790944> **Erfolg!** Das Limit wurde erfolgreich auf {climit} gesetzt.");
             builder.IsEphemeral = true;
             await result.Result.Interaction.CreateFollowupMessageAsync(builder);
-            return;
-
         }
     }
 
@@ -718,7 +724,8 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (!db_channels.Contains((long)userChannel?.Id))
         {
-            string errorMessage = $"<:attention:1085333468688433232> Du musst in einem TempVoice Kanal sein um Mitglieder einladen zu können!";
+            string errorMessage =
+                "<:attention:1085333468688433232> Du musst in einem TempVoice Kanal sein um Mitglieder einladen zu können!";
             DiscordInteractionResponseBuilder ib = new()
             {
                 IsEphemeral = true
@@ -730,12 +737,12 @@ public class TempVoiceHelper : BaseCommandModule
 
         var options = new DiscordUserSelectComponent[]
         {
-            new("Wähle den einzuladenden User aus.", customId: "invite_selector", minOptions: 1, maxOptions: 1)
+            new("Wähle den einzuladenden User aus.", "invite_selector")
         };
-        DiscordInteractionResponseBuilder builder_ = new DiscordInteractionResponseBuilder()
+        DiscordInteractionResponseBuilder builder_ = new()
         {
             IsEphemeral = true,
-            Content = $"Wähle die User aus, die du einladen möchtest.",
+            Content = "Wähle die User aus, die du einladen möchtest."
         };
         var builder = builder_.AddComponents(options);
         await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
@@ -749,31 +756,34 @@ public class TempVoiceHelper : BaseCommandModule
         bool send = false;
         if (user == interaction.User)
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-            {
-                IsEphemeral = true,
-                Content = $"<:attention:1085333468688433232> Du kannst dich nicht selbst einladen!"
-            });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content = "<:attention:1085333468688433232> Du kannst dich nicht selbst einladen!"
+                });
             return;
         }
 
         if (user.IsBot)
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder()
-            {
-                IsEphemeral = true,
-                Content = $"<:attention:1085333468688433232> Du kannst keine Bots einladen!"
-            });
+            await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content = "<:attention:1085333468688433232> Du kannst keine Bots einladen!"
+                });
             return;
         }
 
         if (user.VoiceState != null && user.VoiceState.Channel.Users.Contains(user))
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-            {
-                IsEphemeral = true,
-                Content = $"<:attention:1085333468688433232> Der {user.Mention} ist bereits in deinem Channel!"
-            });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content = $"<:attention:1085333468688433232> Der {user.Mention} ist bereits in deinem Channel!"
+                });
             return;
         }
 
@@ -783,7 +793,7 @@ public class TempVoiceHelper : BaseCommandModule
                 .WithDescription(
                     $"Du wurdest von {interaction.User.Mention} eingeladen <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState?.Channel.Id}> beizutreten.")
                 .WithColor(BotConfig.GetEmbedColor());
-            await user.SendMessageAsync(embed: eb);
+            await user.SendMessageAsync(eb);
             send = true;
         }
         catch (UnauthorizedException)
@@ -794,28 +804,27 @@ public class TempVoiceHelper : BaseCommandModule
         if (send)
         {
             DiscordRole role = interaction.Guild.EveryoneRole;
-            var overwrites = executor.VoiceState?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            var overwrites = executor.VoiceState?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
+                .ToList();
             overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
                 Permissions.None);
-            await executor.VoiceState?.Channel.ModifyAsync(x =>
-            {
-                x.PermissionOverwrites = overwrites;
-            });
-            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-            {
-                IsEphemeral = true,
-                Content = $"<:success:1085333481820790944> {user.Mention} wurde in <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState.Channel.Id}> eingeladen."
-            });
+            await executor.VoiceState?.Channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:success:1085333481820790944> {user.Mention} wurde in <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState.Channel.Id}> eingeladen."
+                });
             return;
         }
-        else
-        {
-            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+
+        await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+            new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
-                Content = $"<:attention:1085333468688433232> {user.Mention} konnte nicht eingeladen werden. Dieser User erlaubt keine DMs!"
+                Content =
+                    $"<:attention:1085333468688433232> {user.Mention} konnte nicht eingeladen werden. Dieser User erlaubt keine DMs!"
             });
-        }
     }
-
 }
