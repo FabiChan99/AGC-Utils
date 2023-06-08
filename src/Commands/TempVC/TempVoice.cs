@@ -1399,6 +1399,18 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelDelete(Interaction, sender, e);
                 }
+                else if (customid == "channel_permit")
+                {
+                    await PanelPermitVoiceSelector(Interaction, sender, e);
+                }
+                else if (customid == "channel_permit")
+                {
+                    await PanelPermitVoiceSelector(Interaction, sender, e);
+                }
+                else if (customid == "permit_selector")
+                {
+                    await PanelPermitVoiceSelectorCallback(Interaction, sender, e);
+                }
             }
         });
         return Task.CompletedTask;
