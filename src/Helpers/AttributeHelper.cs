@@ -90,3 +90,13 @@ public class RequireLavalink : CheckBaseAttribute
         return false;
     }
 }
+
+public class RequireAGC : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        // Check if lavalink is connected
+        if (ctx.Guild.Id == 750365461945778209) return true;
+        return false;
+    }
+}
