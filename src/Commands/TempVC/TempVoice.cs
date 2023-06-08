@@ -1395,6 +1395,10 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelLimit(Interaction, sender);
                 }
+                else if (customid == "channeldelete")
+                {
+                    await PanelChanelDelete(Interaction);
+                }
             }
         });
         return Task.CompletedTask;

@@ -827,4 +827,22 @@ public class TempVoiceHelper : BaseCommandModule
                     $"<:attention:1085333468688433232> {user.Mention} konnte nicht eingeladen werden. Dieser User erlaubt keine DMs!"
             });
     }
+
+    protected static async Task PanelChannelDelete(DiscordInteraction interaction)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel?.Id))
+        {
+            DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+
+        }
+    }
 }
