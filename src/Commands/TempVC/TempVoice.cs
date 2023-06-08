@@ -1395,9 +1395,9 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelLimit(Interaction, sender);
                 }
-                else if (customid == "channeldelete")
+                else if (customid == "channel_delete")
                 {
-                    await PanelChanelDelete(Interaction);
+                    await PanelChannelDelete(Interaction, sender, e);
                 }
             }
         });

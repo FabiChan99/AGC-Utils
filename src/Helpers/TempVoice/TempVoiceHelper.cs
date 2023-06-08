@@ -3,8 +3,10 @@ using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+using Microsoft.CodeAnalysis.Operations;
 using Npgsql;
 
 namespace AGC_Management.Helpers.TempVoice;
@@ -15,7 +17,16 @@ public class TempVoiceHelper : BaseCommandModule
     {
         return BotConfig.GetConfig()["TempVC"][$"{key}"];
     }
-
+    protected static async Task RemoveChannelFromDB(ulong cid)
+    {
+        Dictionary<string, (object value, string comparisonOperator)>
+            DeletewhereConditions = new()
+            {
+                { "channelid", ((long)cid, "=") }
+            };
+        await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+        return;
+    }
 
     protected static async Task<bool> NoChannel(CommandContext ctx)
     {
@@ -737,7 +748,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         var options = new DiscordUserSelectComponent[]
         {
-            new("Wähle den einzuladenden User aus.", "invite_selector")
+            new("Wähle den einzuladenden User aus.", customId: "invite_selector", minOptions: 1, maxOptions: 1)
         };
         DiscordInteractionResponseBuilder builder_ = new()
         {
@@ -828,7 +839,7 @@ public class TempVoiceHelper : BaseCommandModule
             });
     }
 
-    protected static async Task PanelChannelDelete(DiscordInteraction interaction)
+    protected static async Task PanelChannelDelete(DiscordInteraction interaction, DiscordClient client, ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
@@ -841,8 +852,62 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (userChannel != null && db_channel.Contains((long)userChannel?.Id))
         {
+            var caseid = Helpers.GenerateCaseID();
             DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+            List<DiscordButtonComponent> buttons = new(2)
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"chdel_accept_{caseid}", "Ja"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"chdel_deny_{caseid}", "Nein")
+            };
+            var interactivity = client.GetInteractivity();
+            string errorMessage =
+                "<:attention:1085333468688433232> Möchtest du deinen Kanal wirklich löschen?";
+            DiscordInteractionResponseBuilder ib = new()
+            {
+                IsEphemeral = true
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                ib.WithContent(errorMessage).AddComponents(buttons));
+            var resp = await interaction.GetOriginalResponseAsync();
+
+
+
+            var result = await interactivity.WaitForButtonAsync(resp, TimeSpan.FromSeconds(60));
+            if (result.TimedOut)
+            {
+                await interaction.EditOriginalResponseAsync(
+                   new DiscordWebhookBuilder
+                {
+                       Content = $"<:attention:1085333468688433232> Du hast nicht rechtzeitig reagiert."
+                });
+                return;
+            }
+            if (result.Result.Id == $"chdel_accept_{caseid}")
+            {
+
+                var cid = channel.Id;
+                await channel.DeleteAsync();
+                await interaction.EditOriginalResponseAsync(
+                    new DiscordWebhookBuilder
+                    {
+                        Content = $"<:success:1085333481820790944> Dein Channel wurde gelöscht."
+                    });
+                await RemoveChannelFromDB(cid);
+                return;
+            }
+
+            if (result.Result.Id == $"chdel_deny_{caseid}")
+            {
+                await interaction.EditOriginalResponseAsync(
+                    new DiscordWebhookBuilder
+                    {
+                        Content = $"<:attention:1085333468688433232> Vorgang abgebrochen."
+                    });
+                return;
+            }
 
         }
     }
+
+
 }
