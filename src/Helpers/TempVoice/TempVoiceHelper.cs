@@ -677,7 +677,7 @@ public class TempVoiceHelper : BaseCommandModule
         bool send = false;
         if (user == interaction.User)
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
                 Content = $"<:attention:1085333468688433232> Du kannst dich nicht selbst einladen!"
@@ -687,7 +687,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (user.IsBot)
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
                 Content = $"<:attention:1085333468688433232> Du kannst keine Bots einladen!"
@@ -697,7 +697,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (user.VoiceState != null && user.VoiceState.Channel.Users.Contains(user))
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
                 Content = $"<:attention:1085333468688433232> Der {user.Mention} ist bereits in deinem Channel!"
@@ -729,7 +729,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 x.PermissionOverwrites = overwrites;
             });
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
                 Content = $"<:success:1085333481820790944> {user.Mention} wurde in <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState.Channel.Id}> eingeladen."
@@ -738,7 +738,7 @@ public class TempVoiceHelper : BaseCommandModule
         }
         else
         {
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
                 Content = $"<:attention:1085333468688433232> {user.Mention} konnte nicht eingeladen werden. Dieser User erlaubt keine DMs!"
