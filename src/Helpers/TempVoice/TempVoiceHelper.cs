@@ -6,13 +6,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.CodeAnalysis.Operations;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Npgsql;
-using Sentry;
-using System.Net;
-using System.Threading.Channels;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1156,7 +1150,7 @@ public class TempVoiceHelper : BaseCommandModule
                     "<:attention:1085333468688433232> Es wurde bereits eine **Levelbegrenzung** für diesen Channel festgelegt."
             };
             sbuilder.AddComponents(selectComponent);
-            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,sbuilder);
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, sbuilder);
             return;
         }
     }
@@ -1185,10 +1179,10 @@ public class TempVoiceHelper : BaseCommandModule
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                                new DiscordInteractionResponseBuilder
                                {
-                    IsEphemeral = true,
-                    Content =
+                                   IsEphemeral = true,
+                                   Content =
                         $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
-                });
+                               });
             return;
         }
     }
