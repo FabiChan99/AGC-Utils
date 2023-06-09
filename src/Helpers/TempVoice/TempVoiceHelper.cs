@@ -11,15 +11,44 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Sentry;
+using System.Net;
+using System.Threading.Channels;
 
 namespace AGC_Management.Helpers.TempVoice;
 
 public class TempVoiceHelper : BaseCommandModule
 {
+    private static readonly Dictionary<ulong, string> levelroles = new Dictionary<ulong, string>()
+    {
+        { 750402390691152005, "5+" },
+        { 798562254408777739, "10+" },
+        { 750450170189185024, "15+" },
+        { 798555933089071154, "20+" },
+        { 750450342474416249, "25+" },
+        { 750450621492101280, "30+" },
+        { 798555135071617024, "35+" },
+        { 751134108893184072, "40+" },
+        { 776055585912389673, "45+" },
+        { 750458479793274950, "50+" },
+        { 798554730988306483, "60+" },
+        { 757683142894157904, "70+" },
+        { 810231454985486377, "80+" },
+        { 810232899713630228, "90+" },
+        { 810232892386705418, "100+" }
+    };
+
+    private static readonly Dictionary<ulong, string> debuglevelroles = new Dictionary<ulong, string>()
+    {
+        { 1116778938073616545, "001" },
+        { 1116778981442723870, "002" }
+    };
+
+
     protected static string GetVCConfig(string key)
     {
         return BotConfig.GetConfig()["TempVC"][$"{key}"];
     }
+
     protected static async Task RemoveChannelFromDB(ulong cid)
     {
         Dictionary<string, (object value, string comparisonOperator)>
@@ -751,7 +780,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         var options = new DiscordUserSelectComponent[]
         {
-            new("Wähle den einzuladenden User aus.", "invite_selector")
+            new("Wähle den einzuladenden User aus.", customId: "invite_selector", minOptions: 1, maxOptions: 1)
         };
         DiscordInteractionResponseBuilder builder_ = new()
         {
@@ -842,7 +871,8 @@ public class TempVoiceHelper : BaseCommandModule
             });
     }
 
-    protected static async Task PanelChannelDelete(DiscordInteraction interaction, DiscordClient client, ComponentInteractionCreateEventArgs e)
+    protected static async Task PanelChannelDelete(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
@@ -879,12 +909,13 @@ public class TempVoiceHelper : BaseCommandModule
             if (result.TimedOut)
             {
                 await interaction.EditOriginalResponseAsync(
-                   new DiscordWebhookBuilder
-                {
-                       Content = $"<:attention:1085333468688433232> Du hast nicht rechtzeitig reagiert."
-                });
+                    new DiscordWebhookBuilder
+                    {
+                        Content = $"<:attention:1085333468688433232> Du hast nicht rechtzeitig reagiert."
+                    });
                 return;
             }
+
             if (result.Result.Id == $"chdel_accept_{caseid}")
             {
 
@@ -1015,6 +1046,7 @@ public class TempVoiceHelper : BaseCommandModule
                     {
                         continue;
                     }
+
                     var user = await interaction.Guild.GetMemberAsync(id);
 
 
@@ -1029,12 +1061,133 @@ public class TempVoiceHelper : BaseCommandModule
                     // ignored
                 }
             }
+
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                 new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
-                    Content = $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User { (usersList.Count == 1 ? "wurde" : "wurden") } **permittet**."
+                    Content =
+                        $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **permittet**."
+                });
+            return;
+        }
+    }
+
+    protected static async Task PanelPermitVoiceRole(DiscordInteraction interaction, DiscordClient client,
+        InteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+        bool ch_locked = false;
+        var overwrite = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == interaction.Guild.EveryoneRole.Id);
+        if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+        {
+            ch_locked = false;
+        }
+        if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+        {
+            ch_locked = true;
+        }
+
+        if (!ch_locked)
+        {
+
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:attention:1085333468688433232> Der Channel ist **nicht gesperrt** und eine Levelbegrenzung würde __keinen Effekt__ haben. Bitte **sperre** den Channel zuerst!"
+                });
+            return;
+        }
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            bool role_permitted = false;
+            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            foreach (var role in interaction.Guild.Roles)
+            {
+                var RoleId = role.Value.Id;
+                if (lvlroles.ContainsKey(RoleId))
+                {
+                    var temp_ow = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == RoleId);
+                    if (temp_ow != null)
+                    {
+                        role_permitted = true;
+                        break;
+                    }
+                }
+
+            }
+
+            if (role_permitted)
+            {
+                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        "<:attention:1085333468688433232> Es wurde bereits eine **Levelbegrenzung** für diesen Channel festgelegt."
+                });
+                return;
+            }
+
+            var options = new List<DiscordStringSelectComponentOption>();
+
+            foreach (var kvp in lvlroles)
+            {
+                ulong roleId = kvp.Key;
+                string id = kvp.Value;
+                options.Add(new DiscordStringSelectComponentOption(id, roleId.ToString()));
+            }
+            var selectComponent = new DiscordStringSelectComponent
+                ("Wähle ein zuzulassendes Level aus.", options, "role_permit_selector");
+            var sbuilder = new DiscordInteractionResponseBuilder
+            {
+                IsEphemeral = true,
+                Content =
+                    "<:attention:1085333468688433232> Es wurde bereits eine **Levelbegrenzung** für diesen Channel festgelegt."
+            };
+            sbuilder.AddComponents(selectComponent);
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,sbuilder);
+            return;
+        }
+    }
+
+    protected static async Task PanelPermitVoiceRoleCallback(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            var channel = userChannel;
+            var sel_role = e.Values.ToList();
+            var role = interaction.Guild.GetRole(ulong.Parse(sel_role[0]));
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
+                .ToList();
+            overwrites = overwrites.Merge(role, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
+            await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                               new DiscordInteractionResponseBuilder
+                               {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
                 });
             return;
         }

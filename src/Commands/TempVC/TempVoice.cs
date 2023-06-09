@@ -1411,6 +1411,14 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelPermitVoiceSelectorCallback(Interaction, sender, e);
                 }
+                else if (customid == "role_permit_button")
+                {
+                    await PanelPermitVoiceRole(Interaction, sender, e);
+                }
+                else if (customid == "role_permit_selector")
+                {
+                    await PanelPermitVoiceRoleCallback(Interaction, sender, e);
+                }
             }
         });
         return Task.CompletedTask;
