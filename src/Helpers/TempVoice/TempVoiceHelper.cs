@@ -751,7 +751,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         var options = new DiscordUserSelectComponent[]
         {
-            new("Wähle den einzuladenden User aus.", customId: "invite_selector", minOptions: 1, maxOptions: 1)
+            new("Wähle den einzuladenden User aus.", "invite_selector")
         };
         DiscordInteractionResponseBuilder builder_ = new()
         {
