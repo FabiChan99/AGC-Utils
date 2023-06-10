@@ -1098,7 +1098,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
         {
             await msg.ModifyAsync(
-                "<:attention:1085333468688433232> **Fehler!** Der Channel wurde nicht übertragen da der Zielnutzer {user} **nicht** in {channel.mention} ist.");
+                $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde nicht übertragen da der Zielnutzer {new_owner} **nicht** in {userchannelobj.Mention} ist.");
         }
     }
 
