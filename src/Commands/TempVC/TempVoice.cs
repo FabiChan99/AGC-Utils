@@ -1422,6 +1422,18 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelPermitVoiceRoleCallback(Interaction, sender, e);
                 }
+                else if (customid == "channel_unpermit")
+                {
+                    await PanelChannelUnpermit(Interaction, sender, e);
+                }
+                else if (customid == "unpermit_levelrole")
+                {
+                    await PanelChannelUnpermitRoleCallback(Interaction, sender, e);
+                }
+                else if (customid == "unpermit_selector")
+                {
+                    await PanelChannelUnpermitUserCallback(Interaction, sender, e);
+                }
             }
         });
         return Task.CompletedTask;

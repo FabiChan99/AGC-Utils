@@ -7,6 +7,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
+using System.Runtime.ExceptionServices;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1093,7 +1094,7 @@ public class TempVoiceHelper : BaseCommandModule
         if (!ch_locked)
         {
 
-            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                 new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
@@ -1147,7 +1148,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 IsEphemeral = true,
                 Content =
-                    "<:attention:1085333468688433232> Es wurde bereits eine **Levelbegrenzung** für diesen Channel festgelegt."
+                    "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:"
             };
             sbuilder.AddComponents(selectComponent);
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, sbuilder);
@@ -1209,11 +1210,215 @@ public class TempVoiceHelper : BaseCommandModule
                 .Where(x => x.Type == OverwriteType.Member)
                 .Select(x => x.Id)
                 .ToList();
-            foreach (var user in puserow)
+            foreach (ulong userid in puserow)
             {
-                permited_users.Add(user);
+                if (userid != interaction.User.Id)
+                {
+                    permited_users.Add(userid);
+                }
             }
+
+            var allowed_users = permited_users.Count;
+            var options = new List<DiscordStringSelectComponentOption>();
+            bool role_permitted = false;
+            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            string roleName = string.Empty;
+            foreach (var role in interaction.Guild.Roles)
+            {
+                var RoleId = role.Value.Id;
+                if (lvlroles.ContainsKey(RoleId))
+                {
+                    var temp_ow = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == RoleId);
+                    if (temp_ow != null)
+                    {
+                        roleName = lvlroles[RoleId];
+                        role_permitted = true;
+                        break;
+                    }
+                }
+            }
+
+            foreach (var uid in permited_users)
+            {
+                var user = await interaction.Guild.GetMemberAsync(uid);
+                var username = user.DisplayName;
+                options.Add(new DiscordStringSelectComponentOption(username, uid.ToString(),
+                    emoji: new DiscordComponentEmoji(1083853403316297758)));
+            }
+
+            if (allowed_users == 0)
+            {
+                string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
+                var sbuilder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = content
+                };
+
+                if (role_permitted)
+                {
+                    List<DiscordButtonComponent> buttons = new()
+                    {
+                        new DiscordButtonComponent(ButtonStyle.Primary, $"unpermit_levelrole",
+                            $"Entferne zugelassene Levelrolle ({roleName})")
+                    };
+                    sbuilder.AddComponents(buttons);
+                }
+
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, sbuilder);
+                return;
+            }
+
+            if (allowed_users > 25)
+            {
+                string content =
+                    $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
+                var sbuilder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = content
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, sbuilder);
+                return;
+            }
+
+            int ul = 10;
+            if (allowed_users < 10)
+            {
+                ul = allowed_users;
+            }
+
+            var selector = new List<DiscordComponent>
+            {
+                new DiscordStringSelectComponent
+                ("Wähle zu entfernende Mitglieder aus.",
+                    options, "unpermit_selector", maxOptions:ul)
+            };
+            List<DiscordActionRowComponent> rowComponents = new()
+            {
+                new DiscordActionRowComponent(selector)
+            };
+            if (role_permitted)
+            {
+                List<DiscordButtonComponent> buttons = new()
+                {
+                    new DiscordButtonComponent(ButtonStyle.Danger, $"unpermit_levelrole",
+                                               $"Entferne zugelassene Levelrolle ({roleName})")
+                };
+                rowComponents.Add(new DiscordActionRowComponent(buttons));
+            }
+            string econtent = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
+            var ssbuilder = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = econtent
+            };
+            ssbuilder.AddComponents(rowComponents);
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ssbuilder);
+        }
+    }
+
+    protected static async Task PanelChannelUnpermitRoleCallback(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
         }
 
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            DiscordChannel channel = userChannel;
+            ulong r_id = 0;
+            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            foreach (var role in interaction.Guild.Roles)
+            {
+                var RoleId = role.Value.Id;
+                if (lvlroles.ContainsKey(RoleId))
+                {
+                    var temp_ow = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == RoleId);
+                    if (temp_ow != null)
+                    {
+                        r_id = RoleId;
+                        break;
+                    }
+                }
+            }
+            DiscordRole role_ = interaction.Guild.GetRole(r_id);
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(role_, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
+            await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+            string content = $"<:success:1085333481820790944> Erfolg! Die Levelbeschränkung wurde **aufgehoben**.";
+            var sbuilder = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = content
+            };
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, sbuilder);
+
+        }
+    }
+
+    protected static async Task PanelChannelUnpermitUserCallback(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            DiscordChannel channel = userChannel;
+            var u = e.Values.ToList();
+            var users = e.Values.Select(x => ulong.Parse(x));
+            var usersList = new List<DiscordMember>();
+            List<ulong> idlist = new();
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
+                .ToList();
+            foreach (ulong id in users)
+            {
+                try
+                {
+                    idlist.Add(id);
+                    if (id == interaction.User.Id)
+                    {
+                        continue;
+                    }
+
+                    var user = await interaction.Guild.GetMemberAsync(id);
+
+
+                    overwrites = overwrites.Merge(user, Permissions.None,
+                        Permissions.None, Permissions.AccessChannels | Permissions.UseVoice);
+
+
+                    usersList.Add(user);
+                }
+                catch (NotFoundException)
+                {
+                    // ignored
+                }
+            }
+            await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **unpermitted**."
+                });
+            return;
+
+
+        }
     }
 }
