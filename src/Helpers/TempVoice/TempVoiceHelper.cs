@@ -7,6 +7,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
+using Sentry;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1502,7 +1503,135 @@ public class TempVoiceHelper : BaseCommandModule
                 });
             return;
         }
-        
     }
 
+    protected static async Task PanelChannelTransfer(DiscordInteraction interaction)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            List<ulong> UsersInChannel = new();
+            foreach (var user in userChannel.Users)
+            {
+                if (user.Id != interaction.User.Id)
+                {
+                    UsersInChannel.Add(user.Id);
+                }
+            }
+            var options = new List<DiscordStringSelectComponentOption>();
+            foreach (var uid in UsersInChannel)
+            {
+                var user = await interaction.Guild.GetMemberAsync(uid);
+                options.Add(new DiscordStringSelectComponentOption(user.UsernameWithDiscriminator, user.Id.ToString(), emoji: new DiscordComponentEmoji(1083853403316297758)));
+            }
+            if (UsersInChannel.Count == 0)
+            {
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                       new DiscordInteractionResponseBuilder
+                                       {
+                        IsEphemeral = true,
+                        Content = "<:attention:1085333468688433232> Es befinden sich keine User in deinem Channel."
+                    });
+                return;
+            }
+
+            if (UsersInChannel.Count > 25)
+            {
+                string content =
+                    $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
+                var sbuilder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = content
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, sbuilder);
+                return;
+            }
+
+            var selector = new List<DiscordComponent>
+            {
+                new DiscordStringSelectComponent("Wähle den Zieluser aus", options, customId:"transfer_selector", maxOptions:1)
+            };
+            List<DiscordActionRowComponent> rowComponents = new()
+            {
+                new DiscordActionRowComponent(selector)
+            };
+            string econtent = "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
+            var ssbuilder = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = econtent
+            };
+            ssbuilder.AddComponents(rowComponents);
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ssbuilder);
+            return;
+        }
+    }
+
+    protected static async Task PanelChannelTransferCallback(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember orig_owner = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = orig_owner?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+        var channelownerid = await GetChannelOwnerID(interaction);
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            var channel = userChannel;
+            var n_memberid = ulong.Parse(e.Values.First());
+            var new_owner = await interaction.Guild.GetMemberAsync(n_memberid);
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            if (channel.Users.Contains(orig_owner) && db_channel.Contains((long)userChannel.Id))
+            {
+                await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+                {
+                    await conn.OpenAsync();
+                    string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                    await using (NpgsqlCommand command = new(sql, conn))
+                    {
+                        command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
+                        command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                        int affected = await command.ExecuteNonQueryAsync();
+                    }
+                }
+
+                overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None, Permissions.ManageChannels | Permissions.MoveMembers);
+                overwrites = overwrites.Merge(new_owner, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None);
+                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                                                      new DiscordInteractionResponseBuilder
+                                                      {
+                    IsEphemeral = true,
+                    Content = $"<:success:1085333481820790944> Du hast den Channel erfolgreich an {new_owner.Mention} **übertragen**."
+                });
+                return;
+            }
+
+            if (channel.Users.Contains(orig_owner) && db_channel.Contains((long)userChannel.Id) && channel.Users.Contains(new_owner))
+            {
+                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                                                                         new DiscordInteractionResponseBuilder
+                                                                         {
+                    IsEphemeral = true,
+                    Content = $"<:attention:1085333468688433232> {new_owner.Mention} ist __nicht__ im Kanal!"
+                });
+                return;
+            }
+
+        }
+
+    }
 }
