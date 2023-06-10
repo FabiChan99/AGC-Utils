@@ -1181,7 +1181,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     var buserow = userChannel.PermissionOverwrites
                         .Where(x => x.Type == OverwriteType.Member)
                         .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
-                        
+
                         .ToList();
 
                     var puserow = userChannel.PermissionOverwrites

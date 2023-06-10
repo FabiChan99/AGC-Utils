@@ -7,7 +7,6 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
-using System.Runtime.ExceptionServices;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1181,7 +1180,7 @@ public class TempVoiceHelper : BaseCommandModule
                new DiscordInteractionResponseBuilder
                {
                    IsEphemeral = true,
-                   Content = 
+                   Content =
                        $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
                });
             return;
