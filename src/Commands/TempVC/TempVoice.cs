@@ -1434,6 +1434,10 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelUnpermitUserCallback(Interaction, sender, e);
                 }
+                else if (customid == "channel_claim")
+                {
+                    await PanelChannelClaim(Interaction, sender);
+                }
             }
         });
         return Task.CompletedTask;

@@ -1416,8 +1416,93 @@ public class TempVoiceHelper : BaseCommandModule
                         $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **unpermitted**."
                 });
             return;
-
-
         }
     }
+
+    protected static async Task PanelChannelClaim(DiscordInteraction interaction, DiscordClient client)
+    {
+        List<long> dbChannels = await GetChannelIDFromDB(interaction);
+        List<long> all_dbChannels = await GetAllChannelIDsFromDB();
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        long? channelownerid = await GetChannelOwnerID(interaction);
+        if (channelownerid == (long)interaction.User.Id)
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                               new DiscordInteractionResponseBuilder
+                               {
+                    IsEphemeral = true,
+                    Content = "<:attention:1085333468688433232> Du bist bereits der Channelowner."
+                });
+            return;
+        }
+
+        if (userChannel == null)
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                              new DiscordInteractionResponseBuilder
+                                              {
+                    IsEphemeral = true,
+                    Content = "<:attention:1085333468688433232> Du bist in keinem Voice-Channel."
+                });
+            return;
+        }
+
+        if (channelownerid == null)
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                                             new DiscordInteractionResponseBuilder
+                                                             {
+                    IsEphemeral = true,
+                    Content = "<:attention:1085333468688433232> Dieser Channel ist nicht claimbar. Du musst dich in einem Temp-VC Channel befinden"
+                });
+            return;
+        }
+        var channelowner = await client.GetUserAsync((ulong)channelownerid);
+        DiscordMember channelownermember = await interaction.Guild.GetMemberAsync(channelowner.Id);
+        var orig_owner = channelownermember;
+        DiscordMember new_owner = member;
+        DiscordChannel channel = userChannel;
+        var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+        if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+        {
+            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            {
+                await conn.OpenAsync();
+                string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                await using (NpgsqlCommand command = new(sql, conn))
+                {
+                    command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
+                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                    int affected = await command.ExecuteNonQueryAsync();
+                }
+            }
+
+            overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels);
+            overwrites = overwrites.Merge(new_owner, Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers | Permissions.AccessChannels, Permissions.None);
+
+
+            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                               new DiscordInteractionResponseBuilder
+                               {
+                    IsEphemeral = true,
+                    Content = $"<:success:1085333481820790944> Erfolg! Du bist jetzt der Channelowner."
+                });
+            return;
+        }
+        if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+        {
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content = $"<:attention:1085333468688433232> Dieser Channel ist nicht claimbar. Der Channelowner {orig_owner.UsernameWithDiscriminator} {orig_owner.Mention} befindet sich noch im Channel"
+                });
+            return;
+        }
+        
+    }
+
 }
