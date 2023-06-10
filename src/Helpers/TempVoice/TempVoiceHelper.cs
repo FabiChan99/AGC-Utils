@@ -1177,13 +1177,43 @@ public class TempVoiceHelper : BaseCommandModule
             overwrites = overwrites.Merge(role, Permissions.AccessChannels | Permissions.UseVoice, Permissions.None);
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
-                               new DiscordInteractionResponseBuilder
-                               {
-                                   IsEphemeral = true,
-                                   Content =
-                        $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
-                               });
+               new DiscordInteractionResponseBuilder
+               {
+                   IsEphemeral = true,
+                   Content = 
+                       $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
+               });
             return;
         }
+    }
+
+    protected static async Task PanelChannelUnpermit(DiscordInteraction interaction, DiscordClient client,
+        ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            var channel = userChannel;
+            List<ulong> permited_users = new List<ulong>();
+            var puserow = userChannel.PermissionOverwrites
+                .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
+                .Where(x => x.Id != interaction.User.Id)
+                .Where(x => x.Type == OverwriteType.Member)
+                .Select(x => x.Id)
+                .ToList();
+            foreach (var user in puserow)
+            {
+                permited_users.Add(user);
+            }
+        }
+
     }
 }

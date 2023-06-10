@@ -1179,11 +1179,14 @@ public class TempVoiceCommands : TempVoiceHelper
                     string blocklist = string.Empty;
                     string permitlist = string.Empty;
                     var buserow = userChannel.PermissionOverwrites
+                        .Where(x => x.Type == OverwriteType.Member)
                         .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+                        
                         .ToList();
 
                     var puserow = userChannel.PermissionOverwrites
                         .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
+                        .Where(x => x.Type == OverwriteType.Member)
                         .Where(x => x.Id != ctx.User.Id)
                         .Select(x => x.Id)
                         .ToList();
