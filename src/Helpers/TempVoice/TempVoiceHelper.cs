@@ -1311,7 +1311,7 @@ public class TempVoiceHelper : BaseCommandModule
                 rowComponents.Add(new DiscordActionRowComponent(buttons));
             }
 
-            string econtent = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
+            string econtent = "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
             var ssbuilder = new DiscordInteractionResponseBuilder()
             {
                 IsEphemeral = true,
