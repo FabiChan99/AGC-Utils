@@ -1342,10 +1342,10 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
-            /*if (GlobalProperties.DebugMode)
+            if (GlobalProperties.DebugMode)
             {
                 return;
-            }*/
+            }
             var Interaction = e.Interaction;
             var PanelMsgId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelMessageID"]);
             var PanelMsgChannelId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelChannelID"]);
