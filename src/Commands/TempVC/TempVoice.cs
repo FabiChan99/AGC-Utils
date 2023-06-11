@@ -1446,6 +1446,14 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelTransferCallback(Interaction, sender, e);
                 }
+                else if (customid == "channel_kick")
+                {
+                    await PanelChannelKick(Interaction);
+                }
+                else if (customid == "kick_selector")
+                {
+                    await PanelChannelKickCallback(Interaction, sender, e);
+                }
             }
         });
         return Task.CompletedTask;
