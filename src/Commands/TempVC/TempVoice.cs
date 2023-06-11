@@ -10,12 +10,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using Npgsql;
-using Sentry;
-using Sentry.Protocol;
-using System.Diagnostics.Metrics;
-using System.Security.Cryptography.X509Certificates;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -973,7 +968,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
                                 Permissions.None);
 
-                            
+
 
 
                             unpermitlist.Add(user.Id);
@@ -1769,7 +1764,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         nmb.WithEmbed(ebb);
                         msg = await msg.ModifyAsync(mb);
                         var interactiviy = ctx.Client.GetInteractivity();
-                        var response = await interactiviy.WaitForButtonAsync(msg,ctx.User,
+                        var response = await interactiviy.WaitForButtonAsync(msg, ctx.User,
                                                        TimeSpan.FromMinutes(5));
                         if (response.TimedOut)
                         {
@@ -1788,7 +1783,7 @@ public class TempVoiceCommands : TempVoiceHelper
                                 // ignored
                             }
                         }
-                        
+
                     }
                 }
             });

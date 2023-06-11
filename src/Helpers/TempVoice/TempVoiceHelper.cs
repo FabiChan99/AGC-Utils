@@ -6,9 +6,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.VisualBasic;
 using Npgsql;
-using Sentry;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1291,7 +1289,7 @@ public class TempVoiceHelper : BaseCommandModule
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod) 
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var channel = userChannel;
             var sel_role = e.Values.ToList();
