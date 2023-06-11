@@ -10,7 +10,9 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using Npgsql;
+using Sentry;
 using Sentry.Protocol;
 using System.Diagnostics.Metrics;
 using System.Security.Cryptography.X509Certificates;
@@ -344,13 +346,15 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu sperren...");
@@ -378,13 +382,15 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu entsperren...");
@@ -413,13 +419,15 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu verstecken...");
@@ -446,13 +454,15 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel sichtbar zu machen...");
@@ -481,13 +491,15 @@ public class TempVoiceCommands : TempVoiceHelper
         var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel umzubenennen...");
@@ -544,13 +556,15 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             if (limit < 0 || limit > 99)
             {
@@ -558,18 +572,19 @@ public class TempVoiceCommands : TempVoiceHelper
                     "<:attention:1085333468688433232> **Fehler!** Der Limit-Wert muss zwischen 0 und 99 liegen.");
                 return;
             }
-        }
 
-        if (limit == 0)
-        {
+            else if (limit == 0)
+            {
+                await ctx.RespondAsync(
+                    "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
+                return;
+            }
+
+            await userChannel.ModifyAsync(x => x.UserLimit = limit);
             await ctx.RespondAsync(
-                "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
-            return;
+                $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
         }
 
-        await userChannel.ModifyAsync(x => x.UserLimit = limit);
-        await ctx.RespondAsync(
-            $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
     }
 
     [Command("claim")]
@@ -649,14 +664,17 @@ public class TempVoiceCommands : TempVoiceHelper
             {
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+                bool isMod = await IsChannelMod(userChannel, ctx.Member);
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+
+
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
                 {
                     var kicklist = new List<ulong>();
                     List<ulong> ids = new();
@@ -672,7 +690,12 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
-                            if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                            if (user.Roles.Contains(staffrole))
+                            {
+                                continue;
+                            }
+                            List<ulong> mods = await RetrieveChannelMods(userChannel);
+                            if (id == ctx.User.Id || mods.Contains(id))
                             {
                                 continue;
                             }
@@ -690,7 +713,15 @@ public class TempVoiceCommands : TempVoiceHelper
                     }
 
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
-
+                    try
+                    {
+                        var currentmods = await RetrieveChannelMods(userChannel);
+                        currentmods.Remove(ctx.User.Id);
+                        await UpdateChannelMods(userChannel, currentmods);
+                    }
+                    catch (Exception)
+                    {
+                    }
                     int successCount = kicklist.Count;
                     string endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **gekickt**!";
@@ -712,13 +743,16 @@ public class TempVoiceCommands : TempVoiceHelper
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
                 {
                     var blockedlist = new List<ulong>();
                     List<ulong> ids = new();
@@ -734,11 +768,29 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
-                            if (user.Roles.Contains(staffrole) || user.Id == ctx.User.Id)
+                            if (user.Roles.Contains(staffrole))
                             {
                                 continue;
                             }
-
+                            var channelowner = await GetChannelOwnerID(userChannel);
+                            if (channelowner == (long)user.Id)
+                            {
+                                continue;
+                            }
+                            List<ulong> mods = await RetrieveChannelMods(userChannel);
+                            if (id == ctx.User.Id || mods.Contains(id))
+                            {
+                                continue;
+                            }
+                            try
+                            {
+                                var currentmods = await RetrieveChannelMods(userChannel);
+                                currentmods.Remove(id);
+                                await UpdateChannelMods(userChannel, currentmods);
+                            }
+                            catch (Exception)
+                            {
+                            }
                             overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                             {
@@ -751,8 +803,8 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                         }
                     }
-
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
 
                     int successCount = blockedlist.Count;
                     string endstring =
@@ -774,14 +826,15 @@ public class TempVoiceCommands : TempVoiceHelper
             {
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+                bool isMod = await IsChannelMod(userChannel, ctx.Member);
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
                 {
                     var unblocklist = new List<ulong>();
                     List<ulong> ids = new();
@@ -830,14 +883,14 @@ public class TempVoiceCommands : TempVoiceHelper
             {
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
                 {
                     var permitusers = new List<ulong>();
                     List<ulong> ids = new();
