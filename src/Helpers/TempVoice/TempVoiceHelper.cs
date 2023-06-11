@@ -1625,7 +1625,7 @@ public class TempVoiceHelper : BaseCommandModule
                 Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
                 Permissions.AccessChannels, Permissions.None);
 
-
+            await ResetChannelMods(channel);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder
@@ -1758,6 +1758,7 @@ public class TempVoiceHelper : BaseCommandModule
                     }
                 }
 
+                await ResetChannelMods(channel);
                 overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None,
                     Permissions.ManageChannels | Permissions.MoveMembers);
                 overwrites = overwrites.Merge(new_owner,

@@ -11,6 +11,7 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -639,7 +640,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
                 Permissions.AccessChannels, Permissions.None);
 
-
+            await ResetChannelMods(channel);
             await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
         }
@@ -1196,6 +1197,7 @@ public class TempVoiceCommands : TempVoiceHelper
             overwrites = overwrites.Merge(orig_owner, Permissions.AccessChannels | Permissions.UseVoice,
                 Permissions.None, Permissions.ManageChannels | Permissions.MoveMembers);
             await userchannelobj.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await ResetChannelMods(userchannelobj);
             await msg.ModifyAsync(
                 $"<:success:1085333481820790944> **Erfolg!** Channel wurde erfolgreich an {new_owner.Mention} übertragen.");
         }
