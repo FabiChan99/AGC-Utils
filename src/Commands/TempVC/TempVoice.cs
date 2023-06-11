@@ -12,6 +12,7 @@ using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.Diagnostics.Metrics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -1352,7 +1353,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             channellimit = "Kein Limit";
                         }
-
+                        var caseid = Helpers.Helpers.GenerateCaseID();
                         string blockedusers = user["blockedusers"].ToString();
                         string permitedusers = user["permitedusers"].ToString();
                         string locked = user["locked"].ToString();
@@ -1373,7 +1374,37 @@ public class TempVoiceCommands : TempVoiceHelper
                                           $"**Versteckt:** {hidden}\n",
                             Color = BotConfig.GetEmbedColor()
                         };
-                        await msg.ModifyAsync(ebb.Build());
+                        var mb = new DiscordMessageBuilder();
+                        List<DiscordButtonComponent> buttons = new(2)
+                        {
+                            new DiscordButtonComponent(ButtonStyle.Secondary, $"close_msg_{caseid}", "Nachricht schließen"),
+                        };
+                        mb.WithEmbed(ebb);
+                        mb.AddComponents(buttons);
+                        var nmb = new DiscordMessageBuilder();
+                        nmb.WithEmbed(ebb);
+                        msg = await msg.ModifyAsync(mb);
+                        var interactiviy = ctx.Client.GetInteractivity();
+                        var response = await interactiviy.WaitForButtonAsync(msg,ctx.User,
+                                                       TimeSpan.FromMinutes(5));
+                        if (response.TimedOut)
+                        {
+                            await msg.ModifyAsync(nmb);
+                        }
+
+                        if (response.Result.Id == $"close_msg_{caseid}")
+                        {
+                            await msg.DeleteAsync();
+                            try
+                            {
+                                await ctx.Message.DeleteAsync();
+                            }
+                            catch (NotFoundException)
+                            {
+                                // ignored
+                            }
+                        }
+                        
                     }
                 }
             });
