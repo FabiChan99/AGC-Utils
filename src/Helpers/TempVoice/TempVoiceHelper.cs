@@ -6,6 +6,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+using Microsoft.VisualBasic;
 using Npgsql;
 
 namespace AGC_Management.Helpers.TempVoice;
@@ -78,6 +79,104 @@ public class TempVoiceHelper : BaseCommandModule
         return true;
     }
 
+
+    protected static async Task<bool> IsChannelMod(DiscordChannel channel, DiscordUser user)
+    {
+        List<string> Query = new()
+        {
+            "channelmods"
+        };
+        Dictionary<string, object> QueryConditions = new()
+        {
+            { "channelid", (long)channel.Id }
+        };
+        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
+                       Query, QueryConditions);
+        bool isMod = false;
+        foreach (var result in QueryResult)
+        {
+            if (result["channelmods"].ToString().Contains(user.Id.ToString()))
+            {
+                isMod = true;
+            }
+        }
+        return isMod;
+    }
+
+    protected static async Task<List<ulong>> RetrieveChannelMods(DiscordChannel channel)
+    {
+        List<string> Query = new()
+        {
+            "channelmods"
+        };
+        Dictionary<string, object> QueryConditions = new()
+        {
+            { "channelid", (long)channel.Id }
+        };
+        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
+            Query, QueryConditions);
+
+        List<ulong> channelMods = new();
+        foreach (var result in QueryResult)
+        {
+            try
+            {
+                string[] mods = result["channelmods"].ToString().Split(", ");
+                foreach (var mod in mods)
+                {
+                    channelMods.Add(ulong.Parse(mod));
+                }
+            }
+            catch (Exception)
+            {
+                channelMods = new();
+            }
+
+        }
+        return channelMods;
+    }
+
+    protected static async Task<bool> ChannelHasMods(DiscordChannel channel)
+    {
+        List<ulong> channelMods = await RetrieveChannelMods(channel);
+        if (channelMods.Count > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    protected static async Task ResetChannelMods(DiscordChannel channel)
+    {
+        await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+        {
+            await conn.OpenAsync();
+            string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+            await using (NpgsqlCommand command = new(sql, conn))
+            {
+                command.Parameters.AddWithValue("@mods", string.Empty);
+                command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                int affected = await command.ExecuteNonQueryAsync();
+            }
+        }
+        return;
+    }
+
+    protected static async Task UpdateChannelMods(DiscordChannel channel, List<ulong> channelMods)
+    {
+        await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+        {
+            await conn.OpenAsync();
+            string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+            await using (NpgsqlCommand command = new(sql, conn))
+            {
+                command.Parameters.AddWithValue("@mods", string.Join(", ", channelMods));
+                command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                int affected = await command.ExecuteNonQueryAsync();
+            }
+        }
+        return;
+    }
 
     protected static async Task<bool> CheckTeam(CommandContext ctx, DiscordMember user)
     {
