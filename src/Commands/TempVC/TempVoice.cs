@@ -887,13 +887,15 @@ public class TempVoiceCommands : TempVoiceHelper
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !IsChannelMod(userChannel, ctx.Member).Result)
+                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && IsChannelMod(userChannel, ctx.Member).Result)
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
                 {
                     var unpermitlist = new List<ulong>();
                     List<ulong> ids = new();
