@@ -1536,7 +1536,7 @@ public class TempVoicePanel : TempVoiceHelper
             ImageUrl = "https://cdn.discordapp.com/attachments/764921088689438771/1115554368574476288/panel.png"
         };
         DiscordMessageBuilder dmb = new DiscordMessageBuilder().AddComponents(rowComponents).AddEmbed(eb.Build());
-        var msg = await ctx.RespondAsync(dmb);
+        var msg = await ctx.Channel.SendMessageAsync(dmb);
         BotConfig.SetConfig("TempVC", "VCPanelMessageID", msg.Id.ToString());
         BotConfig.SetConfig("TempVC", "VCPanelChannelID", ctx.Channel.Id.ToString());
     }
