@@ -1867,6 +1867,172 @@ public class TempVoiceHelper : BaseCommandModule
             return;
         }
     }
+    protected static async Task PanelChannelUnblock(DiscordInteraction interaction)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            var channel = userChannel;
+            List<ulong> permited_users = new List<ulong>();
+            var puserow = userChannel.PermissionOverwrites
+                .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+                .Where(x => x.Id != interaction.User.Id)
+                .Where(x => x.Type == OverwriteType.Member)
+                .Select(x => x.Id)
+                .ToList();
+            foreach (ulong userid in puserow)
+            {
+                if (userid != interaction.User.Id)
+                {
+                    permited_users.Add(userid);
+                }
+            }
+
+            var blocked_users = permited_users.Count;
+            var options = new List<DiscordStringSelectComponentOption>();
+            bool role_permitted = false;
+            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            string roleName = string.Empty;
+            foreach (var role in interaction.Guild.Roles)
+            {
+                var RoleId = role.Value.Id;
+                if (lvlroles.ContainsKey(RoleId))
+                {
+                    var temp_ow = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == RoleId);
+                    if (temp_ow != null)
+                    {
+                        roleName = lvlroles[RoleId];
+                        role_permitted = true;
+                        break;
+                    }
+                }
+            }
+
+            foreach (var uid in permited_users)
+            {
+                var user = await interaction.Guild.GetMemberAsync(uid);
+                var username = user.DisplayName;
+                options.Add(new DiscordStringSelectComponentOption(username, uid.ToString(),
+                    emoji: new DiscordComponentEmoji(1083853403316297758)));
+            }
+
+            if (blocked_users == 0)
+            {
+                string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **blockiert**!";
+                var sbuilder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = content
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, sbuilder);
+                return;
+            }
+
+            if (blocked_users > 25)
+            {
+                string content =
+                    $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
+                var sbuilder = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true,
+                    Content = content
+                };
+                await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, sbuilder);
+                return;
+            }
+
+            int ul = 10;
+            if (blocked_users < 10)
+            {
+                ul = blocked_users;
+            }
+
+            var selector = new List<DiscordComponent>
+            {
+                new DiscordStringSelectComponent
+                ("Wähle zu entblockierende Mitglieder aus.",
+                    options, "unban_selector", maxOptions: ul)
+            };
+            List<DiscordActionRowComponent> rowComponents = new()
+            {
+                new DiscordActionRowComponent(selector)
+            };
+
+            string econtent = "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
+            var ssbuilder = new DiscordInteractionResponseBuilder()
+            {
+                IsEphemeral = true,
+                Content = econtent
+            };
+            ssbuilder.AddComponents(rowComponents);
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ssbuilder);
+        }
+    }
+
+    protected static async Task PanelChannelUnblockCallback(DiscordInteraction interaction, DiscordClient client,
+    ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            DiscordChannel channel = userChannel;
+            var u = e.Values.ToList();
+            var users = e.Values.Select(x => ulong.Parse(x));
+            var usersList = new List<DiscordMember>();
+            List<ulong> idlist = new();
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
+                .ToList();
+            foreach (ulong id in users)
+            {
+                try
+                {
+                    idlist.Add(id);
+                    if (id == interaction.User.Id)
+                    {
+                        continue;
+                    }
+
+                    var user = await interaction.Guild.GetMemberAsync(id);
+
+
+                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice);
+
+
+                    usersList.Add(user);
+                }
+                catch (NotFoundException)
+                {
+                    // ignored
+                }
+            }
+
+            await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **entblockiert**."
+                });
+            return;
+        }
+    }
 
 
 }

@@ -1462,6 +1462,14 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
                 {
                     await PanelChannelBlockCallback(Interaction, sender, e);
                 }
+                else if (customid == "channel_unban")
+                {
+                    await PanelChannelUnblock(Interaction);
+                }
+                else if (customid == "unban_selector")
+                {
+                    await PanelChannelUnblockCallback(Interaction, sender, e);
+                }
             }
         });
         return Task.CompletedTask;
