@@ -11,6 +11,7 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Sentry.Protocol;
 using System.Diagnostics.Metrics;
 using System.Security.Cryptography.X509Certificates;
 
@@ -1270,10 +1271,77 @@ public class TempVoiceCommands : TempVoiceHelper
                 .WithColor(BotConfig.GetEmbedColor()).WithTitle("Voice Channel Informationen")
                 //.WithThumbnail("https://cdn3.emoji.gg/emojis/2378-discord-voice-channel.png")
                 .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
+            var caseid = Helpers.Helpers.GenerateCaseID();
+            List<DiscordButtonComponent> buttons = new(2)
+            {
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}", "Info über Zugelassene oder Blockierte User (Nur Channelowner)"),
+            };
+
+
             var mb = new DiscordMessageBuilder()
+                .WithEmbed(ebb).AddComponents(buttons);
+            var omb = new DiscordMessageBuilder()
                 .WithEmbed(ebb);
             DiscordMessage msg = await ctx.RespondAsync(mb);
+            var interactivity = ctx.Client.GetInteractivity();
+            var results = await interactivity.WaitForButtonAsync(msg, channelowner, TimeSpan.FromMinutes(3));
+            if (results.TimedOut)
+            {
+                await msg.ModifyAsync(omb);
+                return;
+            }
 
+            if (results.Result.Id == $"get_vcinfo_{caseid}")
+            {
+                string blocklist = string.Empty;
+                string permitlist = string.Empty;
+                var buserow = channel.PermissionOverwrites
+                    .Where(x => x.Type == OverwriteType.Member)
+                    .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+
+                    .ToList();
+
+                var puserow = channel.PermissionOverwrites
+                    .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
+                    .Where(x => x.Type == OverwriteType.Member)
+                    .Where(x => x.Id != ctx.User.Id)
+                    .Select(x => x.Id)
+                    .ToList();
+                foreach (var user in buserow)
+                {
+                    var member = await ctx.Guild.GetMemberAsync(user);
+                    blocklist += $"{member.UsernameWithDiscriminator} {member.Mention} ``({member.Id})``\n";
+                }
+
+                foreach (var user in puserow)
+                {
+                    var member = await ctx.Guild.GetMemberAsync(user);
+                    permitlist += $"{member.UsernameWithDiscriminator} {member.Mention} ``({member.Id})``\n";
+                }
+
+                if (buserow.Count == 0)
+                {
+                    blocklist = "Keine User blockiert";
+                }
+
+                if (puserow.Count == 0)
+                {
+                    permitlist = "Keine User zugelassen";
+                }
+
+                var emb = new DiscordEmbedBuilder().WithDescription("__Zugelassene User:__\n" +
+                                                                    $"{permitlist}\n\n" +
+                                                                    "__Blockierte User:__\n" +
+                                                                    $"{blocklist}").WithColor(BotConfig.GetEmbedColor()).WithTitle("Kanal Permit und Block Liste").WithFooter($"{ctx.User.UsernameWithDiscriminator}");
+                var mbb = new DiscordInteractionResponseBuilder()
+                {
+                    IsEphemeral = true
+                }.AddEmbed(emb);
+
+                await results.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, mbb);
+                await msg.ModifyAsync(omb);
+                return;
+            }
 
 
         }
