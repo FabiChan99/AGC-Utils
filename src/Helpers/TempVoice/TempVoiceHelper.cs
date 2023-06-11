@@ -177,80 +177,10 @@ public class TempVoiceHelper : BaseCommandModule
         return;
     }
 
-    protected static async Task<bool> CheckTeam(CommandContext ctx, DiscordMember user)
-    {
-        DiscordRole staffRole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
-        if (staffRole.Members.Any(x => x.Key == user.Id))
-        {
-            await ctx.RespondAsync(
-                $"<:attention:1085333468688433232> **Fehler!** Du kannst den Befehl ``{ctx.Command.Name}`` nicht auf Teammitglieder anwenden!");
-            return true;
-        }
 
-        return false;
-    }
 
-    protected static ulong? GetUserChannel(CommandContext ctx)
-    {
-        ulong? userchannel;
-        try
-        {
-            userchannel = ctx.Member.VoiceState?.Channel.Id;
-        }
-        catch
-        {
-            userchannel = null;
-        }
 
-        return userchannel;
-    }
-
-    protected static ulong? GetUserChannel(DiscordMember user)
-    {
-        ulong? userchannel;
-        try
-        {
-            userchannel = user.VoiceState?.Channel.Id;
-        }
-        catch
-        {
-            userchannel = null;
-        }
-
-        return userchannel;
-    }
-
-    protected static DiscordChannel? GetUserChannelObj(CommandContext ctx)
-    {
-        DiscordChannel? channel;
-        try
-        {
-            channel = ctx.Member.VoiceState?.Channel;
-        }
-        catch
-        {
-            channel = null;
-        }
-
-        return channel;
-    }
-
-    protected static DiscordChannel? GetUserChannelObj(DiscordMember user)
-    {
-        DiscordChannel? channel;
-        try
-        {
-            channel = user.VoiceState?.Channel;
-        }
-        catch
-        {
-            channel = null;
-        }
-
-        return channel;
-    }
-
-    protected static async Task<List<long>> GetChannelIDFromDB(DiscordInteraction interaction)
+    private static async Task<List<long>> GetChannelIDFromDB(DiscordInteraction interaction)
     {
         List<long> dbChannels = new();
 
@@ -309,30 +239,6 @@ public class TempVoiceHelper : BaseCommandModule
         };
         List<Dictionary<string, object>> QueryResult =
             await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
-        foreach (var result in QueryResult)
-        {
-            var chid = result["channelid"];
-            var id = (long)chid;
-            dbChannels.Add(id);
-        }
-
-        return dbChannels;
-    }
-
-    protected static async Task<List<long>> GetChannelIDFromDB(DiscordMember member)
-    {
-        List<long> dbChannels = new();
-
-        List<string> Query = new()
-        {
-            "channelid"
-        };
-        Dictionary<string, object> QueryConditions = new()
-        {
-            { "ownerid", member.Id }
-        };
-        List<Dictionary<string, object>> QueryResult =
-            await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
             var chid = result["channelid"];
@@ -511,19 +417,6 @@ public class TempVoiceHelper : BaseCommandModule
 
         return list;
     }
-
-
-    protected bool NoChannelInter(DiscordInteraction interaction)
-    {
-        var builder = new DiscordInteractionResponseBuilder
-        {
-            Content = "You are not in a voice channel!",
-            IsEphemeral = true
-        };
-        interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
-        return true;
-    }
-
 
     protected static async Task PanelLockChannel(DiscordInteraction interaction)
     {

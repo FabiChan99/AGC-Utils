@@ -1437,7 +1437,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 var currentmods = await RetrieveChannelMods(userChannel);
                 currentmods.Add(user.Id);
                 await UpdateChannelMods(userChannel, currentmods);
-                await ctx.RespondAsync($"Der User {user.UsernameWithDiscriminator} wurde als Kanalmoderator hinzugefügt.");
+                await ctx.RespondAsync($"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator hinzugefügt.");
             }
         }
 
@@ -1492,7 +1492,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 var currentmods = await RetrieveChannelMods(userChannel);
                 currentmods.Remove(user.Id);
                 await UpdateChannelMods(userChannel, currentmods);
-                await ctx.RespondAsync($"Der User {user.UsernameWithDiscriminator} wurde als Kanalmoderator entfernt.");
+                await ctx.RespondAsync($"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator entfernt.");
             }
         }
 
