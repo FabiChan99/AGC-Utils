@@ -7,7 +7,6 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
-using Sentry;
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -1765,9 +1764,9 @@ public class TempVoiceHelper : BaseCommandModule
                 await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                                        new DiscordInteractionResponseBuilder
                                        {
-                        IsEphemeral = true,
-                        Content = $"<:success:1085333481820790944> {kickuser.Mention} wurde erfolgreich aus dem Channel gekickt."
-                    });
+                                           IsEphemeral = true,
+                                           Content = $"<:success:1085333481820790944> {kickuser.Mention} wurde erfolgreich aus dem Channel gekickt."
+                                       });
                 return;
             }
 
@@ -1898,7 +1897,6 @@ public class TempVoiceHelper : BaseCommandModule
 
             var blocked_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();
-            bool role_permitted = false;
             Dictionary<ulong, string> lvlroles = debuglevelroles;
             string roleName = string.Empty;
             foreach (var role in interaction.Guild.Roles)
@@ -1910,7 +1908,6 @@ public class TempVoiceHelper : BaseCommandModule
                     if (temp_ow != null)
                     {
                         roleName = lvlroles[RoleId];
-                        role_permitted = true;
                         break;
                     }
                 }
