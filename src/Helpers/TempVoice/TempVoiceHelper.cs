@@ -1773,5 +1773,101 @@ public class TempVoiceHelper : BaseCommandModule
 
         }
     }
+    protected static async Task PanelChannelBlock(DiscordInteraction interaction)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            var channel = interaction.Guild.GetChannel(userChannel.Id);
+            var selector = new List<DiscordComponent>
+            {
+                new DiscordUserSelectComponent("Wähle zu blockierende Mitglieder aus.", customId: "ban_selector",
+                    minOptions: 1, maxOptions: 8),
+            };
+            string message =
+                "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
+
+
+            DiscordInteractionResponseBuilder ib = new()
+            {
+                IsEphemeral = true,
+                Content = message
+            };
+            List<DiscordActionRowComponent> rowComponents = new()
+            {
+                new DiscordActionRowComponent(selector)};
+            await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                ib.AddComponents(rowComponents));
+
+        }
+    }
+    protected static async Task PanelChannelBlockCallback(DiscordInteraction interaction, DiscordClient client,
+    ComponentInteractionCreateEventArgs e)
+    {
+        var db_channel = await GetChannelIDFromDB(interaction);
+        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
+        {
+            await NoChannel(interaction);
+            return;
+        }
+
+        if (userChannel != null && db_channel.Contains((long)userChannel.Id))
+        {
+            DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+
+            var u = e.Values.ToList();
+            var users = e.Values.Select(x => ulong.Parse(x));
+            var usersList = new List<DiscordMember>();
+            List<ulong> idlist = new();
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
+                .ToList();
+            foreach (ulong id in users)
+            {
+                try
+                {
+                    idlist.Add(id);
+                    if (id == interaction.User.Id)
+                    {
+                        continue;
+                    }
+
+                    var user = await interaction.Guild.GetMemberAsync(id);
+
+
+                    overwrites = overwrites.Merge(user, Permissions.None,
+                        Permissions.AccessChannels | Permissions.UseVoice);
+
+
+                    usersList.Add(user);
+                }
+                catch (NotFoundException)
+                {
+                    // ignored
+                }
+            }
+
+            await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder
+                {
+                    IsEphemeral = true,
+                    Content =
+                        $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **blockiert**."
+                });
+            return;
+        }
+    }
+
+
 }
 
