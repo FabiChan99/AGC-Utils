@@ -364,7 +364,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             Dictionary<string, object> queryConditions = new()
             {
-                { "channelid", channel.Id }
+                { "channelid", (long)channel.Id }
             };
 
             List<Dictionary<string, object>> queryResult =

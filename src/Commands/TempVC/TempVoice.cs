@@ -1150,6 +1150,135 @@ public class TempVoiceCommands : TempVoiceHelper
         }
     }
 
+    [Command("vcinfo")]
+    [Aliases("voiceinfo", "voice-info", "vc-info")]
+    [RequireDatabase]
+    public async Task VoiceInfo(CommandContext ctx, DiscordChannel channel = null)
+    {
+        if (channel == null)
+        {
+            channel = ctx.Member?.VoiceState?.Channel;
+        }
+        var userchannel = (long?)channel?.Id;
+        var db_channels = await GetAllChannelIDsFromDB();
+        if (userchannel == null)
+        {
+            await ctx.RespondAsync("<:attention:1085333468688433232> Du musst in einem Channel sein, um diesen Befehl auszuführen!");
+            return;
+        }
+
+        if (!db_channels.Contains((long)userchannel) && userchannel != null)
+        {
+            await ctx.RespondAsync(
+                $"<:attention:1085333468688433232> Der Aktuelle Voice Channel ist kein Custom Channel");
+            return;
+        }
+
+        if (db_channels.Contains((long)userchannel) && userchannel != null)
+        {
+            long? channelownerid = await GetChannelOwnerID(channel);
+            var channellimit = channel.UserLimit;
+            DiscordMember channelowner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
+            string channelname = channel.Name;
+            var channel_timestamp = channel.CreationTimestamp;
+            var channel_created = channel_timestamp.UtcDateTime;
+            var rendered_channel_timestamp = channel_created.Timestamp();
+            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            var yesemote = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
+            var noemote = DiscordEmoji.FromName(ctx.Client, ":x:");
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            bool locked = false;
+            bool hidden = false;
+            var overwrite =
+                channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+            {
+                locked = true;
+            }
+
+            if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+            {
+                locked = false;
+            }
+
+            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
+            {
+                hidden = true;
+            }
+
+            if (overwrite == null ||
+                overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
+            {
+                hidden = false;
+            }
+            var hiddenemote = hidden ? yesemote : noemote;
+            var lockedemote = locked ? yesemote : noemote;
+
+
+            string climit = (channellimit == 0) ? "∞" : channellimit.ToString();
+
+            string lreach = "";
+            if (channellimit == channel.Users.Count && channellimit != 0)
+            {
+                lreach = yesemote;
+            }
+
+            if (channellimit < channel.Users.Count && channellimit != 0)
+            {
+                lreach = yesemote;
+            }
+
+            if (channellimit > channel.Users.Count)
+            {
+                lreach = noemote;
+            }
+
+            if (channellimit == 0)
+            {
+                lreach = "Kein Limit gesetzt";
+            }
+
+            List<string> Query = new()
+            {
+                "userid"
+            };
+            Dictionary<string, object> WhereCondiditons = new()
+            {
+                { "userid", (long)channelownerid }
+            };
+
+            string sessionemote = noemote;
+            var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
+            if (usersession.Count > 0)
+            {
+                sessionemote = yesemote;
+            }
+
+            var ebb = new DiscordEmbedBuilder()
+                .WithDescription(
+                    $"**• Name des Channels** = ``{channelname}``\n" +
+                    $"**• ID des Channels** = ``{channel.Id}``\n" +
+                    $"**• Eigentümer** = {channelowner.Mention} ``({channelowner.Id})``\n" +
+                    $"**• Useranzahl im VC** = ``{channel.Users.Count}``\n" +
+                    $"**• Userlimit des VC's** = ``{climit}``\n" +
+                    $"**• Limit des Channels erreicht** = {lreach}\n" +
+                    $"**• Erstellzeit** = {rendered_channel_timestamp}\n" +
+                    $"**• Aktuelle Bitrate** = ``{channel.Bitrate} kbps``\n" +
+                    $"**• Channel Versteckt** = {hiddenemote}\n" +
+                    $"**• Channel Gesperrt** = {lockedemote}\n" +
+                    $"**• Channelowner hat Session** = {sessionemote}")
+                .WithColor(BotConfig.GetEmbedColor()).WithTitle("Voice Channel Informationen")
+                //.WithThumbnail("https://cdn3.emoji.gg/emojis/2378-discord-voice-channel.png")
+                .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
+            var mb = new DiscordMessageBuilder()
+                .WithEmbed(ebb);
+            DiscordMessage msg = await ctx.RespondAsync(mb);
+
+
+
+        }
+    }
+
     [Group("session")]
     public class SessionManagement : TempVoiceCommands
     {
