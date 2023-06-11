@@ -11,7 +11,6 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
