@@ -887,13 +887,13 @@ public class TempVoiceCommands : TempVoiceHelper
                 List<long> dbChannels = await GetChannelIDFromDB(ctx);
                 DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
+                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !IsChannelMod(userChannel, ctx.Member).Result)
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
+                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && IsChannelMod(userChannel, ctx.Member).Result)
                 {
                     var unpermitlist = new List<ulong>();
                     List<ulong> ids = new();
@@ -909,9 +909,16 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
+                            var channelowner = await GetChannelOwnerID(userChannel);
+                            if (channelowner == (long)user.Id)
+                            {
+                                continue;
+                            }
 
                             overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
                                 Permissions.None);
+
+                            
 
 
                             unpermitlist.Add(user.Id);
