@@ -11,6 +11,7 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.Diagnostics.Metrics;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -279,6 +280,52 @@ public class TempVCEventHandler : TempVoiceHelper
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+        });
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                if (e.Before == null && e.After == null) return;
+                if (e.Before == e.After) return;
+                var ChID = ulong.Parse(GetVCConfig("Creation_Channel_ID"));
+                var PaID = ulong.Parse(GetVCConfig("Creation_Category_ID"));
+                DiscordChannel beforeChannel = e.Before?.Channel;
+                DiscordChannel afterChannel = e.After?.Channel;
+
+                if (beforeChannel == null)
+                {
+                    if (afterChannel.Id == ChID) return;
+                    if (afterChannel.ParentId == PaID)
+                    {
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        return;
+                    }
+                }
+
+                if ((beforeChannel?.ParentId == PaID || afterChannel?.ParentId == PaID) &&
+                    beforeChannel != afterChannel)
+                {
+                    if (beforeChannel != null && beforeChannel.Users.Count() > 0)
+                    {
+                        if (beforeChannel.Id == ChID) return;
+                        if (beforeChannel.ParentId != PaID) return;
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        return;
+                    }
+
+                    if (afterChannel != null && afterChannel.Users.Count() > 0)
+                    {
+                        if (afterChannel.Id == ChID) return;
+                        if (afterChannel.ParentId != PaID) return;
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        return;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
         });
 
