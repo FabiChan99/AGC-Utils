@@ -1209,6 +1209,46 @@ public class TempVoiceCommands : TempVoiceHelper
         }
     }
 
+    [Command("vchelp")]
+    [Aliases("voicehelp", "voice-help", "vc-help")]
+    public async Task VoiceHelp(CommandContext ctx)
+    {
+        var eb = new DiscordEmbedBuilder();
+        string prefix = BotConfig.GetConfig()["MainConfig"]["BotPrefix"];
+        string helpstring = $"> {prefix}hide - Macht den aktuellen Channel unsichtbar\n" +
+            $"> {prefix}unhide - Macht den aktuellen Channel sichtbar\n"+
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}unlock - Entsperrt den aktuellen Channel\n" +
+            $"> {prefix}block - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+            $"> {prefix}lock - Sperrt den aktuellen Channel\n" +
+
+
+
+
+
+
+            ;
+
+
+        eb.WithTitle("Voice Help");
+        eb.WithDescription();
+        eb.WithColor(BotConfig.GetEmbedColor());
+        await ctx.RespondAsync(embed: eb);
+    }
+
     [Command("vcinfo")]
     [Aliases("voiceinfo", "voice-info", "vc-info")]
     [RequireDatabase]
@@ -1400,9 +1440,9 @@ public class TempVoiceCommands : TempVoiceHelper
                 await msg.ModifyAsync(omb);
                 return;
             }
-
-
         }
+
+        
     }
 
 
