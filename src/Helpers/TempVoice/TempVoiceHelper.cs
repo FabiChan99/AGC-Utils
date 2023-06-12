@@ -78,6 +78,28 @@ public class TempVoiceHelper : BaseCommandModule
         return true;
     }
 
+    protected static string GetBetterUsername(DiscordMember member)
+    {
+        if (member.IsMigrated)
+        {
+            if ("" == member.Nickname)
+            {
+                return $"{member.Nickname} ({member.Username})";
+            }
+            return $"{member.DisplayName} ({member.Username})";
+        }
+
+        if ("" == member.Nickname)
+        {
+            return $"{member.Nickname} ({member.UsernameWithDiscriminator})";
+        }
+        return $"{member.UsernameWithDiscriminator}";
+    }
+
+    protected static string GetBetterUsernameWithID(DiscordMember member)
+    {
+        return $"{GetBetterUsername(member)} ``{member.Id}``";
+    }
 
     protected static async Task<bool> IsChannelMod(DiscordChannel channel, DiscordUser user)
     {
@@ -947,7 +969,7 @@ public class TempVoiceHelper : BaseCommandModule
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
         DiscordChannel userChannel = member?.VoiceState?.Channel;
         bool isMod = await IsChannelMod(userChannel, interaction.User);
-
+        
         if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(interaction);

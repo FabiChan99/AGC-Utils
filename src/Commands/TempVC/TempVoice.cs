@@ -115,9 +115,9 @@ public class TempVCEventHandler : TempVoiceHelper
                                 overwrites = overwrites.Merge(m,
                                     Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
                                     Permissions.AccessChannels, Permissions.None);
+                                await voice.ModifyPositionInCategoryAsync(e.After.Channel.Position + 1);
                                 await voice.ModifyAsync(async x =>
                                 {
-                                    x.Position = e.After.Channel.Position + 1;
                                     x.PermissionOverwrites = overwrites;
                                 });
                             }
@@ -218,7 +218,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
 
                                 var overwrites = voice.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-                                await voice.ModifyAsync(async x => { x.Position = e.After.Channel.Position + 1; });
+                                await voice.ModifyPositionInCategoryAsync(e.After.Channel.Position + 1);
                                 overwrites = overwrites.Merge(m,
                                     Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
                                     Permissions.AccessChannels, Permissions.None);
@@ -297,7 +297,8 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (afterChannel.Id == ChID) return;
                     if (afterChannel.ParentId == PaID)
                     {
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
@@ -309,7 +310,8 @@ public class TempVCEventHandler : TempVoiceHelper
                     {
                         if (beforeChannel.Id == ChID) return;
                         if (beforeChannel.ParentId != PaID) return;
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
                         return;
                     }
 
@@ -317,7 +319,8 @@ public class TempVCEventHandler : TempVoiceHelper
                     {
                         if (afterChannel.Id == ChID) return;
                         if (afterChannel.ParentId != PaID) return;
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {e.User.UsernameWithGlobalName} ``{e.User.Id}``");
+                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}``");
                         return;
                     }
                 }
