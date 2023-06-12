@@ -969,7 +969,7 @@ public class TempVoiceHelper : BaseCommandModule
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
         DiscordChannel userChannel = member?.VoiceState?.Channel;
         bool isMod = await IsChannelMod(userChannel, interaction.User);
-        
+
         if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
         {
             await NoChannel(interaction);

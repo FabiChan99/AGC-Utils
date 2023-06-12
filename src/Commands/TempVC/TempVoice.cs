@@ -10,7 +10,6 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using Npgsql;
 
 namespace AGC_Management.Commands.TempVC;
@@ -1155,7 +1154,9 @@ public class TempVoiceCommands : TempVoiceHelper
                 }
 
 
-                await userchannel.ModifyAsync(x => { x.PermissionOverwrites = overwrites;
+                await userchannel.ModifyAsync(x =>
+                {
+                    x.PermissionOverwrites = overwrites;
                     x.UserLimit = channellimit;
                 });
                 eb_.WithTitle("Beitrittsanfrage angenommen");
@@ -1493,7 +1494,7 @@ public class TempVoiceCommands : TempVoiceHelper
             }
         }
 
-        
+
     }
 
 
