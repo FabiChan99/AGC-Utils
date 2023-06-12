@@ -91,12 +91,21 @@ public class RequireLavalink : CheckBaseAttribute
     }
 }
 
-public class RequireAGC : CheckBaseAttribute
+public class AGCEasterEggsEnabled: CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
-        // Check if lavalink is connected
-        if (ctx.Guild.Id == 750365461945778209) return true;
+        // Check if AGC Setting is Enabled
+        try
+        {
+            if (bool.TrueString == BotConfig.GetConfig()["ServerConfig"]["EasterEggsEnabled"] &&
+                ctx.Guild.Id == 750365461945778209) return true;
+
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
         return false;
     }
 }

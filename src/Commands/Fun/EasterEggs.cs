@@ -6,7 +6,7 @@ namespace AGC_Management.Commands.Fun;
 
 public class AGCEasterEggs : BaseCommandModule
 {
-    [RequireAGC]
+    [AGCEasterEggsEnabled]
     [Command("koni")]
     public async Task Koni(CommandContext ctx)
     {
