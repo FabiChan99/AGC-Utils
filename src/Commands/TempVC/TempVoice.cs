@@ -305,7 +305,7 @@ public class TempVCEventHandler : TempVoiceHelper
                 if ((beforeChannel?.ParentId == PaID || afterChannel?.ParentId == PaID) &&
                     beforeChannel != afterChannel)
                 {
-                    if (beforeChannel != null && beforeChannel.Users.Count() > 0)
+                    if (beforeChannel != null && beforeChannel.Users.Count > 0)
                     {
                         if (beforeChannel.Id == ChID) return;
                         if (beforeChannel.ParentId != PaID) return;
@@ -314,12 +314,12 @@ public class TempVCEventHandler : TempVoiceHelper
                         return;
                     }
 
-                    if (afterChannel != null && afterChannel.Users.Count() > 0)
+                    if (afterChannel != null && afterChannel.Users.Count > 0)
                     {
                         if (afterChannel.Id == ChID) return;
                         if (afterChannel.ParentId != PaID) return;
                         DiscordMember member = await e.User.ConvertToMember(e.Guild);
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}``");
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
