@@ -101,8 +101,12 @@ public class TempVoiceHelper : BaseCommandModule
         return $"{GetBetterUsername(member)} ``{member.Id}``";
     }
 
-    protected static async Task<bool> IsChannelMod(DiscordChannel channel, DiscordUser user)
+    protected static async Task<bool> IsChannelMod(DiscordChannel? channel, DiscordUser user)
     {
+        if (channel == null)
+        {
+            return false;
+        }
         List<string> Query = new()
         {
             "channelmods"
