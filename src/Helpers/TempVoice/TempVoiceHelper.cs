@@ -1923,8 +1923,8 @@ public class TempVoiceHelper : BaseCommandModule
                     {
                     }
 
-                    overwrites = overwrites.Merge(user, Permissions.None,
-                        Permissions.AccessChannels | Permissions.UseVoice);
+                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
+                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
 
                     await user.DisconnectFromVoiceAsync();
 
