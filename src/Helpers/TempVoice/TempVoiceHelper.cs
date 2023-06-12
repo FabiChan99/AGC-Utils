@@ -12,7 +12,7 @@ namespace AGC_Management.Helpers.TempVoice;
 
 public class TempVoiceHelper : BaseCommandModule
 {
-    private static readonly Dictionary<ulong, string> levelroles = new Dictionary<ulong, string>()
+    private static readonly Dictionary<ulong, string> levelroles = new()
     {
         { 750402390691152005, "5+" },
         { 798562254408777739, "10+" },
@@ -31,7 +31,7 @@ public class TempVoiceHelper : BaseCommandModule
         { 810232892386705418, "100+" }
     };
 
-    private static readonly Dictionary<ulong, string> debuglevelroles = new Dictionary<ulong, string>()
+    private static readonly Dictionary<ulong, string> debuglevelroles = new()
     {
         { 1116778938073616545, "001" },
         { 1116778981442723870, "002" }
@@ -990,7 +990,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (interaction.Guild.Id == 750365461945778209)
             {
-                List<DiscordComponent> button = new List<DiscordComponent>()
+                List<DiscordComponent> button = new()
                 {
                     new DiscordButtonComponent(style: ButtonStyle.Secondary, $"role_permit_button",
                         "Levelbeschränkung festlegen")
@@ -1013,7 +1013,7 @@ public class TempVoiceHelper : BaseCommandModule
             }
             else
             {
-                List<DiscordComponent> button = new List<DiscordComponent>()
+                List<DiscordComponent> button = new()
                 {
                     new DiscordButtonComponent(style: ButtonStyle.Secondary, $"role_permit_button",
                         "Levelbeschränkung festlegen")
@@ -1241,7 +1241,7 @@ public class TempVoiceHelper : BaseCommandModule
         if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var channel = userChannel;
-            List<ulong> permited_users = new List<ulong>();
+            List<ulong> permited_users = new();
             var puserow = userChannel.PermissionOverwrites
                 .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
                 .Where(x => x.Id != interaction.User.Id)
@@ -1958,7 +1958,7 @@ public class TempVoiceHelper : BaseCommandModule
         if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var channel = userChannel;
-            List<ulong> permited_users = new List<ulong>();
+            List<ulong> permited_users = new();
             var puserow = userChannel.PermissionOverwrites
                 .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
                 .Where(x => x.Id != interaction.User.Id)
