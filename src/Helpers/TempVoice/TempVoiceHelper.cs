@@ -1863,7 +1863,7 @@ public class TempVoiceHelper : BaseCommandModule
             List<ulong> idlist = new();
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
-            var staffrole = interaction.Guild.GetRole(GlobalProperties.StaffRoleId);
+            DiscordRole? staffrole = interaction.Guild.GetRole(GlobalProperties.StaffRoleId);
 
             foreach (ulong id in users)
             {
@@ -1876,10 +1876,14 @@ public class TempVoiceHelper : BaseCommandModule
                         continue;
                     }
 
-                    if (staffrole.Members.Any(x => x.Value.Id == id))
+                    if (interaction.Guild.Id == ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
                     {
-                        continue;
+                        if (staffrole.Members.Any(x => x.Value.Id == id))
+                        {
+                            continue;
+                        }
                     }
+
 
 
                     var user = await interaction.Guild.GetMemberAsync(id);

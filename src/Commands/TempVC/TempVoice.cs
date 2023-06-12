@@ -10,6 +10,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using Npgsql;
 
 namespace AGC_Management.Commands.TempVC;
@@ -24,8 +25,7 @@ public class TempVCEventHandler : TempVoiceHelper
         {
             try
             {
-                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) ||
-                    (e.Guild.Id != 818699057878663168)) return;
+                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))) return;
                 var sessionresult = new List<Dictionary<string, object>>();
                 var usersession = new List<dynamic>();
                 List<string> Query = new()
@@ -786,6 +786,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             catch (Exception)
                             {
                             }
+                            overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
                             overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                             {
@@ -901,6 +902,21 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
+                            var channelmods = await RetrieveChannelMods(userChannel);
+                            if (channelmods.Contains(user.Id))
+                            {
+                                var buserow = userChannel.PermissionOverwrites
+                                    .Where(x => x.Type == OverwriteType.Member)
+                                    .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+                                    .ToList();
+
+                                if (buserow.Contains(user.Id))
+                                {
+                                    continue;
+                                }
+
+
+                            }
 
                             overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
                                 Permissions.None);
@@ -965,8 +981,8 @@ public class TempVoiceCommands : TempVoiceHelper
                                 continue;
                             }
 
-                            overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
-                                Permissions.None);
+                            overwrites = overwrites.Merge(user, Permissions.None,
+                                Permissions.None, Permissions.AccessChannels | Permissions.UseVoice);
 
 
 
@@ -1082,7 +1098,12 @@ public class TempVoiceCommands : TempVoiceHelper
                 };
                 if (channelmods.Contains(interaction.User.Id))
                 {
-                    return true;
+                    var buserow = userchannel.PermissionOverwrites
+                        .Where(x => x.Type == OverwriteType.Member)
+                        .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+
+                        .ToList();
+                    return !buserow.Contains(ctx.User.Id);
                 }
                 return false;
 
@@ -1628,8 +1649,12 @@ public class TempVoiceCommands : TempVoiceHelper
                     {
                         "userid"
                     };
+                    Dictionary<string, object> WhereCondiditons = new()
+                    {
+                        { "userid", (long)ctx.User.Id }
+                    };
                     bool hasSession = false;
-                    var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                    var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
                     foreach (var user in usersession)
                     {
                         hasSession = true;
@@ -1728,8 +1753,12 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     "userid"
                 };
+                Dictionary<string, object> WhereCondiditons = new()
+                {
+                    { "userid", (long)ctx.User.Id }
+                };
                 bool hasSession = false;
-                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
                 foreach (var user in usersession)
                 {
                     hasSession = true;
@@ -1769,8 +1798,13 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     "userid"
                 };
+
+                Dictionary<string, object> WhereCondiditons_ = new()
+                {
+                    { "userid", (long)ctx.User.Id }
+                };
                 bool hasSession = false;
-                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, null);
+                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
                 foreach (var user in usersession)
                 {
                     hasSession = true;
@@ -1787,7 +1821,13 @@ public class TempVoiceCommands : TempVoiceHelper
                 {
                     "*"
                 };
-                var session = await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, null);
+
+                Dictionary<string, object> WhereCondiditons = new()
+                {
+                    { "userid", (long)ctx.User.Id }
+                };
+
+                var session = await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, WhereCondiditons);
                 foreach (var user in session)
                 {
                     if (user["userid"].ToString() == ctx.User.Id.ToString())
@@ -1867,10 +1907,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
-            if (GlobalProperties.DebugMode)
-            {
-                return;
-            }
+
             var Interaction = e.Interaction;
             var PanelMsgId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelMessageID"]);
             var PanelMsgChannelId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelChannelID"]);
