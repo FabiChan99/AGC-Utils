@@ -24,7 +24,7 @@ public class TempVCEventHandler : TempVoiceHelper
         {
             try
             {
-                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) |
+                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) ||
                     (e.Guild.Id != 818699057878663168)) return;
                 var sessionresult = new List<Dictionary<string, object>>();
                 var usersession = new List<dynamic>();
