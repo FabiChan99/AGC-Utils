@@ -1073,7 +1073,20 @@ public class TempVoiceCommands : TempVoiceHelper
             var pingmsg = await ctx.RespondAsync($"{TargetUser.Mention}");
             await pingmsg.DeleteAsync();
             var interactivity = ctx.Client.GetInteractivity();
-            var result = await interactivity.WaitForButtonAsync(msg, TargetUser, TimeSpan.FromSeconds(300));
+            var channelmods = await RetrieveChannelMods(userchannel);
+            var result = await interactivity.WaitForButtonAsync(msg, predicate: interaction =>
+            {
+                if (interaction.User.Id == TargetUser.Id)
+                {
+                    return true;
+                };
+                if (channelmods.Contains(interaction.User.Id))
+                {
+                    return true;
+                }
+                return false;
+
+            }, TimeSpan.FromSeconds(300));
             if (!userchannel.Users.Contains(TargetUser) && TargetUser != user)
             {
                 DiscordMessageBuilder msgb = new();
@@ -1111,16 +1124,28 @@ public class TempVoiceCommands : TempVoiceHelper
                 var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                 overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                     Permissions.None);
+                int? channellimit = userchannel.UserLimit;
+                if (userchannel.UserLimit < userchannel.Users.Count() && userchannel.UserLimit != 0 || userchannel.UserLimit == userchannel.Users.Count())
+                {
+                    channellimit = channellimit + 1;
+                }
 
-                await userchannel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
+
+                await userchannel.ModifyAsync(x => { x.PermissionOverwrites = overwrites;
+                    x.UserLimit = channellimit;
+                });
                 eb_.WithTitle("Beitrittsanfrage angenommen");
                 eb_.WithDescription(
-                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage akzeptiert. Klicke [hier beitreten]({invite}) (Diese Einladung ist 5 Minuten gültig)\nDu wurdest außerdem für den Channel freigeschalten!");
+                    $"Deine Beitrittsanfrage wurde von {result.Result.User.UsernameWithDiscriminator} akzeptiert. Du kannst nun beitreten. \nÜber den Button kannst du dem Kanal beitreten.");
                 eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
                 eb_.WithColor(BotConfig.GetEmbedColor());
                 eb_.Build();
-
+                List<DiscordLinkButtonComponent> urlb = new(1)
+                {
+                    new DiscordLinkButtonComponent(invite.ToString(), "Kanal betreten")
+                };
                 DiscordMessageBuilder msgb = new();
+                msgb.AddComponents(urlb);
                 msgb.WithEmbed(eb_);
                 await msg.ModifyAsync(msgb);
             }
@@ -1131,7 +1156,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 DiscordEmbedBuilder eb_ = new();
                 eb_.WithTitle("Beitrittsanfrage abgelehnt");
                 eb_.WithDescription(
-                    $"{TargetUser.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
+                    $"{result.Result.User.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
                 eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
                 eb_.WithColor(DiscordColor.Red);
                 eb_.Build();
