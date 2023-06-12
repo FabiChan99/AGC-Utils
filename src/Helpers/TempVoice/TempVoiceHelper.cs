@@ -1926,6 +1926,7 @@ public class TempVoiceHelper : BaseCommandModule
                     overwrites = overwrites.Merge(user, Permissions.None,
                         Permissions.AccessChannels | Permissions.UseVoice);
 
+                    await member.DisconnectFromVoiceAsync();
 
                     usersList.Add(user);
                 }

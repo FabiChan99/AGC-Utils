@@ -874,7 +874,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
     [Command("permit")]
     [RequireDatabase]
-    [Aliases("allow", "whitelist")]
+    [Aliases("allow", "whitelist", "multipermit")]
     public async Task VoicePermit(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
