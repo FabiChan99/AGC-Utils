@@ -1143,7 +1143,7 @@ public class TempVoiceHelper : BaseCommandModule
         if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             bool role_permitted = false;
-            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            Dictionary<ulong, string> lvlroles = levelroles;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -1268,7 +1268,7 @@ public class TempVoiceHelper : BaseCommandModule
             var allowed_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();
             bool role_permitted = false;
-            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            Dictionary<ulong, string> lvlroles = levelroles;
             string roleName = string.Empty;
             foreach (var role in interaction.Guild.Roles)
             {
@@ -1384,7 +1384,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             DiscordChannel channel = userChannel;
             ulong r_id = 0;
-            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            Dictionary<ulong, string> lvlroles = levelroles;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -1976,11 +1976,11 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     permited_users.Add(userid);
                 }
-            }
+            }   
 
             var blocked_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();
-            Dictionary<ulong, string> lvlroles = debuglevelroles;
+            Dictionary<ulong, string> lvlroles = levelroles;
             string roleName = string.Empty;
             foreach (var role in interaction.Guild.Roles)
             {
