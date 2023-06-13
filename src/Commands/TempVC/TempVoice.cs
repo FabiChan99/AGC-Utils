@@ -680,7 +680,9 @@ public class TempVoiceCommands : TempVoiceHelper
                     var msg = await ctx.RespondAsync(
                         $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu kicken...");
                     var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-
+                    var currentmods = await RetrieveChannelMods(userChannel);
+                    var channelownerid = await GetChannelOwnerID(ctx);
+                    var owner = await ctx.Client.GetUserAsync((ulong)channelownerid);
                     foreach (ulong id in ids)
                     {
                         try
@@ -697,12 +699,23 @@ public class TempVoiceCommands : TempVoiceHelper
                                 continue;
                             }
 
+                            if (id == owner.Id)
+                            {
+                                continue;
+                            }
+
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                             {
                                 await user.DisconnectFromVoiceAsync();
                             }
-
                             kicklist.Add(user.Id);
+                            try
+                            {
+                                currentmods.Remove(id);
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                         catch (NotFoundException)
                         {
@@ -712,8 +725,6 @@ public class TempVoiceCommands : TempVoiceHelper
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
                     try
                     {
-                        var currentmods = await RetrieveChannelMods(userChannel);
-                        currentmods.Remove(ctx.User.Id);
                         await UpdateChannelMods(userChannel, currentmods);
                     }
                     catch (Exception)
