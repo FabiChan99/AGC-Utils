@@ -782,6 +782,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             try
                             {
                                 var currentmods = await RetrieveChannelMods(userChannel);
+
                                 currentmods.Remove(id);
                                 await UpdateChannelMods(userChannel, currentmods);
                             }

@@ -138,25 +138,26 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "channelid", (long)channel.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
-            Query, QueryConditions);
+        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
 
         List<ulong> channelMods = new();
         foreach (var result in QueryResult)
         {
             try
             {
-                string[] mods = result["channelmods"].ToString().Split(", ");
+                string[] mods = result["channelmods"].ToString().Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var mod in mods)
                 {
-                    channelMods.Add(ulong.Parse(mod));
+                    if (ulong.TryParse(mod, out ulong parsedMod))
+                    {
+                        channelMods.Add(parsedMod);
+                    }
                 }
             }
             catch (Exception)
             {
-                channelMods = new();
+                channelMods.Clear();
             }
-
         }
         return channelMods;
     }
