@@ -63,7 +63,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                             { "channelid", ((long)e.Before.Channel.Id, "=") }
                                         };
 
-                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
 
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
@@ -148,7 +148,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                             { "channelid", ((long)e.Before.Channel.Id, "=") }
                                         };
 
-                                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
 
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
@@ -485,64 +485,67 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("vcname")]
     public async Task VoiceRename(CommandContext ctx, [RemainingText] string name)
     {
-        var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, ctx.Member);
-
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        _ = Task.Run(async () =>
         {
-            await NoChannel(ctx);
-            return;
-        }
+            var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+            List<long> dbChannels = await GetChannelIDFromDB(ctx);
+            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+            bool isMod = await IsChannelMod(userChannel, ctx.Member);
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
-        {
-            var msg = await ctx.RespondAsync(
-                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel umzubenennen...");
-            DiscordChannel channel = ctx.Member.VoiceState.Channel;
-            long timestampdata = 0;
-            List<string> Query = new()
+            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
             {
-                "lastedited"
-            };
-            Dictionary<string, object> WhereCondiditons = new()
-            {
-                { "channelid", (long)channel.Id }
-            };
-            var dbtimestampdata = await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
-            foreach (var data in dbtimestampdata)
-            {
-                timestampdata = (long)data["lastedited"];
-            }
-
-            long edit_timestamp = timestampdata;
-            long math = current_timestamp - edit_timestamp;
-            if (math < 300)
-            {
-                long calc = edit_timestamp + 300;
-                await msg.ModifyAsync(
-                    $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
+                await NoChannel(ctx);
                 return;
             }
 
-            string oldname = channel.Name;
-            await channel.ModifyAsync(x => x.Name = name);
-            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
             {
-                await conn.OpenAsync();
-                string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
-                await using (NpgsqlCommand command = new(sql, conn))
+                var msg = await ctx.RespondAsync(
+                    "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel umzubenennen...");
+                DiscordChannel channel = ctx.Member.VoiceState.Channel;
+                long timestampdata = 0;
+                List<string> Query = new()
                 {
-                    command.Parameters.AddWithValue("@timestamp", current_timestamp);
-                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                    int affected = await command.ExecuteNonQueryAsync();
+                    "lastedited"
+                };
+                Dictionary<string, object> WhereCondiditons = new()
+                {
+                    { "channelid", (long)channel.Id }
+                };
+                var dbtimestampdata = await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
+                foreach (var data in dbtimestampdata)
+                {
+                    timestampdata = (long)data["lastedited"];
                 }
-            }
 
-            await msg.ModifyAsync(
-                "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
-        }
+                long edit_timestamp = timestampdata;
+                long math = current_timestamp - edit_timestamp;
+                if (math < 300)
+                {
+                    long calc = edit_timestamp + 300;
+                    await msg.ModifyAsync(
+                        $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
+                    return;
+                }
+
+                string oldname = channel.Name;
+                await channel.ModifyAsync(x => x.Name = name);
+                await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+                {
+                    await conn.OpenAsync();
+                    string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
+                    await using (NpgsqlCommand command = new(sql, conn))
+                    {
+                        command.Parameters.AddWithValue("@timestamp", current_timestamp);
+                        command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                        int affected = await command.ExecuteNonQueryAsync();
+                    }
+                }
+
+                await msg.ModifyAsync(
+                    "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
+            }
+        });
     }
 
 
@@ -589,68 +592,71 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("claimvc")]
     public async Task ClaimVoice(CommandContext ctx)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        List<long> all_dbChannels = await GetAllChannelIDsFromDB();
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        long? channelownerid = await GetChannelOwnerID(ctx);
-        var msg = await ctx.RespondAsync(
-            "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu übernehmen...");
-        if (channelownerid == (long)ctx.User.Id)
+        _ = Task.Run(async () =>
         {
-            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist bereits der Besitzer des Channels.");
-            return;
-        }
-
-        if (ctx.Member.VoiceState?.Channel == null)
-        {
-            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem Voice-Channel.");
-            return;
-        }
-
-        if (channelownerid == null)
-        {
-            await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem TempVC Channel.");
-            return;
-        }
-
-        var channelowner = await ctx.Client.GetUserAsync((ulong)channelownerid);
-        DiscordMember channelownermember = await ctx.Guild.GetMemberAsync(channelowner.Id);
-        var orig_owner = channelownermember;
-        DiscordMember new_owner = ctx.Member;
-        DiscordChannel channel = ctx.Member.VoiceState?.Channel;
-        var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-
-        if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
-        {
-            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            List<long> dbChannels = await GetChannelIDFromDB(ctx);
+            List<long> all_dbChannels = await GetAllChannelIDsFromDB();
+            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+            long? channelownerid = await GetChannelOwnerID(ctx);
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu übernehmen...");
+            if (channelownerid == (long)ctx.User.Id)
             {
-                await conn.OpenAsync();
-                string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
-                await using (NpgsqlCommand command = new(sql, conn))
-                {
-                    command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
-                    command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                    int affected = await command.ExecuteNonQueryAsync();
-                }
+                await msg.ModifyAsync("<:attention:1085333468688433232> Du bist bereits der Besitzer des Channels.");
+                return;
             }
 
-            overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None,
-                Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
-                Permissions.AccessChannels);
-            overwrites = overwrites.Merge(new_owner,
-                Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
-                Permissions.AccessChannels, Permissions.None);
+            if (ctx.Member.VoiceState?.Channel == null)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem Voice-Channel.");
+                return;
+            }
 
-            await ResetChannelMods(channel);
-            await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
-            await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
-        }
+            if (channelownerid == null)
+            {
+                await msg.ModifyAsync("<:attention:1085333468688433232> Du bist in keinem TempVC Channel.");
+                return;
+            }
 
-        if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
-        {
-            await msg.ModifyAsync(
-                $"<:attention:1085333468688433232> Du kannst dein Channel nicht Claimen, da der Channel-Owner ``{orig_owner.UsernameWithDiscriminator}`` noch im Channel ist.");
-        }
+            var channelowner = await ctx.Client.GetUserAsync((ulong)channelownerid);
+            DiscordMember channelownermember = await ctx.Guild.GetMemberAsync(channelowner.Id);
+            var orig_owner = channelownermember;
+            DiscordMember new_owner = ctx.Member;
+            DiscordChannel channel = ctx.Member.VoiceState?.Channel;
+            var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+
+            if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+            {
+                await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+                {
+                    await conn.OpenAsync();
+                    string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                    await using (NpgsqlCommand command = new(sql, conn))
+                    {
+                        command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
+                        command.Parameters.AddWithValue("@channelid", (long)channel.Id);
+                        int affected = await command.ExecuteNonQueryAsync();
+                    }
+                }
+
+                overwrites = overwrites.Merge(orig_owner, Permissions.None, Permissions.None,
+                    Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                    Permissions.AccessChannels);
+                overwrites = overwrites.Merge(new_owner,
+                    Permissions.ManageChannels | Permissions.UseVoice | Permissions.MoveMembers |
+                    Permissions.AccessChannels, Permissions.None);
+
+                await ResetChannelMods(channel);
+                await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                await msg.ModifyAsync("<:success:1085333481820790944> Du hast den Channel erfolgreich **geclaimt**!");
+            }
+
+            if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
+            {
+                await msg.ModifyAsync(
+                    $"<:attention:1085333468688433232> Du kannst dein Channel nicht Claimen, da der Channel-Owner ``{orig_owner.UsernameWithDiscriminator}`` noch im Channel ist.");
+            }
+        });
     }
 
 
@@ -1024,185 +1030,194 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("joinreq")]
     public async Task JoinRequest(CommandContext ctx, DiscordMember user)
     {
-        if (SelfCheck(ctx, user)) return;
-        var caseid = Helpers.Helpers.GenerateCaseID();
-        var db_channels = await GetAllChannelIDsFromDB();
-        var userchannel = user.VoiceState?.Channel;
-        var userchannelid = userchannel?.Id;
-        var channelownerid = await GetChannelOwnerID(user);
-        DiscordChannel channel = userchannel;
-        DiscordMember? TargetUser = null;
-        var msg = await ctx.RespondAsync(
-            "<a:loading_agc:1084157150747697203> **Lade...** Versuche eine Beitrittsanfrage zu stellen...");
-        if (user.IsBot)
+        _ = Task.Run(async () =>
         {
-            await msg.ModifyAsync(
-                "<:attention:1085333468688433232> **Fehler!** Dieser User ist ein Bot!");
-            return;
-        }
-
-        Console.WriteLine(userchannel);
-        if (userchannel == null)
-        {
-            await msg.ModifyAsync("<:attention:1085333468688433232> **Fehler!** Der user ist in keinem Voice Channel.");
-            return;
-        }
-
-        if (userchannel != null && !db_channels.Contains((long)userchannelid))
-        {
-            await msg.ModifyAsync(
-                "<:attention:1085333468688433232> **Fehler!** Der User ist nicht in einem Custom Voice Channel.");
-            return;
-        }
-
-        TargetUser = user;
-        if (db_channels.Contains((long)userchannelid) && channelownerid != (long)user.Id)
-        {
-            DiscordMember Owner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
-            await msg.ModifyAsync(
-                $"<:attention:1085333468688433232> **Fehler!** Der User ist nicht der Besitzer des Channels. Der Besitzer ist ``{Owner.UsernameWithDiscriminator}`` \nJoinanfrage wird umgeleitet...");
-            await Task.Delay(3000);
-            TargetUser = Owner;
-            if (TargetUser.VoiceState?.Channel == null)
+            if (SelfCheck(ctx, user)) return;
+            var caseid = Helpers.Helpers.GenerateCaseID();
+            var db_channels = await GetAllChannelIDsFromDB();
+            var userchannel = user.VoiceState?.Channel;
+            var userchannelid = userchannel?.Id;
+            var channelownerid = await GetChannelOwnerID(user);
+            DiscordChannel channel = userchannel;
+            DiscordMember? TargetUser = null;
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche eine Beitrittsanfrage zu stellen...");
+            if (user.IsBot)
             {
                 await msg.ModifyAsync(
-                    "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist in keinem Voice Channel.");
+                    "<:attention:1085333468688433232> **Fehler!** Dieser User ist ein Bot!");
                 return;
             }
 
-            Console.WriteLine(TargetUser.VoiceState?.Channel.Id);
-            Console.WriteLine(userchannelid);
-            if (TargetUser.VoiceState?.Channel != null && TargetUser.VoiceState?.Channel.Id != userchannelid)
+            Console.WriteLine(userchannel);
+            if (userchannel == null)
             {
                 await msg.ModifyAsync(
-                    "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist nicht in dem gewünschten Channel.");
-                return;
-            }
-        }
-
-        if (db_channels.Contains((long)userchannelid) && channelownerid == (long)TargetUser.Id)
-        {
-            var ebb = new DiscordEmbedBuilder();
-            ebb.WithTitle("Beitrittsanfrage");
-            ebb.WithDescription(
-                $"{ctx.Member.UsernameWithDiscriminator} {ctx.Member.Mention} möchte gerne deinem Channel beitreten. Möchtest du die Beitrittsanfage annehmen?\n Du hast 300 Sekunden Zeit");
-            ebb.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
-            List<DiscordButtonComponent> buttons = new(2)
-            {
-                new DiscordButtonComponent(ButtonStyle.Success, $"jr_accept_{caseid}", "Ja"),
-                new DiscordButtonComponent(ButtonStyle.Danger, $"jr_deny_{caseid}", "Nein")
-            };
-            ebb.WithColor(BotConfig.GetEmbedColor());
-            var eb = ebb.Build();
-            DiscordMessageBuilder mb = new();
-            mb.WithEmbed(eb);
-            mb.WithContent($"{TargetUser.Mention}");
-            mb.AddComponents(buttons);
-
-            msg = await msg.ModifyAsync(mb);
-            var pingmsg = await ctx.RespondAsync($"{TargetUser.Mention}");
-            await pingmsg.DeleteAsync();
-            var interactivity = ctx.Client.GetInteractivity();
-            var channelmods = await RetrieveChannelMods(userchannel);
-            var result = await interactivity.WaitForButtonAsync(msg, predicate: interaction =>
-            {
-                if (interaction.User.Id == TargetUser.Id)
-                {
-                    return true;
-                };
-                if (channelmods.Contains(interaction.User.Id))
-                {
-                    var buserow = userchannel.PermissionOverwrites
-                        .Where(x => x.Type == OverwriteType.Member)
-                        .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
-
-                        .ToList();
-                    return !buserow.Contains(ctx.User.Id);
-                }
-                return false;
-
-            }, TimeSpan.FromSeconds(300));
-            if (!userchannel.Users.Contains(TargetUser) && TargetUser != user)
-            {
-                DiscordMessageBuilder msgb = new();
-                msgb.WithEmbed(null);
-                msgb.WithContent(
-                    "<:attention:1085333468688433232> **Fehler!** Der User ist nicht mehr in deinem Channel.");
-                await msg.ModifyAsync(msgb);
+                    "<:attention:1085333468688433232> **Fehler!** Der user ist in keinem Voice Channel.");
                 return;
             }
 
-            if (result.TimedOut)
+            if (userchannel != null && !db_channels.Contains((long)userchannelid))
             {
-                DiscordEmbedBuilder eb_ = new();
-                eb_.WithTitle("Beitrittsanfrage abgelaufen");
-                eb_.WithDescription(
-                    $"Sorry {ctx.User.Username}, aber {TargetUser.Username} hat nicht in der benötigten Zeit reagiert");
-                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
-                eb_.WithColor(DiscordColor.Red);
-                eb_.Build();
-
-                DiscordMessageBuilder msgb = new();
-                msgb.WithEmbed(eb_);
-
-                await msg.ModifyAsync(msgb);
+                await msg.ModifyAsync(
+                    "<:attention:1085333468688433232> **Fehler!** Der User ist nicht in einem Custom Voice Channel.");
                 return;
             }
 
-            if (result.Result.Id == $"jr_accept_{caseid}")
+            TargetUser = user;
+            if (db_channels.Contains((long)userchannelid) && channelownerid != (long)user.Id)
             {
-                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                var invite = await userchannel.CreateInviteAsync(300, 1, false, true);
-                DiscordEmbedBuilder eb_ = new();
-
-
-                var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-                overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
-                    Permissions.None);
-                int? channellimit = userchannel.UserLimit;
-                if (userchannel.UserLimit < userchannel.Users.Count() && userchannel.UserLimit != 0 || userchannel.UserLimit == userchannel.Users.Count())
+                DiscordMember Owner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
+                await msg.ModifyAsync(
+                    $"<:attention:1085333468688433232> **Fehler!** Der User ist nicht der Besitzer des Channels. Der Besitzer ist ``{Owner.UsernameWithDiscriminator}`` \nJoinanfrage wird umgeleitet...");
+                await Task.Delay(3000);
+                TargetUser = Owner;
+                if (TargetUser.VoiceState?.Channel == null)
                 {
-                    channellimit = channellimit + 1;
+                    await msg.ModifyAsync(
+                        "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist in keinem Voice Channel.");
+                    return;
                 }
 
-
-                await userchannel.ModifyAsync(x =>
+                Console.WriteLine(TargetUser.VoiceState?.Channel.Id);
+                Console.WriteLine(userchannelid);
+                if (TargetUser.VoiceState?.Channel != null && TargetUser.VoiceState?.Channel.Id != userchannelid)
                 {
-                    x.PermissionOverwrites = overwrites;
-                    x.UserLimit = channellimit;
-                });
-                eb_.WithTitle("Beitrittsanfrage angenommen");
-                eb_.WithDescription(
-                    $"Deine Beitrittsanfrage wurde von {result.Result.User.UsernameWithDiscriminator} akzeptiert. Du kannst nun beitreten. \nÜber den Button kannst du dem Kanal beitreten.");
-                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
-                eb_.WithColor(BotConfig.GetEmbedColor());
-                eb_.Build();
-                List<DiscordLinkButtonComponent> urlb = new(1)
-                {
-                    new DiscordLinkButtonComponent(invite.ToString(), "Kanal betreten")
-                };
-                DiscordMessageBuilder msgb = new();
-                msgb.AddComponents(urlb);
-                msgb.WithEmbed(eb_);
-                await msg.ModifyAsync(msgb);
+                    await msg.ModifyAsync(
+                        "<:attention:1085333468688433232> **Fehler!** Der Besitzer des Channels ist nicht in dem gewünschten Channel.");
+                    return;
+                }
             }
 
-            if (result.Result.Id == $"jr_deny_{caseid}")
+            if (db_channels.Contains((long)userchannelid) && channelownerid == (long)TargetUser.Id)
             {
-                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                DiscordEmbedBuilder eb_ = new();
-                eb_.WithTitle("Beitrittsanfrage abgelehnt");
-                eb_.WithDescription(
-                    $"{result.Result.User.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
-                eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
-                eb_.WithColor(DiscordColor.Red);
-                eb_.Build();
+                var ebb = new DiscordEmbedBuilder();
+                ebb.WithTitle("Beitrittsanfrage");
+                ebb.WithDescription(
+                    $"{ctx.Member.UsernameWithDiscriminator} {ctx.Member.Mention} möchte gerne deinem Channel beitreten. Möchtest du die Beitrittsanfage annehmen?\n Du hast 300 Sekunden Zeit");
+                ebb.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                List<DiscordButtonComponent> buttons = new(2)
+                {
+                    new DiscordButtonComponent(ButtonStyle.Success, $"jr_accept_{caseid}", "Ja"),
+                    new DiscordButtonComponent(ButtonStyle.Danger, $"jr_deny_{caseid}", "Nein")
+                };
+                ebb.WithColor(BotConfig.GetEmbedColor());
+                var eb = ebb.Build();
+                DiscordMessageBuilder mb = new();
+                mb.WithEmbed(eb);
+                mb.WithContent($"{TargetUser.Mention}");
+                mb.AddComponents(buttons);
 
-                DiscordMessageBuilder msgb = new();
-                msgb.WithEmbed(eb_);
-                await msg.ModifyAsync(msgb);
+                msg = await msg.ModifyAsync(mb);
+                var pingmsg = await ctx.RespondAsync($"{TargetUser.Mention}");
+                await pingmsg.DeleteAsync();
+                var interactivity = ctx.Client.GetInteractivity();
+                var channelmods = await RetrieveChannelMods(userchannel);
+                var result = await interactivity.WaitForButtonAsync(msg, predicate: interaction =>
+                {
+                    if (interaction.User.Id == TargetUser.Id)
+                    {
+                        return true;
+                    }
+
+                    ;
+                    if (channelmods.Contains(interaction.User.Id))
+                    {
+                        var buserow = userchannel.PermissionOverwrites
+                            .Where(x => x.Type == OverwriteType.Member)
+                            .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+                            .Select(x => x.Id)
+
+                            .ToList();
+                        return !buserow.Contains(ctx.User.Id);
+                    }
+
+                    return false;
+
+                }, TimeSpan.FromSeconds(300));
+                if (!userchannel.Users.Contains(TargetUser) && TargetUser != user)
+                {
+                    DiscordMessageBuilder msgb = new();
+                    msgb.WithEmbed(null);
+                    msgb.WithContent(
+                        "<:attention:1085333468688433232> **Fehler!** Der User ist nicht mehr in deinem Channel.");
+                    await msg.ModifyAsync(msgb);
+                    return;
+                }
+
+                if (result.TimedOut)
+                {
+                    DiscordEmbedBuilder eb_ = new();
+                    eb_.WithTitle("Beitrittsanfrage abgelaufen");
+                    eb_.WithDescription(
+                        $"Sorry {ctx.User.Username}, aber {TargetUser.Username} hat nicht in der benötigten Zeit reagiert");
+                    eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                    eb_.WithColor(DiscordColor.Red);
+                    eb_.Build();
+
+                    DiscordMessageBuilder msgb = new();
+                    msgb.WithEmbed(eb_);
+
+                    await msg.ModifyAsync(msgb);
+                    return;
+                }
+
+                if (result.Result.Id == $"jr_accept_{caseid}")
+                {
+                    await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                    var invite = await userchannel.CreateInviteAsync(300, 1, false, true);
+                    DiscordEmbedBuilder eb_ = new();
+
+
+                    var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+                    overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
+                        Permissions.None);
+                    int? channellimit = userchannel.UserLimit;
+                    if (userchannel.UserLimit < userchannel.Users.Count() && userchannel.UserLimit != 0 ||
+                        userchannel.UserLimit == userchannel.Users.Count())
+                    {
+                        channellimit = channellimit + 1;
+                    }
+
+
+                    await userchannel.ModifyAsync(x =>
+                    {
+                        x.PermissionOverwrites = overwrites;
+                        x.UserLimit = channellimit;
+                    });
+                    eb_.WithTitle("Beitrittsanfrage angenommen");
+                    eb_.WithDescription(
+                        $"Deine Beitrittsanfrage wurde von {result.Result.User.UsernameWithDiscriminator} akzeptiert. Du kannst nun beitreten. \nÜber den Button kannst du dem Kanal beitreten.");
+                    eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                    eb_.WithColor(BotConfig.GetEmbedColor());
+                    eb_.Build();
+                    List<DiscordLinkButtonComponent> urlb = new(1)
+                    {
+                        new DiscordLinkButtonComponent(invite.ToString(), "Kanal betreten")
+                    };
+                    DiscordMessageBuilder msgb = new();
+                    msgb.AddComponents(urlb);
+                    msgb.WithEmbed(eb_);
+                    await msg.ModifyAsync(msgb);
+                }
+
+                if (result.Result.Id == $"jr_deny_{caseid}")
+                {
+                    await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                    DiscordEmbedBuilder eb_ = new();
+                    eb_.WithTitle("Beitrittsanfrage abgelehnt");
+                    eb_.WithDescription(
+                        $"{result.Result.User.UsernameWithDiscriminator} hat deine Beitrittsanfrage abgelehnt.");
+                    eb_.WithFooter($"{ctx.Member.UsernameWithDiscriminator}", ctx.Member.AvatarUrl);
+                    eb_.WithColor(DiscordColor.Red);
+                    eb_.Build();
+
+                    DiscordMessageBuilder msgb = new();
+                    msgb.WithEmbed(eb_);
+                    await msg.ModifyAsync(msgb);
+                }
             }
-        }
+        });
     }
 
 

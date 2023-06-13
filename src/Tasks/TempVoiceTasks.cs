@@ -17,7 +17,7 @@ public class TempVoiceTasks
             while (true)
             {
                 await RemoveEmptyTempVoices(discord);
-                await Task.Delay(TimeSpan.FromMinutes(5));
+                await Task.Delay(TimeSpan.FromSeconds(90));
             }
         }
 
@@ -27,19 +27,44 @@ public class TempVoiceTasks
 
     private static async Task RemoveEmptyTempVoices(DiscordClient discord)
     {
-        List<string> Query = new()
+        _ = Task.Run(async () =>
         {
-            "channelid"
-        };
-        List<Dictionary<string, object>> all_channels =
-            await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
-        foreach (var listed_channel in all_channels)
-        {
-            string channelid = listed_channel["channelid"].ToString();
-            try
+            List<string> Query = new()
             {
-                DiscordChannel channel = await discord.TryGetChannelAsync(ulong.Parse(channelid));
-                if (channel == null)
+                "channelid"
+            };
+            List<Dictionary<string, object>> all_channels =
+                await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
+            foreach (var listed_channel in all_channels)
+            {
+                string channelid = listed_channel["channelid"].ToString();
+                try
+                {
+                    DiscordChannel channel = await discord.TryGetChannelAsync(ulong.Parse(channelid));
+                    if (channel == null)
+                    {
+                        Dictionary<string, (object value, string comparisonOperator)>
+                            DeletewhereConditions = new()
+                            {
+                                { "channelid", (long.Parse(channelid), "=") }
+                            };
+                        //await channel.DeleteAsync();
+                        await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                        continue;
+                    }
+
+                    if (channel?.Users.Count == 0)
+                    {
+                        Dictionary<string, (object value, string comparisonOperator)>
+                            DeletewhereConditions = new()
+                            {
+                                { "channelid", ((long)channel.Id, "=") }
+                            };
+                        await channel.DeleteAsync();
+                        await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                    }
+                }
+                catch (Exception)
                 {
                     Dictionary<string, (object value, string comparisonOperator)>
                         DeletewhereConditions = new()
@@ -48,30 +73,8 @@ public class TempVoiceTasks
                         };
                     //await channel.DeleteAsync();
                     await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-                    continue;
-                }
-
-                if (channel?.Users.Count == 0)
-                {
-                    Dictionary<string, (object value, string comparisonOperator)>
-                        DeletewhereConditions = new()
-                        {
-                            { "channelid", ((long)channel.Id, "=") }
-                        };
-                    await channel.DeleteAsync();
-                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                 }
             }
-            catch (Exception)
-            {
-                Dictionary<string, (object value, string comparisonOperator)>
-                    DeletewhereConditions = new()
-                    {
-                        { "channelid", (long.Parse(channelid), "=") }
-                    };
-                //await channel.DeleteAsync();
-                await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-            }
-        }
+        });
     }
 }
