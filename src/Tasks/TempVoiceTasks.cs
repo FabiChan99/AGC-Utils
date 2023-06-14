@@ -72,7 +72,7 @@ public class TempVoiceTasks
                             { "channelid", (long.Parse(channelid), "=") }
                         };
                     //await channel.DeleteAsync();
-                    await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                    //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                 }
             }
         });
