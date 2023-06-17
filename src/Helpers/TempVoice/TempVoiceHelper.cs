@@ -1153,8 +1153,17 @@ public class TempVoiceHelper : BaseCommandModule
                     var temp_ow = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == RoleId);
                     if (temp_ow != null)
                     {
-                        role_permitted = true;
-                        break;
+                        if (temp_ow?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Allowed)
+                        {
+                            role_permitted = true;
+                            break;
+                        }
+                        if (temp_ow?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
+                        {
+                            role_permitted = false;
+                            break;
+                        }
+                        
                     }
                 }
 
