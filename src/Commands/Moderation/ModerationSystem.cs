@@ -357,7 +357,7 @@ public class ModerationSystem : BaseCommandModule
         var interactivity = ctx.Client.GetInteractivity();
         var message = await ctx.Channel.SendMessageAsync(builder);
 
-        var result = await interactivity.WaitForButtonAsync(message, ctx.User, TimeSpan.FromSeconds(10));
+        var result = await interactivity.WaitForButtonAsync(message, ctx.User, TimeSpan.FromMinutes(10));
         if (result.TimedOut)
         {
             var embed_ = new DiscordMessageBuilder()
@@ -624,7 +624,7 @@ public class ModerationSystem : BaseCommandModule
                     return guildUser.Permissions.HasPermission(Permissions.BanMembers);
 
                 return false;
-            }, TimeSpan.FromSeconds(6));
+            }, TimeSpan.FromHours(6));
             staffbuttons.ForEach(x => x.Disable());
             if (staffresult.TimedOut)
             {
