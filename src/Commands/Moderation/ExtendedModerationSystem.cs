@@ -639,7 +639,7 @@ public class ExtendedModerationSystem : ModerationSystem
             List<DiscordUser> users_to_flag_obj = new();
             foreach (var id in setids)
             {
-                var user = await ctx.Guild.GetMemberAsync(id);
+                var user = await ctx.Client.GetUserAsync(id);
                 if (user != null) users_to_flag_obj.Add(user);
             }
 
