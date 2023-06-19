@@ -636,7 +636,7 @@ public class ExtendedModerationSystem : ModerationSystem
                 .WithReply(ctx.Message.Id);
             await message.ModifyAsync(loadingMessage);
             string for_str = "";
-            List<DiscordMember> users_to_flag_obj = new();
+            List<DiscordUser> users_to_flag_obj = new();
             foreach (var id in setids)
             {
                 var user = await ctx.Guild.GetMemberAsync(id);
