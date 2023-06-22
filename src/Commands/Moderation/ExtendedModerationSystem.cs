@@ -241,6 +241,12 @@ public class ExtendedModerationSystem : ModerationSystem
                     $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn["caseid"]}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn["datum"]), TimestampFormat.RelativeTime)} - {pwarn["description"]}";
                 permawarnResults.Add(FlagStr);
             }
+            string mcicon = "";
+            if (ctx.Guild.Id == 750365461945778209)
+            {
+                if (member.Roles.Any(x => x.Id == 1121443507425517718))
+                    mcicon = "<:mc:1012038546024059021>";
+            }
 
             // if timeout
 
@@ -257,7 +263,7 @@ public class ExtendedModerationSystem : ModerationSystem
             userinfostring += $"**Erstellt:** {member.CreationTimestamp.Timestamp()}\n";
             userinfostring += $"**Beitritt:** {member.JoinedAt.Timestamp()}\n";
             userinfostring +=
-                $"**Infobadges:**  {booster_icon} {teamler_ico} {bot_indicator} {vc_icon} {timeout_icon} {bs_icon}\n\n";
+                $"**Infobadges:**  {booster_icon} {teamler_ico} {bot_indicator}{vc_icon}{timeout_icon}{mcicon}{bs_icon}\n\n";
             userinfostring += "**Der Online-Status und die Plattform**\n";
             userinfostring += $"{status_indicator} | {platform}\n\n";
             userinfostring += "**Kommunikations-Timeout**\n";
