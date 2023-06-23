@@ -2029,7 +2029,7 @@ public class TempVoiceHelper : BaseCommandModule
             if (blocked_users > 25)
             {
                 string content =
-                    $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **blockiert**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
+                    $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **blockiert**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unblock`` Command.";
                 var sbuilder = new DiscordInteractionResponseBuilder()
                 {
                     IsEphemeral = true,
