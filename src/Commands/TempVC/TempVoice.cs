@@ -286,47 +286,47 @@ public class TempVCEventHandler : TempVoiceHelper
             {
                 if (e.Before == null && e.After == null) return;
                 if (e.Before == e.After) return;
-                var ChID = ulong.Parse(GetVCConfig("Creation_Channel_ID"));
-                var PaID = ulong.Parse(GetVCConfig("Creation_Category_ID"));
                 DiscordChannel beforeChannel = e.Before?.Channel;
                 DiscordChannel afterChannel = e.After?.Channel;
-
-                if (beforeChannel == null)
+                List<long> allChannel = await GetAllChannelIDsFromDB();
+                if (beforeChannel == null && afterChannel != null)
                 {
-                    if (afterChannel.Id == ChID) return;
-                    if (afterChannel.ParentId == PaID)
+                    if (allChannel.Contains((long)afterChannel.Id))
                     {
-                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
                         await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
 
-                if ((beforeChannel?.ParentId == PaID || afterChannel?.ParentId == PaID) &&
-                    beforeChannel != afterChannel)
+                if (beforeChannel != null && afterChannel == null)
                 {
-                    if (beforeChannel != null && beforeChannel.Users.Count > 0)
+                    if (allChannel.Contains((long)beforeChannel.Id))
                     {
-                        if (beforeChannel.Id == ChID) return;
-                        if (beforeChannel.ParentId != PaID) return;
-                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
                         await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
                         return;
                     }
-
-                    if (afterChannel != null && afterChannel.Users.Count > 0)
+                }
+                if (beforeChannel != null && afterChannel != null)
+                {
+                    if (beforeChannel == afterChannel) return;
+                    DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                    if (allChannel.Contains((long)beforeChannel.Id))
                     {
-                        if (afterChannel.Id == ChID) return;
-                        if (afterChannel.ParentId != PaID) return;
-                        DiscordMember member = await e.User.ConvertToMember(e.Guild);
+                        
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
+                    }
+                    if (allChannel.Contains((long)afterChannel.Id))
+                    {
                         await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
-                        return;
                     }
                 }
+
             }
             catch (Exception)
             {
-                // ignored
+
             }
         });
 
@@ -806,13 +806,8 @@ public class TempVoiceCommands : TempVoiceHelper
                             catch (Exception)
                             {
                             }
-                            overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
                             overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
-                            if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
-                            {
-                                await user.DisconnectFromVoiceAsync();
-                            }
-
+                            
                             blockedlist.Add(user.Id);
                         }
                         catch (NotFoundException)
@@ -820,6 +815,25 @@ public class TempVoiceCommands : TempVoiceHelper
                         }
                     }
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+
+                    foreach (ulong id in blockedlist)
+                    {
+                        try
+                        {
+                            var user = await ctx.Guild.GetMemberAsync(id);
+                            if (user.Roles.Contains(staffrole))
+                            {
+                                continue;
+                            }
+                            if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
+                            {
+                                await user.DisconnectFromVoiceAsync();
+                            }
+                        }
+                        catch (NotFoundException)
+                        {
+                        }
+                    }
 
 
                     int successCount = blockedlist.Count;
