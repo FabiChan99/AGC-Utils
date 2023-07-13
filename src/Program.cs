@@ -133,6 +133,7 @@ internal class Program : BaseCommandModule
     private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
     {
         sender.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        sender.Logger.LogError($"Stacktrace: {e.Exception.GetType()}: {e.Exception.StackTrace}");
         return Task.CompletedTask;
     }
 

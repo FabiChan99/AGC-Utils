@@ -810,11 +810,21 @@ public class TempVoiceCommands : TempVoiceHelper
                             
                             blockedlist.Add(user.Id);
                         }
-                        catch (NotFoundException)
+                        catch (Exception ex)
                         {
+                            ctx.Client.Logger.LogCritical(ex.Message);
+                            ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
                     }
-                    await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                    try {
+                        await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+                        }
+                    catch (Exception e)
+                    {
+                        ctx.Client.Logger.LogCritical(e.Message);
+                        ctx.Client.Logger.LogCritical(e.StackTrace);
+                    }
+
 
                     foreach (ulong id in blockedlist)
                     {
@@ -830,8 +840,10 @@ public class TempVoiceCommands : TempVoiceHelper
                                 await user.DisconnectFromVoiceAsync();
                             }
                         }
-                        catch (NotFoundException)
+                        catch (Exception ex)
                         {
+                            ctx.Client.Logger.LogCritical(ex.Message);
+                            ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
                     }
 
