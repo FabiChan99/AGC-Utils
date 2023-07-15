@@ -77,7 +77,7 @@ public class RequireLavalink : CheckBaseAttribute
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
         // Check if lavalink is connected
-        if (ctx.Client.GetLavalink().ConnectedNodes.Any()) return true;
+        if (ctx.Client.GetLavalink().ConnectedSessions.Any()) return true;
 
         Console.WriteLine("Lavalink is not connected! Command disabled.");
         var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Lavalink nicht verbunden!")

@@ -1,5 +1,6 @@
 ﻿using DisCatSharp.CommandsNext;
 using DisCatSharp.Lavalink;
+using DisCatSharp.Lavalink.Entities;
 using System.Web;
 
 namespace AGC_Management.Helpers.Lavalink;
@@ -9,12 +10,12 @@ public class LavalinkHelper : BaseCommandModule
     protected static async Task<(LavalinkExtension, bool)> ConnectToVoice(CommandContext ctx)
     {
         var lava = ctx.Client.GetLavalink();
-        if (!lava.ConnectedNodes.Any())
+        if (!lava.ConnectedSessions.Any())
         {
             return (lava, false);
         }
 
-        var node = lava.ConnectedNodes.Values.First();
+        var node = lava.ConnectedSessions.Values.First();
         await node.ConnectAsync(ctx.Member.VoiceState?.Channel);
         return (lava, true);
     }
@@ -23,12 +24,12 @@ public class LavalinkHelper : BaseCommandModule
 
     protected string GetTrackInfo(LavalinkTrack track)
     {
-        return $"{track.Title} ({track.Length:mm\\:ss})";
+        return $"{track.Info.Title} ({track.Info.Length:mm\\:ss})";
     }
 
     protected string GetTrackUrl(LavalinkTrack track)
     {
-        return $"https://www.youtube.com/watch?v={track.Identifier}";
+        return $"https://www.youtube.com/watch?v={track.Info.Identifier}";
     }
 
 

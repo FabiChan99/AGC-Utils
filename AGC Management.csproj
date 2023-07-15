@@ -20,9 +20,9 @@
     </PackageReference>
     <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.4.2-nightly-004" />
     <PackageReference Include="DisCatSharp.CommandsNext" Version="10.4.2-nightly-004" />
-    <PackageReference Include="DisCatSharp.Common" Version="10.4.2-nightly-004" />
+    <PackageReference Include="DisCatSharp.Common" Version="10.4.2-nightly-005" />
     <PackageReference Include="DisCatSharp.Interactivity" Version="10.4.2-nightly-004" />
-    <PackageReference Include="DisCatSharp.Lavalink" Version="10.4.1-sentry-017" />
+    <PackageReference Include="DisCatSharp.Lavalink" Version="10.4.2-nightly-004" />
     <PackageReference Include="ini-parser-new" Version="2.6.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.5-beta1.23225.2">
       <PrivateAssets>all</PrivateAssets>

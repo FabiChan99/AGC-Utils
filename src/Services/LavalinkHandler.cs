@@ -61,16 +61,17 @@ public static class LavalinkHandler
         {
             await lavalink.ConnectAsync(lavalinkconfig());
         }
-        catch
+        catch (Exception ex)
         {
             discord.Logger.LogCritical(
                 "Lavalink is enabled but could not connect to Lavalink Server. Disabling Lavalink...");
+            discord.Logger.LogCritical(ex.Message);
             return null;
         }
 
         await Task.Delay(5000);
         var lava = discord.GetLavalink();
-        if (!lava.ConnectedNodes.Any())
+        if (!lava.ConnectedSessions.Any())
         {
             discord.Logger.LogCritical("Lavalink is enabled but no Lavalink Node is connected. Disabling Lavalink...");
             return null;

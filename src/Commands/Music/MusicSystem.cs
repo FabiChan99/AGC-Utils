@@ -4,7 +4,9 @@ using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
+using DisCatSharp.Lavalink.Entities;
 using DisCatSharp.Lavalink.EventArgs;
+using DisCatSharp.Lavalink.Enums;
 
 namespace AGC_Management.Commands.Music;
 
@@ -13,7 +15,7 @@ public class MusicSystem : LavalinkHelper
     private readonly Dictionary<ulong, bool> _loopStates = new();
     private readonly Dictionary<ulong, Queue<LavalinkTrack>> _queues = new();
 
-    private async Task DisconnectAndReset(LavalinkGuildConnection connection, ulong guildId)
+    private async Task DisconnectAndReset(LavalinkGuildPlayer connection, ulong guildId)
     {
         await connection.DisconnectAsync();
 
@@ -28,7 +30,7 @@ public class MusicSystem : LavalinkHelper
         }
     }
 
-    private async Task PlaybackFinished(LavalinkGuildConnection sender, TrackFinishEventArgs e, CommandContext ctx)
+    private async Task PlaybackFinished(LavalinkGuildPlayer sender, LavalinkTrackEndedEventArgs e, CommandContext ctx)
     {
         if (_loopStates.TryGetValue(sender.Guild.Id, out var loop) && loop)
         {
@@ -36,7 +38,7 @@ public class MusicSystem : LavalinkHelper
             var eb = new DiscordEmbedBuilder()
                 .WithDescription($"Loop aktiviert: Spielt den aktuellen Titel erneut: \n{GetTrackInfo(e.Track)}")
                 .WithColor(BotConfig.GetEmbedColor())
-                .WithAuthor(e.Track.Title, iconUrl: ctx.Client.CurrentUser.AvatarUrl, url: e.Track.Title);
+                .WithAuthor(e.Track.Info.Title, iconUrl: ctx.Client.CurrentUser.AvatarUrl, url: e.Track.Info.Uri.ToString());
             await ctx.RespondAsync($"Loop aktiviert: Spielt den aktuellen Titel erneut: {GetTrackInfo(e.Track)}");
         }
         else if (_queues.TryGetValue(sender.Guild.Id, out var queue) && queue.Count > 0)
@@ -57,7 +59,7 @@ public class MusicSystem : LavalinkHelper
 
             await ctx.RespondAsync(message);
         }
-        else if (sender.CurrentState.CurrentTrack == null)
+        else if (sender.CurrentTrack == null)
         {
             await DisconnectAndReset(sender, ctx.Guild.Id);
         }
@@ -164,15 +166,16 @@ public class MusicSystem : LavalinkHelper
         }
 
 
-        var lavalinkNode = lava.ConnectedNodes.Values.First();
+        var lavalinkNode = lava.ConnectedSessions.Values.First();
 
 
         query = HandleYoutubeLink(query);
 
-        var trackLoadResult = await lavalinkNode.Rest.GetTracksAsync(query);
-        var player = lavalinkNode.GetGuildConnection(ctx.Guild);
+        var player = lavalinkNode.GetGuildPlayer(ctx.Guild);
+        var loadResult = await player.LoadTracksAsync(LavalinkSearchType.Youtube, query);
+        
 
-        if (trackLoadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+        if (loadResult.LoadType == LavalinkLoadResultType.Empty)
         {
             DiscordEmbedBuilder embed = new()
             {
@@ -186,7 +189,7 @@ public class MusicSystem : LavalinkHelper
             return;
         }
 
-        if (trackLoadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+        if (loadResult.LoadType == LavalinkLoadResultType.Error)
         {
             DiscordEmbedBuilder embed = new()
             {
@@ -199,14 +202,20 @@ public class MusicSystem : LavalinkHelper
             await DisconnectAndReset(player, ctx.Guild.Id);
             return;
         }
+        LavalinkTrack track = loadResult.LoadType switch
+        {
+            LavalinkLoadResultType.Track => loadResult.GetResultAs<LavalinkTrack>(),
+            LavalinkLoadResultType.Playlist => loadResult.GetResultAs<LavalinkPlaylist>().Tracks.First(),
+            LavalinkLoadResultType.Search => loadResult.GetResultAs<List<LavalinkTrack>>().First(),
+            _ => throw new InvalidOperationException("Unexpected load result type.")
+        };
 
 
-        player.PlaybackFinished += (sender, e) => PlaybackFinished(sender, e, ctx);
+        player.TrackEnded += (sender, e) => PlaybackFinished(sender, e, ctx);
 
 
-        var track = trackLoadResult.Tracks.First();
 
-        if (player.CurrentState.CurrentTrack != null)
+        if (player.CurrentTrack != null)
         {
             if (!_queues.ContainsKey(ctx.Channel.Guild.Id))
             {
