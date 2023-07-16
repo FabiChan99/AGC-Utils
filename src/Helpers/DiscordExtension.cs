@@ -1,5 +1,7 @@
-﻿using DisCatSharp.Entities;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Exceptions;
 
 namespace AGC_Management;
 

@@ -1935,9 +1935,10 @@ public class TempVoiceHelper : BaseCommandModule
 
                     //overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
                     overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice, Permissions.AccessChannels);
-
-                    await user.DisconnectFromVoiceAsync();
-
+                    if (userChannel.Users.Contains(user))
+                    {
+                        await user.DisconnectFromVoiceAsync();
+                    }
                     usersList.Add(user);
                 }
                 catch (NotFoundException)
