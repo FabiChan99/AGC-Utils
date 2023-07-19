@@ -28,6 +28,31 @@ public class ExtendedModerationSystem : ModerationSystem
     }
 
 
+    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    {
+
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        var httpClient = new HttpClient();
+        string urls = "";
+        foreach (DiscordAttachment att in imgAttachments)
+        {
+            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
+            using var stream = new MemoryStream(bytesImage);
+            using var scope = _services.CreateScope();
+            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
+            var response = await client.UploadImage(new StreamUploadRequest
+            {
+                Stream = stream,
+                FileName = att.FileName
+            });
+
+            urls += $" {response}";
+        }
+
+        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        return urls;
+    }
+
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
         using HttpClient client = new();
@@ -565,30 +590,7 @@ public class ExtendedModerationSystem : ModerationSystem
         await ctx.RespondAsync(embed);
     }
 
-    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
-    {
-        
-        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        var httpClient = new HttpClient();
-        string urls =  "";
-        foreach (DiscordAttachment att in imgAttachments)
-        {
-            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
-            using var stream = new MemoryStream(bytesImage);
-            using var scope = _services.CreateScope();
-            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
-            var response = await client.UploadImage(new StreamUploadRequest
-            {
-                Stream = stream,
-                FileName = att.FileName
-            });
 
-            urls += $" {response}";
-        }
-
-        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        return urls;
-    }
 
     [Command("multiflag")]
     [Description("Flaggt mehrere Nutzer")]
