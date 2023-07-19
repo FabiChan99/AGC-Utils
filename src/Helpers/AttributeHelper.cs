@@ -12,6 +12,10 @@ public class RequireStaffRole : CheckBaseAttribute
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
+        if (GlobalProperties.DebugMode)
+        {
+            return true;
+        }
         // Check if user has staff role
         if (ctx.Member.Roles.Any(r => r.Id == RoleId))
             return true;
@@ -60,6 +64,10 @@ public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
+        if (GlobalProperties.DebugMode)
+        {
+            return true;
+        }
         ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
         ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
         ulong modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);

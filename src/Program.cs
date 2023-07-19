@@ -9,8 +9,12 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using CatBox.NET;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AGC_Management;
 
@@ -55,7 +59,15 @@ internal class Program : BaseCommandModule
                 Environment.Exit(0);
             }
         }
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .CreateLogger();
 
+        var serviceProvider = new ServiceCollection()
+            .AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"))
+            .AddLogging(lb => lb.AddSerilog())
+            .BuildServiceProvider();
 
         DatabaseService.OpenConnection();
         var discord = new DiscordClient(new DiscordConfiguration
@@ -68,6 +80,7 @@ internal class Program : BaseCommandModule
             LogTimestampFormat = "MMM dd yyyy - HH:mm:ss tt",
             DeveloperUserId = GlobalProperties.BotOwnerId,
             Locale = "de",
+            ServiceProvider = serviceProvider,
             MessageCacheSize = 10000
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
@@ -89,7 +102,7 @@ internal class Program : BaseCommandModule
         await discord.ConnectAsync();
 
         await StartTasks(discord);
-        var lavalink = await LavalinkHandler.InitLavalink(discord);
+        await LavalinkHandler.InitLavalink(discord);
         await Task.Delay(-1);
     }
 

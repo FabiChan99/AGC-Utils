@@ -1,5 +1,7 @@
-﻿using AGC_Management.Helpers;
+﻿using System.Net;
+using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
+using AGC_Management.Services;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -9,11 +11,23 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Newtonsoft.Json;
 using Npgsql;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using CatBox.NET.Client;
+using CatBox.NET.Requests;
 
 namespace AGC_Management.Commands.Moderation;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
+    private IServiceProvider _services;
+
+    public ExtendedModerationSystem(IServiceProvider services)
+    {
+        _services = services;
+    }
+
+
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
         using HttpClient client = new();
@@ -500,12 +514,26 @@ public class ExtendedModerationSystem : ModerationSystem
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
+
+        var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+        var imgAttachments = ctx.Message.Attachments
+            .Where(att => imgExtensions.Contains(Path.GetExtension(att.FileName).ToLower()))
+            .ToList();
+        string urls = "";
+        if (imgAttachments.Count > 0)
+        {
+            urls = await UploadToCatBox(ctx, imgAttachments);
+        }
+
+
+
+
         Dictionary<string, object> data = new()
         {
             { "userid", (long)user.Id },
             { "punisherid", (long)ctx.User.Id },
             { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-            { "description", reason },
+            { "description", reason+urls },
             { "caseid", caseid }
         };
         await DatabaseService.InsertDataIntoTable("flags", data);
@@ -525,15 +553,41 @@ public class ExtendedModerationSystem : ModerationSystem
         foreach (var result in results) flaglist.Add(result);
 
 
+
         var flagcount = flaglist.Count;
 
         var embed = new DiscordEmbedBuilder()
             .WithTitle("Nutzer geflaggt")
             .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}```Der User hat nun __{flagcount} Flag(s)__. \nID des Flags: ``{caseid}``")
+                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde geflaggt!\n Grund: ```{reason}{urls}```Der User hat nun __{flagcount} Flag(s)__. \nID des Flags: ``{caseid}``")
             .WithColor(BotConfig.GetEmbedColor())
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed);
+    }
+
+    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    {
+        
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        var httpClient = new HttpClient();
+        string urls =  "";
+        foreach (DiscordAttachment att in imgAttachments)
+        {
+            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
+            using var stream = new MemoryStream(bytesImage);
+            using var scope = _services.CreateScope();
+            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
+            var response = await client.UploadImage(new StreamUploadRequest
+            {
+                Stream = stream,
+                FileName = att.FileName
+            });
+
+            urls += $" {response}";
+        }
+
+        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        return urls;
     }
 
     [Command("multiflag")]
@@ -572,6 +626,15 @@ public class ExtendedModerationSystem : ModerationSystem
             if (user != null) users_to_flag.Add(user);
         }
 
+        var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+        var imgAttachments = ctx.Message.Attachments
+            .Where(att => imgExtensions.Contains(Path.GetExtension(att.FileName).ToLower()))
+            .ToList();
+        string urls = "";
+        if (imgAttachments.Count > 0)
+        {
+            urls = await UploadToCatBox(ctx, imgAttachments);
+        }
         var busers_formatted = string.Join("\n", users_to_flag.Select(buser => buser.UsernameWithDiscriminator));
         var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -579,7 +642,7 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
-                             $"```{busers_formatted}```\n__Grund:__```{reason}```")
+                             $"```{busers_formatted}```\n__Grund:__```{reason+urls}```")
             .WithColor(BotConfig.GetEmbedColor());
         var embed = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
@@ -657,7 +720,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     { "userid", (long)user.Id },
                     { "punisherid", (long)ctx.User.Id },
                     { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-                    { "description", reason },
+                    { "description", reason+urls },
                     { "caseid", caseid_ }
                 };
                 await DatabaseService.InsertDataIntoTable("flags", data);
@@ -682,7 +745,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             string e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
-                              $"__Grund:__ ```{reason}```\n" +
+                              $"__Grund:__ ```{reason+urls}```\n" +
                               $"__Geflaggte User:__\n" +
                               $"```{for_str}```";
             DiscordColor ec = DiscordColor.Green;
