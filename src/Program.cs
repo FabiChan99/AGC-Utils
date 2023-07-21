@@ -12,8 +12,10 @@ using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using CatBox.NET;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AGC_Management;
@@ -27,6 +29,12 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
+        var logger = Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .CreateLogger();
+
+        logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
         try
         {
@@ -59,15 +67,34 @@ internal class Program : BaseCommandModule
                 Environment.Exit(0);
             }
         }
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .CreateLogger();
+
+        
 
         var serviceProvider = new ServiceCollection()
             .AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"))
             .AddLogging(lb => lb.AddSerilog())
             .BuildServiceProvider();
+
+        Log.Logger.Information("Environment Details\n\n" +
+                               "Dotnet Version: {Version}\n" +
+                               "OS & Version: {OSVersion}\n\n" +
+                               "OS 64x: {Is64BitOperatingSystem}\n" +
+                               "Process 64x: {Is64BitProcess}\n\n" +
+                               "MachineName: {MachineName}\n" +
+                               "UserName: {UserName}\n" +
+                               "UserDomain: {UserDomainName}\n\n" +
+                               "Current Directory: {CurrentDirectory}\n" +
+                               "Commandline: {Commandline}\n",
+            Environment.Version,
+            Environment.OSVersion,
+            Environment.Is64BitOperatingSystem,
+            Environment.Is64BitProcess,
+            Environment.MachineName,
+            Environment.UserName,
+            Environment.UserDomainName,
+            Environment.CurrentDirectory,
+            Environment.CommandLine);
+
 
         DatabaseService.OpenConnection();
         var discord = new DiscordClient(new DiscordConfiguration

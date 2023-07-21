@@ -882,7 +882,7 @@ public class ModerationSystem : BaseCommandModule
                     .WithDescription($"**Begründung:**```{reason}```\n" +
                                      $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
                                      $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
-                    .WithColor(DiscordColor.Red);
+                    .WithColor(DiscordColor.Red).Build();
 
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var loadingEmbedBuilder = new DiscordEmbedBuilder()
@@ -906,7 +906,7 @@ public class ModerationSystem : BaseCommandModule
                 DiscordMessage? umsg = null;
                 try
                 {
-                    umsg = await user.SendMessageAsync(embed);
+                    umsg = await user.SendMessageAsync(banEmbedBuilder);
                     sent = true;
                 }
                 catch
