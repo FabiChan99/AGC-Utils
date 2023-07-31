@@ -58,7 +58,6 @@
   <ItemGroup>
     <Folder Include="src\Commands\Fun\" />
     <Folder Include="src\Commands\TempVC\" />
-    <Folder Include="src\Helpers\Lavalink\" />
     <Folder Include="src\Helpers\TempVoice\" />
   </ItemGroup>
 

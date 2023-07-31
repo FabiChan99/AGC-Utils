@@ -129,7 +129,6 @@ internal class Program : BaseCommandModule
         await discord.ConnectAsync();
 
         await StartTasks(discord);
-        await LavalinkHandler.InitLavalink(discord);
         await Task.Delay(-1);
     }
 
