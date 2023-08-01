@@ -26,7 +26,7 @@ internal class Program : BaseCommandModule
     private static async Task MainAsync()
     {
         var logger = Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             .WriteTo.Console()
             .CreateLogger();
 
