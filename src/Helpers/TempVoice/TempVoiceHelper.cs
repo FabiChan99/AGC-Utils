@@ -1163,7 +1163,7 @@ public class TempVoiceHelper : BaseCommandModule
                             role_permitted = false;
                             break;
                         }
-                        
+
                     }
                 }
 
@@ -1987,7 +1987,7 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     permited_users.Add(userid);
                 }
-            }   
+            }
 
             var blocked_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();

@@ -1,12 +1,10 @@
 ﻿using AGC_Management.Helpers;
-using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using System.Text;
 
 namespace AGC_Management.Commands.Moderation;
 

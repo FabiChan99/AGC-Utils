@@ -1,7 +1,7 @@
-﻿using System.Net;
-using AGC_Management.Helpers;
+﻿using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
-using AGC_Management.Services;
+using CatBox.NET.Client;
+using CatBox.NET.Requests;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -9,18 +9,15 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Npgsql;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using CatBox.NET.Client;
-using CatBox.NET.Requests;
 
 namespace AGC_Management.Commands.Moderation;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-    private IServiceProvider _services;
+    private readonly IServiceProvider _services;
 
     public ExtendedModerationSystem(IServiceProvider services)
     {
@@ -644,7 +641,7 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
             .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
                              $"__Users:__\n" +
-                             $"```{busers_formatted}```\n__Grund:__```{reason+urls}```")
+                             $"```{busers_formatted}```\n__Grund:__```{reason + urls}```")
             .WithColor(BotConfig.GetEmbedColor());
         var embed = confirmEmbedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)
@@ -747,7 +744,7 @@ public class ExtendedModerationSystem : ModerationSystem
             }
 
             string e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
-                              $"__Grund:__ ```{reason+urls}```\n" +
+                              $"__Grund:__ ```{reason + urls}```\n" +
                               $"__Geflaggte User:__\n" +
                               $"```{for_str}```";
             DiscordColor ec = DiscordColor.Green;
