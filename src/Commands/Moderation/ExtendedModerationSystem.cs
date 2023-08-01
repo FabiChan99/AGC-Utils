@@ -769,6 +769,10 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireTeamCat]
     public async Task WarnUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
+        if (reason == null)
+        {
+            reason = await ModerationHelper.WarnReasonSelector(ctx);
+        }
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
