@@ -1,5 +1,9 @@
-﻿using DisCatSharp.CommandsNext;
+﻿using AGC_Management.Services.DatabaseHandler;
+using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+using DisCatSharp.Interactivity.Extensions;
+using System.Text;
 
 namespace AGC_Management.Helpers;
 
@@ -199,6 +203,139 @@ public static class ModerationHelper
             .Build();
     }
 
+
+    public static async Task<string?> WarnReasonSelector(CommandContext ctx)
+    {
+        var caseId = Helpers.GenerateCaseID();
+        List<string> DBQuery = new()
+        {
+            "*"
+        };
+        List<Dictionary<string, object>> queryResult = await DatabaseService.SelectDataFromTable("warnreasons", DBQuery, null);
+        var embedBuilder = new DiscordEmbedBuilder()
+            .WithTitle("Grund auswählen | Aktion: Verwarnen")
+            .WithDescription("Wähle einen oder mehrere zutreffende Gründe aus der Liste aus. \n Dieses Menü läuft in 120 Sekunden ab!")
+            .WithFooter(ctx.User.UsernameWithDiscriminator)
+            .WithColor(BotConfig.GetEmbedColor());
+        var options = new List<DiscordStringSelectComponentOption>();
+        Dictionary<string, string> ReasonMap = new();
+        foreach (var result in queryResult)
+        {
+            options.Add(new DiscordStringSelectComponentOption(result["reason"].ToString(), result["custom_id"].ToString()));
+            ReasonMap.Add(result["custom_id"].ToString(), result["reason"].ToString());
+        }
+
+        var discordEmbed = embedBuilder.Build();
+        var select = new DiscordStringSelectComponent("warnreason", "Gründe auswählen", options, customId: caseId, maxOptions: ReasonMap.Count, minOptions: 1);
+        var selector = new List<DiscordComponent>
+        {
+            select
+        };
+
+        List<DiscordActionRowComponent> discordActionRowComponents = new()
+        {
+            new DiscordActionRowComponent(selector)
+        };
+        var message = await ctx.RespondAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed).AddComponents(discordActionRowComponents));
+        var interactivity = ctx.Client.GetInteractivity();
+        var interaction = await interactivity.WaitForSelectAsync(message, ctx.User, caseId,
+            ComponentType.StringSelect, TimeSpan.FromSeconds(120));
+        if (interaction.TimedOut)
+        {
+            await message.DeleteAsync();
+            return "";
+        }
+        Console.WriteLine(interaction.Result.Id);
+        var valIds = new List<string>();
+        foreach (var option in interaction.Result.Values)
+        {
+            valIds.Add(option);
+        }
+
+        var reasonBuilder = new StringBuilder();
+        for (int i = 0; i < valIds.Count; i++)
+        {
+            reasonBuilder.Append(ReasonMap[valIds[i]]);
+
+            if (i < valIds.Count - 1)
+            {
+                reasonBuilder.Append(" | ");
+            }
+        }
+
+        var reason = reasonBuilder.ToString();
+
+        Console.WriteLine(reason);
+        await message.DeleteAsync();
+        return reason;
+    }
+
+
+    public static async Task<string?> BanReasonSelector(CommandContext ctx)
+    {
+        var caseId = Helpers.GenerateCaseID();
+        List<string> DBQuery = new()
+        {
+            "*"
+        };
+        List<Dictionary<string, object>> queryResult = await DatabaseService.SelectDataFromTable("banreasons", DBQuery, null);
+        var embedBuilder = new DiscordEmbedBuilder()
+            .WithTitle("Grund auswählen | Aktion: Ban")
+            .WithDescription("Wähle einen oder mehrere zutreffende Gründe aus der Liste aus. \n Dieses Menü läuft in 120 Sekunden ab!")
+            .WithFooter(ctx.User.UsernameWithDiscriminator)
+            .WithColor(BotConfig.GetEmbedColor());
+        var options = new List<DiscordStringSelectComponentOption>();
+        Dictionary<string, string> ReasonMap = new();
+        foreach (var result in queryResult)
+        {
+            options.Add(new DiscordStringSelectComponentOption(result["reason"].ToString(), result["custom_id"].ToString()));
+            ReasonMap.Add(result["custom_id"].ToString(), result["reason"].ToString());
+        }
+
+        var discordEmbed = embedBuilder.Build();
+        var select = new DiscordStringSelectComponent("banreason", "Gründe auswählen auswählen", options, customId: caseId, maxOptions: ReasonMap.Count, minOptions: 1);
+        var selector = new List<DiscordComponent>
+        {
+            select
+        };
+
+        List<DiscordActionRowComponent> discordActionRowComponents = new()
+        {
+            new DiscordActionRowComponent(selector)
+        };
+        var message = await ctx.RespondAsync(new DiscordMessageBuilder().WithEmbed(discordEmbed).AddComponents(discordActionRowComponents));
+        var interactivity = ctx.Client.GetInteractivity();
+        var interaction = await interactivity.WaitForSelectAsync(message, ctx.User, caseId,
+            ComponentType.StringSelect, TimeSpan.FromSeconds(120));
+        if (interaction.TimedOut)
+        {
+            await message.DeleteAsync();
+            return "";
+        }
+        Console.WriteLine(interaction.Result.Id);
+        var valIds = new List<string>();
+        foreach (var option in interaction.Result.Values)
+        {
+            valIds.Add(option);
+        }
+
+        var reasonBuilder = new StringBuilder();
+        for (int i = 0; i < valIds.Count; i++)
+        {
+            reasonBuilder.Append(ReasonMap[valIds[i]]);
+
+            if (i < valIds.Count - 1)
+            {
+                reasonBuilder.Append(" | ");
+            }
+        }
+
+        var reason = reasonBuilder.ToString();
+
+        Console.WriteLine(reason);
+        await message.DeleteAsync();
+        return reason;
+    }
 
     public static string GetUnbanURL()
     {
