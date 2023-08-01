@@ -314,7 +314,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
-                        
+
                         await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
                     }
                     if (allChannel.Contains((long)afterChannel.Id))
@@ -807,7 +807,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                             }
                             overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
-                            
+
                             blockedlist.Add(user.Id);
                         }
                         catch (Exception ex)
@@ -816,9 +816,10 @@ public class TempVoiceCommands : TempVoiceHelper
                             ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
                     }
-                    try {
+                    try
+                    {
                         await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
-                        }
+                    }
                     catch (Exception e)
                     {
                         ctx.Client.Logger.LogCritical(e.Message);

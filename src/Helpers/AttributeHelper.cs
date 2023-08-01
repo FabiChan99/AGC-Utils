@@ -99,7 +99,7 @@ public class RequireLavalink : CheckBaseAttribute
     }
 }
 
-public class AGCEasterEggsEnabled: CheckBaseAttribute
+public class AGCEasterEggsEnabled : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {

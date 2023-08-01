@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using DisCatSharp.Entities;
+﻿using DisCatSharp.Entities;
 
 namespace AGC_Management.Services;
 

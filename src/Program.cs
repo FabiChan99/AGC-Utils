@@ -1,6 +1,6 @@
-﻿using AGC_Management.Services;
-using AGC_Management.Services.DatabaseHandler;
+﻿using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Tasks;
+using CatBox.NET;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Exceptions;
@@ -11,12 +11,8 @@ using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using CatBox.NET;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
+using System.Reflection;
 
 namespace AGC_Management;
 
@@ -68,7 +64,7 @@ internal class Program : BaseCommandModule
             }
         }
 
-        
+
 
         var serviceProvider = new ServiceCollection()
             .AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"))
