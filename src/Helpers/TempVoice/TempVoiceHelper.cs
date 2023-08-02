@@ -1267,7 +1267,7 @@ public class TempVoiceHelper : BaseCommandModule
                 if (userid != interaction.User.Id)
                 {
                     var channelowner = await GetChannelOwnerID(userChannel);
-                    if (channelowner == (long)interaction.User.Id)
+                    if (channelowner == (long)userid)
                     {
                         continue;
                     }
