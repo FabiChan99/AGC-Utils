@@ -25,7 +25,7 @@ public class ExtendedModerationSystem : ModerationSystem
     }
 
 
-    public async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
 
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
@@ -1039,7 +1039,7 @@ public class CaseManagement : BaseCommandModule
     }
 
 
-    public async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
 
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
