@@ -25,7 +25,7 @@ public class ExtendedModerationSystem : ModerationSystem
     }
 
 
-    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
 
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
@@ -1032,6 +1032,38 @@ public class ExtendedModerationSystem : ModerationSystem
 [Group("case")]
 public class CaseManagement : BaseCommandModule
 {
+    private readonly IServiceProvider _services;
+    public CaseManagement(IServiceProvider services)
+    {
+        _services = services;
+    }
+
+
+    public async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    {
+
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        var httpClient = new HttpClient();
+        string urls = "";
+        foreach (DiscordAttachment att in imgAttachments)
+        {
+            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
+            using var stream = new MemoryStream(bytesImage);
+            using var scope = _services.CreateScope();
+            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
+            var response = await client.UploadImage(new StreamUploadRequest
+            {
+                Stream = stream,
+                FileName = att.FileName
+            });
+
+            urls += $" {response}";
+        }
+
+        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        return urls;
+    }
+
     [Command("info")]
     [RequireDatabase]
     [RequireStaffRole]
@@ -1236,6 +1268,15 @@ public class CaseManagement : BaseCommandModule
 
         if (fcase)
         {
+            var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var imgAttachments = ctx.Message.Attachments
+                .Where(att => imgExtensions.Contains(Path.GetExtension(att.FileName).ToLower()))
+                .ToList();
+            string urls = "";
+            if (imgAttachments.Count > 0)
+            {
+                urls = await UploadToCatBox(ctx, imgAttachments);
+            }
             if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
