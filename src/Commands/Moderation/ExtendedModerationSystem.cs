@@ -1284,7 +1284,7 @@ public class CaseManagement : BaseCommandModule
                 sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
                 await using (NpgsqlCommand command = new(sql, conn))
                 {
-                    command.Parameters.AddWithValue("@description", newreason);
+                    command.Parameters.AddWithValue("@description", newreason + urls);
                     command.Parameters.AddWithValue("@caseid", caseid);
 
                     int affected = await command.ExecuteNonQueryAsync();
@@ -1292,7 +1292,7 @@ public class CaseManagement : BaseCommandModule
                         .WithTitle("Case Update").WithDescription(
                             $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
                             $"Case-Typ: {ctyp}\n" +
-                            $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
+                            $"Neuer Grund: ```{reason + urls}```").WithColor(BotConfig.GetEmbedColor()).Build();
                     await ctx.RespondAsync(ue);
                 }
             }
