@@ -13,7 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
-
+using DisCatSharp.ApplicationCommands;
+using KawaiiAPI.NET;
 namespace AGC_Management;
 
 internal class Program : BaseCommandModule
@@ -64,11 +65,13 @@ internal class Program : BaseCommandModule
             }
         }
 
+        var client = new KawaiiClient();
 
-
+       
         var serviceProvider = new ServiceCollection()
             .AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"))
             .AddLogging(lb => lb.AddSerilog())
+            .AddSingleton(client)
             .BuildServiceProvider();
 
         Log.Logger.Information("Environment Details\n\n" +
@@ -121,6 +124,11 @@ internal class Program : BaseCommandModule
             Timeout = TimeSpan.FromMinutes(2)
         });
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
+        var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
+        {
+            ServiceProvider = serviceProvider,
+        });
+        appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
 
