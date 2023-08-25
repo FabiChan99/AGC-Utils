@@ -932,7 +932,7 @@ public class ExtendedModerationSystem : ModerationSystem
     [RequireDatabase]
     [RequireStaffRole]
     [RequireTeamCat]
-    public async Task PermaWarn(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
+    public async Task PermaWarnUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
         if (reason == null)
         {
@@ -942,91 +942,155 @@ public class ExtendedModerationSystem : ModerationSystem
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
         var caseid = Helpers.Helpers.GenerateCaseID();
-        Dictionary<string, object> data = new()
+
+
+        var interactivity = ctx.Client.GetInteractivity();
+        var confirmEmbedBuilder = new DiscordEmbedBuilder()
+            .WithTitle("Überprüfe deine Eingabe | Aktion: Permanente Verwarnung")
+            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+            .WithDescription($"Bitte überprüfe deine Eingabe und bestätige mit ✅ um fortzufahren.\n\n" +
+                             $"__Users:__\n" +
+                             $"```{user.UsernameWithDiscriminator}```\n__Grund:__```{reason}```")
+            .WithColor(BotConfig.GetEmbedColor());
+        var embed__ = confirmEmbedBuilder.Build();
+        List<DiscordButtonComponent> buttons = new(2)
         {
-            { "userid", (long)user.Id },
-            { "punisherid", (long)ctx.User.Id },
-            { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-            { "description", reason },
-            { "caseid", caseid },
-            { "perma", true }
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"warn_accept_{caseid}", "✅"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"warn_deny_{caseid}", "❌")
         };
-
-        var warnlist = new List<dynamic>();
-
-        List<string> selectedWarns = new()
+        var confirmMessage = new DiscordMessageBuilder()
+            .WithEmbed(embed__).AddComponents(buttons).WithReply(ctx.Message.Id);
+        var confirm = await ctx.Channel.SendMessageAsync(confirmMessage);
+        var interaction = await interactivity.WaitForButtonAsync(confirm, ctx.User, TimeSpan.FromSeconds(60));
+        buttons.ForEach(x => x.Disable());
+        if (interaction.TimedOut)
         {
-            "*"
-        };
-
-        Dictionary<string, object> whereConditions = new()
-        {
-            { "userid", (long)user.Id }
-        };
-
-
-        List<Dictionary<string, object>> results =
-            await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
-        foreach (var result in results) warnlist.Add(result);
-
-
-        var warncount = warnlist.Count + 1;
-
-        await DatabaseService.InsertDataIntoTable("warns", data);
-        DiscordEmbed uembed =
-            await ModerationHelper.GeneratePermaWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
-        string reasonString =
-            $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
-        bool sent;
-        try
-        {
-            await user.SendMessageAsync(uembed);
-            sent = true;
-        }
-        catch (Exception)
-        {
-            sent = false;
+            var embed_ = new DiscordMessageBuilder()
+                .WithEmbed(confirmEmbedBuilder.WithTitle("Ban abgebrochen")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithDescription(
+                        "Die Permanente Verwarnung wurde abgebrochen.\n\nGrund: Zeitüberschreitung. <:counting_warning:962007085426556989>")
+                    .WithColor(DiscordColor.Red).Build());
+            await confirm.ModifyAsync(embed_);
+            return;
         }
 
-        var dmsent = sent ? "✅" : "❌";
-        string uAction = "Keine";
+        if (interaction.Result.Id == $"warn_deny_{caseid}")
+        {
+            await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            var embed_ = new DiscordMessageBuilder()
+                .WithEmbed(confirmEmbedBuilder.WithTitle("Ban abgebrochen")
+                    .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                    .WithDescription(
+                        "Die Permanente Verwarnung wurde abgebrochen.\n\nGrund: Abgebrochen. <:counting_warning:962007085426556989>")
+                    .WithColor(DiscordColor.Red).Build());
+            await confirm.ModifyAsync(embed_);
+            return;
+        }
 
-        var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
+        if (interaction.Result.Id == $"warn_accept_{caseid}")
+        {
+            await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-        if (warncount >= warnsToBan)
+            var loadingEmbedBuilder = new DiscordEmbedBuilder()
+                .WithTitle("Permanente Varwarnung wird bearbeitet")
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                .WithDescription("Die Permanente Verwarnung wird bearbeitet. Bitte warten...")
+                .WithColor(DiscordColor.Yellow);
+            var loadingEmbed = loadingEmbedBuilder.Build();
+            var loadingMessage = new DiscordMessageBuilder()
+                .WithEmbed(loadingEmbed).AddComponents(buttons)
+                .WithReply(ctx.Message.Id);
+            await confirm.ModifyAsync(loadingMessage);
+
+            Dictionary<string, object> data = new()
+            {
+                { "userid", (long)user.Id },
+                { "punisherid", (long)ctx.User.Id },
+                { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
+                { "description", reason },
+                { "caseid", caseid },
+                { "perma", true }
+            };
+
+            var warnlist = new List<dynamic>();
+
+            List<string> selectedWarns = new()
+            {
+                "*"
+            };
+            Dictionary<string, object> whereConditions = new()
+            {
+                { "userid", (long)user.Id }
+            };
+
+            List<Dictionary<string, object>> results =
+                await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
+            foreach (var result in results) warnlist.Add(result);
+
+
+            var warncount = warnlist.Count + 1;
+
+            await DatabaseService.InsertDataIntoTable("warns", data);
+            DiscordEmbed uembed =
+                await ModerationHelper.GeneratePermaWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
+            string reasonString =
+                $"{warncount}. Permanente Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+            bool sent;
             try
             {
-                if (BanEnabled)
-                {
-                    await ctx.Guild.BanMemberAsync(user, 7, reasonString);
-                    uAction = "Gebannt";
-                }
+                await user.SendMessageAsync(uembed);
+                sent = true;
             }
             catch (Exception)
             {
+                sent = false;
             }
-        else if (warncount >= warnsToKick)
-            try
-            {
-                if (KickEnabled)
+
+            var dmsent = sent ? "✅" : "❌";
+            string uAction = "Keine";
+
+            var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
+
+            if (warncount >= warnsToBan)
+                try
                 {
-                    await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
-                    uAction = "Gekickt";
+                    if (BanEnabled)
+                    {
+                        await ctx.Guild.BanMemberAsync(user, 7, reasonString);
+                        uAction = "Gebannt";
+                    }
                 }
-            }
-            catch (Exception)
-            {
-            }
+                catch (Exception)
+                {
+                }
+            else if (warncount >= warnsToKick)
+                try
+                {
+                    if (KickEnabled)
+                    {
+                        await ctx.Guild.GetMemberAsync(user.Id).Result.RemoveAsync(reasonString);
+                        uAction = "Gekickt";
+                    }
+                }
+                catch (Exception)
+                {
+                }
 
 
-        var sembed = new DiscordEmbedBuilder()
-            .WithTitle("Nutzer permanent verwarnt")
-            .WithDescription(
-                $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde permanent verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
-            .WithColor(BotConfig.GetEmbedColor())
-            .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
-        await ctx.RespondAsync(sembed);
+            var sembed = new DiscordEmbedBuilder()
+                .WithTitle("Nutzer permaverwarnt")
+                .WithDescription(
+                    $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde permanent verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
+                .WithColor(BotConfig.GetEmbedColor())
+                .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
+                .Build();
+            var embedwithoutbuttons = new DiscordMessageBuilder()
+                .WithEmbed(sembed);
+            await confirm.ModifyAsync(embedwithoutbuttons);
+        }
     }
+
 }
 
 [Group("case")]
