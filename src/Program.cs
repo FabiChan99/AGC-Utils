@@ -1,6 +1,5 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Tasks;
-using CatBox.NET;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Exceptions;
@@ -69,7 +68,6 @@ internal class Program : BaseCommandModule
 
        
         var serviceProvider = new ServiceCollection()
-            .AddCatBoxServices(f => f.CatBoxUrl = new Uri("https://catbox.moe/user/api.php"))
             .AddLogging(lb => lb.AddSerilog())
             .AddSingleton(client)
             .BuildServiceProvider();

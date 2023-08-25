@@ -1,7 +1,5 @@
 ﻿using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
-using CatBox.NET.Client;
-using CatBox.NET.Requests;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -9,46 +7,45 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Npgsql;
+using System.Net.Http.Headers;
 
 namespace AGC_Management.Commands.Moderation;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-    private readonly IServiceProvider _services;
-
-    public ExtendedModerationSystem(IServiceProvider services)
-    {
-        _services = services;
-    }
-
 
     private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
-
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
         var httpClient = new HttpClient();
         string urls = "";
+
         foreach (DiscordAttachment att in imgAttachments)
         {
             var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
             using var stream = new MemoryStream(bytesImage);
-            using var scope = _services.CreateScope();
-            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
-            var response = await client.UploadImage(new StreamUploadRequest
-            {
-                Stream = stream,
-                FileName = att.FileName
-            });
 
-            urls += $" {response}";
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+            content.Add(fileContent, "fileToUpload", att.FileName);
+
+            content.Add(new StringContent("fileupload"), "reqtype");
+
+            var response = await httpClient.PostAsync("https://catbox.moe/user/api.php", content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            urls += $" {responseString}";
         }
 
         await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
         return urls;
     }
+
+
+
+
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
     {
@@ -1096,32 +1093,29 @@ public class ExtendedModerationSystem : ModerationSystem
 [Group("case")]
 public class CaseManagement : BaseCommandModule
 {
-    private readonly IServiceProvider _services;
-    public CaseManagement(IServiceProvider services)
-    {
-        _services = services;
-    }
-
 
     private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
-
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
         var httpClient = new HttpClient();
         string urls = "";
+
         foreach (DiscordAttachment att in imgAttachments)
         {
             var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
             using var stream = new MemoryStream(bytesImage);
-            using var scope = _services.CreateScope();
-            var client = scope.ServiceProvider.GetRequiredService<ICatBoxClient>();
-            var response = await client.UploadImage(new StreamUploadRequest
-            {
-                Stream = stream,
-                FileName = att.FileName
-            });
 
-            urls += $" {response}";
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+            content.Add(fileContent, "fileToUpload", att.FileName);
+
+            
+            content.Add(new StringContent("fileupload"), "reqtype");
+
+            var response = await httpClient.PostAsync("https://catbox.moe/user/api.php", content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            urls += $" {responseString}";
         }
 
         await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
