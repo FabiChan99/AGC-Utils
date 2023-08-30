@@ -645,7 +645,6 @@ public class TempVoiceHelper : BaseCommandModule
             }
 
             var name = result.Result.Interaction.Data.Components[0].Value;
-            //Console.WriteLine(result.Result.Interaction.Data.Options.ToString());
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             var channel = userChannel;
             long timestampdata = 0;
@@ -736,7 +735,6 @@ public class TempVoiceHelper : BaseCommandModule
             }
             catch (FormatException ex)
             {
-                Console.WriteLine(ex.Message);
                 var errbuilder = new DiscordFollowupMessageBuilder();
                 errbuilder.WithContent(
                     "<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");
@@ -752,7 +750,6 @@ public class TempVoiceHelper : BaseCommandModule
             }
             catch (BadRequestException ex)
             {
-                Console.WriteLine(ex.Message);
                 var errbuilder = new DiscordFollowupMessageBuilder();
                 errbuilder.WithContent(
                     "<:attention:1085333468688433232> **Fehler!** Stelle sicher, dass das Limit korrekt ist. Bitte gebe nur Zahlen von 0 - 99 ein.");

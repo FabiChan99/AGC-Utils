@@ -2029,7 +2029,6 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
 
             if (Interaction.Channel.Id == PanelMsgChannelId)
             {
-                Console.WriteLine(Interaction.Data.CustomId);
                 var customid = Interaction.Data.CustomId;
                 //await Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 if (customid == "channel_lock")
