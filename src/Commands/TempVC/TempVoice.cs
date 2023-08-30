@@ -1363,29 +1363,27 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("vcsoundboard")]
     public async Task ToggleVcSoundboard(CommandContext ctx)
     {
-        var channel = ctx.Member?.VoiceState?.Channel;
-        var userchannel = (long?)channel?.Id;
-        var db_channels = await GetAllChannelIDsFromDB();
-        if (userchannel == null)
+
+
+        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+
+        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+
+        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
         {
-            await ctx.RespondAsync("<:attention:1085333468688433232> Du musst in einem Channel sein, um diesen Befehl auszuführen!");
+            await NoChannel(ctx);
             return;
         }
 
-        if (!db_channels.Contains((long)userchannel) && userchannel != null)
-        {
-            await ctx.RespondAsync(
-                $"<:attention:1085333468688433232> Der Aktuelle Voice Channel ist kein Custom Channel");
-            return;
-        }
-        if (userchannel != null && db_channels.Contains((long)userchannel))
+        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
         {
             var msg = await ctx.RespondAsync("Status des Soundboards wird geändert");
-            bool SBState = GetSoundboardState(channel);
+            bool SBState = GetSoundboardState(userChannel);
             bool newstate;
             if (SBState)
             {
-                await SetSoundboardState(channel, false);
+                await SetSoundboardState(userChannel, false);
                 newstate = false;
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **deaktiviert**!");
@@ -1393,13 +1391,13 @@ public class TempVoiceCommands : TempVoiceHelper
             }
             if (!SBState)
             {
-                await SetSoundboardState(channel, true);
+                await SetSoundboardState(userChannel, true);
                 newstate = true;
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **aktiviert**!");
                 return;
             }
-        } 
+        }
     }
 
 
