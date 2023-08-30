@@ -14,6 +14,8 @@ using Serilog;
 using System.Reflection;
 using DisCatSharp.ApplicationCommands;
 using KawaiiAPI.NET;
+using AGC_Management.Services.Logging;
+
 namespace AGC_Management;
 
 internal class Program : BaseCommandModule
@@ -70,6 +72,7 @@ internal class Program : BaseCommandModule
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
             .AddSingleton(client)
+            .AddSingleton<LoggingService>()
             .BuildServiceProvider();
 
         Log.Logger.Information("Environment Details\n\n" +
