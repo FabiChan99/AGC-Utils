@@ -2127,6 +2127,40 @@ public class TempVoiceHelper : BaseCommandModule
         }
     }
 
+    protected static bool GetSoundboardState(DiscordChannel channel)
+    {
+        bool active = false;
+        var overwrite =
+            channel.PermissionOverwrites.FirstOrDefault(o => o.Id == channel.Guild.EveryoneRole.Id);
+        if (overwrite?.CheckPermission(Permissions.UseSoundboard) == PermissionLevel.Allowed)
+        {
+            active = true;
+        }
+
+        if (overwrite == null || overwrite?.CheckPermission(Permissions.UseSoundboard) == PermissionLevel.Unset)
+        {
+            active = false;
+        }
+        return active;
+    }
+
+    protected static async Task SetSoundboardState(DiscordChannel channel, bool state)
+    {
+        if (state)
+        {
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.UseExternalSounds | Permissions.UseSoundboard, Permissions.None);
+            await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+            return;
+        }
+        if (!state)
+        {
+            var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
+            overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.None, Permissions.None, Permissions.UseExternalSounds | Permissions.UseSoundboard);
+            await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
+        }
+        
+    }
 
 }
 

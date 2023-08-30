@@ -11,6 +11,8 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Sentry;
+using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -1333,6 +1335,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             $"> ``{prefix}unpermit @user/id`` - Macht das Whitelisting eines Users rückgängig¹\n" +
                             $"> ``{prefix}limit 0 - 99`` -  Setzt das Userlimit für den Channel (0 = Unlimited)¹\n" +
                             $"> ``{prefix}rename name`` - Verändert den Namen des Channels¹\n" +
+                            $"> ``{prefix}togglesoundboard`` - Aktiviert oder Deaktiviert das VC Soundboard\n" +
                             $"> ``{prefix}vcinfo [optional <channelid>]`` - Zeigt ausführliche Infos über einen Channel an wie z.b. Eigentümer\n" +
                             $"> ``{prefix}joinrequest @user/id`` - Stellt eine Beitrittsanfrage an einen User\n" +
                             $"\n" +
@@ -1354,6 +1357,52 @@ public class TempVoiceCommands : TempVoiceHelper
         eb.WithColor(BotConfig.GetEmbedColor());
         await ctx.Channel.SendMessageAsync(embed: eb);
     }
+
+
+    [Command("togglesoundboard")]
+    [Aliases("vcsoundboard")]
+    public async Task ToggleVcSoundboard(CommandContext ctx)
+    {
+        var channel = ctx.Member?.VoiceState?.Channel;
+        var userchannel = (long?)channel?.Id;
+        var db_channels = await GetAllChannelIDsFromDB();
+        if (userchannel == null)
+        {
+            await ctx.RespondAsync("<:attention:1085333468688433232> Du musst in einem Channel sein, um diesen Befehl auszuführen!");
+            return;
+        }
+
+        if (!db_channels.Contains((long)userchannel) && userchannel != null)
+        {
+            await ctx.RespondAsync(
+                $"<:attention:1085333468688433232> Der Aktuelle Voice Channel ist kein Custom Channel");
+            return;
+        }
+        if (userchannel != null && db_channels.Contains((long)userchannel))
+        {
+            var msg = await ctx.RespondAsync("Status des Soundboards wird geändert");
+            bool SBState = GetSoundboardState(channel);
+            bool newstate;
+            if (SBState)
+            {
+                await SetSoundboardState(channel, false);
+                newstate = false;
+                await msg.ModifyAsync(
+                    "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **deaktiviert**!");
+                return;
+            }
+            if (!SBState)
+            {
+                await SetSoundboardState(channel, true);
+                newstate = true;
+                await msg.ModifyAsync(
+                    "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **aktiviert**!");
+                return;
+            }
+        } 
+    }
+
+
 
     [Command("vcinfo")]
     [Aliases("voiceinfo", "voice-info", "vc-info")]
@@ -1444,13 +1493,13 @@ public class TempVoiceCommands : TempVoiceHelper
             }
 
             List<string> Query = new()
-            {
-                "userid"
-            };
+        {
+            "userid"
+        };
             Dictionary<string, object> WhereCondiditons = new()
-            {
-                { "userid", (long)channelownerid }
-            };
+        {
+            { "userid", (long)channelownerid }
+        };
 
             string sessionemote = noemote;
             var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
@@ -1477,9 +1526,9 @@ public class TempVoiceCommands : TempVoiceHelper
                 .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
             var caseid = Helpers.Helpers.GenerateCaseID();
             List<DiscordButtonComponent> buttons = new(2)
-            {
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}", "Info über Zugelassene oder Blockierte User (Nur Channelowner)"),
-            };
+        {
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}", "Info über Zugelassene oder Blockierte User (Nur Channelowner)"),
+        };
 
 
             var mb = new DiscordMessageBuilder()
@@ -1547,12 +1596,11 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
         }
-
-
     }
 
 
-    [Group("channelmod")]
+
+[Group("channelmod")]
     [Aliases("cmod")]
     public class ChannelModManagement : TempVoiceCommands
     {
