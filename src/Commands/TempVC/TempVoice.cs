@@ -1470,6 +1470,19 @@ public class TempVoiceCommands : TempVoiceHelper
             string climit = (channellimit == 0) ? "∞" : channellimit.ToString();
 
             string lreach = "";
+
+            string soundboardac = "";
+            var sbstate = GetSoundboardState(channel);
+            if (sbstate)
+            {
+                soundboardac = yesemote;
+            }
+            else if (!sbstate)
+            {
+                soundboardac = noemote;
+            }
+
+
             if (channellimit == channel.Users.Count && channellimit != 0)
             {
                 lreach = yesemote;
@@ -1514,6 +1527,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     $"**• Useranzahl im VC** = ``{channel.Users.Count}``\n" +
                     $"**• Userlimit des VC's** = ``{climit}``\n" +
                     $"**• Limit des Channels erreicht** = {lreach}\n" +
+                    $"**• Soundboard aktiv** = {soundboardac}\n" +
                     $"**• Erstellzeit** = {rendered_channel_timestamp}\n" +
                     $"**• Aktuelle Bitrate** = ``{channel.Bitrate} kbps``\n" +
                     $"**• Channel Versteckt** = {hiddenemote}\n" +
