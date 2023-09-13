@@ -489,6 +489,12 @@ public class TempVoiceCommands : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
+            if (name.Length == 0 || name.Length > 25)
+            {
+                await ctx.RespondAsync(
+                                       "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 25 Zeichen lang sein.");
+                return;
+            }
             var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             List<long> dbChannels = await GetChannelIDFromDB(ctx);
             DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
