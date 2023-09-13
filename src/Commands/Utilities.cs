@@ -13,7 +13,6 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AGC_Management.Commands
 {
