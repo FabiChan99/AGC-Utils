@@ -22,10 +22,9 @@ namespace AGC_Management.Commands
         [ContextMenu(ApplicationCommandType.Message, "Steal Emoji")]
         public static async Task StealEmojiMessageCommand(ContextMenuContext ctx)
         {
-            Console.WriteLine(ctx.TargetMessage.Content);
             DiscordMessage message = ctx.TargetMessage;
             ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
-            if (!ctx.Member.Roles.Any(r => r.Id == RoleId))
+            if (ctx.Member.Roles.Any(r => r.Id == RoleId))
             {
                 var ib = new DiscordInteractionResponseBuilder();
                 ib.IsEphemeral = true;
@@ -41,14 +40,32 @@ namespace AGC_Management.Commands
             }
             {
                 string emoji;
+                bool isAnimated = true;
                 try
                 {
-                    emoji = message.Content.Split(":")[2].Split(">")[0];
+                    string[] splitMessage = message.Content.Split(":");
+                    if (splitMessage.Length < 3)
+                    {
+                        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                            new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht enthält kein Emoji!").AsEphemeral());
+                        return;
+                    }
+                    emoji = splitMessage[0];
+                    Console.WriteLine(emoji);
+                    isAnimated = false;
+                    if (splitMessage[0].Contains("<a"))
+                    {
+                        isAnimated = true;
+                    }
+
+                    string emojiString = splitMessage[2].Split(">")[0].Trim(); 
+
+                    emoji = emojiString;
                 }
                 catch
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                                                              new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht enthält kein Emoji!").AsEphemeral());
+                        new DiscordInteractionResponseBuilder().WithContent("Ein Fehler ist aufgetreten!").AsEphemeral());
 
                     return;
                 }
@@ -65,8 +82,8 @@ namespace AGC_Management.Commands
                 var result = await interactivity.WaitForModalAsync(cid, TimeSpan.FromMinutes(2));
 
 
-                
-                var emojiUrl = $"https://cdn.discordapp.com/emojis/{emoji}.png?v=1";
+
+                string emojiUrl = $"https://cdn.discordapp.com/emojis/{emoji}.{(isAnimated ? "gif" : "png")}?v=1";
                 var emojiBytes = await new HttpClient().GetByteArrayAsync(emojiUrl);
                 var emojiStream = new MemoryStream(emojiBytes);
 
@@ -85,6 +102,7 @@ namespace AGC_Management.Commands
                 {
 
                     var emojiName = result.Result.Interaction.Data.Components[0].Value;
+
 
                     await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
                     await ctx.Guild.CreateEmojiAsync(emojiName, emojiStream);
