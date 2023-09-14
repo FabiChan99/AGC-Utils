@@ -11,7 +11,7 @@ namespace AGC_Management.Commands
     public class Utilities : ApplicationCommandsModule
     {
         [RequireStaffRole]
-        [ContextMenu(ApplicationCommandType.Message, "Steal Emoji")]
+        [ContextMenu(ApplicationCommandType.Message, "Steal Emoji and upload")]
         public static async Task StealEmojiMessageCommand(ContextMenuContext ctx)
         {
             DiscordMessage message = ctx.TargetMessage;
