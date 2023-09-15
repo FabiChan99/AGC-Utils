@@ -296,7 +296,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)afterChannel.Id))
                     {
                         DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1152226343291986013> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
@@ -306,7 +306,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
                         DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1152226344529297488> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
@@ -317,11 +317,11 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
 
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1117480573414412339> {GetBetterUsernameWithID(member)}");
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1152226344529297488> {GetBetterUsernameWithID(member)}");
                     }
                     if (allChannel.Contains((long)afterChannel.Id))
                     {
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1117480571917049966> {GetBetterUsernameWithID(member)}");
+                        await afterChannel.SendMessageAsync($"<:vcjoin:1152226343291986013> {GetBetterUsernameWithID(member)}");
                     }
                 }
 
