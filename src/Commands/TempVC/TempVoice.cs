@@ -306,7 +306,7 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
                         DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1152226344529297488> {GetBetterUsernameWithID(member)}");
+                        await beforeChannel.SendMessageAsync($"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
