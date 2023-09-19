@@ -197,6 +197,7 @@ internal class Program : BaseCommandModule
                                $"**Stelle sicher dass alle Argumente richtig angegeben sind!**");
             eb.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
             await e.Context.RespondAsync(embed: eb, content:e.Context.User.Mention);
+            return;
         }
 
         if (e.Exception is CommandNotFoundException)
