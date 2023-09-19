@@ -123,7 +123,7 @@ namespace AGC_Management.Commands
         {
             DiscordMessage message = ctx.TargetMessage;
             ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
-            if (ctx.Member.Roles.Any(r => r.Id == RoleId))
+            if (!ctx.Member.Roles.Any(r => r.Id == RoleId))
             {
                 var ib = new DiscordInteractionResponseBuilder();
                 ib.IsEphemeral = true;
