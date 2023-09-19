@@ -97,8 +97,17 @@ namespace AGC_Management.Commands
 
 
                     await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-                    await ctx.Guild.CreateEmojiAsync(emojiName, emojiStream);
-                    await result.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Emoji ``{emojiName}`` wurde erfolgreich hinzugefügt!"));
+                    try
+                    {
+                        await ctx.Guild.CreateEmojiAsync(emojiName, emojiStream);
+                        await result.Result.Interaction.EditOriginalResponseAsync(
+                            new DiscordWebhookBuilder().WithContent(
+                                $"Emoji ``{emojiName}`` wurde erfolgreich hinzugefügt!"));
+                    }
+                    catch (Exception e)
+                    {
+                        await result.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Fehler beim hinzufügen des Emojis: ```{e.Message}```"));
+                    }
                 }
 
 
