@@ -7,7 +7,6 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Microsoft.CodeAnalysis.Operations;
 using Newtonsoft.Json;
 using Npgsql;
 using System.Net.Http.Headers;
@@ -1134,7 +1133,7 @@ public class CaseManagement : BaseCommandModule
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
             content.Add(fileContent, "fileToUpload", att.FileName);
 
-            
+
             content.Add(new StringContent("fileupload"), "reqtype");
 
             var response = await httpClient.PostAsync("https://catbox.moe/user/api.php", content);

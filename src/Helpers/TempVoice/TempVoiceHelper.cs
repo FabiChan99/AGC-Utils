@@ -1,5 +1,4 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
-using AGC_Management.Services.Logging;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
@@ -734,7 +733,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 climit = int.Parse(limit);
             }
-            catch (FormatException ex)
+            catch (FormatException)
             {
                 var errbuilder = new DiscordFollowupMessageBuilder();
                 errbuilder.WithContent(
@@ -749,7 +748,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 await channel.ModifyAsync(x => x.UserLimit = climit);
             }
-            catch (BadRequestException ex)
+            catch (BadRequestException)
             {
                 var errbuilder = new DiscordFollowupMessageBuilder();
                 errbuilder.WithContent(
@@ -2157,7 +2156,7 @@ public class TempVoiceHelper : BaseCommandModule
             overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.None, Permissions.None, Permissions.UseExternalSounds | Permissions.UseSoundboard);
             await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
         }
-        
+
     }
 
 }

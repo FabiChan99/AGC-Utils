@@ -50,7 +50,7 @@ namespace AGC_Management.Commands
                         isAnimated = true;
                     }
 
-                    string emojiString = splitMessage[2].Split(">")[0].Trim(); 
+                    string emojiString = splitMessage[2].Split(">")[0].Trim();
 
                     emoji = emojiString;
                 }
@@ -66,7 +66,7 @@ namespace AGC_Management.Commands
                 DiscordInteractionModalBuilder modal = new();
                 modal.WithTitle("Emoji Stealer");
                 modal.CustomId = cid;
-                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Neuer Name für den Emoji:", minLength:2, maxLength:49));
+                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Neuer Name für den Emoji:", minLength: 2, maxLength: 49));
 
                 await ctx.CreateModalResponseAsync(modal);
 

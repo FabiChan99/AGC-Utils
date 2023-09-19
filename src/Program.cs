@@ -1,6 +1,8 @@
 ﻿using AGC_Management.Services.DatabaseHandler;
+using AGC_Management.Services.Logging;
 using AGC_Management.Tasks;
 using DisCatSharp;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Entities;
@@ -8,13 +10,11 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using KawaiiAPI.NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
-using DisCatSharp.ApplicationCommands;
-using KawaiiAPI.NET;
-using AGC_Management.Services.Logging;
 
 namespace AGC_Management;
 
@@ -68,7 +68,7 @@ internal class Program : BaseCommandModule
 
         var client = new KawaiiClient();
 
-       
+
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
             .AddSingleton(client)

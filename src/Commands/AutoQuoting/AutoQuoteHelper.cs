@@ -1,10 +1,8 @@
-﻿using System.Text.RegularExpressions;
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
+﻿using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.EventArgs;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using System.Text.RegularExpressions;
 
 namespace AGC_Management.Commands.AutoQuoting;
 
@@ -12,10 +10,10 @@ public class AutoQuoteHelper
 {
     public static async Task<List<DiscordMessage>> GetMessagesWithMessageLinks(DiscordGuild guild, string content)
     {
-        List<DiscordMessage> list = new ();
+        List<DiscordMessage> list = new();
         string guildId = guild.Id.ToString();
         string pattern = @"(?:https?://)?(?:\w+\.)?discord(?:app)?\.com/channels/(?<guild>\d+)/(?<channel>\d+)/(?<message>\d+)(?:\?\S*)?(?:#\S*)?";
-        Regex MSG_URL_PATTERN = new Regex(pattern, RegexOptions.IgnoreCase);
+        Regex MSG_URL_PATTERN = new(pattern, RegexOptions.IgnoreCase);
         Match m = MSG_URL_PATTERN.Match(content);
 
         while (m.Success)
@@ -108,11 +106,11 @@ public class AutoQuoteHelper
 
             if (!string.IsNullOrEmpty(embed.Footer.Text))
             {
-                eb.WithFooter(embed.Footer.Text + " - " + ftitle); 
+                eb.WithFooter(embed.Footer.Text + " - " + ftitle);
             }
             else
             {
-                eb.WithFooter(ftitle); 
+                eb.WithFooter(ftitle);
             }
         }
 

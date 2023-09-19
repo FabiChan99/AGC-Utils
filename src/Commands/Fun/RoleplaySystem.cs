@@ -1,7 +1,6 @@
 ﻿using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using KawaiiAPI.NET;
@@ -17,14 +16,14 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     public RoleplaySystem(IServiceProvider serviceProvider)
     {
-        this._serviceProvider = serviceProvider;
-        this._kawaiiclient = _serviceProvider.GetRequiredService<KawaiiClient>();
+        _serviceProvider = serviceProvider;
+        _kawaiiclient = _serviceProvider.GetRequiredService<KawaiiClient>();
     }
 
     [SlashCommand("hug", "Umarmt einen User")]
     public async Task HugCommand(InteractionContext ctx, [Option("user", "Den Nutzer den du umarmen willst")] DiscordUser user)
     {
-        
+
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Hug);
 
         var embed = new DiscordEmbedBuilder()

@@ -11,8 +11,6 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Sentry;
-using System.Threading.Channels;
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -1386,11 +1384,9 @@ public class TempVoiceCommands : TempVoiceHelper
         {
             var msg = await ctx.RespondAsync("Status des Soundboards wird geändert");
             bool SBState = GetSoundboardState(userChannel);
-            bool newstate;
             if (SBState)
             {
                 await SetSoundboardState(userChannel, false);
-                newstate = false;
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **deaktiviert**!");
                 return;
@@ -1398,7 +1394,6 @@ public class TempVoiceCommands : TempVoiceHelper
             if (!SBState)
             {
                 await SetSoundboardState(userChannel, true);
-                newstate = true;
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **aktiviert**!");
                 return;
@@ -1618,7 +1613,7 @@ public class TempVoiceCommands : TempVoiceHelper
 
 
 
-[Group("channelmod")]
+    [Group("channelmod")]
     [Aliases("cmod")]
     public class ChannelModManagement : TempVoiceCommands
     {
