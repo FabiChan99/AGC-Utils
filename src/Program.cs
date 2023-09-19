@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
+using DisCatSharp.CommandsNext.Attributes;
 
 namespace AGC_Management;
 
@@ -181,16 +182,40 @@ internal class Program : BaseCommandModule
         return Task.CompletedTask;
     }
 
-    private static Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
+    private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
-        // check if error is DisCatSharp.CommandsNext.Exceptions.CommandNotFoundException
-        if (e.Exception is CommandNotFoundException)
-            // ignore the error silently
-            return Task.CompletedTask;
-        cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
-        cn.Client.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.StackTrace}");
+        if (e.Exception is ArgumentException)
+        {
+            DiscordEmbedBuilder eb;
+            eb = new DiscordEmbedBuilder()
+            {
+                Title = "Fehler | BadArgumentException",
 
-        return Task.CompletedTask;
+                Color = new DiscordColor("#FF0000")
+            };
+            eb.WithDescription($"Fehlerhafte Argumente.\n" +
+                               $"**Stelle sicher dass alle Argumente richtig angegeben sind!**");
+            eb.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
+            await e.Context.RespondAsync(embed: eb, content:e.Context.User.Mention);
+        }
+
+        if (e.Exception is CommandNotFoundException)
+        {
+            return;
+        }
+        else
+        {
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "Fehler | CommandErrored",
+                Color = new DiscordColor("#FF0000")
+            };
+            embed.WithDescription($"Es ist ein Fehler aufgetreten.\n" +
+                                                                   $"**Fehler: {e.Exception.Message}**");
+            embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
+            await e.Context.RespondAsync(embed: embed, content:e.Context.User.Mention);
+        }
+        return;
     }
 }
 
