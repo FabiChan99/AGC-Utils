@@ -95,7 +95,7 @@ public class AutoQuoteHelper
             DiscordEmbed embed = quotedMessage.Embeds[0];
             eb = new DiscordEmbedBuilder(embed);
 
-            if (!string.IsNullOrEmpty(embed.Image.Url?.ToString()))
+            if (!string.IsNullOrEmpty(embed.Image?.Url?.ToString()))
             {
                 eb.WithImageUrl(embed.Image.Url.ToString());
             }
