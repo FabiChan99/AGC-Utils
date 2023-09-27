@@ -9,6 +9,7 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Newtonsoft.Json;
 using Npgsql;
+using RestSharp;
 using System.Net.Http.Headers;
 
 namespace AGC_Management.Commands.Moderation;
@@ -19,31 +20,28 @@ public class ExtendedModerationSystem : ModerationSystem
     private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        var httpClient = new HttpClient();
+        string apiurl = "https://catbox.moe/user/api.php";
+        var client = new RestClient(apiurl);
         string urls = "";
 
         foreach (DiscordAttachment att in imgAttachments)
         {
-            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
-            using var stream = new MemoryStream(bytesImage);
+            var bytesImage = await new HttpClient().GetByteArrayAsync(att.Url.Split('?')[0]);
+            //using var stream = new MemoryStream(bytesImage);
 
-            using var content = new MultipartFormDataContent();
-            var fileContent = new StreamContent(stream);
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-            content.Add(fileContent, "fileToUpload", att.FileName);
+            var request = new RestRequest(apiurl, Method.Post);
+            request.AddParameter("reqtype", "fileupload");
+            request.AddHeader("Content-Type", "multipart/form-data");
+            request.AddFile("fileToUpload", bytesImage, att.FileName);
+            
 
-            content.Add(new StringContent("fileupload"), "reqtype");
-
-            var response = await httpClient.PostAsync("https://catbox.moe/user/api.php", content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            urls += $" {responseString}";
+            var response = await client.ExecuteAsync(request);
+            urls += $" {response.Content}";
         }
 
         await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
         return urls;
     }
-
-
 
 
 
