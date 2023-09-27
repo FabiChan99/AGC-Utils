@@ -104,7 +104,7 @@ public class AutoQuoteHelper
                 eb.WithImageUrl(quotedMessage.Attachments[0].Url);
             }
 
-            if (!string.IsNullOrEmpty(embed.Footer.Text))
+            if (!string.IsNullOrEmpty(embed.Footer?.Text))
             {
                 eb.WithFooter(embed.Footer.Text + " - " + ftitle);
             }
