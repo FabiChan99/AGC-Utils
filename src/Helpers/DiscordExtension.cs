@@ -1,12 +1,15 @@
-﻿using DisCatSharp;
+﻿using AGC_Management.Helpers;
+using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace AGC_Management;
 
 internal static class DiscordExtension
 {
+    private static readonly Regex InviteRegex = new Regex(RegexPatterns.INVITE, RegexOptions.Compiled | RegexOptions.IgnoreCase);
     internal static List<DiscordOverwriteBuilder> ConvertToBuilderWithNewOverwrites(
         this IReadOnlyList<DiscordOverwrite> overwrites, DiscordMember member, Permissions allowed, Permissions denied)
     {
@@ -70,6 +73,46 @@ internal static class DiscordExtension
         {
             return null;
         }
+    }
+
+
+    public static async Task<List<string>> GetInvitesAsync(this DiscordMessage message, DiscordClient client)
+    {
+        var matches = InviteRegex.Matches(message.Content);
+        var invites = new List<string>();
+
+        foreach (Match match in matches)
+        {
+            if (match.Groups["code"].Success)
+            {
+                var code = match.Groups["code"].Value;
+                var invite = await client.GetInviteByCodeAsync(code);
+
+                if (invite != null)
+                {
+                    invites.Add(invite.ToString());
+                }
+            }
+        }
+
+        return invites;
+    }
+    public static List<string> GetInvites(this DiscordMessage message)
+    {
+        var matches = InviteRegex.Matches(message.Content);
+        var invites = new List<string>();
+
+        foreach (Match match in matches)
+        {
+            if (match.Groups["code"].Success)
+            {
+                var code = match.Groups["code"].Value;
+                var inviteLink = $"https://discord.gg/{code}";
+                invites.Add(inviteLink);
+            }
+        }
+
+        return invites;
     }
 
 }
