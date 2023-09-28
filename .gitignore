@@ -396,7 +396,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-
+src/Commands/TestCommands/*
+src/Commands/Test/*
 # JetBrains Rider
 *.sln.iml
 .idea/
