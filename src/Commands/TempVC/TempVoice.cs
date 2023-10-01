@@ -583,7 +583,6 @@ public class TempVoiceCommands : TempVoiceHelper
             {
                 await ctx.RespondAsync(
                     "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
-                return;
             }
 
             await userChannel.ModifyAsync(x => x.UserLimit = limit);
