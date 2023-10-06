@@ -16,6 +16,10 @@ public class DateKickEventhandler : BaseCommandModule
     {
         _ = Task.Run(async () =>
         {
+            if (eventArgs.Guild?.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
+            {
+                return;
+            }
             var member = eventArgs.Member;
             DateTime createdate = member.CreationTimestamp.Date;
             int age = (DateTime.Now - createdate).Days;
