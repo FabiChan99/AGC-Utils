@@ -1204,7 +1204,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                     overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                         Permissions.None);
-                    int? channellimit = userchannel.UserLimit;
+                    int? channellimit = userchannel.Users.Count;
                     if (userchannel.UserLimit < userchannel.Users.Count() && userchannel.UserLimit != 0 ||
                         userchannel.UserLimit == userchannel.Users.Count())
                     {
