@@ -19,6 +19,11 @@ using DisCatSharp.CommandsNext.Attributes;
 
 namespace AGC_Management;
 
+public class CurrentApplicationData
+{
+    public static DiscordClient Client { get; set; }
+}
+
 internal class Program : BaseCommandModule
 {
     private static void Main(string[] args)
@@ -133,6 +138,7 @@ internal class Program : BaseCommandModule
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
+        CurrentApplicationData.Client = discord;
 
         await StartTasks(discord);
         await Task.Delay(-1);
