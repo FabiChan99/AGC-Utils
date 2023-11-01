@@ -95,7 +95,9 @@ public class ExtendedModerationSystem : ModerationSystem
             isMember = false;
         }
         string ticketcount = "Tickets konnten nicht abgerufen werden.";
-        ticketcount = await Helpers.Helpers.GetTicketCount(user.Id).ToString();
+        var ticketcount_c = await Helpers.Helpers.GetTicketCount(user.Id);
+        if (ticketcount_c != null)
+            ticketcount = ticketcount_c.ToString();
         
 
         string bot_indicator = user.IsBot ? "<:bot:1012035481573265458>" : "";
