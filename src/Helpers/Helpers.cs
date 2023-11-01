@@ -1,5 +1,6 @@
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
+using Npgsql;
 
 namespace AGC_Management.Helpers;
 
@@ -32,9 +33,29 @@ public static class Helpers
         return false;
     }
 
+    public static async Task<long> GetTicketCount(ulong userid)
+    {
+        try
+        {
+            var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
+            var DbHost = BotConfig.GetConfig()[dbConfigSection]["Database_Host"];
+            var DbUser = BotConfig.GetConfig()[dbConfigSection]["Database_User"];
+            var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
+            var DbName = BotConfig.GetConfig()[dbConfigSection]["Ticket_Database"];
 
-
-
+            await using var con = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
+            await con.OpenAsync();
+            await using var cmd = new NpgsqlCommand($"SELECT COUNT(*) FROM ticketstore WHERE ticket_owner = {userid}", con);
+            var result = await cmd.ExecuteScalarAsync();
+            await con.CloseAsync();
+            return (long) result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return 0;
+        }
+    }
 
     public static IEnumerable<DiscordOverwriteBuilder> MergeOverwrites(DiscordChannel userChannel, List<DiscordOverwriteBuilder> overwrites,
         out IEnumerable<DiscordOverwriteBuilder> targetOverwrites)

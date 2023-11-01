@@ -94,6 +94,9 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             isMember = false;
         }
+        string ticketcount = "Tickets konnten nicht abgerufen werden.";
+        ticketcount = await Helpers.Helpers.GetTicketCount(user.Id).ToString();
+        
 
         string bot_indicator = user.IsBot ? "<:bot:1012035481573265458>" : "";
         string user_status = member?.Presence?.Status.ToString() ?? "Offline";
@@ -300,6 +303,9 @@ public class ExtendedModerationSystem : ModerationSystem
             userinfostring += "**Kommunikations-Timeout**\n";
             userinfostring +=
                 $"{(member.IsCommunicationDisabled ? $"Nutzer getimeouted bis: {member.CommunicationDisabledUntil.Value.Timestamp()}" : "Nutzer nicht getimeouted")}\n\n";
+            userinfostring += "**Anzahl Tickets**\n";
+            userinfostring +=
+                $"{ticketcount}\n\n";
             userinfostring +=
                 $"**Aktueller Voice-Channel**\n{(member.VoiceState != null && member.VoiceState.Channel != null ? member.VoiceState.Channel.Mention : "Mitglied nicht in einem Voice-Channel")}\n\n";
             userinfostring += $"**__Alle Verwarnungen ({warncount})__**\n";
@@ -447,6 +453,9 @@ public class ExtendedModerationSystem : ModerationSystem
             userinfostring += $"**Infobadges:**  {bot_indicator} {bs_icon} {banicon}\n\n";
             userinfostring += "**Der Online-Status und die Plattform**\n";
             userinfostring += $"{status_indicator} | Nicht ermittelbar - User ist nicht auf dem Server\n\n";
+            userinfostring += "**Anzahl Tickets**\n";
+            userinfostring +=
+                $"{ticketcount}\n\n";
             userinfostring += $"**__Alle Verwarnungen ({warncount})__**\n";
             userinfostring += warnlist.Count == 0
                 ? "Es wurden keine gefunden.\n"
