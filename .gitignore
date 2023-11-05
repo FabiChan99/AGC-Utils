@@ -15,7 +15,7 @@
 
 # Mono auto generated files
 mono_crash.*
-
+out/
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -401,3 +401,5 @@ src/Commands/Test/*
 # JetBrains Rider
 *.sln.iml
 .idea/
+/out/AGC Management.exe
+/out/payload.bin
