@@ -11,7 +11,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands
 {
-    public class Utilities : ApplicationCommandsModule
+    public class EmojiStealer : ApplicationCommandsModule
     {
         [RequireStaffRole]
         [ContextMenu(ApplicationCommandType.Message, "Steal Emoji")]
