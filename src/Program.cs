@@ -103,6 +103,7 @@ internal class Program : BaseCommandModule
 
 
         DatabaseService.OpenConnection();
+        TicketDatabaseService.OpenConnection();
         var discord = new DiscordClient(new DiscordConfiguration
         {
             Token = DcApiToken,
