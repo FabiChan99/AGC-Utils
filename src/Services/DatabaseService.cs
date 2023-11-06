@@ -1,5 +1,9 @@
-﻿using Npgsql;
+﻿#region
+
 using System.Data;
+using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Services.DatabaseHandler;
 

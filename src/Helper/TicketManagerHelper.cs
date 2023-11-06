@@ -7,7 +7,6 @@ using AGC_Management.Components;
 using AGC_Management.Enums;
 using AGC_Management.Helper;
 using AGC_Management.Managers;
-using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using AGC_Ticket_System.Helper;
 using AGC_Ticket.Helpers;
@@ -33,7 +32,7 @@ public class TicketManagerHelper
 
     public static async Task<long> GetTicketOwnerFromChannel(DiscordChannel channel)
     {
-        var new_constr =TicketDatabaseService.GetConnectionString();
+        var new_constr = TicketDatabaseService.GetConnectionString();
         var newcon = new NpgsqlConnection(new_constr);
         await newcon.OpenAsync();
         string query = $"SELECT ticket_owner FROM ticketcache where tchannel_id = '{channel.Id}'";

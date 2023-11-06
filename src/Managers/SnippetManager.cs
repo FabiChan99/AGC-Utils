@@ -1,8 +1,5 @@
 ﻿#region
 
-using AGC_Management;
-using AGC_Management.Helper;
-using AGC_Management.Helpers;
 using AGC_Ticket_System.Helper;
 using AGC_Ticket.Helpers;
 using DisCatSharp;

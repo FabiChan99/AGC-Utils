@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
 using AGC_Management.Components;
 using AGC_Management.Enums;
 using AGC_Management.Services.DatabaseHandler;
@@ -6,11 +8,12 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using Npgsql;
 
+#endregion
+
 namespace AGC_Management.Managers;
 
 public class NotificationManager
 {
-    
     public static async Task<List<DiscordMember?>> GetSubscribedStaffs(DiscordChannel channel)
     {
         long cid = (long)channel.Id;
@@ -33,14 +36,16 @@ public class NotificationManager
                     await SetMode(NotificationMode.Disabled, channel.Id, uid);
                     continue;
                 }
+
                 L.Add(member);
             }
 
             return L;
         }
+
         return L;
     }
-    
+
     public static async Task SetMode(NotificationMode mode, ulong channel_id, ulong user_id)
     {
         long cid = (long)channel_id;
@@ -49,7 +54,8 @@ public class NotificationManager
         var constring = TicketDatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("INSERT INTO subscriptions (user_id, channel_id, mode) VALUES (@uid, @cid, @mode)", con);
+        await using var cmd =
+            new NpgsqlCommand("INSERT INTO subscriptions (user_id, channel_id, mode) VALUES (@uid, @cid, @mode)", con);
         cmd.Parameters.AddWithValue("mode", (int)mode);
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
@@ -60,10 +66,11 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring =TicketDatabaseService.GetConnectionString();
+        var constring = TicketDatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("DELETE FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
+        await using var cmd =
+            new NpgsqlCommand("DELETE FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
         await cmd.ExecuteNonQueryAsync();
@@ -72,14 +79,14 @@ public class NotificationManager
     public static async Task ClearMode(ulong channel_id)
     {
         long cid = (long)channel_id;
-        var constring =TicketDatabaseService.GetConnectionString();
+        var constring = TicketDatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd = new NpgsqlCommand("DELETE FROM subscriptions WHERE channel_id = @cid", con);
         cmd.Parameters.AddWithValue("cid", cid);
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     public static string GetModeString(NotificationMode mode)
     {
         switch (mode)
@@ -107,10 +114,11 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring =TicketDatabaseService.GetConnectionString();
+        var constring = TicketDatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT mode FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
+        await using var cmd =
+            new NpgsqlCommand("SELECT mode FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -119,11 +127,8 @@ public class NotificationManager
             await reader.ReadAsync();
             return (NotificationMode)reader.GetInt32(0);
         }
-        else
-        {
-            return NotificationMode.Disabled;
-        }
-        
+
+        return NotificationMode.Disabled;
     }
 
     private static List<DiscordActionRowComponent> GetPhase1Row(NotificationMode mode)
@@ -132,10 +137,8 @@ public class NotificationManager
         {
             return TicketComponents.GetNotificationManagerButtons();
         }
-        else
-        {
-            return TicketComponents.GetNotificationManagerButtonsEnabledNotify();
-        }
+
+        return TicketComponents.GetNotificationManagerButtonsEnabledNotify();
     }
 
     public static async Task RenderNotificationManager(DiscordInteraction interaction)
@@ -156,7 +159,7 @@ public class NotificationManager
         irb.AddComponents(rows).AsEphemeral();
         await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, irb);
     }
-    
+
     public static async Task RenderNotificationManagerWithUpdate(DiscordInteraction interaction)
     {
         var customid = interaction.Data.CustomId;
@@ -175,7 +178,7 @@ public class NotificationManager
         irb.AddComponents(rows).AsEphemeral();
         await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, irb);
     }
-    
+
 
     public static async Task ChangeMode(DiscordInteraction interaction)
     {
@@ -216,5 +219,4 @@ public class NotificationManager
             await RenderNotificationManagerWithUpdate(interaction);
         }
     }
-    
 }

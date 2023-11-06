@@ -1,7 +1,11 @@
+#region
+
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Tasks;
 
@@ -12,13 +16,13 @@ public class ModerationSystemTasks
         if (GlobalProperties.DebugMode)
         {
             discord.Logger.LogWarning(
-                "Debugmodus aktiviert. Deaktiviere automatische überprüfung auf abgelaufene warns.");
+                "Debugmodus aktiviert. Deaktiviere automatische Ã¼berprÃ¼fung auf abgelaufene warns.");
             return;
         }
 
         if (DatabaseService.IsConnected())
         {
-            discord.Logger.LogInformation("Starte überprüfung auf abgelaufene Warns..");
+            discord.Logger.LogInformation("Starte Ã¼berprÃ¼fung auf abgelaufene Warns..");
             while (true)
             {
                 await RemoveWarnsOlderThan7Days(discord);
@@ -27,7 +31,7 @@ public class ModerationSystemTasks
         }
 
         discord.Logger.LogWarning(
-            "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf abgelaufene warns.");
+            "Datenbank nicht verbunden. Deaktiviere automatische Ã¼berprÃ¼fung auf abgelaufene warns.");
     }
 
     private int GetWarnExpiringTime()
@@ -51,7 +55,7 @@ public class ModerationSystemTasks
 
     private async Task RemoveWarnsOlderThan7Days(DiscordClient discord)
     {
-        discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
+        discord.Logger.LogInformation("PrÃ¼fe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
         int days = GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
         int expireTime = (int)DateTimeOffset.UtcNow.AddDays(-days).ToUnixTimeSeconds();

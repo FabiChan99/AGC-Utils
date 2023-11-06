@@ -1,7 +1,7 @@
-﻿using AGC_Management;
+﻿#region
+
 using AGC_Management.Enums;
 using AGC_Management.Managers;
-using AGC_Management.Helpers;
 using AGC_Ticket.Helpers;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
@@ -9,12 +9,15 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 
+#endregion
+
 namespace AGC_Management.Eventlistener;
+
 [EventHandler]
 public class NotificationMessageListener : BaseCommandModule
 {
     private static readonly long catid = long.Parse(BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"]);
-    
+
     [Event]
     public static async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
     {
@@ -39,7 +42,7 @@ public class NotificationMessageListener : BaseCommandModule
             {
                 return;
             }
-            
+
             var openticket = await TicketManagerHelper.IsOpenTicket(e.Message.Channel);
             if (!openticket)
             {
@@ -50,6 +53,7 @@ public class NotificationMessageListener : BaseCommandModule
             {
                 return;
             }
+
             var subscribedStaffs = await NotificationManager.GetSubscribedStaffs(e.Channel);
             foreach (var staff in subscribedStaffs)
             {
@@ -82,27 +86,26 @@ public class NotificationMessageListener : BaseCommandModule
                         await NotifyUserDM(e.Message, staff);
                         await NotificationManager.RemoveMode(e.Channel.Id, staff.Id);
                         break;
-                    default:
-                        break;
                 }
             }
-
         });
     }
-    
+
     public static async Task NotifyUser(DiscordMessage message, DiscordMember member)
     {
-        var m = await message.Channel.SendMessageAsync(member.Mention + " Es gibt eine neue Nachricht in deinem Ticket!");
+        var m = await message.Channel.SendMessageAsync(
+            member.Mention + " Es gibt eine neue Nachricht in deinem Ticket!");
         await m.DeleteAsync();
     }
-    
+
     public static async Task NotifyUserDM(DiscordMessage message, DiscordMember member)
     {
         var eb = new DiscordEmbedBuilder();
         eb.WithTitle("Neue Nachricht in deinem Ticket");
         eb.WithDescription($"In deinem Ticket {message.Channel.Mention} wurde eine neue Nachricht geschrieben!");
         eb.WithColor(BotConfig.GetEmbedColor());
-        var toticketbutton = new DiscordLinkButtonComponent($"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}", "Zum Ticket");
+        var toticketbutton = new DiscordLinkButtonComponent(
+            $"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}", "Zum Ticket");
         var mb = new DiscordMessageBuilder();
         mb.WithEmbed(eb);
         mb.AddComponents(toticketbutton);
@@ -115,5 +118,4 @@ public class NotificationMessageListener : BaseCommandModule
             Console.WriteLine(e);
         }
     }
-    
 }

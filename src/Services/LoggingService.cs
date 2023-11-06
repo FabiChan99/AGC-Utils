@@ -1,5 +1,9 @@
-﻿using DisCatSharp;
+﻿#region
+
+using DisCatSharp;
 using DisCatSharp.Entities;
+
+#endregion
 
 namespace AGC_Management.Services.Logging
 {
@@ -13,10 +17,7 @@ namespace AGC_Management.Services.Logging
 
         public async Task SendLog(DiscordWebhook webhook, DiscordEmbed embed)
         {
-            await webhook.ExecuteAsync(new DiscordWebhookBuilder
-            {
-
-            }.AddEmbed(embed));
+            await webhook.ExecuteAsync(new DiscordWebhookBuilder().AddEmbed(embed));
         }
     }
 }

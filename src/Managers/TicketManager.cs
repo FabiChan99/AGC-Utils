@@ -1,9 +1,7 @@
 ﻿#region
 
-using AGC_Management;
 using AGC_Management.Components;
 using AGC_Management.Enums;
-using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using AGC_Ticket.Helpers;
 using DisCatSharp;

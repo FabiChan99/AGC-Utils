@@ -1,10 +1,13 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Interactivity.Extensions;
+
+#endregion
 
 namespace AGC_Management.Commands
 {
@@ -24,12 +27,15 @@ namespace AGC_Management.Commands
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ib);
                 return;
             }
+
             if (message.Content == "")
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                                       new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht hat keinen Inhalt!").AsEphemeral());
+                    new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht hat keinen Inhalt!")
+                        .AsEphemeral());
                 return;
             }
+
             {
                 string emoji;
                 bool isAnimated = true;
@@ -39,9 +45,11 @@ namespace AGC_Management.Commands
                     if (splitMessage.Length < 3)
                     {
                         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                            new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht enthält kein Emoji!").AsEphemeral());
+                            new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht enthält kein Emoji!")
+                                .AsEphemeral());
                         return;
                     }
+
                     emoji = splitMessage[0];
                     Console.WriteLine(emoji);
                     isAnimated = false;
@@ -57,22 +65,24 @@ namespace AGC_Management.Commands
                 catch
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder().WithContent("Ein Fehler ist aufgetreten!").AsEphemeral());
+                        new DiscordInteractionResponseBuilder().WithContent("Ein Fehler ist aufgetreten!")
+                            .AsEphemeral());
 
                     return;
                 }
+
                 var randomid = new Random();
                 var cid = randomid.Next(100000, 999999).ToString();
                 DiscordInteractionModalBuilder modal = new();
                 modal.WithTitle("Emoji Stealer");
                 modal.CustomId = cid;
-                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Neuer Name für den Emoji:", minLength: 2, maxLength: 49));
+                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small,
+                    label: "Neuer Name für den Emoji:", minLength: 2, maxLength: 49));
 
                 await ctx.CreateModalResponseAsync(modal);
 
                 var interactivity = ctx.Client.GetInteractivity();
                 var result = await interactivity.WaitForModalAsync(cid, TimeSpan.FromMinutes(2));
-
 
 
                 string emojiUrl = $"https://cdn.discordapp.com/emojis/{emoji}.{(isAnimated ? "gif" : "png")}?v=1";
@@ -81,8 +91,11 @@ namespace AGC_Management.Commands
 
                 if (emoji == null)
                 {
-                    await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-                    await result.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Diese Nachricht enthält kein Emoji"));
+                    await result.Result.Interaction.CreateResponseAsync(
+                        InteractionResponseType.DeferredChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder().AsEphemeral());
+                    await result.Result.Interaction.EditOriginalResponseAsync(
+                        new DiscordWebhookBuilder().WithContent("Diese Nachricht enthält kein Emoji"));
                     return;
                 }
 
@@ -90,31 +103,27 @@ namespace AGC_Management.Commands
                 {
                     return;
                 }
-                else
+
+                var emojiName = result.Result.Interaction.Data.Components[0].Value;
+
+
+                await result.Result.Interaction.CreateResponseAsync(
+                    InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral());
+                try
                 {
-
-                    var emojiName = result.Result.Interaction.Data.Components[0].Value;
-
-
-                    await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-                    try
-                    {
-                        await ctx.Guild.CreateEmojiAsync(emojiName, emojiStream);
-                        await result.Result.Interaction.EditOriginalResponseAsync(
-                            new DiscordWebhookBuilder().WithContent(
-                                $"Emoji ``{emojiName}`` wurde erfolgreich hinzugefügt!"));
-                    }
-                    catch (Exception e)
-                    {
-                        await result.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Fehler beim hinzufügen des Emojis: ```{e.Message}```"));
-                    }
+                    await ctx.Guild.CreateEmojiAsync(emojiName, emojiStream);
+                    await result.Result.Interaction.EditOriginalResponseAsync(
+                        new DiscordWebhookBuilder().WithContent(
+                            $"Emoji ``{emojiName}`` wurde erfolgreich hinzugefügt!"));
                 }
-
-
+                catch (Exception e)
+                {
+                    await result.Result.Interaction.EditOriginalResponseAsync(
+                        new DiscordWebhookBuilder().WithContent(
+                            $"Fehler beim hinzufügen des Emojis: ```{e.Message}```"));
+                }
             }
-
-
-
         }
 
         [RequireStaffRole]
@@ -135,7 +144,8 @@ namespace AGC_Management.Commands
             if (message.Stickers.Count == 0)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                                                          new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht hat keinen Sticker!").AsEphemeral());
+                    new DiscordInteractionResponseBuilder().WithContent("Diese Nachricht hat keinen Sticker!")
+                        .AsEphemeral());
                 return;
             }
 
@@ -145,8 +155,10 @@ namespace AGC_Management.Commands
                 DiscordInteractionModalBuilder modal = new();
                 modal.WithTitle("Sticker Stealer");
                 modal.CustomId = cid;
-                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Neuer Name für den Sticker:", minLength: 2, maxLength: 49));
-                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, label: "Beschreibung für den Sticker:", minLength: 2, maxLength: 100));
+                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small,
+                    label: "Neuer Name für den Sticker:", minLength: 2, maxLength: 49));
+                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small,
+                    label: "Beschreibung für den Sticker:", minLength: 2, maxLength: 100));
 
                 await ctx.CreateModalResponseAsync(modal);
 
@@ -165,7 +177,9 @@ namespace AGC_Management.Commands
                 var stickerStream = new MemoryStream(stickerBytes);
                 var stickerdescription = result.Result.Interaction.Data.Components[1].Value;
                 var StickerName = result.Result.Interaction.Data.Components[0].Value;
-                await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+                await result.Result.Interaction.CreateResponseAsync(
+                    InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral());
                 try
                 {
                     await ctx.Guild.CreateStickerAsync(StickerName, stickerdescription,
@@ -176,11 +190,11 @@ namespace AGC_Management.Commands
                 }
                 catch (Exception e)
                 {
-                    await result.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Fehler beim hinzufügen des Stickers: ```{e.Message}```"));
+                    await result.Result.Interaction.EditOriginalResponseAsync(
+                        new DiscordWebhookBuilder().WithContent(
+                            $"Fehler beim hinzufügen des Stickers: ```{e.Message}```"));
                 }
-
             }
         }
-
     }
 }

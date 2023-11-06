@@ -1,7 +1,11 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿#region
+
+using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.Entities;
 using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace AGC_Management.Tasks;
 

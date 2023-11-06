@@ -1,8 +1,12 @@
+#region
+
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
+
+#endregion
 
 namespace AGC_Management.Helpers;
 
@@ -16,6 +20,7 @@ public class RequireStaffRole : CheckBaseAttribute
         {
             return true;
         }
+
         // Check if user has staff role
         if (ctx.Member.Roles.Any(r => r.Id == RoleId))
             return true;
@@ -68,6 +73,7 @@ public class RequireTeamCat : CheckBaseAttribute
         {
             return true;
         }
+
         ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
         ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
         ulong modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);
@@ -108,12 +114,12 @@ public class AGCEasterEggsEnabled : CheckBaseAttribute
         {
             if (bool.TrueString == BotConfig.GetConfig()["ServerConfig"]["EasterEggsEnabled"] &&
                 ctx.Guild.Id == 750365461945778209) return true;
-
         }
         catch (Exception)
         {
             // ignored
         }
+
         return false;
     }
 }

@@ -1,4 +1,7 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿#region
+
+using System.Reflection;
+using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Services.Logging;
 using AGC_Management.Tasks;
 using DisCatSharp;
@@ -14,8 +17,8 @@ using KawaiiAPI.NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using System.Reflection;
-using DisCatSharp.CommandsNext.Attributes;
+
+#endregion
 
 namespace AGC_Management;
 
@@ -134,7 +137,7 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider,
+            ServiceProvider = serviceProvider
         });
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
         commands.CommandErrored += Commands_CommandErrored;
@@ -194,7 +197,7 @@ internal class Program : BaseCommandModule
         if (e.Exception is ArgumentException)
         {
             DiscordEmbedBuilder eb;
-            eb = new DiscordEmbedBuilder()
+            eb = new DiscordEmbedBuilder
             {
                 Title = "Fehler | BadArgumentException",
 
@@ -203,7 +206,7 @@ internal class Program : BaseCommandModule
             eb.WithDescription($"Fehlerhafte Argumente.\n" +
                                $"**Stelle sicher dass alle Argumente richtig angegeben sind!**");
             eb.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
-            await e.Context.RespondAsync(embed: eb, content:e.Context.User.Mention);
+            await e.Context.RespondAsync(embed: eb, content: e.Context.User.Mention);
             return;
         }
 
@@ -211,19 +214,16 @@ internal class Program : BaseCommandModule
         {
             return;
         }
-        else
+
+        var embed = new DiscordEmbedBuilder
         {
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = "Fehler | CommandErrored",
-                Color = new DiscordColor("#FF0000")
-            };
-            embed.WithDescription($"Es ist ein Fehler aufgetreten.\n" +
-                                                                   $"**Fehler: {e.Exception.Message}**");
-            embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
-            await e.Context.RespondAsync(embed: embed, content:e.Context.User.Mention);
-        }
-        return;
+            Title = "Fehler | CommandErrored",
+            Color = new DiscordColor("#FF0000")
+        };
+        embed.WithDescription($"Es ist ein Fehler aufgetreten.\n" +
+                              $"**Fehler: {e.Exception.Message}**");
+        embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
+        await e.Context.RespondAsync(embed: embed, content: e.Context.User.Mention);
     }
 }
 

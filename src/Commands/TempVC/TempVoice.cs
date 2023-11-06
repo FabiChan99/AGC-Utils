@@ -1,4 +1,6 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using AGC_Management.Helpers;
 using AGC_Management.Helpers.TempVoice;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
@@ -11,6 +13,8 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -115,10 +119,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
                                     Permissions.AccessChannels, Permissions.None);
                                 await voice.ModifyPositionInCategoryAsync(e.After.Channel.Position + 1);
-                                await voice.ModifyAsync(async x =>
-                                {
-                                    x.PermissionOverwrites = overwrites;
-                                });
+                                await voice.ModifyAsync(async x => { x.PermissionOverwrites = overwrites; });
                             }
                     }
                 }
@@ -294,7 +295,8 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)afterChannel.Id))
                     {
                         DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
+                        await afterChannel.SendMessageAsync(
+                            $"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
@@ -304,29 +306,31 @@ public class TempVCEventHandler : TempVoiceHelper
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
                         DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
+                        await beforeChannel.SendMessageAsync(
+                            $"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
                         return;
                     }
                 }
+
                 if (beforeChannel != null && afterChannel != null)
                 {
                     if (beforeChannel == afterChannel) return;
                     DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
-
-                        await beforeChannel.SendMessageAsync($"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
+                        await beforeChannel.SendMessageAsync(
+                            $"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
                     }
+
                     if (allChannel.Contains((long)afterChannel.Id))
                     {
-                        await afterChannel.SendMessageAsync($"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
+                        await afterChannel.SendMessageAsync(
+                            $"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
                     }
                 }
-
             }
             catch (Exception)
             {
-
             }
         });
 
@@ -497,7 +501,7 @@ public class TempVoiceCommands : TempVoiceHelper
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
         bool isMod = await IsChannelMod(userChannel, ctx.Member);
-        
+
 
         if (dbChannels.Contains((long)channelid.Id))
         {
@@ -560,9 +564,10 @@ public class TempVoiceCommands : TempVoiceHelper
             if (name.Length == 0 || name.Length > 25)
             {
                 await ctx.RespondAsync(
-                                       "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 25 Zeichen lang sein.");
+                    "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 25 Zeichen lang sein.");
                 return;
             }
+
             var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             List<long> dbChannels = await GetChannelIDFromDB(ctx);
             DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
@@ -649,7 +654,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
 
-            else if (limit == 0)
+            if (limit == 0)
             {
                 await ctx.RespondAsync(
                     "<:success:1085333481820790944> Du hast das Userlimit erfolgreich **entfernt**.");
@@ -659,7 +664,6 @@ public class TempVoiceCommands : TempVoiceHelper
             await ctx.RespondAsync(
                 $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
         }
-
     }
 
     [Command("claim")]
@@ -745,7 +749,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 bool isMod = await IsChannelMod(userChannel, ctx.Member);
 
 
-
                 if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
                 {
                     await NoChannel(ctx);
@@ -774,6 +777,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                                 continue;
                             }
+
                             List<ulong> mods = await RetrieveChannelMods(userChannel);
                             if (id == ctx.User.Id || mods.Contains(id))
                             {
@@ -789,6 +793,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                                 await user.DisconnectFromVoiceAsync();
                             }
+
                             kicklist.Add(user.Id);
                             try
                             {
@@ -811,6 +816,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     catch (Exception)
                     {
                     }
+
                     int successCount = kicklist.Count;
                     string endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **gekickt**!";
@@ -861,16 +867,19 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                                 continue;
                             }
+
                             var channelowner = await GetChannelOwnerID(userChannel);
                             if (channelowner == (long)user.Id)
                             {
                                 continue;
                             }
+
                             List<ulong> mods = await RetrieveChannelMods(userChannel);
                             if (id == ctx.User.Id || mods.Contains(id))
                             {
                                 continue;
                             }
+
                             try
                             {
                                 var currentmods = await RetrieveChannelMods(userChannel);
@@ -881,6 +890,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             catch (Exception)
                             {
                             }
+
                             overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice);
 
                             blockedlist.Add(user.Id);
@@ -891,6 +901,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
                     }
+
                     try
                     {
                         await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
@@ -911,6 +922,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                                 continue;
                             }
+
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
                             {
                                 await user.DisconnectFromVoiceAsync();
@@ -1029,15 +1041,14 @@ public class TempVoiceCommands : TempVoiceHelper
                             {
                                 var buserow = userChannel.PermissionOverwrites
                                     .Where(x => x.Type == OverwriteType.Member)
-                                    .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
+                                    .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
+                                    .Select(x => x.Id)
                                     .ToList();
 
                                 if (buserow.Contains(user.Id))
                                 {
                                     continue;
                                 }
-
-
                             }
 
                             overwrites = overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
@@ -1107,8 +1118,6 @@ public class TempVoiceCommands : TempVoiceHelper
                                 Permissions.None, Permissions.AccessChannels | Permissions.UseVoice);
 
 
-
-
                             unpermitlist.Add(user.Id);
                         }
                         catch (NotFoundException)
@@ -1151,7 +1160,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 return;
             }
 
-            Console.WriteLine(userchannel);
             if (userchannel == null)
             {
                 await msg.ModifyAsync(
@@ -1215,7 +1223,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 await pingmsg.DeleteAsync();
                 var interactivity = ctx.Client.GetInteractivity();
                 var channelmods = await RetrieveChannelMods(userchannel);
-                var result = await interactivity.WaitForButtonAsync(msg, predicate: interaction =>
+                var result = await interactivity.WaitForButtonAsync(msg, interaction =>
                 {
                     if (interaction.User.Id == TargetUser.Id)
                     {
@@ -1229,13 +1237,11 @@ public class TempVoiceCommands : TempVoiceHelper
                             .Where(x => x.Type == OverwriteType.Member)
                             .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
                             .Select(x => x.Id)
-
                             .ToList();
                         return !buserow.Contains(ctx.User.Id);
                     }
 
                     return false;
-
                 }, TimeSpan.FromSeconds(300));
                 if (!userchannel.Users.Contains(TargetUser) && TargetUser != user)
                 {
@@ -1411,13 +1417,13 @@ public class TempVoiceCommands : TempVoiceHelper
                             $"> ``{prefix}togglesoundboard`` - Aktiviert oder Deaktiviert das VC Soundboard\n" +
                             $"> ``{prefix}vcinfo [optional <channelid>]`` - Zeigt ausführliche Infos über einen Channel an wie z.b. Eigentümer\n" +
                             $"> ``{prefix}joinrequest @user/id`` - Stellt eine Beitrittsanfrage an einen User\n" +
-                            $"\n" +
-                            $"**__Sitzungsverwaltung:__** (Persistente Kanäle)\n" +
+                            "\n" +
+                            "**__Sitzungsverwaltung:__** (Persistente Kanäle)\n" +
                             $"> ``{prefix}session save`` - Speichert ein Abbild des Channels in der Datenbank\n" +
                             $"> ``{prefix}session read`` - Zeigt die aktuell gespeicherte Sitzung an\n" +
                             $"> ``{prefix}session delete`` -  Löscht die gespeicherte Sitzung\n" +
-                            $"\n" +
-                            $"**__Kanalmodverwaltung:__** (Mehrere Channelowner)\n" +
+                            "\n" +
+                            "**__Kanalmodverwaltung:__** (Mehrere Channelowner)\n" +
                             $"> ``{prefix}channelmod add @user/id`` - Ernennnt einen User zu einem Kanalmoderator\n" +
                             $"> ``{prefix}channelmod remove @user/id`` - Entfernt einen Kanalmoderator\n" +
                             $"> ``{prefix}channelmod reset`` - Entfernt alle Kanalmoderatoren\n" +
@@ -1428,7 +1434,7 @@ public class TempVoiceCommands : TempVoiceHelper
         eb.WithTitle("Temp-VC Commands");
         eb.WithDescription(helpstring);
         eb.WithColor(BotConfig.GetEmbedColor());
-        await ctx.Channel.SendMessageAsync(embed: eb);
+        await ctx.Channel.SendMessageAsync(eb);
     }
 
 
@@ -1436,8 +1442,6 @@ public class TempVoiceCommands : TempVoiceHelper
     [Aliases("vcsoundboard")]
     public async Task ToggleVcSoundboard(CommandContext ctx)
     {
-
-
         List<long> dbChannels = await GetChannelIDFromDB(ctx);
         DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
@@ -1460,16 +1464,15 @@ public class TempVoiceCommands : TempVoiceHelper
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **deaktiviert**!");
                 return;
             }
+
             if (!SBState)
             {
                 await SetSoundboardState(userChannel, true);
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Das Soundboard ist nun **aktiviert**!");
-                return;
             }
         }
     }
-
 
 
     [Command("vcinfo")]
@@ -1481,18 +1484,20 @@ public class TempVoiceCommands : TempVoiceHelper
         {
             channel = ctx.Member?.VoiceState?.Channel;
         }
+
         var userchannel = (long?)channel?.Id;
         var db_channels = await GetAllChannelIDsFromDB();
         if (userchannel == null)
         {
-            await ctx.RespondAsync("<:attention:1085333468688433232> Du musst in einem Channel sein, um diesen Befehl auszuführen!");
+            await ctx.RespondAsync(
+                "<:attention:1085333468688433232> Du musst in einem Channel sein, um diesen Befehl auszuführen!");
             return;
         }
 
         if (!db_channels.Contains((long)userchannel) && userchannel != null)
         {
             await ctx.RespondAsync(
-                $"<:attention:1085333468688433232> Der Aktuelle Voice Channel ist kein Custom Channel");
+                "<:attention:1085333468688433232> Der Aktuelle Voice Channel ist kein Custom Channel");
             return;
         }
 
@@ -1533,6 +1538,7 @@ public class TempVoiceCommands : TempVoiceHelper
             {
                 hidden = false;
             }
+
             var hiddenemote = hidden ? yesemote : noemote;
             var lockedemote = locked ? yesemote : noemote;
 
@@ -1574,13 +1580,13 @@ public class TempVoiceCommands : TempVoiceHelper
             }
 
             List<string> Query = new()
-        {
-            "userid"
-        };
+            {
+                "userid"
+            };
             Dictionary<string, object> WhereCondiditons = new()
-        {
-            { "userid", (long)channelownerid }
-        };
+            {
+                { "userid", (long)channelownerid }
+            };
 
             string sessionemote = noemote;
             var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
@@ -1608,9 +1614,10 @@ public class TempVoiceCommands : TempVoiceHelper
                 .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
             var caseid = Helpers.Helpers.GenerateCaseID();
             List<DiscordButtonComponent> buttons = new(2)
-        {
-            new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}", "Info über Zugelassene oder Blockierte User (Nur Channelowner)"),
-        };
+            {
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}",
+                    "Info über Zugelassene oder Blockierte User (Nur Channelowner)")
+            };
 
 
             var mb = new DiscordMessageBuilder()
@@ -1633,7 +1640,6 @@ public class TempVoiceCommands : TempVoiceHelper
                 var buserow = channel.PermissionOverwrites
                     .Where(x => x.Type == OverwriteType.Member)
                     .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
-
                     .ToList();
 
                 var puserow = channel.PermissionOverwrites
@@ -1667,19 +1673,19 @@ public class TempVoiceCommands : TempVoiceHelper
                 var emb = new DiscordEmbedBuilder().WithDescription("__Zugelassene User:__\n" +
                                                                     $"{permitlist}\n\n" +
                                                                     "__Blockierte User:__\n" +
-                                                                    $"{blocklist}").WithColor(BotConfig.GetEmbedColor()).WithTitle("Kanal Permit und Block Liste").WithFooter($"{ctx.User.UsernameWithDiscriminator}");
-                var mbb = new DiscordInteractionResponseBuilder()
+                                                                    $"{blocklist}").WithColor(BotConfig.GetEmbedColor())
+                    .WithTitle("Kanal Permit und Block Liste").WithFooter($"{ctx.User.UsernameWithDiscriminator}");
+                var mbb = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true
                 }.AddEmbed(emb);
 
-                await results.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, mbb);
+                await results.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    mbb);
                 await msg.ModifyAsync(omb);
-                return;
             }
         }
     }
-
 
 
     [Group("channelmod")]
@@ -1709,10 +1715,12 @@ public class TempVoiceCommands : TempVoiceHelper
                     await ctx.RespondAsync("Dieser User ist bereits Kanalmoderator");
                     return;
                 }
+
                 var currentmods = await RetrieveChannelMods(userChannel);
                 currentmods.Add(user.Id);
                 await UpdateChannelMods(userChannel, currentmods);
-                await ctx.RespondAsync($"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator hinzugefügt.");
+                await ctx.RespondAsync(
+                    $"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator hinzugefügt.");
             }
         }
 
@@ -1736,6 +1744,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     await ctx.RespondAsync("Dieser Kanal hat keine Kanalmoderatoren.");
                     return;
                 }
+
                 await ResetChannelMods(userChannel);
                 await ctx.RespondAsync("Die Kanalmoderatoren wurden zurückgesetzt.");
             }
@@ -1764,10 +1773,12 @@ public class TempVoiceCommands : TempVoiceHelper
                     await ctx.RespondAsync("Dieser User ist kein Kanalmoderator");
                     return;
                 }
+
                 var currentmods = await RetrieveChannelMods(userChannel);
                 currentmods.Remove(user.Id);
                 await UpdateChannelMods(userChannel, currentmods);
-                await ctx.RespondAsync($"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator entfernt.");
+                await ctx.RespondAsync(
+                    $"Der User ``{user.UsernameWithDiscriminator}`` ``{user.Id}`` wurde als Kanalmoderator entfernt.");
             }
         }
 
@@ -1793,6 +1804,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     await ctx.RespondAsync("Dieser Kanal hat keine Kanalmoderatoren.");
                     return;
                 }
+
                 var currentmods = await RetrieveChannelMods(userChannel);
                 string modlist = string.Empty;
                 foreach (var mod in currentmods)
@@ -1800,8 +1812,11 @@ public class TempVoiceCommands : TempVoiceHelper
                     var member = await ctx.Guild.GetMemberAsync(mod);
                     modlist += $"{member.UsernameWithDiscriminator} ``({member.Id})``\n";
                 }
-                var emb = new DiscordEmbedBuilder().WithDescription(modlist).WithColor(BotConfig.GetEmbedColor()).WithTitle("Kanalmoderatoren").WithFooter($"{ctx.User.UsernameWithDiscriminator} | {userChannel.Name}");
-                await ctx.RespondAsync(embed: emb);
+
+                var emb = new DiscordEmbedBuilder().WithDescription(modlist).WithColor(BotConfig.GetEmbedColor())
+                    .WithTitle("Kanalmoderatoren")
+                    .WithFooter($"{ctx.User.UsernameWithDiscriminator} | {userChannel.Name}");
+                await ctx.RespondAsync(emb);
             }
         }
     }
@@ -1842,7 +1857,8 @@ public class TempVoiceCommands : TempVoiceHelper
                         { "userid", (long)ctx.User.Id }
                     };
                     bool hasSession = false;
-                    var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
+                    var usersession =
+                        await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
                     foreach (var user in usersession)
                     {
                         hasSession = true;
@@ -1889,7 +1905,6 @@ public class TempVoiceCommands : TempVoiceHelper
                     var buserow = userChannel.PermissionOverwrites
                         .Where(x => x.Type == OverwriteType.Member)
                         .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
-
                         .ToList();
 
                     var puserow = userChannel.PermissionOverwrites
@@ -1946,7 +1961,8 @@ public class TempVoiceCommands : TempVoiceHelper
                     { "userid", (long)ctx.User.Id }
                 };
                 bool hasSession = false;
-                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
+                var usersession =
+                    await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
                 foreach (var user in usersession)
                 {
                     hasSession = true;
@@ -1992,7 +2008,8 @@ public class TempVoiceCommands : TempVoiceHelper
                     { "userid", (long)ctx.User.Id }
                 };
                 bool hasSession = false;
-                var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
+                var usersession =
+                    await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
                 foreach (var user in usersession)
                 {
                     hasSession = true;
@@ -2015,7 +2032,8 @@ public class TempVoiceCommands : TempVoiceHelper
                     { "userid", (long)ctx.User.Id }
                 };
 
-                var session = await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, WhereCondiditons);
+                var session =
+                    await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, WhereCondiditons);
                 foreach (var user in session)
                 {
                     if (user["userid"].ToString() == ctx.User.Id.ToString())
@@ -2028,6 +2046,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         {
                             channellimit = "Kein Limit";
                         }
+
                         var caseid = Helpers.Helpers.GenerateCaseID();
                         string blockedusers = user["blockedusers"].ToString();
                         string permitedusers = user["permitedusers"].ToString();
@@ -2052,7 +2071,8 @@ public class TempVoiceCommands : TempVoiceHelper
                         var mb = new DiscordMessageBuilder();
                         List<DiscordButtonComponent> buttons = new(2)
                         {
-                            new DiscordButtonComponent(ButtonStyle.Secondary, $"close_msg_{caseid}", "Nachricht schließen"),
+                            new DiscordButtonComponent(ButtonStyle.Secondary, $"close_msg_{caseid}",
+                                "Nachricht schließen")
                         };
                         mb.WithEmbed(ebb);
                         mb.AddComponents(buttons);
@@ -2061,7 +2081,7 @@ public class TempVoiceCommands : TempVoiceHelper
                         msg = await msg.ModifyAsync(mb);
                         var interactiviy = ctx.Client.GetInteractivity();
                         var response = await interactiviy.WaitForButtonAsync(msg, ctx.User,
-                                                       TimeSpan.FromMinutes(5));
+                            TimeSpan.FromMinutes(5));
                         if (response.TimedOut)
                         {
                             await msg.ModifyAsync(nmb);
@@ -2079,7 +2099,6 @@ public class TempVoiceCommands : TempVoiceHelper
                                 // ignored
                             }
                         }
-
                     }
                 }
             });
@@ -2095,7 +2114,6 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
-
             var Interaction = e.Interaction;
             var PanelMsgId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelMessageID"]);
             var PanelMsgChannelId = ulong.Parse(BotConfig.GetConfig()["TempVC"]["VCPanelChannelID"]);
@@ -2233,35 +2251,35 @@ public class TempVoicePanel : TempVoiceHelper
     {
         List<DiscordButtonComponent> buttons = new()
         {
-            new(ButtonStyle.Secondary, "channel_rename",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_rename",
                 emoji: new DiscordComponentEmoji(1085333479732035664)),
-            new(ButtonStyle.Secondary, "channel_limit",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_limit",
                 emoji: new DiscordComponentEmoji(1085333471838343228)),
-            new(ButtonStyle.Secondary, "channel_lock",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_lock",
                 emoji: new DiscordComponentEmoji(1085333475625795605)),
-            new(ButtonStyle.Secondary, "unlock_lock",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "unlock_lock",
                 emoji: new DiscordComponentEmoji(1085518424790286346)),
-            new(ButtonStyle.Secondary, "channel_invite",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_invite",
                 emoji: new DiscordComponentEmoji(1085333458840203314)),
-            new(ButtonStyle.Secondary, "channel_delete",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_delete",
                 emoji: new DiscordComponentEmoji(1085333454713004182)),
-            new(ButtonStyle.Secondary, "channel_hide",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_hide",
                 emoji: new DiscordComponentEmoji(1085333456487206973)),
-            new(ButtonStyle.Secondary, "channel_show",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_show",
                 emoji: new DiscordComponentEmoji(1085333489416671242)),
-            new(ButtonStyle.Secondary, "channel_permit",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_permit",
                 emoji: new DiscordComponentEmoji(1085333477240615094)),
-            new(ButtonStyle.Secondary, "channel_unpermit",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_unpermit",
                 emoji: new DiscordComponentEmoji(1085333494105919560)),
-            new(ButtonStyle.Secondary, "channel_claim",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_claim",
                 emoji: new DiscordComponentEmoji(1085333451571466301)),
-            new(ButtonStyle.Secondary, "channel_transfer",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_transfer",
                 emoji: new DiscordComponentEmoji(1085333484731629578)),
-            new(ButtonStyle.Secondary, "channel_kick",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_kick",
                 emoji: new DiscordComponentEmoji(1085333460366925914)),
-            new(ButtonStyle.Secondary, "channel_ban",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_ban",
                 emoji: new DiscordComponentEmoji(1085333473893556324)),
-            new(ButtonStyle.Secondary, "channel_unban",
+            new DiscordButtonComponent(ButtonStyle.Secondary, "channel_unban",
                 emoji: new DiscordComponentEmoji(1085333487587971102))
         };
 

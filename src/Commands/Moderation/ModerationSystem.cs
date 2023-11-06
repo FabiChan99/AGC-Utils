@@ -1,10 +1,14 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+
+#endregion
 
 namespace AGC_Management.Commands.Moderation;
 
@@ -150,8 +154,6 @@ public class ModerationSystem : BaseCommandModule
     }
 
 
-
-
     [Command("ban")]
     [Description("Bannt einen User vom Server")]
     [RequirePermissions(Permissions.BanMembers)]
@@ -161,6 +163,7 @@ public class ModerationSystem : BaseCommandModule
         {
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
@@ -310,6 +313,7 @@ public class ModerationSystem : BaseCommandModule
         {
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
@@ -484,6 +488,7 @@ public class ModerationSystem : BaseCommandModule
         {
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
@@ -764,6 +769,7 @@ public class ModerationSystem : BaseCommandModule
         {
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
