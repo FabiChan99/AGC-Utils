@@ -54,7 +54,7 @@ internal static class DiscordExtension
                     : new DiscordOverwriteBuilder(x.GetMemberAsync().Result) { Allowed = x.Allowed, Denied = x.Denied })
             .ToList();
     }
-
+    
 
     internal static async Task<DiscordUser?> TryGetUserAsync(this DiscordClient client, ulong userId, bool fetch = true)
     {
@@ -68,6 +68,17 @@ internal static class DiscordExtension
         }
     }
 
+    /// <summary>
+    ///     Truncates a string to a maximum length.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="maxLength"></param>
+    /// <returns>string</returns>
+    public static string Truncate(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value; // Return original value if it's null or empty
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+    }
 
     internal static async Task<DiscordChannel?> TryGetChannelAsync(this DiscordClient client, ulong id,
         bool fetch = true)
