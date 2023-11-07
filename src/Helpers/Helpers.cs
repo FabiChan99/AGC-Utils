@@ -1,6 +1,10 @@
+#region
+
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Helpers;
 
@@ -43,12 +47,14 @@ public static class Helpers
             var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
             var DbName = BotConfig.GetConfig()[dbConfigSection]["Ticket_Database"];
 
-            await using var con = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
+            await using var con =
+                new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
             await con.OpenAsync();
-            await using var cmd = new NpgsqlCommand($"SELECT COUNT(*) FROM ticketstore WHERE ticket_owner = {userid}", con);
+            await using var cmd =
+                new NpgsqlCommand($"SELECT COUNT(*) FROM ticketstore WHERE ticket_owner = {userid}", con);
             var result = await cmd.ExecuteScalarAsync();
             await con.CloseAsync();
-            return (long) result;
+            return (long)result;
         }
         catch (Exception e)
         {
@@ -57,7 +63,8 @@ public static class Helpers
         }
     }
 
-    public static IEnumerable<DiscordOverwriteBuilder> MergeOverwrites(DiscordChannel userChannel, List<DiscordOverwriteBuilder> overwrites,
+    public static IEnumerable<DiscordOverwriteBuilder> MergeOverwrites(DiscordChannel userChannel,
+        List<DiscordOverwriteBuilder> overwrites,
         out IEnumerable<DiscordOverwriteBuilder> targetOverwrites)
     {
         targetOverwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder());
@@ -70,7 +77,6 @@ public static class Helpers
         var newOverwrites = targetOverwrites.ToList();
         return newOverwrites;
     }
-
 
 
     public static string GenerateCaseID()

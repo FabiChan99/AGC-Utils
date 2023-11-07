@@ -1,4 +1,7 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using System.Net.Http.Headers;
+using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
@@ -10,13 +13,13 @@ using DisCatSharp.Interactivity.Extensions;
 using Newtonsoft.Json;
 using Npgsql;
 using RestSharp;
-using System.Net.Http.Headers;
+
+#endregion
 
 namespace AGC_Management.Commands.Moderation;
 
 public class ExtendedModerationSystem : ModerationSystem
 {
-
     private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
@@ -33,7 +36,7 @@ public class ExtendedModerationSystem : ModerationSystem
             request.AddParameter("reqtype", "fileupload");
             request.AddHeader("Content-Type", "multipart/form-data");
             request.AddFile("fileToUpload", bytesImage, att.FileName);
-            
+
 
             var response = await client.ExecuteAsync(request);
             urls += $" {response.Content}";
@@ -42,7 +45,6 @@ public class ExtendedModerationSystem : ModerationSystem
         await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
         return urls;
     }
-
 
 
     private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
@@ -94,11 +96,12 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             isMember = false;
         }
+
         string ticketcount = "Tickets konnten nicht abgerufen werden.";
         var ticketcount_c = await Helpers.Helpers.GetTicketCount(user.Id);
         if (ticketcount_c != null)
             ticketcount = ticketcount_c.ToString();
-        
+
 
         string bot_indicator = user.IsBot ? "<:bot:1012035481573265458>" : "";
         string user_status = member?.Presence?.Status.ToString() ?? "Offline";
@@ -277,6 +280,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{pwarn["caseid"]}``] {Formatter.Timestamp(Converter.ConvertUnixTimestamp(pwarn["datum"]), TimestampFormat.RelativeTime)} - {pwarn["description"]}";
                 permawarnResults.Add(FlagStr);
             }
+
             string mcicon = "";
             if (ctx.Guild.Id == 750365461945778209)
             {
@@ -554,14 +558,12 @@ public class ExtendedModerationSystem : ModerationSystem
         }
 
 
-
-
         Dictionary<string, object> data = new()
         {
             { "userid", (long)user.Id },
             { "punisherid", (long)ctx.User.Id },
             { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-            { "description", reason+urls },
+            { "description", reason + urls },
             { "caseid", caseid }
         };
         await DatabaseService.InsertDataIntoTable("flags", data);
@@ -581,7 +583,6 @@ public class ExtendedModerationSystem : ModerationSystem
         foreach (var result in results) flaglist.Add(result);
 
 
-
         var flagcount = flaglist.Count;
 
         var embed = new DiscordEmbedBuilder()
@@ -592,7 +593,6 @@ public class ExtendedModerationSystem : ModerationSystem
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl).Build();
         await ctx.RespondAsync(embed);
     }
-
 
 
     [Command("multiflag")]
@@ -640,6 +640,7 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             urls = await UploadToCatBox(ctx, imgAttachments);
         }
+
         var busers_formatted = string.Join("\n", users_to_flag.Select(buser => buser.UsernameWithDiscriminator));
         var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -725,7 +726,7 @@ public class ExtendedModerationSystem : ModerationSystem
                     { "userid", (long)user.Id },
                     { "punisherid", (long)ctx.User.Id },
                     { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-                    { "description", reason+urls },
+                    { "description", reason + urls },
                     { "caseid", caseid_ }
                 };
                 await DatabaseService.InsertDataIntoTable("flags", data);
@@ -785,7 +786,8 @@ public class ExtendedModerationSystem : ModerationSystem
 
                 DiscordEmbed ue = new DiscordEmbedBuilder()
                     .WithTitle("Cooldown Entfernt").WithDescription(
-                        $"{user.UsernameWithDiscriminator} kann nun wieder eine Vorstellung posten.").WithColor(BotConfig.GetEmbedColor()).Build();
+                        $"{user.UsernameWithDiscriminator} kann nun wieder eine Vorstellung posten.")
+                    .WithColor(BotConfig.GetEmbedColor()).Build();
                 await ctx.RespondAsync(ue);
             }
         }
@@ -802,6 +804,7 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             reason = await ModerationHelper.WarnReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
@@ -967,6 +970,7 @@ public class ExtendedModerationSystem : ModerationSystem
         {
             reason = await ModerationHelper.WarnReasonSelector(ctx);
         }
+
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
@@ -1119,13 +1123,11 @@ public class ExtendedModerationSystem : ModerationSystem
             await confirm.ModifyAsync(embedwithoutbuttons);
         }
     }
-
 }
 
 [Group("case")]
 public class CaseManagement : BaseCommandModule
 {
-
     private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
@@ -1367,6 +1369,7 @@ public class CaseManagement : BaseCommandModule
             {
                 urls = await UploadToCatBox(ctx, imgAttachments);
             }
+
             if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {

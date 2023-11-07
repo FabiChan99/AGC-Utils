@@ -1,15 +1,21 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using System.Text.RegularExpressions;
+using AGC_Management.Helpers;
 using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
-using System.Text.RegularExpressions;
+
+#endregion
 
 namespace AGC_Management;
 
 internal static class DiscordExtension
 {
-    private static readonly Regex InviteRegex = new Regex(RegexPatterns.INVITE, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex InviteRegex =
+        new(RegexPatterns.INVITE, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     internal static List<DiscordOverwriteBuilder> ConvertToBuilderWithNewOverwrites(
         this IReadOnlyList<DiscordOverwrite> overwrites, DiscordMember member, Permissions allowed, Permissions denied)
     {
@@ -63,7 +69,8 @@ internal static class DiscordExtension
     }
 
 
-    internal static async Task<DiscordChannel?> TryGetChannelAsync(this DiscordClient client, ulong id, bool fetch = true)
+    internal static async Task<DiscordChannel?> TryGetChannelAsync(this DiscordClient client, ulong id,
+        bool fetch = true)
     {
         try
         {
@@ -97,6 +104,7 @@ internal static class DiscordExtension
 
         return invites;
     }
+
     public static List<string> GetInvites(this DiscordMessage message)
     {
         var matches = InviteRegex.Matches(message.Content);
@@ -114,5 +122,4 @@ internal static class DiscordExtension
 
         return invites;
     }
-
 }

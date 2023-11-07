@@ -1,6 +1,10 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
+
+#endregion
 
 namespace AGC_Management.Commands.Fun;
 
@@ -11,6 +15,7 @@ public class AGCEasterEggs : BaseCommandModule
     public async Task Koni(CommandContext ctx)
     {
         await ctx.Channel.SendMessageAsync("POV <@244455692881100801>:");
-        await ctx.Channel.SendMessageAsync("https://cdn.discordapp.com/emojis/1116433698590556301.gif?size=256&quality=lossless");
+        await ctx.Channel.SendMessageAsync(
+            "https://cdn.discordapp.com/emojis/1116433698590556301.gif?size=256&quality=lossless");
     }
 }

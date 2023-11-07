@@ -1,8 +1,12 @@
-﻿using DisCatSharp;
+﻿#region
+
+using System.Text.RegularExpressions;
+using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.EventArgs;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
+
+#endregion
 
 namespace AGC_Management.Commands.AutoQuoting;
 
@@ -12,7 +16,8 @@ public class AutoQuoteHelper
     {
         List<DiscordMessage> list = new();
         string guildId = guild.Id.ToString();
-        string pattern = @"(?:https?://)?(?:\w+\.)?discord(?:app)?\.com/channels/(?<guild>\d+)/(?<channel>\d+)/(?<message>\d+)(?:\?\S*)?(?:#\S*)?";
+        string pattern =
+            @"(?:https?://)?(?:\w+\.)?discord(?:app)?\.com/channels/(?<guild>\d+)/(?<channel>\d+)/(?<message>\d+)(?:\?\S*)?(?:#\S*)?";
         Regex MSG_URL_PATTERN = new(pattern, RegexOptions.IgnoreCase);
         Match m = MSG_URL_PATTERN.Match(content);
 
@@ -37,14 +42,15 @@ public class AutoQuoteHelper
                     }
                 }
             }
+
             m = m.NextMatch();
         }
+
         return list;
     }
 
     public static async Task ProcessMessageWithLinks(DiscordClient client, MessageCreateEventArgs args)
     {
-
         var messages = await GetMessagesWithMessageLinks(args.Guild, args.Message.Content);
 
         if (messages.Count > 0)
@@ -85,6 +91,7 @@ public class AutoQuoteHelper
             {
                 eb.WithDescription("\"" + quotedMessage.Content + "\"");
             }
+
             if (quotedMessage.Attachments.Count > 0)
             {
                 eb.WithImageUrl(quotedMessage.Attachments[0].Url);
@@ -114,10 +121,10 @@ public class AutoQuoteHelper
             }
         }
 
-        eb.WithAuthor($"Gesendet von {quotedMessage.Author.UsernameWithDiscriminator}", iconUrl: quotedMessage.Author.AvatarUrl);
+        eb.WithAuthor($"Gesendet von {quotedMessage.Author.UsernameWithDiscriminator}",
+            iconUrl: quotedMessage.Author.AvatarUrl);
         eb.WithColor(DiscordColor.White);
 
         return new DiscordMessageBuilder().WithEmbed(eb.Build());
     }
-
 }

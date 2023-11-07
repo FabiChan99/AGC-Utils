@@ -1,8 +1,16 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿#region
+
+using System.Reflection;
+using AGC_Management.Helpers;
+using AGC_Management.LavaManager;
+using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Services.Logging;
 using AGC_Management.Tasks;
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.Attributes;
+using DisCatSharp.ApplicationCommands.EventArgs;
+using DisCatSharp.ApplicationCommands.Exceptions;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Entities;
@@ -11,11 +19,12 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
+using LavaSharp.LavaManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using System.Reflection;
-using DisCatSharp.CommandsNext.Attributes;
+
+#endregion
 
 namespace AGC_Management;
 
@@ -103,6 +112,7 @@ internal class Program : BaseCommandModule
 
 
         DatabaseService.OpenConnection();
+        TicketDatabaseService.OpenConnection();
         var discord = new DiscordClient(new DiscordConfiguration
         {
             Token = DcApiToken,
@@ -133,11 +143,14 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider,
+            ServiceProvider = serviceProvider
         });
+        appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
+        
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
+        await LavalinkConnectionManager.ConnectAsync(discord);
         CurrentApplicationData.Client = discord;
 
         await StartTasks(discord);
@@ -157,6 +170,27 @@ internal class Program : BaseCommandModule
     }
 
 
+    private static async Task Discord_SlashCommandErrored(ApplicationCommandsExtension sender,
+        SlashCommandErrorEventArgs e)
+    {
+        if (e.Exception is SlashExecutionChecksFailedException)
+        {
+            var ex = (SlashExecutionChecksFailedException)e.Exception;
+            if (ex.FailedChecks.Any(x => x is ApplicationCommandRequireUserPermissionsAttribute))
+            {
+                var embed = EmbedGenerator.GetErrorEmbed(
+                    "You don't have the required permissions to execute this command.");
+                await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = true;
+        }
+    }
+    
+    
     private static Task<int> GetPrefix(DiscordMessage message)
     {
         return Task.Run(() =>
@@ -193,7 +227,7 @@ internal class Program : BaseCommandModule
         if (e.Exception is ArgumentException)
         {
             DiscordEmbedBuilder eb;
-            eb = new DiscordEmbedBuilder()
+            eb = new DiscordEmbedBuilder
             {
                 Title = "Fehler | BadArgumentException",
 
@@ -202,7 +236,7 @@ internal class Program : BaseCommandModule
             eb.WithDescription($"Fehlerhafte Argumente.\n" +
                                $"**Stelle sicher dass alle Argumente richtig angegeben sind!**");
             eb.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
-            await e.Context.RespondAsync(embed: eb, content:e.Context.User.Mention);
+            await e.Context.RespondAsync(embed: eb, content: e.Context.User.Mention);
             return;
         }
 
@@ -210,19 +244,16 @@ internal class Program : BaseCommandModule
         {
             return;
         }
-        else
+
+        var embed = new DiscordEmbedBuilder
         {
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = "Fehler | CommandErrored",
-                Color = new DiscordColor("#FF0000")
-            };
-            embed.WithDescription($"Es ist ein Fehler aufgetreten.\n" +
-                                                                   $"**Fehler: {e.Exception.Message}**");
-            embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
-            await e.Context.RespondAsync(embed: embed, content:e.Context.User.Mention);
-        }
-        return;
+            Title = "Fehler | CommandErrored",
+            Color = new DiscordColor("#FF0000")
+        };
+        embed.WithDescription($"Es ist ein Fehler aufgetreten.\n" +
+                              $"**Fehler: {e.Exception.Message}**");
+        embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
+        await e.Context.RespondAsync(embed: embed, content: e.Context.User.Mention);
     }
 }
 

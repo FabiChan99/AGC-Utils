@@ -1,4 +1,6 @@
-﻿using AGC_Management.Services.DatabaseHandler;
+﻿#region
+
+using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
@@ -7,6 +9,8 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Helpers.TempVoice;
 
@@ -51,7 +55,6 @@ public class TempVoiceHelper : BaseCommandModule
                 { "channelid", ((long)cid, "=") }
             };
         await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
-        return;
     }
 
     protected static async Task<bool> NoChannel(CommandContext ctx)
@@ -86,6 +89,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 return $"{member.Nickname} ({member.Username})";
             }
+
             return $"{member.DisplayName} ({member.Username})";
         }
 
@@ -93,6 +97,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             return $"{member.Nickname} ({member.UsernameWithDiscriminator})";
         }
+
         return $"{member.UsernameWithDiscriminator}";
     }
 
@@ -107,6 +112,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             return false;
         }
+
         List<string> Query = new()
         {
             "channelmods"
@@ -116,7 +122,7 @@ public class TempVoiceHelper : BaseCommandModule
             { "channelid", (long)channel.Id }
         };
         List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
-                       Query, QueryConditions);
+            Query, QueryConditions);
         bool isMod = false;
         foreach (var result in QueryResult)
         {
@@ -125,6 +131,7 @@ public class TempVoiceHelper : BaseCommandModule
                 isMod = true;
             }
         }
+
         return isMod;
     }
 
@@ -138,14 +145,16 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "channelid", (long)channel.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
+        List<Dictionary<string, object>> QueryResult =
+            await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
 
         List<ulong> channelMods = new();
         foreach (var result in QueryResult)
         {
             try
             {
-                string[] mods = result["channelmods"].ToString().Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] mods = result["channelmods"].ToString()
+                    .Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var mod in mods)
                 {
                     if (ulong.TryParse(mod, out ulong parsedMod))
@@ -159,6 +168,7 @@ public class TempVoiceHelper : BaseCommandModule
                 channelMods.Clear();
             }
         }
+
         return channelMods;
     }
 
@@ -169,6 +179,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             return true;
         }
+
         return false;
     }
 
@@ -185,7 +196,6 @@ public class TempVoiceHelper : BaseCommandModule
                 int affected = await command.ExecuteNonQueryAsync();
             }
         }
-        return;
     }
 
     protected static async Task UpdateChannelMods(DiscordChannel channel, List<ulong> channelMods)
@@ -201,10 +211,7 @@ public class TempVoiceHelper : BaseCommandModule
                 int affected = await command.ExecuteNonQueryAsync();
             }
         }
-        return;
     }
-
-
 
 
     private static async Task<List<long>> GetChannelIDFromDB(DiscordInteraction interaction)
@@ -925,27 +932,25 @@ public class TempVoiceHelper : BaseCommandModule
             var resp = await interaction.GetOriginalResponseAsync();
 
 
-
             var result = await interactivity.WaitForButtonAsync(resp, TimeSpan.FromSeconds(60));
             if (result.TimedOut)
             {
                 await interaction.EditOriginalResponseAsync(
                     new DiscordWebhookBuilder
                     {
-                        Content = $"<:attention:1085333468688433232> Du hast nicht rechtzeitig reagiert."
+                        Content = "<:attention:1085333468688433232> Du hast nicht rechtzeitig reagiert."
                     });
                 return;
             }
 
             if (result.Result.Id == $"chdel_accept_{caseid}")
             {
-
                 var cid = channel.Id;
                 await channel.DeleteAsync();
                 await interaction.EditOriginalResponseAsync(
                     new DiscordWebhookBuilder
                     {
-                        Content = $"<:success:1085333481820790944> Dein Channel wurde gelöscht."
+                        Content = "<:success:1085333481820790944> Dein Channel wurde gelöscht."
                     });
                 await RemoveChannelFromDB(cid);
                 return;
@@ -956,11 +961,9 @@ public class TempVoiceHelper : BaseCommandModule
                 await interaction.EditOriginalResponseAsync(
                     new DiscordWebhookBuilder
                     {
-                        Content = $"<:attention:1085333468688433232> Vorgang abgebrochen."
+                        Content = "<:attention:1085333468688433232> Vorgang abgebrochen."
                     });
-                return;
             }
-
         }
     }
 
@@ -984,8 +987,8 @@ public class TempVoiceHelper : BaseCommandModule
             var interactivity = client.GetInteractivity();
             var selector = new List<DiscordComponent>
             {
-                new DiscordUserSelectComponent("Wähle zuzulassende Mitglieder aus.", customId: "permit_selector",
-                    minOptions: 1, maxOptions: 8),
+                new DiscordUserSelectComponent("Wähle zuzulassende Mitglieder aus.", "permit_selector",
+                    1, 8)
             };
             string message =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
@@ -994,7 +997,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 List<DiscordComponent> button = new()
                 {
-                    new DiscordButtonComponent(style: ButtonStyle.Secondary, $"role_permit_button",
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "role_permit_button",
                         "Levelbeschränkung festlegen")
                 };
 
@@ -1007,17 +1010,16 @@ public class TempVoiceHelper : BaseCommandModule
                 List<DiscordActionRowComponent> rowComponents = new()
                 {
                     new DiscordActionRowComponent(selector),
-                    new DiscordActionRowComponent(button),
+                    new DiscordActionRowComponent(button)
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     ib.AddComponents(rowComponents));
-                return;
             }
             else
             {
                 List<DiscordComponent> button = new()
                 {
-                    new DiscordButtonComponent(style: ButtonStyle.Secondary, $"role_permit_button",
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "role_permit_button",
                         "Levelbeschränkung festlegen")
                 };
 
@@ -1030,7 +1032,7 @@ public class TempVoiceHelper : BaseCommandModule
                 List<DiscordActionRowComponent> rowComponents = new()
                 {
                     new DiscordActionRowComponent(selector),
-                    new DiscordActionRowComponent(button),
+                    new DiscordActionRowComponent(button)
                 };
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     ib.AddComponents(rowComponents));
@@ -1095,7 +1097,6 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **permittet**."
                 });
-            return;
         }
     }
 
@@ -1127,13 +1128,12 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (!ch_locked)
         {
-
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                 new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content =
-                        $"<:attention:1085333468688433232> Der Channel ist **nicht gesperrt** und eine Levelbegrenzung würde __keinen Effekt__ haben. Bitte **sperre** den Channel zuerst!"
+                        "<:attention:1085333468688433232> Der Channel ist **nicht gesperrt** und eine Levelbegrenzung würde __keinen Effekt__ haben. Bitte **sperre** den Channel zuerst!"
                 });
             return;
         }
@@ -1155,15 +1155,14 @@ public class TempVoiceHelper : BaseCommandModule
                             role_permitted = true;
                             break;
                         }
+
                         if (temp_ow?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
                         {
                             role_permitted = false;
                             break;
                         }
-
                     }
                 }
-
             }
 
             if (role_permitted)
@@ -1197,7 +1196,6 @@ public class TempVoiceHelper : BaseCommandModule
             };
             sbuilder.AddComponents(selectComponent);
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, sbuilder);
-            return;
         }
     }
 
@@ -1231,7 +1229,6 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:success:1085333481820790944> Erfolg! Es können nur noch Mitglieder den Kanal betreten, die die Rolle ``{role.Name}`` haben."
                 });
-            return;
         }
     }
 
@@ -1268,6 +1265,7 @@ public class TempVoiceHelper : BaseCommandModule
                     {
                         continue;
                     }
+
                     permited_users.Add(userid);
                 }
             }
@@ -1303,7 +1301,7 @@ public class TempVoiceHelper : BaseCommandModule
             if (allowed_users == 0)
             {
                 string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -1313,7 +1311,7 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     List<DiscordButtonComponent> buttons = new()
                     {
-                        new DiscordButtonComponent(ButtonStyle.Primary, $"unpermit_levelrole",
+                        new DiscordButtonComponent(ButtonStyle.Primary, "unpermit_levelrole",
                             $"Entferne zugelassene Levelrolle ({roleName})")
                     };
                     sbuilder.AddComponents(buttons);
@@ -1327,7 +1325,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 string content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -1356,14 +1354,15 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 List<DiscordButtonComponent> buttons = new()
                 {
-                    new DiscordButtonComponent(ButtonStyle.Danger, $"unpermit_levelrole",
+                    new DiscordButtonComponent(ButtonStyle.Danger, "unpermit_levelrole",
                         $"Entferne zugelassene Levelrolle ({roleName})")
                 };
                 rowComponents.Add(new DiscordActionRowComponent(buttons));
             }
 
-            string econtent = "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
-            var ssbuilder = new DiscordInteractionResponseBuilder()
+            string econtent =
+                "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
+            var ssbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
                 Content = econtent
@@ -1411,14 +1410,13 @@ public class TempVoiceHelper : BaseCommandModule
             overwrites = overwrites.Merge(role_, Permissions.None, Permissions.None,
                 Permissions.UseVoice | Permissions.AccessChannels);
             await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
-            string content = $"<:success:1085333481820790944> Erfolg! Die Levelbeschränkung wurde **aufgehoben**.";
-            var sbuilder = new DiscordInteractionResponseBuilder()
+            string content = "<:success:1085333481820790944> Erfolg! Die Levelbeschränkung wurde **aufgehoben**.";
+            var sbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
                 Content = content
             };
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, sbuilder);
-
         }
     }
 
@@ -1478,7 +1476,6 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **unpermitted**."
                 });
-            return;
         }
     }
 
@@ -1557,7 +1554,7 @@ public class TempVoiceHelper : BaseCommandModule
                 new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
-                    Content = $"<:success:1085333481820790944> Erfolg! Du bist jetzt der Channelowner."
+                    Content = "<:success:1085333481820790944> Erfolg! Du bist jetzt der Channelowner."
                 });
             return;
         }
@@ -1571,7 +1568,6 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:attention:1085333468688433232> Dieser Channel ist nicht claimbar. Der Channelowner {orig_owner.UsernameWithDiscriminator} {orig_owner.Mention} befindet sich noch im Channel"
                 });
-            return;
         }
     }
 
@@ -1620,7 +1616,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 string content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -1631,7 +1627,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             var selector = new List<DiscordComponent>
             {
-                new DiscordStringSelectComponent("Wähle den Zieluser aus", options, customId: "transfer_selector",
+                new DiscordStringSelectComponent("Wähle den Zieluser aus", options, "transfer_selector",
                     maxOptions: 1)
             };
             List<DiscordActionRowComponent> rowComponents = new()
@@ -1640,14 +1636,13 @@ public class TempVoiceHelper : BaseCommandModule
             };
             string econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
-            var ssbuilder = new DiscordInteractionResponseBuilder()
+            var ssbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
                 Content = econtent
             };
             ssbuilder.AddComponents(rowComponents);
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ssbuilder);
-            return;
         }
     }
 
@@ -1710,11 +1705,8 @@ public class TempVoiceHelper : BaseCommandModule
                         IsEphemeral = true,
                         Content = $"<:attention:1085333468688433232> {new_owner.Mention} ist __nicht__ im Kanal!"
                     });
-                return;
             }
-
         }
-
     }
 
     protected static async Task PanelChannelKick(DiscordInteraction interaction)
@@ -1741,7 +1733,6 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     ChUsers.Add(uid);
                 }
-
             }
 
             var options = new List<DiscordStringSelectComponentOption>();
@@ -1769,7 +1760,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 string content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder im Channel! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}vckick`` Command.";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -1780,7 +1771,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             var selector = new List<DiscordComponent>
             {
-                new DiscordStringSelectComponent("Wähle den Zieluser aus", options, customId: "kick_selector",
+                new DiscordStringSelectComponent("Wähle den Zieluser aus", options, "kick_selector",
                     maxOptions: 1)
             };
             List<DiscordActionRowComponent> rowComponents = new()
@@ -1789,14 +1780,13 @@ public class TempVoiceHelper : BaseCommandModule
             };
             string econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
-            var ssbuilder = new DiscordInteractionResponseBuilder()
+            var ssbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
                 Content = econtent
             };
             ssbuilder.AddComponents(rowComponents);
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, ssbuilder);
-            return;
         }
     }
 
@@ -1824,16 +1814,16 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 await kickuser.DisconnectFromVoiceAsync();
                 await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
-                                       new DiscordInteractionResponseBuilder
-                                       {
-                                           IsEphemeral = true,
-                                           Content = $"<:success:1085333481820790944> {kickuser.Mention} wurde erfolgreich aus dem Channel gekickt."
-                                       });
-                return;
+                    new DiscordInteractionResponseBuilder
+                    {
+                        IsEphemeral = true,
+                        Content =
+                            $"<:success:1085333481820790944> {kickuser.Mention} wurde erfolgreich aus dem Channel gekickt."
+                    });
             }
-
         }
     }
+
     protected static async Task PanelChannelBlock(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
@@ -1852,8 +1842,8 @@ public class TempVoiceHelper : BaseCommandModule
             var channel = interaction.Guild.GetChannel(userChannel.Id);
             var selector = new List<DiscordComponent>
             {
-                new DiscordUserSelectComponent("Wähle zu blockierende Mitglieder aus.", customId: "ban_selector",
-                    minOptions: 1, maxOptions: 8),
+                new DiscordUserSelectComponent("Wähle zu blockierende Mitglieder aus.", "ban_selector",
+                    1, 8)
             };
             string message =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
@@ -1866,14 +1856,15 @@ public class TempVoiceHelper : BaseCommandModule
             };
             List<DiscordActionRowComponent> rowComponents = new()
             {
-                new DiscordActionRowComponent(selector)};
+                new DiscordActionRowComponent(selector)
+            };
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 ib.AddComponents(rowComponents));
-
         }
     }
+
     protected static async Task PanelChannelBlockCallback(DiscordInteraction interaction, DiscordClient client,
-    ComponentInteractionCreateEventArgs e)
+        ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
@@ -1918,7 +1909,6 @@ public class TempVoiceHelper : BaseCommandModule
                     }
 
 
-
                     var user = await interaction.Guild.GetMemberAsync(id);
                     try
                     {
@@ -1931,11 +1921,13 @@ public class TempVoiceHelper : BaseCommandModule
                     }
 
                     //overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
-                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice, Permissions.AccessChannels);
+                    overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice,
+                        Permissions.AccessChannels);
                     if (userChannel.Users.Contains(user))
                     {
                         await user.DisconnectFromVoiceAsync();
                     }
+
                     usersList.Add(user);
                 }
                 catch (NotFoundException)
@@ -1952,9 +1944,9 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **blockiert**."
                 });
-            return;
         }
     }
+
     protected static async Task PanelChannelUnblock(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
@@ -2015,7 +2007,7 @@ public class TempVoiceHelper : BaseCommandModule
             if (blocked_users == 0)
             {
                 string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **blockiert**!";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -2028,7 +2020,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 string content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **blockiert**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unblock`` Command.";
-                var sbuilder = new DiscordInteractionResponseBuilder()
+                var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
                     Content = content
@@ -2054,8 +2046,9 @@ public class TempVoiceHelper : BaseCommandModule
                 new DiscordActionRowComponent(selector)
             };
 
-            string econtent = "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
-            var ssbuilder = new DiscordInteractionResponseBuilder()
+            string econtent =
+                "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
+            var ssbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
                 Content = econtent
@@ -2066,7 +2059,7 @@ public class TempVoiceHelper : BaseCommandModule
     }
 
     protected static async Task PanelChannelUnblockCallback(DiscordInteraction interaction, DiscordClient client,
-    ComponentInteractionCreateEventArgs e)
+        ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
         DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
@@ -2120,7 +2113,6 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:success:1085333481820790944> {usersList.Count} von {idlist.Count} User {(usersList.Count == 1 ? "wurde" : "wurden")} **entblockiert**."
                 });
-            return;
         }
     }
 
@@ -2138,6 +2130,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             active = false;
         }
+
         return active;
     }
 
@@ -2146,18 +2139,18 @@ public class TempVoiceHelper : BaseCommandModule
         if (state)
         {
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-            overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.UseExternalSounds | Permissions.UseSoundboard, Permissions.None);
+            overwrites = overwrites.Merge(channel.Guild.EveryoneRole,
+                Permissions.UseExternalSounds | Permissions.UseSoundboard, Permissions.None);
             await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             return;
         }
+
         if (!state)
         {
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-            overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.None, Permissions.None, Permissions.UseExternalSounds | Permissions.UseSoundboard);
+            overwrites = overwrites.Merge(channel.Guild.EveryoneRole, Permissions.None, Permissions.None,
+                Permissions.UseExternalSounds | Permissions.UseSoundboard);
             await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
         }
-
     }
-
 }
-

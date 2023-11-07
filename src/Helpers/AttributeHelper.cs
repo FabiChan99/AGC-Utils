@@ -1,8 +1,13 @@
+#region
+
+using AGC_Management.LavaManager;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
+
+#endregion
 
 namespace AGC_Management.Helpers;
 
@@ -16,6 +21,7 @@ public class RequireStaffRole : CheckBaseAttribute
         {
             return true;
         }
+
         // Check if user has staff role
         if (ctx.Member.Roles.Any(r => r.Id == RoleId))
             return true;
@@ -60,6 +66,24 @@ public class RequireVoiceChannel : CheckBaseAttribute
     }
 }
 
+public class RequireConnectedLavalink : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        // Check if lavalink is connected
+        if (LavalinkConnectionManager.LavalinkConnected) return true;
+        
+        var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Lavalink nicht verbunden!")
+            .WithDescription(
+                $"Command deaktiviert. Lavalink ist nicht verbunden. Bitte informiere den Botentwickler ``{ctx.Client.GetUserAsync(GlobalProperties.BotOwnerId).Result.UsernameWithDiscriminator}``")
+            .WithColor(DiscordColor.Red);
+        var embed = embedBuilder.Build();
+        var msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id);
+        await ctx.Channel.SendMessageAsync(msg_e);
+        return false;
+    }
+}
+
 public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
@@ -68,6 +92,7 @@ public class RequireTeamCat : CheckBaseAttribute
         {
             return true;
         }
+
         ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
         ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
         ulong modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);
@@ -108,12 +133,12 @@ public class AGCEasterEggsEnabled : CheckBaseAttribute
         {
             if (bool.TrueString == BotConfig.GetConfig()["ServerConfig"]["EasterEggsEnabled"] &&
                 ctx.Guild.Id == 750365461945778209) return true;
-
         }
         catch (Exception)
         {
             // ignored
         }
+
         return false;
     }
 }

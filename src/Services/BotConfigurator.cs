@@ -1,7 +1,11 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using AGC_Management.Helpers;
 using DisCatSharp.Entities;
 using IniParser;
 using IniParser.Model;
+
+#endregion
 
 namespace AGC_Management;
 

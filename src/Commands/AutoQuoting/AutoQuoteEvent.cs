@@ -1,7 +1,11 @@
-﻿using DisCatSharp;
+﻿#region
+
+using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
+
+#endregion
 
 namespace AGC_Management.Commands.AutoQuoting
 {
@@ -30,7 +34,6 @@ namespace AGC_Management.Commands.AutoQuoting
                 }
                 catch
                 {
-
                 }
 
                 if (isAutoQuoteActive)
@@ -38,8 +41,6 @@ namespace AGC_Management.Commands.AutoQuoting
                     await AutoQuoteHelper.ProcessMessageWithLinks(client, eventArgs);
                 }
             });
-
         }
-
     }
 }
