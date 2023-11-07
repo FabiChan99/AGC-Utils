@@ -1,6 +1,5 @@
 ﻿#region
 
-using AGC_Management;
 using DisCatSharp.Entities;
 
 #endregion

@@ -27,31 +27,31 @@ dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.interface.required_modifiers = 
+dotnet_naming_symbols.interface.required_modifiers =
 
 dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
 dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.types.required_modifiers = 
+dotnet_naming_symbols.types.required_modifiers =
 
 dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
 dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.non_field_members.required_modifiers = 
+dotnet_naming_symbols.non_field_members.required_modifiers =
 
 # Benennungsstile
 
 dotnet_naming_style.begins_with_i.required_prefix = I
-dotnet_naming_style.begins_with_i.required_suffix = 
-dotnet_naming_style.begins_with_i.word_separator = 
+dotnet_naming_style.begins_with_i.required_suffix =
+dotnet_naming_style.begins_with_i.word_separator =
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
-dotnet_naming_style.pascal_case.required_prefix = 
-dotnet_naming_style.pascal_case.required_suffix = 
-dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.required_prefix =
+dotnet_naming_style.pascal_case.required_suffix =
+dotnet_naming_style.pascal_case.word_separator =
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
-dotnet_naming_style.pascal_case.required_prefix = 
-dotnet_naming_style.pascal_case.required_suffix = 
-dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.required_prefix =
+dotnet_naming_style.pascal_case.required_suffix =
+dotnet_naming_style.pascal_case.word_separator =
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 csharp_space_around_binary_operators = before_and_after
 csharp_indent_labels = one_less_than_current
@@ -100,31 +100,31 @@ dotnet_naming_rule.nicht_feldmember_should_be_pascal_schreibweise.style = pascal
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
-dotnet_naming_symbols.interface.required_modifiers = 
+dotnet_naming_symbols.interface.required_modifiers =
 
 dotnet_naming_symbols.typen.applicable_kinds = class, struct, interface, enum
 dotnet_naming_symbols.typen.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
-dotnet_naming_symbols.typen.required_modifiers = 
+dotnet_naming_symbols.typen.required_modifiers =
 
 dotnet_naming_symbols.nicht_feldmember.applicable_kinds = property, event, method
 dotnet_naming_symbols.nicht_feldmember.applicable_accessibilities = public, friend, private, protected, protected_friend, private_protected
-dotnet_naming_symbols.nicht_feldmember.required_modifiers = 
+dotnet_naming_symbols.nicht_feldmember.required_modifiers =
 
 # Benennungsstile
 
 dotnet_naming_style.beginnt_mit_i.required_prefix = I
-dotnet_naming_style.beginnt_mit_i.required_suffix = 
-dotnet_naming_style.beginnt_mit_i.word_separator = 
+dotnet_naming_style.beginnt_mit_i.required_suffix =
+dotnet_naming_style.beginnt_mit_i.word_separator =
 dotnet_naming_style.beginnt_mit_i.capitalization = pascal_case
 
-dotnet_naming_style.pascal_schreibweise.required_prefix = 
-dotnet_naming_style.pascal_schreibweise.required_suffix = 
-dotnet_naming_style.pascal_schreibweise.word_separator = 
+dotnet_naming_style.pascal_schreibweise.required_prefix =
+dotnet_naming_style.pascal_schreibweise.required_suffix =
+dotnet_naming_style.pascal_schreibweise.word_separator =
 dotnet_naming_style.pascal_schreibweise.capitalization = pascal_case
 
-dotnet_naming_style.pascal_schreibweise.required_prefix = 
-dotnet_naming_style.pascal_schreibweise.required_suffix = 
-dotnet_naming_style.pascal_schreibweise.word_separator = 
+dotnet_naming_style.pascal_schreibweise.required_prefix =
+dotnet_naming_style.pascal_schreibweise.required_suffix =
+dotnet_naming_style.pascal_schreibweise.word_separator =
 dotnet_naming_style.pascal_schreibweise.capitalization = pascal_case
 
 [*.{cs,vb}]
