@@ -26,7 +26,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("hug", "Umarmt einen User")]
     public async Task HugCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du umarmen willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du umarmen willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Hug);
 
@@ -42,7 +43,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("kiss", "Küsst einen User")]
     public async Task KissCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du küssen willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du küssen willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Kiss);
 
@@ -57,7 +59,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("pat", "Streichelt einen User")]
     public async Task PatCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du streicheln willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du streicheln willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Pat);
 
@@ -72,7 +75,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("kill", "Tötet einen User")]
     public async Task KillCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du töten willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du töten willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Kill);
 
@@ -87,7 +91,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("lick", "Leckt einen User")]
     public async Task LickCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du ablecken willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du ablecken willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Lick);
 
@@ -102,7 +107,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("bite", "Beißt einen User")]
     public async Task BiteCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du beißen willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du beißen willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Bite);
 
@@ -117,7 +123,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("cry", "Weint mit einem User")]
     public async Task CryCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer mit dem du weinen willst")] DiscordUser user)
+        [Option("user", "Den Nutzer mit dem du weinen willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Cry);
 
@@ -132,7 +139,8 @@ public class RoleplaySystem : ApplicationCommandsModule
 
     [SlashCommand("love", "Liebt einen User")]
     public async Task LoveCommand(InteractionContext ctx,
-        [Option("user", "Den Nutzer den du lieben willst")] DiscordUser user)
+        [Option("user", "Den Nutzer den du lieben willst")]
+        DiscordUser user)
     {
         var imageUrl = await _kawaiiclient.GetRandomGifAsync(KawaiiGifType.Love);
 

@@ -1,6 +1,5 @@
 ﻿#region
 
-using AGC_Management;
 using DisCatSharp;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Net;
@@ -14,7 +13,7 @@ public class LavalinkConnectionManager
 {
     public static LavalinkExtension? LavalinkExtension;
     public static LavalinkSession? LavalinkSession;
-    public static bool LavalinkConnected = false;
+    public static bool LavalinkConnected;
 
     public static LavalinkConfiguration LavaConfig()
     {
@@ -45,6 +44,7 @@ public class LavalinkConnectionManager
                 client.Logger.LogInformation("Lavalink ist deaktiviert. Verbindung wird nicht hergestellt.");
                 return;
             }
+
             client.Logger.LogInformation("Verbinde mit Lavalink...");
             LavalinkExtension = client.UseLavalink();
             LavalinkSession = await LavalinkExtension.ConnectAsync(LavaConfig());

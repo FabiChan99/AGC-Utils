@@ -1,13 +1,13 @@
 ﻿#region
 
+using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
-using AGC_Management.Attributes;
-using AGC_Management.Helpers;
 
 #endregion
 
@@ -29,7 +29,8 @@ public class SeekCommand : ApplicationCommandsModule
         // Parse the time here. Assuming timeString is in the format "hh:mm:ss" or "mm:ss"
         if (!TimeSpan.TryParseExact(timeString, new[] { "hh\\:mm\\:ss", "mm\\:ss" }, null, out time))
         {
-            var errorEmbed = EmbedGenerator.GetErrorEmbed("Ungültige Zeitangabe. Bitte benutze ``hh:mm:ss`` oder ``mm:ss``");
+            var errorEmbed =
+                EmbedGenerator.GetErrorEmbed("Ungültige Zeitangabe. Bitte benutze ``hh:mm:ss`` oder ``mm:ss``");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(errorEmbed));
             return;

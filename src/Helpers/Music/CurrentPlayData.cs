@@ -1,6 +1,10 @@
-﻿using DisCatSharp.Entities;
+﻿#region
+
+using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
+
+#endregion
 
 namespace AGC_Management.Helpers;
 

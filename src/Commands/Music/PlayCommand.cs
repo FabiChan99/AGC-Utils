@@ -1,6 +1,9 @@
 ﻿#region
 
 using System.Text.RegularExpressions;
+using AGC_Management.Attributes;
+using AGC_Management.Enums;
+using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
@@ -10,9 +13,6 @@ using DisCatSharp.Interactivity.Extensions;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using DisCatSharp.Lavalink.Enums;
-using AGC_Management.Attributes;
-using AGC_Management.Enums;
-using AGC_Management.Helpers;
 using LavaSharp.LavaManager;
 
 #endregion
@@ -49,7 +49,8 @@ public class PlayCommand : ApplicationCommandsModule
         if (channel != null && !channel.PermissionsFor(await ctx.Client.CurrentUser.ConvertToMember(ctx.Guild))
                 .HasPermission(Permissions.AccessChannels))
         {
-            var errorEmbed = EmbedGenerator.GetErrorEmbed("Ich habe keine Berechtigung auf diesen Channel zuzugreifen.");
+            var errorEmbed =
+                EmbedGenerator.GetErrorEmbed("Ich habe keine Berechtigung auf diesen Channel zuzugreifen.");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(errorEmbed));
             return;
@@ -164,12 +165,14 @@ public class PlayCommand : ApplicationCommandsModule
         }
         catch (FileNotFoundException)
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("\u26a0\ufe0f | Keine Ergebnisse gefunden."));
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().WithContent("\u26a0\ufe0f | Keine Ergebnisse gefunden."));
             return;
         }
         catch (InvalidOperationException)
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("\u274c | Ein Fehler ist aufgetreten."));
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().WithContent("\u274c | Ein Fehler ist aufgetreten."));
             return;
         }
 
@@ -179,7 +182,8 @@ public class PlayCommand : ApplicationCommandsModule
         {
             LavaQueue.queue.Enqueue((track, ctx.User));
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().WithContent($"🎵 | **{track.Info.Title}** wurde zur Warteschlange hinzugefügt."));
+                new DiscordWebhookBuilder().WithContent(
+                    $"🎵 | **{track.Info.Title}** wurde zur Warteschlange hinzugefügt."));
             return;
         }
 
@@ -191,7 +195,8 @@ public class PlayCommand : ApplicationCommandsModule
             }
 
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().WithContent($"🎵 | **{tracks.Count}** Songs wurden zur Warteschlange hinzugefügt."));
+                new DiscordWebhookBuilder().WithContent(
+                    $"🎵 | **{tracks.Count}** Songs wurden zur Warteschlange hinzugefügt."));
             return;
         }
 
@@ -201,7 +206,8 @@ public class PlayCommand : ApplicationCommandsModule
             CurrentPlayData.user = ctx.User;
             CurrentPlayData.CurrentExecutionChannel = ctx.Channel;
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().WithContent($"🎵 | **{track.Info.Title}** wurde zur Warteschlange hinzugefügt."));
+                new DiscordWebhookBuilder().WithContent(
+                    $"🎵 | **{track.Info.Title}** wurde zur Warteschlange hinzugefügt."));
             await NowPlaying.sendNowPlayingTrack(ctx, track);
             await lavaPlayer.PlayAsync(track);
             RegisterPlaybackFinishedEvent(lavaPlayer, ctx);
@@ -219,7 +225,8 @@ public class PlayCommand : ApplicationCommandsModule
             }
 
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().WithContent($"🎵 | **{tracks.Count}** Songs wurden zur Warteschlange hinzugefügt."));
+                new DiscordWebhookBuilder().WithContent(
+                    $"🎵 | **{tracks.Count}** Songs wurden zur Warteschlange hinzugefügt."));
             var ftrack = LavaQueue.queue.Dequeue();
             await lavaPlayer.PlayAsync(ftrack.Item1);
             RegisterPlaybackFinishedEvent(lavaPlayer, ctx);

@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
+using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
@@ -9,10 +13,9 @@ using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
-using AGC_Management.Attributes;
-using AGC_Management.Helpers;
-using AGC_Management.LavaManager;
 using LavaSharp.LavaManager;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
@@ -234,14 +237,16 @@ public class QueueCommand : ApplicationCommandsModule
 
         if (result.Result.Id == "no")
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("🚫 | Entfernung des Songs abgebrochen."));
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().WithContent("🚫 | Entfernung des Songs abgebrochen."));
             return;
         }
 
         if (queueList[songnumber - 1].Item1 != tracktoRemove.Item1)
         {
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().WithContent("🚫 | Die Warteschlange wurde in der Zwischenzeit geändert. Entfernung des Songs abgebrochen."));
+                new DiscordWebhookBuilder().WithContent(
+                    "🚫 | Die Warteschlange wurde in der Zwischenzeit geändert. Entfernung des Songs abgebrochen."));
             return;
         }
 

@@ -1,15 +1,19 @@
-﻿using DisCatSharp.ApplicationCommands;
+﻿#region
+
+using AGC_Management.Attributes;
+using AGC_Management.Helpers;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
-using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
-public class ReplayCommand: ApplicationCommandsModule
+public class ReplayCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]
@@ -44,7 +48,7 @@ public class ReplayCommand: ApplicationCommandsModule
         await player.PlayAsync(player.CurrentTrack);
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
-                $"🔂 | Der Song wurde neugestartet!"));
+                "\ud83d\udd02 | Der Song wurde neugestartet!"));
         await NowPlaying.sendNowPlayingTrack(ctx, player.CurrentTrack);
     }
 }

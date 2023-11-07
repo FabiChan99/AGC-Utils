@@ -1,12 +1,12 @@
 ﻿#region
 
+using AGC_Management.Helpers;
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Lavalink;
-using AGC_Management.Helpers;
 using LavaSharp.LavaManager;
 
 #endregion
@@ -44,7 +44,8 @@ public class LavaDiscordEvents : ApplicationCommandsModule
                 await LavaQueue.DisconnectAndReset(player);
             });
         }
-        else if (e.User.Id != client.CurrentUser.Id && e.Before.Channel is not null && e.Before.Channel.Users.Count == 1)
+        else if (e.User.Id != client.CurrentUser.Id && e.Before.Channel is not null &&
+                 e.Before.Channel.Users.Count == 1)
         {
             _ = Task.Run(async () =>
             {
@@ -55,13 +56,15 @@ public class LavaDiscordEvents : ApplicationCommandsModule
                 {
                     return;
                 }
+
                 if (player.Channel.Id != e.Before.Channel.Id)
                 {
                     return;
                 }
 
 
-                bool DelayActive = bool.Parse(BotConfig.GetConfig()["MainConfig"]["AutoLeaveOnEmptyChannelDelayActive"]);
+                bool DelayActive =
+                    bool.Parse(BotConfig.GetConfig()["MainConfig"]["AutoLeaveOnEmptyChannelDelayActive"]);
                 if (DelayActive)
                 {
                     int delay = int.Parse(BotConfig.GetConfig()["MainConfig"]["AutoLeaveOnEmptyChannelDelay"]);
@@ -71,14 +74,14 @@ public class LavaDiscordEvents : ApplicationCommandsModule
                         return;
                     }
                 }
+
                 await CurrentPlayData.CurrentExecutionChannel.SendMessageAsync(
                     "🔊 | Ich habe den Voice Channel verlassen, da ich alleine war. Stoppe den Player und leere die Warteschlange...");
                 await LavaQueue.DisconnectAndReset(player);
             });
         }
-        
     }
-    
+
     private static DiscordChannel? GetPlayerChannel(DiscordClient client, DiscordGuild guild)
     {
         var lava = client.GetLavalink();

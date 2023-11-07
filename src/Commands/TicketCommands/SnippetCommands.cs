@@ -2,6 +2,7 @@
 
 using System.Text;
 using System.Text.RegularExpressions;
+using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -16,14 +17,14 @@ namespace AGC_Management.Commands;
 public class SnippetManagerCommands : BaseCommandModule
 {
     [GroupCommand]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task SnippetManager_Help(CommandContext ctx)
     {
         await SnippetManager(ctx);
     }
 
     [Command("help")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task SnippetManager(CommandContext ctx)
     {
         string prefix = ctx.Prefix;
@@ -43,7 +44,7 @@ public class SnippetManagerCommands : BaseCommandModule
 
 
     [Command("add")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task AddSnippet(CommandContext ctx, string name, [RemainingText] string content)
     {
         await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
@@ -78,7 +79,7 @@ public class SnippetManagerCommands : BaseCommandModule
 
 
     [Command("remove")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task RemoveSnippet(CommandContext ctx, string name)
     {
         await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
@@ -105,7 +106,7 @@ public class SnippetManagerCommands : BaseCommandModule
 
 
     [Command("list")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task ListSnippets(CommandContext ctx)
     {
         await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
@@ -144,7 +145,7 @@ public class SnippetManagerCommands : BaseCommandModule
 
 
     [Command("search")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task SearchSnippets(CommandContext ctx, string snippet_id)
     {
         await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
@@ -170,7 +171,7 @@ public class SnippetManagerCommands : BaseCommandModule
     }
 
     [Command("shortcutsearch")]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task ShortcutSnippets(CommandContext ctx)
     {
         await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());

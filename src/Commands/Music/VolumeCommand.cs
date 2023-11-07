@@ -1,11 +1,15 @@
-﻿using DisCatSharp.ApplicationCommands;
+﻿#region
+
+using AGC_Management.Attributes;
+using AGC_Management.Helpers;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
-using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+
+#endregion
 
 namespace AGC_Management.Commands;
 

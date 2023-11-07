@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Enums;
+using AGC_Management.Helpers;
 using AGC_Management.Managers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -44,7 +45,7 @@ public class TicketCommands : BaseCommandModule
 
     [Command("contact")]
     [RequireGuild]
-    [RequireStaffRole]
+    [TicketRequireStaffRole]
     public async Task ContactUser(CommandContext ctx, DiscordMember member)
     {
         var ticket_channel = await TicketManager.OpenTicket(ctx, TicketType.Support, TicketCreator.Staff, member);

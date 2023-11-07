@@ -1,12 +1,12 @@
 ﻿#region
 
+using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
-using AGC_Management.Helpers;
 
 #endregion
 
@@ -18,7 +18,8 @@ public sealed class ApplicationRequireExecutorInVoice : ApplicationCommandCheckB
     {
         if (ctx.Member.VoiceState?.Channel is null)
         {
-            var embed = EmbedGenerator.GetErrorEmbed("Du musst in einem VoiceChannel sein um diesen Command zu verwenden!");
+            var embed = EmbedGenerator.GetErrorEmbed(
+                "Du musst in einem VoiceChannel sein um diesen Command zu verwenden!");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(embed));
             return false;
@@ -72,7 +73,8 @@ public sealed class EnsureMatchGuildId : ApplicationCommandCheckBaseAttribute
         if (ctx.Guild.Id != configuredId)
         {
             var errorembed =
-                EmbedGenerator.GetErrorEmbed("Dieser Command kann nur in dem Server verwendet werden, in dem ich konfiguriert bin.");
+                EmbedGenerator.GetErrorEmbed(
+                    "Dieser Command kann nur in dem Server verwendet werden, in dem ich konfiguriert bin.");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(errorembed));
             return false;
@@ -90,7 +92,8 @@ public sealed class CheckDJ : ApplicationCommandCheckBaseAttribute
         bool isPlaying = false;
         try
         {
-            LavalinkTrack? ct = ctx.Client.GetLavalink().ConnectedSessions!.First().Value.GetGuildPlayer(ctx.Guild).CurrentTrack;
+            LavalinkTrack? ct = ctx.Client.GetLavalink().ConnectedSessions!.First().Value.GetGuildPlayer(ctx.Guild)
+                .CurrentTrack;
             if (ct != null)
             {
                 isPlaying = true;

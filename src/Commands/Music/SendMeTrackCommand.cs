@@ -1,11 +1,15 @@
-﻿using DisCatSharp.ApplicationCommands;
+﻿#region
+
+using AGC_Management.Attributes;
+using AGC_Management.Helpers;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
-using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
@@ -38,11 +42,11 @@ public class SendMeTrackCommand : ApplicationCommandsModule
                 new DiscordInteractionResponseBuilder().AddEmbed(errorEmbed));
             return;
         }
-        
+
         // send the track to the user
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
-                $"🔂 | Ich habe dir den Song per DM gesendet!"));
+                "\ud83d\udd02 | Ich habe dir den Song per DM gesendet!"));
         // send the track to the user per dm
         var em = new DiscordEmbedBuilder()
             .WithTitle("Aktueller Song")
@@ -51,10 +55,13 @@ public class SendMeTrackCommand : ApplicationCommandsModule
             .WithFooter($"Requested by {ctx.Member.DisplayName}", ctx.Member.AvatarUrl)
             .Build();
         bool success = false;
-        try {
-            await ctx.Member.SendMessageAsync(embed: em);
+        try
+        {
+            await ctx.Member.SendMessageAsync(em);
             success = true;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Console.WriteLine(e);
         }
 
@@ -62,15 +69,8 @@ public class SendMeTrackCommand : ApplicationCommandsModule
         {
             // follow up message
             await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
-                .WithContent("❌ | Ich konnte dir den Song nicht per DM senden. Hast du DMs von Servermitgliedern deaktiviert? Wenn ja, aktiviere sie bitte und versuche es erneut."));
+                .WithContent(
+                    "❌ | Ich konnte dir den Song nicht per DM senden. Hast du DMs von Servermitgliedern deaktiviert? Wenn ja, aktiviere sie bitte und versuche es erneut."));
         }
-        
-        
-        
-        
-        
-        
-        
-        
     }
 }

@@ -3,7 +3,6 @@
 using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
-using AGC_Management.LavaManager;
 using LavaSharp.LavaManager;
 
 #endregion
@@ -17,7 +16,8 @@ public static class EmbedGenerator
         return new DiscordEmbedBuilder()
             .WithDescription(description)
             .WithTitle("Error")
-            .WithFooter("Ups. Irgendwas stimmt hier nicht!", "https://cdn.discordapp.com/emojis/755048875965939833.webp")
+            .WithFooter("Ups. Irgendwas stimmt hier nicht!",
+                "https://cdn.discordapp.com/emojis/755048875965939833.webp")
             .WithColor(new DiscordColor(255, 69, 58));
     }
 

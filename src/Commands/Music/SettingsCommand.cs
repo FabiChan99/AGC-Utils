@@ -1,9 +1,13 @@
-﻿using DisCatSharp.ApplicationCommands;
+﻿#region
+
+using AGC_Management.Helpers;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using AGC_Management.Helpers;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
@@ -57,7 +61,7 @@ public class SettingsCommand : ApplicationCommandsModule
                 .AsEphemeral());
     }
 
-    
+
     [SlashCommand("AutoDisconnect", "Enable or disable the auto-disconnect when all users left the channel.")]
     public async Task AutoDisconnect(InteractionContext ctx,
         [Option("setActive", "Set the active state.")]
@@ -80,8 +84,9 @@ public class SettingsCommand : ApplicationCommandsModule
                                                                 (setActive ? "``aktiviert``" : "``deaktiviert``") + ".")
                 .AsEphemeral());
     }
-    
-    [SlashCommand("AutoDisconnectDelay", "Setzt die Zeit in Sekunden, nach der der Bot sich automatisch aus dem Voice Channel entfernt.")]
+
+    [SlashCommand("AutoDisconnectDelay",
+        "Setzt die Zeit in Sekunden, nach der der Bot sich automatisch aus dem Voice Channel entfernt.")]
     public async Task AutoDisconnectDelay(InteractionContext ctx,
         [Option("delay", "Der delay in Sekunden.")]
         int delay)
@@ -93,11 +98,13 @@ public class SettingsCommand : ApplicationCommandsModule
                 new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
             return;
         }
+
         var cfg = BotConfig.GetConfig()["MusicConfig"]["AutoLeaveOnEmptyChannelDelay"];
         var isAlreadyActive = int.Parse(cfg);
         if (isAlreadyActive == delay)
         {
-            var embed = EmbedGenerator.GetErrorEmbed("Der auto-disconnect delay ist bereits auf " + delay + " Sekunden gesetzt.");
+            var embed = EmbedGenerator.GetErrorEmbed("Der auto-disconnect delay ist bereits auf " + delay +
+                                                     " Sekunden gesetzt.");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
             return;
@@ -105,10 +112,11 @@ public class SettingsCommand : ApplicationCommandsModule
 
         BotConfig.SetConfig("MusicConfig", "AutoLeaveOnEmptyChannelDelay", delay.ToString());
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent("🛠️ | Der auto-disconnect delay wurde auf ``" + delay + "`` Sekunden gesetzt.")
+            new DiscordInteractionResponseBuilder()
+                .WithContent("🛠️ | Der auto-disconnect delay wurde auf ``" + delay + "`` Sekunden gesetzt.")
                 .AsEphemeral());
     }
-    
+
     [SlashCommand("AutoDisconnectDelayActive", "Aktiviere oder deaktiviere den auto-disconnect delay.")]
     public async Task AutoDisconnectDelayActive(InteractionContext ctx,
         [Option("setActive", "Set the active state.")]
@@ -131,6 +139,4 @@ public class SettingsCommand : ApplicationCommandsModule
                                                                 (setActive ? "``enabled``" : "``disabled``") + ".")
                 .AsEphemeral());
     }
-    
-    
 }

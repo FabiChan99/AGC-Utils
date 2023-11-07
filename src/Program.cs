@@ -19,7 +19,6 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
-using LavaSharp.LavaManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -147,7 +146,7 @@ internal class Program : BaseCommandModule
         });
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
-        
+
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
         await LavalinkConnectionManager.ConnectAsync(discord);
@@ -189,8 +188,8 @@ internal class Program : BaseCommandModule
             e.Handled = true;
         }
     }
-    
-    
+
+
     private static Task<int> GetPrefix(DiscordMessage message)
     {
         return Task.Run(() =>
