@@ -1,6 +1,6 @@
 ﻿#region
 
-using AGC_Ticket.Helpers;
+using AGC_Management.Helpers;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;

@@ -67,6 +67,7 @@ public class DateKickCommands : BaseCommandModule
         embed.WithColor(DiscordColor.Green);
         await ctx.RespondAsync(embed);
         BotConfig.SetConfig("AntiRaid", "DateKickActive", active.ToString());
+        
     }
 }
 

@@ -22,6 +22,7 @@ using KawaiiAPI.NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 #endregion
 
@@ -45,7 +46,7 @@ internal class Program : BaseCommandModule
             .MinimumLevel.Information()
             .WriteTo.Console()
             .CreateLogger();
-
+        
         logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
         try

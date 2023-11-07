@@ -1,7 +1,7 @@
 ﻿#region
 
-using AGC_Ticket_System.Helper;
-using AGC_Ticket.Helpers;
+using AGC_Management.Helper;
+using AGC_Management.Helpers;
 using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;

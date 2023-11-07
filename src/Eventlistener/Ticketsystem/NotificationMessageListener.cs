@@ -2,7 +2,7 @@
 
 using AGC_Management.Enums;
 using AGC_Management.Managers;
-using AGC_Ticket.Helpers;
+using AGC_Management.Helpers;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;

@@ -7,7 +7,7 @@ using Npgsql;
 
 #endregion
 
-namespace AGC_Ticket_System.Helper;
+namespace AGC_Management.Helper;
 
 public class SnippetManagerHelper
 {

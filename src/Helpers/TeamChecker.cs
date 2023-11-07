@@ -5,7 +5,7 @@ using DisCatSharp.Entities;
 
 #endregion
 
-namespace AGC_Ticket.Helpers;
+namespace AGC_Management.Helpers;
 
 public static class TeamChecker
 {
