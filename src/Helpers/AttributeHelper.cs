@@ -1,5 +1,6 @@
 #region
 
+using AGC_Management.LavaManager;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -57,6 +58,24 @@ public class RequireVoiceChannel : CheckBaseAttribute
         var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Du bist in keinem Sprachkanal!")
             .WithDescription(
                 "Bitte betrete einen Sprachkanal und versuche es erneut.")
+            .WithColor(DiscordColor.Red);
+        var embed = embedBuilder.Build();
+        var msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id);
+        await ctx.Channel.SendMessageAsync(msg_e);
+        return false;
+    }
+}
+
+public class RequireConnectedLavalink : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        // Check if lavalink is connected
+        if (LavalinkConnectionManager.LavalinkConnected) return true;
+        
+        var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Lavalink nicht verbunden!")
+            .WithDescription(
+                $"Command deaktiviert. Lavalink ist nicht verbunden. Bitte informiere den Botentwickler ``{ctx.Client.GetUserAsync(GlobalProperties.BotOwnerId).Result.UsernameWithDiscriminator}``")
             .WithColor(DiscordColor.Red);
         var embed = embedBuilder.Build();
         var msg_e = new DiscordMessageBuilder().WithEmbed(embed).WithReply(ctx.Message.Id);

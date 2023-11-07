@@ -1,11 +1,16 @@
 ﻿#region
 
 using System.Reflection;
+using AGC_Management.Helpers;
+using AGC_Management.LavaManager;
 using AGC_Management.Services.DatabaseHandler;
 using AGC_Management.Services.Logging;
 using AGC_Management.Tasks;
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.Attributes;
+using DisCatSharp.ApplicationCommands.EventArgs;
+using DisCatSharp.ApplicationCommands.Exceptions;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Entities;
@@ -14,6 +19,7 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
+using LavaSharp.LavaManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -139,9 +145,12 @@ internal class Program : BaseCommandModule
         {
             ServiceProvider = serviceProvider
         });
+        appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
+        
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
+        await LavalinkConnectionManager.ConnectAsync(discord);
         CurrentApplicationData.Client = discord;
 
         await StartTasks(discord);
@@ -161,6 +170,27 @@ internal class Program : BaseCommandModule
     }
 
 
+    private static async Task Discord_SlashCommandErrored(ApplicationCommandsExtension sender,
+        SlashCommandErrorEventArgs e)
+    {
+        if (e.Exception is SlashExecutionChecksFailedException)
+        {
+            var ex = (SlashExecutionChecksFailedException)e.Exception;
+            if (ex.FailedChecks.Any(x => x is ApplicationCommandRequireUserPermissionsAttribute))
+            {
+                var embed = EmbedGenerator.GetErrorEmbed(
+                    "You don't have the required permissions to execute this command.");
+                await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = true;
+        }
+    }
+    
+    
     private static Task<int> GetPrefix(DiscordMessage message)
     {
         return Task.Run(() =>
