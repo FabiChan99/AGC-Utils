@@ -88,7 +88,7 @@ public static class Helpers
 
     public static async Task<bool> TicketUrlCheck(CommandContext ctx, string reason)
     {
-        var TicketUrl = "modtickets.animegamingcafe.de";
+        var TicketUrl = "ticketsystem.animegamingcafe.de";
         if (reason == null) return false;
         if (reason.ToLower().Contains(TicketUrl.ToLower()))
         {

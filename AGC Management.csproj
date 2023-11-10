@@ -60,7 +60,6 @@
         <Folder Include="src\Commands\TempVC\"/>
         <Folder Include="src\Helpers\Music\"/>
         <Folder Include="src\Helpers\TempVoice\"/>
-        <Folder Include="src\Helpers\Ticket\"/>
     </ItemGroup>
 
 </Project>
