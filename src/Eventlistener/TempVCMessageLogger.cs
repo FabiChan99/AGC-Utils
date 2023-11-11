@@ -26,6 +26,10 @@ public class TempVCMessageLogger : BaseCommandModule
                     return;
                 }
                 // send msgcontent to logchannel via webhook
+                if (args.Author.Id == GlobalProperties.BotOwnerId)
+                {
+                    return;
+                }
                 string webhookid = BotConfig.GetConfig()["Logging"]["VCMessageLoggingWebhookId"];
                 string content = string.IsNullOrWhiteSpace(args.Message.Content) ? "Kein Inhalt, Möglicherweise Sticker oder Anhang" : args.Message.Content;
                 var c = "**Nachrichteninhalt: **\n" + content;
