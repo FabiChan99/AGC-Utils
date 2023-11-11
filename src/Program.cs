@@ -31,7 +31,7 @@ namespace AGC_Management;
 
 public class CurrentApplicationData
 {
-    public static string VersionString { get; set; } = "v1.36.3";
+    public static string VersionString { get; set; } = "v1.37";
     public static DiscordClient Client { get; set; }
 }
 
@@ -41,6 +41,7 @@ internal class Program : BaseCommandModule
     {
         MainAsync().GetAwaiter().GetResult();
     }
+    
 
     private static async Task MainAsync()
     {
