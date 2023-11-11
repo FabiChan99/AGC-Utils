@@ -327,8 +327,25 @@ internal class Program : BaseCommandModule
 
     private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
+        CurrentApplicationData.Client.Logger.LogError(e.Exception, $"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         if (e.Exception is ArgumentException)
         {
+            if (e.Exception.Message.Contains("Description length cannot exceed 4096 characters."))
+            {
+                DiscordEmbedBuilder web;
+                web = new DiscordEmbedBuilder
+                {
+                    Title = "Fehler | DescriptionTooLongException",
+
+                    Color = new DiscordColor("#FF0000")
+                };
+                web.WithDescription($"Das Embed hat zu viele Zeichen.\n" +
+                                    $"**Stelle sicher dass die Hauptsektion nicht mehr als 4096 Zeichen hat!**");
+                web.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
+                await e.Context.RespondAsync(embed: web, content: e.Context.User.Mention);
+                return;
+            }
+            
             DiscordEmbedBuilder eb;
             eb = new DiscordEmbedBuilder
             {
