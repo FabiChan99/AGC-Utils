@@ -23,7 +23,7 @@ public class UpdateBot : ApplicationCommandsModule
         DiscordAttachment payload)
     {
         // check filename 
-        if (payload.FileName != "payload.bin")
+        if (payload.FileName != "update.pkg")
         {
             var errorEmbed =
                 EmbedGenerator.GetErrorEmbed(
@@ -43,7 +43,7 @@ public class UpdateBot : ApplicationCommandsModule
         var response = await client.GetAsync(url);
 
         var bytes = await response.Content.ReadAsByteArrayAsync();
-        await File.WriteAllBytesAsync("payload.bin", bytes);
+        await File.WriteAllBytesAsync("update.pkg", bytes);
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("📥 | Update wird installiert..."));
         var originalresponse = await ctx.Interaction.GetOriginalResponseAsync();
         var m = originalresponse;
