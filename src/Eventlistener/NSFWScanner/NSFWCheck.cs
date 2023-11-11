@@ -52,7 +52,17 @@ public class NSFWCheck : BaseCommandModule
             {
                 var text = args.Message.Content;
                 var matches = Regex.Matches(text, @"(https?://)?(www\.)?([^\s]+)\.([^\s]+)");
-                urls.AddRange(matches.Select(match => match.Value));
+                var urlsFromText = new List<string>();
+
+                foreach (Match match in matches)
+                {
+                    var url = match.Value;
+                    if (url.Contains(".png") || url.Contains(".jpg") || url.Contains(".jpeg") || url.Contains(".webp"))
+                    {
+                        urlsFromText.Add(url);
+                    }
+                }
+                urls.AddRange(urlsFromText);
             }
 
             foreach (var url in urls)
