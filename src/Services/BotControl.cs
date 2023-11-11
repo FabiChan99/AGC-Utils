@@ -81,7 +81,7 @@ public class BotControl : BaseCommandModule
     /// <summary>
     ///     The eval variables.
     /// </summary>
-    private class EvalVariables
+    public class EvalVariables
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="EvalVariables" /> class.
