@@ -23,22 +23,22 @@
         <PackageReference Include="DisCatSharp.Common" Version="10.4.2-nightly-043" />
         <PackageReference Include="DisCatSharp.Interactivity" Version="10.4.2-nightly-043" />
         <PackageReference Include="DisCatSharp.Lavalink" Version="10.4.2-nightly-043" />
-        <PackageReference Include="ini-parser-new" Version="2.6.2"/>
-        <PackageReference Include="KawaiiAPI.NET" Version="1.1.0"/>
+        <PackageReference Include="ini-parser-new" Version="2.6.2" />
+        <PackageReference Include="KawaiiAPI.NET" Version="1.1.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.5-beta1.23225.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0-1.final"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.7.0-1.final"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0-1.final" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.7.0-1.final" />
         <PackageReference Include="Npgsql" Version="7.0.6" />
-        <PackageReference Include="RestSharp" Version="110.2.0"/>
-        <PackageReference Include="Serilog" Version="3.0.2-dev-02044"/>
-        <PackageReference Include="Serilog.Expressions" Version="3.4.2-dev-00120"/>
-        <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0"/>
-        <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.1-dev-00944"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.2.0-dev-00918"/>
-        <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0"/>
+        <PackageReference Include="RestSharp" Version="110.2.0" />
+        <PackageReference Include="Serilog" Version="3.0.2-dev-02044" />
+        <PackageReference Include="Serilog.Expressions" Version="3.4.2-dev-00120" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0" />
+        <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.1-dev-00944" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.2.0-dev-00918" />
+        <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -57,9 +57,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="src\Commands\TempVC\"/>
-        <Folder Include="src\Helpers\Music\"/>
-        <Folder Include="src\Helpers\TempVoice\"/>
+        <Folder Include="src\Commands\ServerControl\" />
+        <Folder Include="src\Commands\TempVC\" />
+        <Folder Include="src\Helpers\Music\" />
+        <Folder Include="src\Helpers\TempVoice\" />
     </ItemGroup>
 
 </Project>

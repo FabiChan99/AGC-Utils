@@ -80,6 +80,24 @@ public class RequireDatabase : CheckBaseAttribute
     }
 }
 
+public class ACRequireStaffRole : CheckBaseAttribute
+{
+    private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ACStaffRoleId"]);
+
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        if (GlobalProperties.DebugMode)
+        {
+            return true;
+        }
+
+        // Check if user has staff role
+        if (ctx.Member.Roles.Any(r => r.Id == RoleId))
+            return true;
+        return false;
+    }
+}
+
 public class RequireVoiceChannel : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)

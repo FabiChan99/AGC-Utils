@@ -31,7 +31,7 @@ namespace AGC_Management;
 
 public class CurrentApplicationData
 {
-    public static string VersionString { get; set; } = "v1.36.1-HOTFIX-1";
+    public static string VersionString { get; set; } = "v1.36.2";
     public static DiscordClient Client { get; set; }
 }
 
