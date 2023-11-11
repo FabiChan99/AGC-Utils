@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿#region
+
 using System.Text.RegularExpressions;
 using AGC_Management.Helpers;
 using DisCatSharp;
@@ -8,6 +9,8 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using Newtonsoft.Json.Linq;
+
+#endregion
 
 namespace AGC_Management.Eventlistener.NSFWScanner;
 
@@ -23,6 +26,7 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
+
             if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
             {
                 return;
@@ -37,7 +41,8 @@ public class NSFWCheck : BaseCommandModule
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
 
             var attachments = args.Message.Attachments;
             var urls = attachments.Select(att => att.Url).ToList();
@@ -80,17 +85,18 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-            
+
             if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
             {
                 return;
             }
-            
+
 
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
 
             var avatarUrl = args.Member.AvatarUrl;
             var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
@@ -124,12 +130,12 @@ public class NSFWCheck : BaseCommandModule
             }
             var guildid = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
             var guild = await _client.GetGuildAsync(guildid);
-            
+
             if (await _args.UserAfter.IsInGuild(guild) == false)
             {
                 return;
             }
-            
+
 
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
@@ -151,7 +157,7 @@ public class NSFWCheck : BaseCommandModule
             }
         });
     }
-    
+
     */
 
     [Command("nsfwcheck")]
@@ -163,7 +169,6 @@ public class NSFWCheck : BaseCommandModule
     }
 
 
-
     private static DiscordMessageBuilder GetReportAvatarOnMemberUpdate(DiscordUser user)
     {
         var embed = new DiscordEmbedBuilder()
@@ -172,16 +177,16 @@ public class NSFWCheck : BaseCommandModule
             .WithTimestamp(DateTime.Now)
             .WithFooter("Reported at")
             .WithThumbnail(user.AvatarUrl)
-            .AddField(new DiscordEmbedField("User", $"{user.Mention} ``{user.Id}``", false))
-            .AddField(new DiscordEmbedField("Account erstellt", user.CreationTimestamp.Timestamp(), false))
-            .AddField(new DiscordEmbedField("Avatar Link", user.AvatarUrl, false));
+            .AddField(new DiscordEmbedField("User", $"{user.Mention} ``{user.Id}``"))
+            .AddField(new DiscordEmbedField("Account erstellt", user.CreationTimestamp.Timestamp()))
+            .AddField(new DiscordEmbedField("Avatar Link", user.AvatarUrl));
 
         var mb = new DiscordMessageBuilder()
             .WithEmbed(embed)
             .WithContent($"NSFW Inhalt von {user.Mention} wurde gemeldet! **(Avatar)**");
         return mb;
     }
-    
+
     private static DiscordMessageBuilder GetReportAvatarOnJoin(DiscordUser user)
     {
         var embed = new DiscordEmbedBuilder()
@@ -190,9 +195,9 @@ public class NSFWCheck : BaseCommandModule
             .WithTimestamp(DateTime.Now)
             .WithFooter("Reported at")
             .WithThumbnail(user.AvatarUrl)
-            .AddField(new DiscordEmbedField("User", $"{user.Mention} ``{user.Id}``", false))
-            .AddField(new DiscordEmbedField("Account erstellt", user.CreationTimestamp.Timestamp(), false))
-            .AddField(new DiscordEmbedField("Avatar Link", user.AvatarUrl, false));
+            .AddField(new DiscordEmbedField("User", $"{user.Mention} ``{user.Id}``"))
+            .AddField(new DiscordEmbedField("Account erstellt", user.CreationTimestamp.Timestamp()))
+            .AddField(new DiscordEmbedField("Avatar Link", user.AvatarUrl));
 
         var mb = new DiscordMessageBuilder()
             .WithEmbed(embed)
@@ -209,14 +214,16 @@ public class NSFWCheck : BaseCommandModule
             .WithTimestamp(message.CreationTimestamp)
             .WithFooter("Reported at")
             .WithThumbnail(message.Author.AvatarUrl)
-            .AddField(new DiscordEmbedField("Author", $"{message.Author.Mention} ``{message.Author.Id}``", false))
-            .AddField(new DiscordEmbedField("Channel", message.Channel.Mention, false))
+            .AddField(new DiscordEmbedField("Author", $"{message.Author.Mention} ``{message.Author.Id}``"))
+            .AddField(new DiscordEmbedField("Channel", message.Channel.Mention))
             .AddField(new DiscordEmbedField("Message Link",
-                $"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}", false))
-            .AddField(new DiscordEmbedField("Message Content", $"```{(string.IsNullOrWhiteSpace(message.Content) ? "none" : message.Content)}```", false));
+                $"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}"))
+            .AddField(new DiscordEmbedField("Message Content",
+                $"```{(string.IsNullOrWhiteSpace(message.Content) ? "none" : message.Content)}```"));
 
 
-        var button = new DiscordLinkButtonComponent($"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}", "Zur Nachricht");
+        var button = new DiscordLinkButtonComponent(
+            $"https://discord.com/channels/{message.Guild.Id}/{message.Channel.Id}/{message.Id}", "Zur Nachricht");
         var mb = new DiscordMessageBuilder()
             .WithEmbed(embed)
             .WithReply(message.Id)

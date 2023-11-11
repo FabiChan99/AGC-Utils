@@ -18,7 +18,6 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
-using DisCatSharp.Lavalink;
 using KawaiiAPI.NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,7 +40,7 @@ internal class Program : BaseCommandModule
     {
         MainAsync().GetAwaiter().GetResult();
     }
-    
+
 
     private static async Task MainAsync()
     {
@@ -169,26 +168,25 @@ internal class Program : BaseCommandModule
         //// start TempVC Check Task
         TempVoiceTasks TVT = new();
         TVT.StartRemoveEmptyTempVoices(discord);
-        
-        _ = StatusUpdateTask(discord);
-        
-        return Task.CompletedTask;
 
-        
+        _ = StatusUpdateTask(discord);
+
+        return Task.CompletedTask;
     }
-    
+
     private static Task StatusUpdateTask(DiscordClient discord)
     {
         return Task.Run(async () =>
         {
             while (true)
             {
-                await discord.UpdateStatusAsync(new DiscordActivity($"Version: {CurrentApplicationData.VersionString}", ActivityType.Custom));
+                await discord.UpdateStatusAsync(new DiscordActivity($"Version: {CurrentApplicationData.VersionString}",
+                    ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
 
                 await discord.UpdateStatusAsync(new DiscordActivity(await TicketString(), ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
-                
+
                 // get tempvc count
                 int tempvcCount = 0;
                 var constring = DatabaseService.GetConnectionString();
@@ -207,15 +205,18 @@ internal class Program : BaseCommandModule
                         tempvcCount++;
                     }
                 }
-                await discord.UpdateStatusAsync(new DiscordActivity($" Offene Temp-VCs: {tempvcCount}", ActivityType.Custom));
+
+                await discord.UpdateStatusAsync(new DiscordActivity($" Offene Temp-VCs: {tempvcCount}",
+                    ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
-                
+
                 // get membercount of agc
                 var guild = await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
-                await discord.UpdateStatusAsync(new DiscordActivity($"Servermitglieder: {guild.MemberCount}", ActivityType.Custom));
+                await discord.UpdateStatusAsync(new DiscordActivity($"Servermitglieder: {guild.MemberCount}",
+                    ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
-                
-                
+
+
                 // get today messages
                 int todayMessages = 0;
                 var constring1 = DatabaseService.GetConnectionString();
@@ -233,9 +234,11 @@ internal class Program : BaseCommandModule
                 {
                     todayMessages = reader1.GetInt32(0);
                 }
-                await discord.UpdateStatusAsync(new DiscordActivity($"Heutige Servermessages: {todayMessages}", ActivityType.Custom));
+
+                await discord.UpdateStatusAsync(new DiscordActivity($"Heutige Servermessages: {todayMessages}",
+                    ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
-                
+
                 // get vc user
                 int vcUsers = 0;
                 // for each channel in agc
@@ -247,15 +250,13 @@ internal class Program : BaseCommandModule
                         vcUsers += channel.Users.Count;
                     }
                 }
+
                 await discord.UpdateStatusAsync(new DiscordActivity($"User in VC: {vcUsers}", ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
-
-                
-                
             }
         });
     }
-    
+
 
     private static async Task<string> TicketString()
     {
@@ -327,7 +328,8 @@ internal class Program : BaseCommandModule
 
     private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
-        CurrentApplicationData.Client.Logger.LogError(e.Exception, $"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
+        CurrentApplicationData.Client.Logger.LogError(e.Exception,
+            $"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         if (e.Exception is ArgumentException)
         {
             if (e.Exception.Message.Contains("Description length cannot exceed 4096 characters."))
@@ -345,7 +347,7 @@ internal class Program : BaseCommandModule
                 await e.Context.RespondAsync(embed: web, content: e.Context.User.Mention);
                 return;
             }
-            
+
             DiscordEmbedBuilder eb;
             eb = new DiscordEmbedBuilder
             {

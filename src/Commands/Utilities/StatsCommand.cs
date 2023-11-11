@@ -1,9 +1,11 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
-using DisCatSharp.Lavalink;
-using Microsoft.CodeAnalysis;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
@@ -16,10 +18,11 @@ public class StatsCommand : BaseCommandModule
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("AGC Management Bot Stats")
-             .WithColor(DiscordColor.Blurple)
-             .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl) // Adds the bot's avatar as a thumbnail
-             .WithFooter($"Requested by {ctx.User.Username}", ctx.User.AvatarUrl) // Adds the requester's username and avatar in the footer
-             .WithTimestamp(DateTimeOffset.Now); // Adds the current time to the embed
+            .WithColor(DiscordColor.Blurple)
+            .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl) // Adds the bot's avatar as a thumbnail
+            .WithFooter($"Requested by {ctx.User.Username}",
+                ctx.User.AvatarUrl) // Adds the requester's username and avatar in the footer
+            .WithTimestamp(DateTimeOffset.Now); // Adds the current time to the embed
 
         // Calculate uptime
         var uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
@@ -48,13 +51,13 @@ public class StatsCommand : BaseCommandModule
         // Operating System
         var OS = Environment.OSVersion;
         istring += $"Operating System: **{OS}**\n";
-        
+
         var writtenin = "C#";
         istring += $"Written in: **{writtenin}**\n";
-        
+
         var workingdir = Environment.ProcessPath;
         istring += $"Working Directory: **{workingdir}**\n";
-        
+
         // CPU Core count
         var cpu = Environment.ProcessorCount;
         istring += $"CPU Cores: **{cpu}**\n";

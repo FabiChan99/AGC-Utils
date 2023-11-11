@@ -825,11 +825,13 @@ public class ExtendedModerationSystem : ModerationSystem
             await ctx.Channel.SendMessageAsync(failSuccessMessage);
             return;
         }
+
         foreach (var id in setids)
         {
             var user = await ctx.Client.TryGetUserAsync(id);
             if (user != null) users_to_warn.Add(user);
         }
+
         var busers_formatted = string.Join("\n", users_to_warn.Select(buser => buser.UsernameWithDiscriminator));
         var caseid = Helpers.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
@@ -867,7 +869,8 @@ public class ExtendedModerationSystem : ModerationSystem
             await message.ModifyAsync(timeoutMessage);
             return;
         }
-        else if (result.Result.Id == $"multiwarn_deny_{caseid}")
+
+        if (result.Result.Id == $"multiwarn_deny_{caseid}")
         {
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             var loadingEmbedBuilder = new DiscordEmbedBuilder()
@@ -882,7 +885,8 @@ public class ExtendedModerationSystem : ModerationSystem
             await message.ModifyAsync(loadingMessage);
             return;
         }
-        else if (result.Result.Id == $"multiwarn_accept_{caseid}")
+
+        if (result.Result.Id == $"multiwarn_accept_{caseid}")
         {
             var disbtn = buttons;
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -980,11 +984,12 @@ public class ExtendedModerationSystem : ModerationSystem
                     catch (Exception)
                     {
                     }
+
                 string stringtoadd =
                     $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {warncount} Warn(s) | DM: {dmsent} | Sek. Aktion: {uAction}\n\n";
                 for_str += stringtoadd;
             }
-            
+
             string e_string = $"Der MultiWarn wurde erfolgreich abgeschlossen.\n" +
                               $"__Grund:__ ```{reason}```\n" +
                               $"__Gewarnte User:__\n" +
