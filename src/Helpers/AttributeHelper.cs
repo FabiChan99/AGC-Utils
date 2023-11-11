@@ -142,6 +142,12 @@ public class RequireTeamCat : CheckBaseAttribute
         {
             return true;
         }
+        
+        ulong botOwnerId = GlobalProperties.BotOwnerId;
+        if (ctx.Member.Id == botOwnerId)
+        {
+            return true;
+        }
 
         ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
         ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
