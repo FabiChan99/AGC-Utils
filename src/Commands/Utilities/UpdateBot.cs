@@ -27,7 +27,7 @@ public class UpdateBot : ApplicationCommandsModule
         {
             var errorEmbed =
                 EmbedGenerator.GetErrorEmbed(
-                    "Die Datei muss payload.bin heißen und mit dem Packtool erstellt worden sein.");
+                    "Die Datei muss update.pkg heißen und mit dem Packtool erstellt worden sein.");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(errorEmbed));
             return;
