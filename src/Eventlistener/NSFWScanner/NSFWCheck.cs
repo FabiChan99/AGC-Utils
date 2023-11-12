@@ -124,13 +124,10 @@ public class NSFWCheck : BaseCommandModule
         });
     }
 
-    /*
-    // TODO: Fix this
-    [Event]
-    public async Task UserUpdated(DiscordClient _client, UserUpdateEventArgs _args)
+
+    //[Event]
+    public async Task GuildMemberUpdated(DiscordClient _client, GuildMemberUpdateEventArgs _args)
     {
-        Console.WriteLine(_args.UserBefore.AvatarUrl);
-        Console.WriteLine(_args.UserAfter.AvatarUrl);
         _ = Task.Run(async () =>
         {
             bool isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
@@ -138,21 +135,19 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-            var guildid = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
-            var guild = await _client.GetGuildAsync(guildid);
-
-            if (await _args.UserAfter.IsInGuild(guild) == false)
+            
+            
+            if (_args.Guild.Id != GlobalProperties.AGCGuild.Id)
             {
                 return;
             }
-
 
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
-
-            var avatarUrl = _args.UserAfter.AvatarUrl;
+            
+            var avatarUrl = _args.AvatarUrlAfter;
             var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
             var responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
@@ -161,14 +156,13 @@ public class NSFWCheck : BaseCommandModule
             if (isNSFW)
             {
                 ulong AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
-                var c = guild.GetChannel(AlertChannel);
-                var e = GetReportAvatarOnMemberUpdate(_args.UserAfter);
+                var c = GlobalProperties.AGCGuild.GetChannel(AlertChannel);
+                var e = GetReportAvatarOnMemberUpdate(_args.Member);
                 await c.SendMessageAsync(e);
             }
         });
     }
 
-    */
 
     [Command("nsfwcheck")]
     [RequireStaffRole]

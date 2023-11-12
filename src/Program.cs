@@ -170,6 +170,7 @@ internal class Program : BaseCommandModule
         TVT.StartRemoveEmptyTempVoices(discord);
 
         _ = StatusUpdateTask(discord);
+        _ = UpdateGuild(discord);
 
         return Task.CompletedTask;
     }
@@ -318,6 +319,15 @@ internal class Program : BaseCommandModule
         });
     }
 
+    private static async Task UpdateGuild(DiscordClient client)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        while (true)
+        {
+            GlobalProperties.AGCGuild = await client.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
+            await Task.Delay(TimeSpan.FromMinutes(5));
+        }
+    }
 
     private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
     {
@@ -396,4 +406,6 @@ public static class GlobalProperties
             return parsedBool;
         return false;
     }
+    
+    public static DiscordGuild AGCGuild { get; set; }
 }
