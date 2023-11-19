@@ -38,6 +38,11 @@ public class NSFWCheck : BaseCommandModule
                 return;
             }
 
+            if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
+            {
+                return;
+            }
+            
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
