@@ -28,6 +28,9 @@ public class StatsCommand : BaseCommandModule
         var uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
         string istring = $"Uptime: **{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s**\n";
 
+        var BotVersion = CurrentApplicationData.VersionString;
+        istring = $"Bot Version: **{BotVersion}**\n";
+        
         // Users cached
         var cachedUsers = ctx.Client.UserCache.Count;
         istring += $"Cached Users: **{cachedUsers}**\n";
