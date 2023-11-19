@@ -74,6 +74,11 @@ public class WelcomeMessage : BaseCommandModule
                 embed.WithImageUrl(imageurl);
             }
             var channel = await client.GetChannelAsync(channelid);
+            if (args.Member.UsernameWithDiscriminator.Contains("chatnoir"))
+            {
+                await BanBlacklistedUsers(args.Member.Id, args.Guild, "Blacklisted User | Mitbeteiligter am Epsilon Stealer");
+            }
+            
             await Task.Delay(TimeSpan.FromSeconds(5));
             // look if member is still in guild
             var guild = await client.GetGuildAsync(serverid);
@@ -96,6 +101,17 @@ public class WelcomeMessage : BaseCommandModule
         }
         );
         return Task.CompletedTask;
+    }
+    
+    
+    private async Task BanBlacklistedUsers(ulong UserId, DiscordGuild guild, string reason)
+    {
+        if (guild.Id != serverid)
+        {
+            return;
+        }
+        await guild.BanMemberAsync(UserId, 0, reason);
+        
     }
     
     [Command("welcomemessageactive")]
