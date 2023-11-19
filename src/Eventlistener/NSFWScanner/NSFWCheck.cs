@@ -114,6 +114,10 @@ public class NSFWCheck : BaseCommandModule
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
 
             var avatarUrl = args.Member.AvatarUrl;
+            if (!avatarUrl.Contains(".png") || !avatarUrl.Contains(".jpg") || !avatarUrl.Contains(".jpeg") || !avatarUrl.Contains(".webp"))
+            {
+                return;
+            }
             var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
             var responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
