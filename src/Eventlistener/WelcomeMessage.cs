@@ -74,6 +74,24 @@ public class WelcomeMessage : BaseCommandModule
                 embed.WithImageUrl(imageurl);
             }
             var channel = await client.GetChannelAsync(channelid);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            // look if member is still in guild
+            var guild = await client.GetGuildAsync(serverid);
+            try
+            {
+                var member = await guild.GetMemberAsync(args.Member.Id);
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (member == null)
+                {
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            } 
+            
+            
             await channel.SendMessageAsync(args.Member.Mention, embed: embed);
         }
         );
