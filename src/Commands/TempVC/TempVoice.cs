@@ -1291,7 +1291,7 @@ public class TempVoiceCommands : TempVoiceHelper
                     await userchannel.ModifyAsync(x =>
                     {
                         x.PermissionOverwrites = overwrites;
-                        x.UserLimit = channellimit;
+                        //x.UserLimit = channellimit;
                     });
                     eb_.WithTitle("Beitrittsanfrage angenommen");
                     eb_.WithDescription(
