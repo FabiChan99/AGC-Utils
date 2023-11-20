@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Reflection;
+using AGC_Management.Commands.Moderation;
 using AGC_Management.Helpers;
 using AGC_Management.LavaManager;
 using AGC_Management.Services.DatabaseHandler;
@@ -171,6 +172,7 @@ internal class Program : BaseCommandModule
 
         _ = StatusUpdateTask(discord);
         _ = UpdateGuild(discord);
+        _ = ExtendedModerationSystemLoop.LaunchLoops();
 
         return Task.CompletedTask;
     }
