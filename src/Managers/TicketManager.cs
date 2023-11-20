@@ -342,7 +342,7 @@ public class TicketManager
 
 
         var del_ticketbutton = new DiscordButtonComponent(ButtonStyle.Danger, "ticket_delete", "Ticket löschen ❌");
-        var botu = await client.GetUserAsync(ulong.Parse(BotConfig.GetConfig()["MainConfig"]["BotUserID"]));
+        var botu = CurrentApplicationData.Client.CurrentUser;
         var teb = new DiscordEmbedBuilder
         {
             Title = "Ticket geschlossen",
