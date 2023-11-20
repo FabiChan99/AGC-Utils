@@ -589,7 +589,7 @@ public class ModerationSystem : BaseCommandModule
             var staffWithBanPerms =
                 staffmembers.Where(x => x.Permissions.HasPermission(Permissions.BanMembers)).ToList();
             var onlineStaffWithBanPerms = staffWithBanPerms
-                .Where(member => (member.Presence?.Status ?? UserStatus.Offline) != UserStatus.Offline).ToList();
+                .Where(member => (member.Presence?.Status ?? UserStatus.Offline) != UserStatus.Offline).Where(member => member.Id != 441192596325531648).ToList();
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Bannanfrage")
                 .WithDescription($"Ban-Anfrage für mehrere Benutzer: {busers_formatted}\n" +
