@@ -81,12 +81,18 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     }
                     else if (c_user.Id == a_user.Id)
                     {
+                        // remove button from embed
+                        var embed = args.Message.Embeds.First();
+                        var component = args.Message.Components.First();
+                        var mb = new DiscordMessageBuilder();
+                        mb.AddEmbed(embed);
+                        await args.Message.ModifyAsync(mb);
                         await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                             new DiscordInteractionResponseBuilder()
                                 .WithContent("Der Warn wurde zur Kenntnis genommen!")
                                 .AsEphemeral());
-                        await Task.Delay(TimeSpan.FromSeconds(10));
-                        await args.Channel.DeleteAsync("Warn wurde zur Kenntnis genommen.");
+                        await Task.Delay(TimeSpan.FromSeconds(30));
+                        await args.Channel.DeleteAsync("Warn wurde zur Kenntnis genommen. Dieser Channel wird nach 30 Sekunden gelöscht.");
                     }
 
                 }
