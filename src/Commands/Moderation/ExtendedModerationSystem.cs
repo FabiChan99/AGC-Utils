@@ -186,26 +186,59 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
 
             return null;
         }
-
-
-        public async Task<JObject?> BSTest(CommandContext ctx, DiscordUser user)
+        
+        private static async Task<List<BSReportDTO>?> GetBannsystemReports(DiscordUser user)
         {
-            string content = "";
+            using HttpClient client = new();
+            string apiKey = GlobalProperties.DebugMode
+                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
+                : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
+            string apiUrl = GlobalProperties.DebugMode
+                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
+                : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
+
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
+            HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
+                List<BSReportDTO> data = apiResponse.reports;
+                return data;
+            }
+
+            return null;
+        }
+        
+        private async Task<List<BSReportDTO>> BSReportToWarn(DiscordUser user)
+        {
             try
             {
-                object u = await GetBannsystemWarns(user);
-                JArray jsonArray = JArray.Parse(u.ToString());
-                JObject firstObject = (JObject)jsonArray[0];
-                return (JObject)firstObject;
+                var warnList = new List<BSReportDTO>();
+                var data = await GetBannsystemReports(user);
+
+                foreach (var warn in data)
+                {
+                    BSReportDTO bswarn = new BSReportDTO
+                    {
+                        reportId = warn.reportId,
+                        authorId = warn.authorId,
+                        reason = warn.reason,
+                        timestamp = warn.timestamp
+                    };
+                    warnList.Add(bswarn);
+                }
+
+                return warnList;
             }
             catch (Exception e)
             {
                 // ignored
             }
 
-            return null;
+            return new List<BSReportDTO>();
         }
-
+        
 
         private async Task<List<BSWarnDTO>> BSWarnToWarn(DiscordUser user)
         {
@@ -306,11 +339,13 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             }
 
             var bsflaglist = new List<BSWarnDTO>();
+            var bsreportlist = new List<BSReportDTO>();
             if (bs_enabled)
             {
                 try
                 {
                     bsflaglist = await BSWarnToWarn(user);
+                    bsreportlist = await BSReportToWarn(user);
                 }
                 catch (Exception)
                 {
@@ -420,9 +455,19 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-W-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
+
+                foreach (var bsreport in bsreportlist)
+                {
+                    var pid = bsreport.authorId;
+                    var puser = await ctx.Client.TryGetUserAsync(pid, false);
+                    bool active = bsreport.active;
+                    var FlagStr = 
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
+                }
+                flagResults = flagResults.OrderByDescending(x => x.Split(" ")[2]).ToList();
 
                 var __flagcount = flagResults.Count;
 
@@ -573,9 +618,20 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-W-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
+                
+                foreach (var bsreport in bsreportlist)
+                {
+                    var pid = bsreport.authorId;
+                    var puser = await ctx.Client.TryGetUserAsync(pid, false);
+                    bool active = bsreport.active;
+                    var FlagStr = 
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
+                    flagResults.Add(FlagStr);
+                }
+                flagResults = flagResults.OrderBy(x => x.Split(" ")[2]).ToList();
 
                 var __flagcount = flagResults.Count;
 
