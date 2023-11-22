@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Net.Http.Headers;
+using System.Text.Json.Nodes;
 using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
@@ -13,6 +14,7 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Npgsql;
 using RestSharp;
 
@@ -159,6 +161,91 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             return (false, null, false);
         }
 
+        private static async Task<List<BSWarnDTO>?> GetBannsystemWarns(DiscordUser user)
+        {
+            using HttpClient client = new();
+            string apiKey = GlobalProperties.DebugMode
+                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
+                : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
+            string apiUrl = GlobalProperties.DebugMode
+                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
+                : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
+
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
+            HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                ApiResponse apiResponse = JsonConvert.DeserializeObject<ApiResponse>(json);
+                List<BSWarnDTO> data = apiResponse.warns;
+                return data;
+            }
+
+            return null;
+        }
+
+
+        public async Task<JObject?> BSTest(CommandContext ctx ,DiscordUser user)
+        {
+            string content = "";
+            try
+            {
+                object u = await GetBannsystemWarns(user);
+                JArray jsonArray = JArray.Parse(u.ToString());
+                JObject firstObject = (JObject)jsonArray[0];
+                return (JObject)firstObject;
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            return null;
+        }
+
+        public class ApiResponse
+        {
+            public List<BSWarnDTO> warns { get; set; }
+        }
+
+        public class BSWarnDTO
+        {
+            public string? warnId { get; set; }
+            public ulong authorId { get; set; }
+            public string? reason { get; set; }
+            public long timestamp { get; set; }
+        }
+
+
+        private async Task<List<BSWarnDTO>> BSWarnToWarn(DiscordUser user)
+        {
+            try
+            {
+                var warnList = new List<BSWarnDTO>();
+                var data = await GetBannsystemWarns(user);
+
+                foreach (var warn in data)
+                {
+                    BSWarnDTO bswarn = new BSWarnDTO
+                    {
+                        warnId = warn.warnId,
+                        authorId = warn.authorId,
+                        reason = warn.reason,
+                        timestamp = warn.timestamp
+                    };
+                    warnList.Add(bswarn);
+                }
+
+                return warnList;
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+            return new List<BSWarnDTO>();
+
+        }
+
 
         [Command("userinfo")]
         [RequireDatabase]
@@ -228,10 +315,11 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             {
                 bs_enabled = false;
             }
-
+            var bsflaglist = new List<BSWarnDTO>();
             if (bs_enabled)
                 try
                 {
+                    bsflaglist = await BSWarnToWarn(user);
                     (bool temp_bs_status, object bs, bs_success) = await CheckBannsystem(user);
                     bs_status = temp_bs_status;
                     if (bs_status)
@@ -239,6 +327,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         {
                             DiscordColor clr = DiscordColor.Red;
                             var report_data = (List<object>)bs;
+                            
                         }
                         catch (Exception)
                         {
@@ -298,6 +387,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 List<Dictionary<string, object>> FlagResults =
                     await DatabaseService.SelectDataFromTable("flags", FlagQuery, flagWhereConditions);
                 foreach (var result in FlagResults) flaglist.Add(result);
+                
 
                 List<string> pWarnQuery = new()
                 {
@@ -342,6 +432,15 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag["caseid"]}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag["datum"]), TimestampFormat.RelativeTime)}  -  {flag["description"]}";
                     flagResults.Add(FlagStr);
                 }
+                
+                foreach (var bsflag in bsflaglist)
+                {
+                    var pid = bsflag.authorId;
+                    var puser = await ctx.Client.TryGetUserAsync(pid, false);
+                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(bsflag.timestamp), TimestampFormat.RelativeTime)}  -  {bsflag.reason}";
+                    flagResults.Add(FlagStr);
+                }
+                var __flagcount = flagResults.Count;
 
                 foreach (dynamic warn in warnlist)
                 {
@@ -405,7 +504,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", permawarnResults) + "\n";
                 userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
-                userinfostring += flaglist.Count == 0
+                userinfostring += __flagcount == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", flagResults) + "\n";
 
@@ -493,6 +592,15 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     flagResults.Add(FlagStr);
                 }
 
+                foreach (var bsflag in bsflaglist)
+                {
+                    var pid = bsflag.authorId;
+                    var puser = await ctx.Client.TryGetUserAsync(pid, false);
+                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(bsflag.timestamp), TimestampFormat.RelativeTime)}  -  {bsflag.reason}";
+                    flagResults.Add(FlagStr);
+                }
+                var __flagcount = flagResults.Count;
+
                 foreach (dynamic warn in warnlist)
                 {
                     long intValue = warn["punisherid"];
@@ -553,7 +661,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", permawarnResults) + "\n";
                 userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
-                userinfostring += flaglist.Count == 0
+                userinfostring += __flagcount == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", flagResults) + "\n";
                 userinfostring += "\n**Lokaler Bannstatus**\n";
