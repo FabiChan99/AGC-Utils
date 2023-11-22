@@ -194,7 +194,8 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         reportId = warn.reportId,
                         authorId = warn.authorId,
                         reason = warn.reason,
-                        timestamp = warn.timestamp
+                        timestamp = warn.timestamp,
+                        active = warn.active
                     };
                     warnList.Add(bswarn);
                 }
