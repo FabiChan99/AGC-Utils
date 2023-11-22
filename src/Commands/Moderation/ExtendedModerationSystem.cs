@@ -14,7 +14,6 @@ using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Npgsql;
 using RestSharp;
 
@@ -132,9 +131,9 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
             return urls;
         }
-        
 
-        private static async Task<List<BSWarnDTO>?> GetBannsystemWarns(DiscordUser user)
+
+        private static async Task<List<BannSystemWarn>?> GetBannsystemWarns(DiscordUser user)
         {
             using HttpClient client = new();
             string apiKey = GlobalProperties.DebugMode
@@ -150,14 +149,14 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             {
                 string json = await response.Content.ReadAsStringAsync();
                 UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-                List<BSWarnDTO> data = apiResponse.warns;
+                List<BannSystemWarn> data = apiResponse.warns;
                 return data;
             }
 
             return null;
         }
-        
-        private static async Task<List<BSReportDTO>?> GetBannsystemReports(DiscordUser user)
+
+        private static async Task<List<BannSystemReport>?> GetBannsystemReports(DiscordUser user)
         {
             using HttpClient client = new();
             string apiKey = GlobalProperties.DebugMode
@@ -173,23 +172,23 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             {
                 string json = await response.Content.ReadAsStringAsync();
                 UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-                List<BSReportDTO> data = apiResponse.reports;
+                List<BannSystemReport> data = apiResponse.reports;
                 return data;
             }
 
             return null;
         }
-        
-        private async Task<List<BSReportDTO>> BSReportToWarn(DiscordUser user)
+
+        private async Task<List<BannSystemReport>> BSReportToWarn(DiscordUser user)
         {
             try
             {
-                var warnList = new List<BSReportDTO>();
+                var warnList = new List<BannSystemReport>();
                 var data = await GetBannsystemReports(user);
 
                 foreach (var warn in data)
                 {
-                    BSReportDTO bswarn = new BSReportDTO
+                    BannSystemReport bswarn = new BannSystemReport
                     {
                         reportId = warn.reportId,
                         authorId = warn.authorId,
@@ -207,20 +206,20 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 // ignored
             }
 
-            return new List<BSReportDTO>();
+            return new List<BannSystemReport>();
         }
-        
 
-        private async Task<List<BSWarnDTO>> BSWarnToWarn(DiscordUser user)
+
+        private async Task<List<BannSystemWarn>> BSWarnToWarn(DiscordUser user)
         {
             try
             {
-                var warnList = new List<BSWarnDTO>();
+                var warnList = new List<BannSystemWarn>();
                 var data = await GetBannsystemWarns(user);
 
                 foreach (var warn in data)
                 {
-                    BSWarnDTO bswarn = new BSWarnDTO
+                    BannSystemWarn bswarn = new BannSystemWarn
                     {
                         warnId = warn.warnId,
                         authorId = warn.authorId,
@@ -237,7 +236,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 // ignored
             }
 
-            return new List<BSWarnDTO>();
+            return new List<BannSystemWarn>();
         }
 
 
@@ -309,8 +308,8 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 bs_enabled = false;
             }
 
-            var bsflaglist = new List<BSWarnDTO>();
-            var bsreportlist = new List<BSReportDTO>();
+            var bsflaglist = new List<BannSystemWarn>();
+            var bsreportlist = new List<BannSystemReport>();
             if (bs_enabled)
             {
                 try
@@ -320,10 +319,8 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 }
                 catch (Exception)
                 {
-
                 }
             }
-
 
 
             string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";
@@ -435,9 +432,10 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var pid = bsreport.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     bool active = bsreport.active;
-                    var FlagStr = 
+                    var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
                 }
+
                 flagResults = flagResults.OrderByDescending(x => x.Split(" ")[2]).ToList();
 
                 var __flagcount = flagResults.Count;
@@ -592,16 +590,17 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-W-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
-                
+
                 foreach (var bsreport in bsreportlist)
                 {
                     var pid = bsreport.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     bool active = bsreport.active;
-                    var FlagStr = 
+                    var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
                     flagResults.Add(FlagStr);
                 }
+
                 flagResults = flagResults.OrderBy(x => x.Split(" ")[2]).ToList();
 
                 var __flagcount = flagResults.Count;
@@ -1555,7 +1554,6 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 await confirm.ModifyAsync(embedwithoutbuttons);
             }
         }
-
 
 
         [Group("case")]

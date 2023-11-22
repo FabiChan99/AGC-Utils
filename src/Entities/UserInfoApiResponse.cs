@@ -2,7 +2,6 @@
 
 public class UserInfoApiResponse
 {
-    public List<BSWarnDTO> warns { get; set; }
-    public List<BSReportDTO> reports { get; set; }
+    public List<BannSystemWarn> warns { get; set; }
+    public List<BannSystemReport> reports { get; set; }
 }
-

@@ -1,10 +1,9 @@
 ﻿namespace AGC_Management.Entities;
 
-public class BSReportDTO
+public class BannSystemWarn
 {
-    public string? reportId { get; set; }
+    public string? warnId { get; set; }
     public ulong authorId { get; set; }
     public string? reason { get; set; }
     public long timestamp { get; set; }
-    public bool active { get; set; }
 }
