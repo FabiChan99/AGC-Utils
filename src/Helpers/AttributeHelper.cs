@@ -142,7 +142,7 @@ public class RequireTeamCat : CheckBaseAttribute
         {
             return true;
         }
-        
+
         ulong botOwnerId = GlobalProperties.BotOwnerId;
         if (ctx.Member.Id == botOwnerId)
         {

@@ -589,7 +589,9 @@ public class ModerationSystem : BaseCommandModule
             var staffWithBanPerms =
                 staffmembers.Where(x => x.Permissions.HasPermission(Permissions.BanMembers)).ToList();
             var onlineStaffWithBanPerms = staffWithBanPerms
-                .Where(member => (member.Presence?.Status ?? UserStatus.Offline) != UserStatus.Offline).Where(member => member.Id != 441192596325531648).Where(member => member.Id != 515404778021322773).ToList();
+                .Where(member => (member.Presence?.Status ?? UserStatus.Offline) != UserStatus.Offline)
+                .Where(member => member.Id != 441192596325531648).Where(member => member.Id != 515404778021322773)
+                .ToList();
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Bannanfrage")
                 .WithDescription($"Ban-Anfrage für mehrere Benutzer: {busers_formatted}\n" +
@@ -840,7 +842,8 @@ public class ModerationSystem : BaseCommandModule
             {
                 if (!GlobalProperties.DebugMode)
                     staffMentionString = string.Join(" ", onlineStaffWithBanPerms
-                        .Where(member => member.Id != 441192596325531648).Where(member => member.Id != 515404778021322773)
+                        .Where(member => member.Id != 441192596325531648)
+                        .Where(member => member.Id != 515404778021322773)
                         .Select(member => member.Mention));
                 else
                     staffMentionString = "DEBUG MODE AKTIV | Kein Ping wird ausgeführt";

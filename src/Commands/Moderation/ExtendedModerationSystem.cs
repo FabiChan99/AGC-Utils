@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Net.Http.Headers;
-using System.Text.Json.Nodes;
 using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp;
@@ -47,14 +46,17 @@ public sealed class ExtendedModerationSystemLoop
                     {
                         continue;
                     }
-                    else if (channel.Name.StartsWith("warn-"))
+
+                    if (channel.Name.StartsWith("warn-"))
                     {
                         CurrentApplicationData.Client.Logger.LogInformation(
                             $"Lösche Warn-Channel {channel.Name} da er älter als 24 Stunden ist.");
-                        await channel.DeleteAsync("Warn-Channel ist älter als 24 Stunden. Behandle ihn als abgeschlossen.");
+                        await channel.DeleteAsync(
+                            "Warn-Channel ist älter als 24 Stunden. Behandle ihn als abgeschlossen.");
                     }
                 }
             }
+
             await Task.Delay(TimeSpan.FromHours(1));
         }
     }
@@ -94,9 +96,9 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                                 .WithContent("Der Warn wurde zur Kenntnis genommen!")
                                 .AsEphemeral());
                         await Task.Delay(TimeSpan.FromSeconds(30));
-                        await args.Channel.DeleteAsync("Warn wurde zur Kenntnis genommen. Dieser Channel wird nach 30 Sekunden gelöscht.");
+                        await args.Channel.DeleteAsync(
+                            "Warn wurde zur Kenntnis genommen. Dieser Channel wird nach 30 Sekunden gelöscht.");
                     }
-
                 }
             );
         }
@@ -185,7 +187,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
         }
 
 
-        public async Task<JObject?> BSTest(CommandContext ctx ,DiscordUser user)
+        public async Task<JObject?> BSTest(CommandContext ctx, DiscordUser user)
         {
             string content = "";
             try
@@ -201,19 +203,6 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             }
 
             return null;
-        }
-
-        public class ApiResponse
-        {
-            public List<BSWarnDTO> warns { get; set; }
-        }
-
-        public class BSWarnDTO
-        {
-            public string? warnId { get; set; }
-            public ulong authorId { get; set; }
-            public string? reason { get; set; }
-            public long timestamp { get; set; }
         }
 
 
@@ -242,8 +231,8 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             {
                 // ignored
             }
-            return new List<BSWarnDTO>();
 
+            return new List<BSWarnDTO>();
         }
 
 
@@ -315,6 +304,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             {
                 bs_enabled = false;
             }
+
             var bsflaglist = new List<BSWarnDTO>();
             if (bs_enabled)
                 try
@@ -327,7 +317,6 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         {
                             DiscordColor clr = DiscordColor.Red;
                             var report_data = (List<object>)bs;
-                            
                         }
                         catch (Exception)
                         {
@@ -387,7 +376,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 List<Dictionary<string, object>> FlagResults =
                     await DatabaseService.SelectDataFromTable("flags", FlagQuery, flagWhereConditions);
                 foreach (var result in FlagResults) flaglist.Add(result);
-                
+
 
                 List<string> pWarnQuery = new()
                 {
@@ -432,14 +421,16 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``{flag["caseid"]}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(flag["datum"]), TimestampFormat.RelativeTime)}  -  {flag["description"]}";
                     flagResults.Add(FlagStr);
                 }
-                
+
                 foreach (var bsflag in bsflaglist)
                 {
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
-                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(bsflag.timestamp), TimestampFormat.RelativeTime)}  -  {bsflag.reason}";
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
+
                 var __flagcount = flagResults.Count;
 
                 foreach (dynamic warn in warnlist)
@@ -596,9 +587,11 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 {
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
-                    var FlagStr = $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Formatter.Timestamp(Converter.ConvertUnixTimestamp(bsflag.timestamp), TimestampFormat.RelativeTime)}  -  {bsflag.reason}";
+                    var FlagStr =
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
+
                 var __flagcount = flagResults.Count;
 
                 foreach (dynamic warn in warnlist)
@@ -1378,10 +1371,10 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             DiscordEmbed userembed = uembed;
             var catid = BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"];
             var wchannel = await ctx.Guild.CreateChannelAsync($"warn-{caseid}",
-                ChannelType.Text, ctx.Guild.GetChannel(Convert.ToUInt64(catid)), topic: user.Id.ToString());
+                ChannelType.Text, ctx.Guild.GetChannel(Convert.ToUInt64(catid)), user.Id.ToString());
             await wchannel.AddOverwriteAsync(await user.ConvertToMember(ctx.Guild),
                 Permissions.AccessChannels, Permissions.SendMessages | Permissions.AddReactions, "Warn eröffnet");
-            var buttonack = new DiscordButtonComponent(ButtonStyle.Primary, $"ackwarn", "Kenntnisnahme",
+            var buttonack = new DiscordButtonComponent(ButtonStyle.Primary, "ackwarn", "Kenntnisnahme",
                 emoji: new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:")));
             var mb = new DiscordMessageBuilder()
                 .WithEmbed(userembed).AddComponents(buttonack).WithContent(user.Mention);
@@ -1556,6 +1549,19 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     .WithEmbed(sembed);
                 await confirm.ModifyAsync(embedwithoutbuttons);
             }
+        }
+
+        public class ApiResponse
+        {
+            public List<BSWarnDTO> warns { get; set; }
+        }
+
+        public class BSWarnDTO
+        {
+            public string? warnId { get; set; }
+            public ulong authorId { get; set; }
+            public string? reason { get; set; }
+            public long timestamp { get; set; }
         }
     }
 

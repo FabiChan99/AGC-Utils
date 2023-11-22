@@ -42,7 +42,7 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-            
+
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
@@ -67,6 +67,7 @@ public class NSFWCheck : BaseCommandModule
                         urlsFromText.Add(url);
                     }
                 }
+
                 urls.AddRange(urlsFromText);
             }
 
@@ -114,10 +115,12 @@ public class NSFWCheck : BaseCommandModule
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
 
             var avatarUrl = args.Member.AvatarUrl;
-            if (!avatarUrl.Contains(".png") || !avatarUrl.Contains(".jpg") || !avatarUrl.Contains(".jpeg") || !avatarUrl.Contains(".webp"))
+            if (!avatarUrl.Contains(".png") || !avatarUrl.Contains(".jpg") || !avatarUrl.Contains(".jpeg") ||
+                !avatarUrl.Contains(".webp"))
             {
                 return;
             }
+
             var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
             var responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
@@ -144,8 +147,8 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-            
-            
+
+
             if (_args.Guild.Id != GlobalProperties.AGCGuild.Id)
             {
                 return;
@@ -154,8 +157,9 @@ public class NSFWCheck : BaseCommandModule
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
-            
+            _httpClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
+
             var avatarUrl = _args.AvatarUrlAfter;
             var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
             var responseString = await response.Content.ReadAsStringAsync();

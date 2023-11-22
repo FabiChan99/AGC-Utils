@@ -326,7 +326,8 @@ internal class Program : BaseCommandModule
         await Task.Delay(TimeSpan.FromSeconds(5));
         while (true)
         {
-            GlobalProperties.AGCGuild = await client.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
+            GlobalProperties.AGCGuild =
+                await client.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
             await Task.Delay(TimeSpan.FromMinutes(5));
         }
     }
@@ -402,12 +403,12 @@ public static class GlobalProperties
     // Bot Owner ID
     public static ulong BotOwnerId { get; } = ulong.Parse(BotConfig.GetConfig()["MainConfig"]["BotOwnerId"]);
 
+    public static DiscordGuild AGCGuild { get; set; }
+
     private static bool ParseBoolean(string boolString)
     {
         if (bool.TryParse(boolString, out bool parsedBool))
             return parsedBool;
         return false;
     }
-    
-    public static DiscordGuild AGCGuild { get; set; }
 }

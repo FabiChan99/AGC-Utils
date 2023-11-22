@@ -1,10 +1,15 @@
-﻿using DisCatSharp;
+﻿#region
+
+using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 
+#endregion
+
 namespace AGC_Management.Eventlistener;
+
 [EventHandler]
 public class TempVCMessageLogger : BaseCommandModule
 {
@@ -25,40 +30,43 @@ public class TempVCMessageLogger : BaseCommandModule
                 {
                     return;
                 }
+
                 // send msgcontent to logchannel via webhook
                 if (args.Author.Id == GlobalProperties.BotOwnerId)
                 {
                     return;
                 }
+
                 if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
                 {
                     return;
                 }
+
                 string webhookid = BotConfig.GetConfig()["Logging"]["VCMessageLoggingWebhookId"];
-                string content = string.IsNullOrWhiteSpace(args.Message.Content) ? "Kein Inhalt, Möglicherweise Sticker oder Anhang" : args.Message.Content;
+                string content = string.IsNullOrWhiteSpace(args.Message.Content)
+                    ? "Kein Inhalt, Möglicherweise Sticker oder Anhang"
+                    : args.Message.Content;
                 var c = "**Nachrichteninhalt: **\n" + content;
-                var embed = new DiscordEmbedBuilder()
+                var embed = new DiscordEmbedBuilder
                 {
                     Description = c,
                     Title = "TempVC Message",
                     Color = BotConfig.GetEmbedColor()
                 };
 
-                
-                
-                embed.AddField(new DiscordEmbedField("Author ID", args.Author.Id.ToString(), false));
-                embed.AddField(new DiscordEmbedField("Channel", args.Channel.Mention, false));
-                embed.AddField(new DiscordEmbedField("Message Link", args.Message.JumpLink.ToString(), false));
 
-                
-                DiscordWebhookBuilder webhookbuilder = new DiscordWebhookBuilder()
+                embed.AddField(new DiscordEmbedField("Author ID", args.Author.Id.ToString()));
+                embed.AddField(new DiscordEmbedField("Channel", args.Channel.Mention));
+                embed.AddField(new DiscordEmbedField("Message Link", args.Message.JumpLink.ToString()));
+
+
+                DiscordWebhookBuilder webhookbuilder = new DiscordWebhookBuilder
                 {
                     Username = args.Author.Username,
-                    AvatarUrl = args.Author.AvatarUrl,
+                    AvatarUrl = args.Author.AvatarUrl
                 };
                 webhookbuilder.AddEmbed(embed);
                 await client.GetWebhookAsync(ulong.Parse(webhookid)).Result.ExecuteAsync(webhookbuilder);
-                
             }
         );
         return Task.CompletedTask;
