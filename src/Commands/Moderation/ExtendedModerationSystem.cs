@@ -501,7 +501,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 userinfostring += permawarnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", permawarnResults) + "\n";
-                userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
+                userinfostring += $"\n**__Alle Markierungen ({__flagcount})__**\n";
                 userinfostring += __flagcount == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", flagResults) + "\n";
@@ -664,7 +664,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 userinfostring += permawarnlist.Count == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", permawarnResults) + "\n";
-                userinfostring += $"\n**__Alle Markierungen ({flagcount})__**\n";
+                userinfostring += $"\n**__Alle Markierungen ({__flagcount})__**\n";
                 userinfostring += __flagcount == 0
                     ? "Es wurden keine gefunden.\n"
                     : string.Join("\n\n", flagResults) + "\n";
