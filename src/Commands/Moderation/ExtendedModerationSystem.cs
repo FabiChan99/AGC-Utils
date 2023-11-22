@@ -132,37 +132,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
             return urls;
         }
-
-
-        private static async Task<(bool, object, bool)> CheckBannsystem(DiscordUser user)
-        {
-            using HttpClient client = new();
-
-            string apiKey = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
-
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
-
-            string apiUrl = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
-
-            HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                dynamic data = JsonConvert.DeserializeObject(json);
-
-                if (data.reports != null && data.reports.Count > 0)
-                    return (true, data.reports, true);
-
-                return (false, data.reports, true);
-            }
-
-            return (false, null, false);
-        }
+        
 
         private static async Task<List<BSWarnDTO>?> GetBannsystemWarns(DiscordUser user)
         {
