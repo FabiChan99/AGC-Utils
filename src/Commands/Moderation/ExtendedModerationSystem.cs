@@ -423,7 +423,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-W-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-WARN-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
 
@@ -433,7 +433,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     bool active = bsreport.active;
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-REPORT-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
                 }
 
                 flagResults = flagResults.OrderByDescending(x => x.Split(" ")[2]).ToList();
@@ -587,7 +587,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var pid = bsflag.authorId;
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-W-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-WARN-{bsflag.warnId}``]  {Converter.ConvertUnixTimestamp(bsflag.timestamp).Timestamp()}  -  {bsflag.reason}";
                     flagResults.Add(FlagStr);
                 }
 
@@ -597,7 +597,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     var puser = await ctx.Client.TryGetUserAsync(pid, false);
                     bool active = bsreport.active;
                     var FlagStr =
-                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-R-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
+                        $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-REPORT-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
                     flagResults.Add(FlagStr);
                 }
 
