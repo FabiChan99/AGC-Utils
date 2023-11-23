@@ -238,6 +238,19 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
 
             return new List<BannSystemWarn>();
         }
+        
+        public bool HasActiveBannSystemReport(List<BannSystemReport> reports)
+        {
+            foreach (var report in reports)
+            {
+                if (report.active)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
 
         [Command("userinfo")]
@@ -321,6 +334,8 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                 {
                 }
             }
+            
+            bs_status = HasActiveBannSystemReport(bsreportlist);
 
 
             string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";
