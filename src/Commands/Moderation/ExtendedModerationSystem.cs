@@ -449,9 +449,9 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                     bool active = bsreport.active;
                     var FlagStr =
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-REPORT-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
+                    flagResults.Add(FlagStr);
                 }
-
-                flagResults = flagResults.OrderByDescending(x => x.Split(" ")[2]).ToList();
+                
 
                 var __flagcount = flagResults.Count;
 
@@ -615,8 +615,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
                         $"[{(puser != null ? puser.Username : "Unbekannt")}, ``BS-REPORT-{bsreport.reportId}{(active ? "" : "-EXPIRED")}``]  {Converter.ConvertUnixTimestamp(bsreport.timestamp).Timestamp()}  -  {bsreport.reason}";
                     flagResults.Add(FlagStr);
                 }
-
-                flagResults = flagResults.OrderBy(x => x.Split(" ")[2]).ToList();
+                
 
                 var __flagcount = flagResults.Count;
 
