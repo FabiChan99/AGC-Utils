@@ -10,8 +10,6 @@ using DisCatSharp.EventArgs;
 
 namespace AGC_Management.Eventlistener;
 
-
-
 [EventHandler]
 public class WarnChannelAcknowledgedButtonListener : BaseCommandModule
 {

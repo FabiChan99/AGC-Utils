@@ -1,10 +1,14 @@
-﻿using AGC_Management.Helpers;
+﻿#region
+
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
+
+#endregion
 
 namespace AGC_Management.Commands.Moderation;
 

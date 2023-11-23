@@ -3,7 +3,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
-using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;

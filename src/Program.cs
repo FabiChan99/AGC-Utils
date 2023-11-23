@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Reflection;
-using AGC_Management.Commands.Moderation;
 using AGC_Management.Helpers;
 using AGC_Management.LavaManager;
 using AGC_Management.Services.DatabaseHandler;

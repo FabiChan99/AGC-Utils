@@ -1,6 +1,5 @@
 ﻿#region
 
-using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;

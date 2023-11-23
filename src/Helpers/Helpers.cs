@@ -14,131 +14,130 @@ namespace AGC_Management.Helpers;
 
 public static class Helpers
 {
-        public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
+    {
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        string apiurl = "https://catbox.moe/user/api.php";
+        var client = new RestClient(apiurl);
+        string urls = "";
+
+        foreach (DiscordAttachment att in imgAttachments)
         {
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-            string apiurl = "https://catbox.moe/user/api.php";
-            var client = new RestClient(apiurl);
-            string urls = "";
+            var bytesImage = await new HttpClient().GetByteArrayAsync(att.Url.Split('?')[0]);
+            //using var stream = new MemoryStream(bytesImage);
 
-            foreach (DiscordAttachment att in imgAttachments)
-            {
-                var bytesImage = await new HttpClient().GetByteArrayAsync(att.Url.Split('?')[0]);
-                //using var stream = new MemoryStream(bytesImage);
-
-                var request = new RestRequest(apiurl, Method.Post);
-                request.AddParameter("reqtype", "fileupload");
-                request.AddHeader("Content-Type", "multipart/form-data");
-                request.AddFile("fileToUpload", bytesImage, att.FileName);
+            var request = new RestRequest(apiurl, Method.Post);
+            request.AddParameter("reqtype", "fileupload");
+            request.AddHeader("Content-Type", "multipart/form-data");
+            request.AddFile("fileToUpload", bytesImage, att.FileName);
 
 
-                var response = await client.ExecuteAsync(request);
-                urls += $" {response.Content}";
-            }
-
-            await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-            return urls;
+            var response = await client.ExecuteAsync(request);
+            urls += $" {response.Content}";
         }
 
+        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
+        return urls;
+    }
 
-        public static async Task<List<BannSystemWarn>?> GetBannsystemWarns(DiscordUser user)
+
+    public static async Task<List<BannSystemWarn>?> GetBannsystemWarns(DiscordUser user)
+    {
+        using HttpClient client = new();
+        string apiKey = GlobalProperties.DebugMode
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
+        string apiUrl = GlobalProperties.DebugMode
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
+
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
+        HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+        if (response.IsSuccessStatusCode)
         {
-            using HttpClient client = new();
-            string apiKey = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
-            string apiUrl = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
-
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
-            HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-                List<BannSystemWarn> data = apiResponse.warns;
-                return data;
-            }
-
-            return null;
+            string json = await response.Content.ReadAsStringAsync();
+            UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
+            List<BannSystemWarn> data = apiResponse.warns;
+            return data;
         }
 
-        public static async Task<List<BannSystemReport?>?> GetBannsystemReports(DiscordUser user)
+        return null;
+    }
+
+    public static async Task<List<BannSystemReport?>?> GetBannsystemReports(DiscordUser user)
+    {
+        using HttpClient client = new();
+        string apiKey = GlobalProperties.DebugMode
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
+        string apiUrl = GlobalProperties.DebugMode
+            ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
+            : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
+
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
+        HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+        if (response.IsSuccessStatusCode)
         {
-            using HttpClient client = new();
-            string apiKey = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
-            string apiUrl = GlobalProperties.DebugMode
-                ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
-                : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
-
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
-            HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-                List<BannSystemReport> data = apiResponse.reports;
-                return data;
-            }
-
-            return null;
+            string json = await response.Content.ReadAsStringAsync();
+            UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
+            List<BannSystemReport> data = apiResponse.reports;
+            return data;
         }
 
-        public static async Task<List<BannSystemReport?>?> BSReportToWarn(DiscordUser user)
+        return null;
+    }
+
+    public static async Task<List<BannSystemReport?>?> BSReportToWarn(DiscordUser user)
+    {
+        try
         {
-            try
-            {
-                var data = await GetBannsystemReports(user);
+            var data = await GetBannsystemReports(user);
 
-                return data.Select(warn => new BannSystemReport
-                {
-                    reportId = warn.reportId,
-                    authorId = warn.authorId,
-                    reason = warn.reason,
-                    timestamp = warn.timestamp,
-                    active = warn.active
-                }).ToList();
-            }
-            catch (Exception e)
+            return data.Select(warn => new BannSystemReport
             {
-                // ignored
-            }
-
-            return new List<BannSystemReport>();
+                reportId = warn.reportId,
+                authorId = warn.authorId,
+                reason = warn.reason,
+                timestamp = warn.timestamp,
+                active = warn.active
+            }).ToList();
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
 
-        public static async Task<List<BannSystemWarn>> BSWarnToWarn(DiscordUser user)
+        return new List<BannSystemReport>();
+    }
+
+    public static async Task<List<BannSystemWarn>> BSWarnToWarn(DiscordUser user)
+    {
+        try
         {
-            try
-            {
-                var data = await GetBannsystemWarns(user);
+            var data = await GetBannsystemWarns(user);
 
-                return data.Select(warn => new BannSystemWarn
-                {
-                    warnId = warn.warnId,
-                    authorId = warn.authorId,
-                    reason = warn.reason,
-                    timestamp = warn.timestamp
-                }).ToList();
-            }
-            catch (Exception e)
+            return data.Select(warn => new BannSystemWarn
             {
-                // ignored
-            }
-
-            return new List<BannSystemWarn>();
+                warnId = warn.warnId,
+                authorId = warn.authorId,
+                reason = warn.reason,
+                timestamp = warn.timestamp
+            }).ToList();
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
 
-        
-        
-        public static bool HasActiveBannSystemReport(List<BannSystemReport> reports)
-        {
-            return reports.Any(report => report.active);
-        }
-    
+        return new List<BannSystemWarn>();
+    }
+
+
+    public static bool HasActiveBannSystemReport(List<BannSystemReport> reports)
+    {
+        return reports.Any(report => report.active);
+    }
+
     public static async Task<bool> CheckForReason(CommandContext ctx, string? reason)
     {
         if (reason == null)
@@ -214,7 +213,7 @@ public static class Helpers
         var uniqueID = guid.Substring(0, 8);
         return uniqueID;
     }
-    
+
     public static async Task SendWarnAsChannel(CommandContext ctx, DiscordUser user, DiscordEmbed uembed, string caseid)
     {
         DiscordEmbed userembed = uembed;

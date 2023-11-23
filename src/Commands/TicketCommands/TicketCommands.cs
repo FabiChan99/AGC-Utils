@@ -2,7 +2,6 @@
 
 using AGC_Management.Attributes;
 using AGC_Management.Enums;
-using AGC_Management.Helpers;
 using AGC_Management.Managers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;

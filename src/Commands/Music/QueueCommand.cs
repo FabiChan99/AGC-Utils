@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Text;
+using AGC_Management.Attributes;
 using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
@@ -13,12 +14,10 @@ using DisCatSharp.Interactivity.Extensions;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using LavaSharp.LavaManager;
-using AGC_Management.Attributes;
 
 #endregion
 
 namespace AGC_Management.Commands.Music;
-
 
 [SlashCommandGroup("queue", "Queue commands.")]
 public sealed class QueueCommand : ApplicationCommandsModule
