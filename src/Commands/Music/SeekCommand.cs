@@ -13,7 +13,7 @@ using AGC_Management.Attributes;
 
 namespace AGC_Management.Commands.Music;
 
-public class SeekCommand : ApplicationCommandsModule
+public sealed class SeekCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

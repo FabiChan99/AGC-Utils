@@ -8,7 +8,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class KickUserCommand : BaseCommandModule
+public sealed class KickUserCommand : BaseCommandModule
 {
     [Command("kick")]
     [RequireTeamCat]

@@ -13,7 +13,7 @@ namespace AGC_Management.Commands.Music;
 
 [ApplicationCommandRequireUserPermissions(Permissions.ManageGuild)]
 [SlashCommandGroup("settings", "Ändere die Einstellungen des Bots.")]
-public class SettingsCommand : ApplicationCommandsModule
+public sealed class SettingsCommand : ApplicationCommandsModule
 {
     [SlashCommand("RequireDJRole", "Aktiviere oder deaktiviere die DJ-Rolle.")]
     public async Task RequireDJRole(InteractionContext ctx,

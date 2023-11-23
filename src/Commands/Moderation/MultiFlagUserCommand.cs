@@ -9,7 +9,7 @@ using AGC_Management.Attributes;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class MultiFlagUserCommand : BaseCommandModule
+public sealed class MultiFlagUserCommand : BaseCommandModule
 {
         [Command("multiflag")]
         [Description("Flaggt mehrere Nutzer")]

@@ -8,7 +8,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class MultiBanCommand : BaseCommandModule
+public sealed class MultiBanCommand : BaseCommandModule
 {
     [Command("multiban")]
     [Description("Bannt mehrere User gleichzeitig.")]

@@ -11,7 +11,7 @@ using DisCatSharp.Exceptions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class UserInfoCommand : BaseCommandModule
+public sealed class UserInfoCommand : BaseCommandModule
 {
         [Command("userinfo")]
         [RequireDatabase]

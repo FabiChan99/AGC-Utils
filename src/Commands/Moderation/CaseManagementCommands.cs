@@ -10,7 +10,7 @@ using Npgsql;
 namespace AGC_Management.Commands.Moderation;
 
     [Group("case")]
-    public class CaseManagement : BaseCommandModule
+    public sealed class CaseManagement : BaseCommandModule
     {
         private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
         {

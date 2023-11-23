@@ -9,7 +9,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class PermaWarnCommand : BaseCommandModule
+public sealed class PermaWarnCommand : BaseCommandModule
 {
         [Command("permawarn")]
         [Description("Verwarnt einen Nutzer permanent")]

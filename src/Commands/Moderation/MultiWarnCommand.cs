@@ -9,7 +9,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class MultiWarnCommand : BaseCommandModule
+public sealed class MultiWarnCommand : BaseCommandModule
 {
             // multiwarn, also wie multiflag und warn zusammen
 

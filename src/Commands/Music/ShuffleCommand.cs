@@ -14,7 +14,7 @@ using LavaSharp.LavaManager;
 
 namespace AGC_Management.Commands.Music;
 
-public class ShuffleCommand : ApplicationCommandsModule
+public sealed class ShuffleCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

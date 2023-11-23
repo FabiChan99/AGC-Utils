@@ -13,7 +13,7 @@ using AGC_Management.Attributes;
 
 namespace AGC_Management.Commands.Music;
 
-public class ReplayCommand : ApplicationCommandsModule
+public sealed class ReplayCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

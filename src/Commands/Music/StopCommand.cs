@@ -14,7 +14,7 @@ using LavaSharp.LavaManager;
 
 namespace AGC_Management.Commands.Music;
 
-public class StopCommand : ApplicationCommandsModule
+public sealed class StopCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

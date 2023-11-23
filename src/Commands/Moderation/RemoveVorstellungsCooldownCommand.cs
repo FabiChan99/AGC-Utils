@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class RemoveVorstellungsCooldownCommand : BaseCommandModule
+public sealed class RemoveVorstellungsCooldownCommand : BaseCommandModule
 {
     [Command("removevcooldown")]
     [RequireDatabase]

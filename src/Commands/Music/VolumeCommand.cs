@@ -13,7 +13,7 @@ using DisCatSharp.Lavalink;
 
 namespace AGC_Management.Commands.Music;
 
-public class VolumeCommand : ApplicationCommandsModule
+public sealed class VolumeCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

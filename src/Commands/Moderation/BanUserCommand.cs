@@ -8,7 +8,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class BanUserCommand : BaseCommandModule
+public sealed class BanUserCommand : BaseCommandModule
 {
     [Command("ban")]
     [Description("Bannt einen User vom Server")]

@@ -6,7 +6,7 @@ using DisCatSharp.Entities;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class FlagUserCommand : BaseCommandModule
+public sealed class FlagUserCommand : BaseCommandModule
 {
         [Command("flag")]
         [Description("Flaggt einen Nutzer")]

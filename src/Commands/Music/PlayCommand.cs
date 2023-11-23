@@ -18,7 +18,7 @@ using AGC_Management.Attributes;
 #endregion
 
 namespace AGC_Management.Commands.Music;
-public class PlayCommand : ApplicationCommandsModule
+public sealed class PlayCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

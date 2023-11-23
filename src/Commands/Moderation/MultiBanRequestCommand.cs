@@ -9,7 +9,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 namespace AGC_Management.Commands.Moderation;
 
-public class MultiBanRequestCommand : BaseCommandModule
+public sealed class MultiBanRequestCommand : BaseCommandModule
 {
     [Command("multibanrequest")]
     [Aliases("multibanreq")]
