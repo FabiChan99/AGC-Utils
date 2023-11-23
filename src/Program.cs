@@ -164,11 +164,11 @@ internal class Program : BaseCommandModule
     {
         //// start Warn Expire Task
         ModerationSystemTasks MST = new();
-        MST.StartRemovingWarnsPeriodically(discord);
+        _ = MST.StartRemovingWarnsPeriodically(discord);
 
         //// start TempVC Check Task
         TempVoiceTasks TVT = new();
-        TVT.StartRemoveEmptyTempVoices(discord);
+        _ = TVT.StartRemoveEmptyTempVoices(discord);
 
         _ = StatusUpdateTask(discord);
         _ = UpdateGuild(discord);
