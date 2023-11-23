@@ -11,9 +11,9 @@ using DisCatSharp.Lavalink;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
-public class SendMeTrackCommand : ApplicationCommandsModule
+public sealed class SendMeTrackCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

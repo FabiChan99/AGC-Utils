@@ -13,9 +13,9 @@ using LavaSharp.LavaManager;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
-public class SkipCommand : ApplicationCommandsModule
+public sealed class SkipCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

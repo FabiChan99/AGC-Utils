@@ -12,9 +12,9 @@ using LavaSharp.LavaManager;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
-public class PauseCommand : ApplicationCommandsModule
+public sealed class PauseCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

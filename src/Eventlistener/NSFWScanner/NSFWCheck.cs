@@ -1,7 +1,7 @@
 ﻿#region
 
 using System.Text.RegularExpressions;
-using AGC_Management.Helpers;
+using AGC_Management.Attributes;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;

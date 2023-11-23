@@ -17,10 +17,10 @@ using LavaSharp.LavaManager;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
 [SlashCommandGroup("queue", "Queue commands.")]
-public class QueueCommand : ApplicationCommandsModule
+public sealed class QueueCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
     [EnsureGuild]

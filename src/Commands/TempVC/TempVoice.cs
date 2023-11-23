@@ -1,5 +1,6 @@
 ﻿#region
 
+using AGC_Management.Attributes;
 using AGC_Management.Helpers;
 using AGC_Management.Helpers.TempVoice;
 using AGC_Management.Services.DatabaseHandler;
@@ -2243,7 +2244,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     }
 }
 
-public class TempVoicePanel : TempVoiceHelper
+public sealed class TempVoicePanel : TempVoiceHelper
 {
     [Command("initpanel")]
     [RequirePermissions(Permissions.Administrator)]

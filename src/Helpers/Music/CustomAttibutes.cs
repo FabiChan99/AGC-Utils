@@ -1,6 +1,5 @@
 ﻿#region
 
-using AGC_Management.Helpers;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
@@ -10,7 +9,7 @@ using DisCatSharp.Lavalink.Entities;
 
 #endregion
 
-namespace AGC_Management.Attributes;
+namespace AGC_Management.Helpers;
 
 public sealed class ApplicationRequireExecutorInVoice : ApplicationCommandCheckBaseAttribute
 {
