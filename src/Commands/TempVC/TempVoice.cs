@@ -2244,7 +2244,7 @@ public class TempVoicePanelEventHandler : TempVoiceHelper
     }
 }
 
-public class TempVoicePanel : TempVoiceHelper
+public sealed class TempVoicePanel : TempVoiceHelper
 {
     [Command("initpanel")]
     [RequirePermissions(Permissions.Administrator)]
