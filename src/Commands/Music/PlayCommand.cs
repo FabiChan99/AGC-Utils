@@ -1,9 +1,8 @@
 ﻿#region
 
 using System.Text.RegularExpressions;
-using AGC_Management.Attributes;
-using AGC_Management.Enums;
 using AGC_Management.Helpers;
+using AGC_Management.Enums;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
@@ -14,11 +13,11 @@ using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using DisCatSharp.Lavalink.Enums;
 using LavaSharp.LavaManager;
+using AGC_Management.Attributes;
 
 #endregion
 
-namespace AGC_Management.Commands;
-
+namespace AGC_Management.Commands.Music;
 public class PlayCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]

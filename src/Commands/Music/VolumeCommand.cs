@@ -11,7 +11,7 @@ using DisCatSharp.Lavalink;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
 public class VolumeCommand : ApplicationCommandsModule
 {
@@ -27,7 +27,7 @@ public class VolumeCommand : ApplicationCommandsModule
         var lava = ctx.Client.GetLavalink();
         var node = lava.ConnectedSessions.First().Value;
         var player = node.GetGuildPlayer(ctx.Guild);
-        var channel = ctx.Member.VoiceState?.Channel;
+        var channel = ctx.Member?.VoiceState?.Channel;
         int maxvol = 150;
 
         if (player?.Channel.Id != channel?.Id)

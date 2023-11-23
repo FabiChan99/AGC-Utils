@@ -10,7 +10,7 @@ using DisCatSharp.Lavalink.Entities;
 
 #endregion
 
-namespace AGC_Management.Attributes;
+namespace AGC_Management.Helpers;
 
 public sealed class ApplicationRequireExecutorInVoice : ApplicationCommandCheckBaseAttribute
 {

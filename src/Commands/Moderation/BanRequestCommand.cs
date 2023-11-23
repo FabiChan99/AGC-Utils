@@ -1,4 +1,5 @@
-﻿using AGC_Management.Helpers;
+﻿using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -10,7 +11,7 @@ namespace AGC_Management.Commands.Moderation;
 
 public class BanRequestCommand : BaseCommandModule
 {
-        [Command("banrequest")]
+    [Command("banrequest")]
     [Aliases("banreq")]
     [Description("Erstellt einen Banrequest")]
     [RequireStaffRole]

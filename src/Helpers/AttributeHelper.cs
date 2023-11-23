@@ -9,7 +9,7 @@ using DisCatSharp.Lavalink;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Attributes;
 
 public class RequireStaffRole : CheckBaseAttribute
 {

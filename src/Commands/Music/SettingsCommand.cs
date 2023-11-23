@@ -9,7 +9,7 @@ using DisCatSharp.Enums;
 
 #endregion
 
-namespace AGC_Management.Commands;
+namespace AGC_Management.Commands.Music;
 
 [ApplicationCommandRequireUserPermissions(Permissions.ManageGuild)]
 [SlashCommandGroup("settings", "Ändere die Einstellungen des Bots.")]

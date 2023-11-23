@@ -1,4 +1,5 @@
-﻿using AGC_Management.Helpers;
+﻿using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;

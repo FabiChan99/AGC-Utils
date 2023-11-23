@@ -12,8 +12,7 @@ using LavaSharp.LavaManager;
 
 #endregion
 
-namespace AGC_Management.Commands;
-
+namespace AGC_Management.Commands.Music;
 public class LoopCommand : ApplicationCommandsModule
 {
     [RequireConnectedLavalink]
