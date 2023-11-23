@@ -156,7 +156,7 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             return null;
         }
 
-        private static async Task<List<BannSystemReport>?> GetBannsystemReports(DiscordUser user)
+        private static async Task<List<BannSystemReport?>?> GetBannsystemReports(DiscordUser user)
         {
             using HttpClient client = new();
             string apiKey = GlobalProperties.DebugMode
@@ -179,27 +179,20 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             return null;
         }
 
-        private async Task<List<BannSystemReport>> BSReportToWarn(DiscordUser user)
+        private async Task<List<BannSystemReport?>?> BSReportToWarn(DiscordUser user)
         {
             try
             {
-                var warnList = new List<BannSystemReport>();
                 var data = await GetBannsystemReports(user);
 
-                foreach (var warn in data)
+                return data.Select(warn => new BannSystemReport
                 {
-                    BannSystemReport bswarn = new BannSystemReport
-                    {
-                        reportId = warn.reportId,
-                        authorId = warn.authorId,
-                        reason = warn.reason,
-                        timestamp = warn.timestamp,
-                        active = warn.active
-                    };
-                    warnList.Add(bswarn);
-                }
-
-                return warnList;
+                    reportId = warn.reportId,
+                    authorId = warn.authorId,
+                    reason = warn.reason,
+                    timestamp = warn.timestamp,
+                    active = warn.active
+                }).ToList();
             }
             catch (Exception e)
             {
@@ -209,27 +202,19 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
             return new List<BannSystemReport>();
         }
 
-
         private async Task<List<BannSystemWarn>> BSWarnToWarn(DiscordUser user)
         {
             try
             {
-                var warnList = new List<BannSystemWarn>();
                 var data = await GetBannsystemWarns(user);
 
-                foreach (var warn in data)
+                return data.Select(warn => new BannSystemWarn
                 {
-                    BannSystemWarn bswarn = new BannSystemWarn
-                    {
-                        warnId = warn.warnId,
-                        authorId = warn.authorId,
-                        reason = warn.reason,
-                        timestamp = warn.timestamp
-                    };
-                    warnList.Add(bswarn);
-                }
-
-                return warnList;
+                    warnId = warn.warnId,
+                    authorId = warn.authorId,
+                    reason = warn.reason,
+                    timestamp = warn.timestamp
+                }).ToList();
             }
             catch (Exception e)
             {
@@ -238,19 +223,14 @@ public class ExtendedModerationSystemEvents : BaseCommandModule
 
             return new List<BannSystemWarn>();
         }
+
+        
         
         public bool HasActiveBannSystemReport(List<BannSystemReport> reports)
         {
-            foreach (var report in reports)
-            {
-                if (report.active)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return reports.Any(report => report.active);
         }
+
 
 
         [Command("userinfo")]
