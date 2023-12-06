@@ -270,7 +270,7 @@ public class TicketManagerHelper
         // Add a general note
         if (!string.IsNullOrEmpty(additionalNotes))
         {
-            additionalNotes = $"\nNOTE: {additionalNotes} Danke für deine Geduld";
+            additionalNotes = $"\nNOTE: {additionalNotes} Danke für deine Geduld.";
         }
 
         return additionalNotes;
