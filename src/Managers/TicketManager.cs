@@ -348,14 +348,14 @@ public class TicketManager
             Title = "Ticket geschlossen",
             Description =
                 $"Das Ticket wurde erfolgreich geschlossen!\n Geschlossen von {botu.UsernameWithDiscriminator} " +
-                $"``{BotConfig.GetConfig()["MainConfig"]["BotUserID"]}`` " +
+                $"``{botu.Id}`` " +
                 $"\nLetzter Ticketuser nicht mehr auf dem Server",
             Color = DiscordColor.Green
         };
         var tname = ticket_channel.Name;
         await ticket_channel.ModifyAsync(x => x.Name = $"closed-{ticket_channel.Name}");
         var mb = new DiscordMessageBuilder();
-        mb.WithContent($"<@{BotConfig.GetConfig()["MainConfig"]["BotUserID"]}>");
+        mb.WithContent($"<@{CurrentApplicationData.Client.CurrentUser.Id}>");
         mb.WithEmbed(teb.Build());
         mb.AddComponents(del_ticketbutton);
         await ticket_channel.SendMessageAsync(mb);
