@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
 using DisCatSharp;
@@ -37,12 +38,8 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-
-            if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
-            {
-                return;
-            }
-
+            
+            
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
@@ -73,10 +70,11 @@ public class NSFWCheck : BaseCommandModule
 
             foreach (var url in urls)
             {
-                var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={url}");
+                var content = new StringContent($"{{\"imageUrl\":\"{url}\"}}", null, "application/json");
+                var response = await _httpClient.PostAsync("https://api.linklens.xyz/analyze", content);
                 var responseString = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(responseString);
-                var isNSFW = bool.Parse(json["data"]["is_nsfw"].ToString());
+                var isNSFW = bool.Parse(json["is_nsfw"].ToString());
 
                 if (isNSFW)
                 {
@@ -121,10 +119,11 @@ public class NSFWCheck : BaseCommandModule
                 return;
             }
 
-            var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
+            var content = new StringContent($"{{\"imageUrl\":\"{args.Member.AvatarUrl}\"}}", null, "application/json");
+            var response = await _httpClient.PostAsync("https://api.linklens.xyz/analyze", content);
             var responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
-            var isNSFW = bool.Parse(json["data"]["is_nsfw"].ToString());
+            var isNSFW = bool.Parse(json["is_nsfw"].ToString());
 
             if (isNSFW)
             {
@@ -159,13 +158,12 @@ public class NSFWCheck : BaseCommandModule
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
             _httpClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
-
-            var avatarUrl = _args.AvatarUrlAfter;
-            var response = await _httpClient.GetAsync($"https://api.linklens.xyz/?url={avatarUrl}");
+            
+            var content = new StringContent($"{{\"imageUrl\":\"{_args.AvatarUrlAfter}\"}}", null, "application/json");
+            var response = await _httpClient.PostAsync("https://api.linklens.xyz/analyze", content);
             var responseString = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseString);
-            var isNSFW = bool.Parse(json["data"]["is_nsfw"].ToString());
-
+            var isNSFW = bool.Parse(json["is_nsfw"].ToString());
             if (isNSFW)
             {
                 ulong AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
