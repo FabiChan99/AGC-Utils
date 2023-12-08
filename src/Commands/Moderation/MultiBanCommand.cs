@@ -70,7 +70,7 @@ public sealed class MultiBanCommand : BaseCommandModule
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +
                              $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                             $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
+                             $"Dann kannst du eine Entbannung beim [Entbannungsserver]({ModerationHelper.GetUnbanURL()}) beantragen")
             .WithColor(DiscordColor.Red);
         var UserEmbed = embedBuilder.Build();
         List<DiscordButtonComponent> buttons = new(2)

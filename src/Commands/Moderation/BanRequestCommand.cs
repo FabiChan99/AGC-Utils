@@ -163,7 +163,7 @@ public sealed class BanRequestCommand : BaseCommandModule
                     .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
                     .WithDescription($"**Begründung:**```{reason}```\n" +
                                      $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                                     $"Dann kannst du eine Entbannung beim [Entbannportal]({ModerationHelper.GetUnbanURL()}) beantragen")
+                                     $"Dann kannst du eine Entbannung beim [Entbannungsserver]({ModerationHelper.GetUnbanURL()}) beantragen")
                     .WithColor(DiscordColor.Red).Build();
 
                 await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);

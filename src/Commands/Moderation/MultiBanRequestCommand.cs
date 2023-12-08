@@ -119,7 +119,7 @@ public sealed class MultiBanRequestCommand : BaseCommandModule
                 .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!").WithColor(DiscordColor.Red)
                 .WithDescription($"**Begründung:**```{reason}```\n" +
                                  $"**Du möchtest einen Entbannungsantrag stellen?**\n" +
-                                 $"Dann kannst du eine Entbannung beim [Entbannportal]( {ModerationHelper.GetUnbanURL()} ) beantragenen");
+                                 $"Dann kannst du eine Entbannung beim [Entbannungsserver]( {ModerationHelper.GetUnbanURL()} ) beantragenen");
             var banEmbed = banEmbedBuilder.Build();
             var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
             var staffmembers = ctx.Guild.Members
