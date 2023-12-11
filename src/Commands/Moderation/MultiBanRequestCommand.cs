@@ -223,7 +223,7 @@ public sealed class MultiBanRequestCommand : BaseCommandModule
             if (staffresult.Result.Id == $"modbanrequest_accept_{caseid}")
             {
                 var ReasonString =
-                    $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {staffresult.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                    $"{reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {staffresult.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 await staffresult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var disbtn = buttons;
                 var loadingEmbedBuilder = new DiscordEmbedBuilder()

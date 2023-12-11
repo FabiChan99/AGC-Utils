@@ -183,7 +183,7 @@ public sealed class BanRequestCommand : BaseCommandModule
                 string e_string;
                 bool sent;
                 var ReasonString =
-                    $"Grund: {reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {result.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+                    $"{reason} | Banrequest von Moderator: {ctx.User.UsernameWithDiscriminator} | Approver: {result.Result.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 var ec = DiscordColor.Red;
                 DiscordMessage? umsg = null;
                 try

@@ -32,7 +32,7 @@ public sealed class MultiBanCommand : BaseCommandModule
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
         var reasonString =
-            $"Grund: {reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
+            $"{reason} | Von Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
         var setids = ids.ToHashSet().ToList();
         if (setids.Count < 2)
         {
