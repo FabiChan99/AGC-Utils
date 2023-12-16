@@ -67,6 +67,7 @@ public class SnippetListener
             string? snipped = await SnippetManagerHelper.GetSnippetAsync(string_to_search);
             if (snipped != null && !e.Message.Author.IsBot)
             {
+                snipped = SnippetManagerHelper.FormatStringWithVariables(snipped);
                 await e.Message.DeleteAsync(snipped);
                 var eb = new DiscordEmbedBuilder()
                     .WithDescription(snipped)

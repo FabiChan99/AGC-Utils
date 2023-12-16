@@ -3,6 +3,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
+using AGC_Management.Helper;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -159,7 +160,9 @@ public class SnippetManagerCommands : BaseCommandModule
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl);
         if (await reader.ReadAsync())
         {
-            eb.WithDescription(reader.GetString(0));
+            string snipped_text = reader.GetString(0);
+            snipped_text = SnippetManagerHelper.FormatStringWithVariables(snipped_text);
+            eb.WithDescription(snipped_text);
         }
         else
         {

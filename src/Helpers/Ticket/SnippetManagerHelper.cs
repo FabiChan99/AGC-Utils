@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Text.RegularExpressions;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
@@ -45,7 +46,7 @@ public class SnippetManagerHelper
         {
             return;
         }
-
+        snippet = FormatStringWithVariables(snippet);
         var eb = new DiscordEmbedBuilder()
             .WithDescription(snippet)
             .WithColor(DiscordColor.Gold)
@@ -64,6 +65,35 @@ public class SnippetManagerHelper
         nrb.WithContent("Snippet gesendet!");
         await e.EditOriginalResponseAsync(nrb);
     }
+
+    public static string FormatStringWithVariables(string inputString)
+    {
+        long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string snippetString = inputString;
+
+        if (snippetString.Contains("{unixtimestamp"))
+        {
+            var matches = Regex.Matches(snippetString, @"{unixtimestamp(?:\+([0-9]+))?}");
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count == 2)
+                {
+                    var add = match.Groups[1].Value;
+                    if (string.IsNullOrEmpty(add))
+                    {
+                        snippetString = snippetString.Replace(match.Value, unixTimestamp.ToString());
+                    }
+                    else
+                    {
+                        snippetString = snippetString.Replace(match.Value, (unixTimestamp + Convert.ToInt64(add)).ToString());
+                    }
+                }
+            }
+        }
+
+        return snippetString;
+    }
+
 
 
     public static async Task<List<(string snipId, string snippedText)>> GetAllSnippetsAsync()
