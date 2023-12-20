@@ -1,7 +1,7 @@
 #region
 
 using AGC_Management.LavaManager;
-using AGC_Management.Services.DatabaseHandler;
+using AGC_Management.Services;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;

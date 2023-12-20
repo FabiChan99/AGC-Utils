@@ -5,7 +5,7 @@ using Npgsql;
 
 #endregion
 
-namespace AGC_Management.Services.DatabaseHandler;
+namespace AGC_Management.Services;
 
 public static class DatabaseService
 {

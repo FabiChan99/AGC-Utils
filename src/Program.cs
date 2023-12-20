@@ -3,8 +3,7 @@
 using System.Reflection;
 using AGC_Management.Helpers;
 using AGC_Management.LavaManager;
-using AGC_Management.Services.DatabaseHandler;
-using AGC_Management.Services.Logging;
+using AGC_Management.Services;
 using AGC_Management.Tasks;
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;

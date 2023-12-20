@@ -5,7 +5,7 @@ using DisCatSharp.Entities;
 
 #endregion
 
-namespace AGC_Management.Services.Logging
+namespace AGC_Management.Services
 {
     public class LoggingService
     {

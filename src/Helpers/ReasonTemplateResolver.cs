@@ -1,5 +1,5 @@
-﻿using Npgsql;
-using AGC_Management.Services.DatabaseHandler;
+﻿using AGC_Management.Services;
+using Npgsql;
 
 namespace AGC_Management.Helpers
 {
