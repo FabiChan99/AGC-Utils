@@ -29,6 +29,7 @@ public sealed class MultiBanCommand : BaseCommandModule
 
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        reason = await ReasonTemplateResolver.Resolve(reason);
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
         var reasonString =

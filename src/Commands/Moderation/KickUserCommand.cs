@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -22,6 +23,7 @@ public sealed class KickUserCommand : BaseCommandModule
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        reason = await ReasonTemplateResolver.Resolve(reason);
         var caseid = Helpers.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt!")

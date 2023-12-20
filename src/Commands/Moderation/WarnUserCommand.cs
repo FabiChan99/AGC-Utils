@@ -29,6 +29,7 @@ public sealed class WarnUserCommand : BaseCommandModule
 
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        reason = await ReasonTemplateResolver.Resolve(reason);
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
         var caseid = Helpers.Helpers.GenerateCaseID();
 

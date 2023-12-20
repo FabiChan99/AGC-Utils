@@ -28,6 +28,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
+        reason = await ReasonTemplateResolver.Resolve(reason);
         var users_to_flag = new List<DiscordUser>();
         var setids = ids.ToHashSet().ToList();
         if (setids.Count < 2)

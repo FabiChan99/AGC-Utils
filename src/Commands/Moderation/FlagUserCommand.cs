@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Helpers;
 using AGC_Management.Services.DatabaseHandler;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -21,6 +22,7 @@ public sealed class FlagUserCommand : BaseCommandModule
     {
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         var caseid = Helpers.Helpers.GenerateCaseID();
+        reason = await ReasonTemplateResolver.Resolve(reason);
 
         var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
         var imgAttachments = ctx.Message.Attachments

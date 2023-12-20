@@ -26,6 +26,7 @@ public sealed class BanUserCommand : BaseCommandModule
 
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        reason = await ReasonTemplateResolver.Resolve(reason);
         var caseid = Helpers.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")

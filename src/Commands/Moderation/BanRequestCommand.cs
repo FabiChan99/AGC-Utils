@@ -28,6 +28,7 @@ public sealed class BanRequestCommand : BaseCommandModule
 
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
         if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        reason = await ReasonTemplateResolver.Resolve(reason);
         var caseid = Helpers.Helpers.GenerateCaseID();
         var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         var staffmembers = ctx.Guild.Members
