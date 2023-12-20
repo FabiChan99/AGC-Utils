@@ -28,7 +28,6 @@ public sealed class MultiWarnCommand : BaseCommandModule
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
         if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         var users_to_warn = new List<DiscordUser>();
         var setids = ids.ToHashSet().ToList();
