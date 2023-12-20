@@ -9,7 +9,7 @@ using DisCatSharp.Interactivity.Extensions;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Utils;
 
 public static class ModerationHelper
 {

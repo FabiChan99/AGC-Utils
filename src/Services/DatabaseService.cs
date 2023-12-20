@@ -2,6 +2,7 @@
 
 using System.Data;
 using Npgsql;
+using Serilog.Core;
 
 #endregion
 
@@ -224,5 +225,64 @@ public static class DatabaseService
         }
 
         return rowsAffected;
+    }
+
+
+    public static async Task InitializeDatabaseTables()
+    {
+        var dbstring = GetConnectionString();
+        await using var conn = new NpgsqlConnection(dbstring);
+        CurrentApplicationData.Logger.Information("Initializing database tables... ");
+        
+        var spinner = new ConsoleSpinner();
+        spinner.Start();
+
+        await conn.OpenAsync();
+        
+        var tableCommands = new Dictionary<string, string>
+        {
+            { "reasonmap", "CREATE TABLE reasonmap (key TEXT, text TEXT)" },
+            { "abstimmungen", "CREATE TABLE abstimmungen (channel_id BIGINT, message_id BIGINT, expires_at BIGINT)" },
+            { "antragssperre", "CREATE TABLE antragssperre (user_id BIGINT, expires_at BIGINT, reason TEXT)" },
+            { "autocompletions", "CREATE TABLE autocompletions (data TEXT, type TEXT)" },
+            { "banreasons", "CREATE TABLE banreasons (reason TEXT, custom_id VARCHAR)" },
+            {
+                "flags",
+                "CREATE TABLE flags (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, caseid VARCHAR)"
+            },
+            {
+                "tempvoice",
+                "CREATE TABLE tempvoice (channelid BIGINT, ownerid BIGINT, lastedited BIGINT, channelmods VARCHAR)"
+            },
+            {
+                "tempvoicesession",
+                "CREATE TABLE tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN)"
+            },
+            { "vorstellungscooldown", "CREATE TABLE vorstellungscooldown (user_id BIGINT, time BIGINT)" },
+            { "warnreasons", "CREATE TABLE warnreasons (reason TEXT, custom_id VARCHAR)" },
+            {
+                "warns",
+                "CREATE TABLE warns (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, perma BOOLEAN, caseid VARCHAR)"
+            },
+        };
+
+        foreach (var kvp in tableCommands)
+        {
+            var tableName = kvp.Key;
+            var createTableCommand = kvp.Value;
+            
+            var checkTableCmd = $"SELECT COUNT(*) FROM pg_catalog.pg_tables WHERE tablename = '{tableName}'";
+            await using var cmd = new NpgsqlCommand(checkTableCmd, conn);
+            int exists = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+            if (exists == 0)
+            {
+                await using var cmdCreate = new NpgsqlCommand(createTableCommand, conn);
+                await cmdCreate.ExecuteNonQueryAsync();
+            }
+            Thread.Sleep(20);
+        }
+
+        spinner.Stop();
+        CurrentApplicationData.Logger.Information("Database tables initialized.");
     }
 }

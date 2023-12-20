@@ -9,7 +9,7 @@ using DisCatSharp.Lavalink.Entities;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Utils;
 
 public sealed class ApplicationRequireExecutorInVoice : ApplicationCommandCheckBaseAttribute
 {

@@ -1,7 +1,7 @@
 ﻿#region
 
 using System.Diagnostics;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;

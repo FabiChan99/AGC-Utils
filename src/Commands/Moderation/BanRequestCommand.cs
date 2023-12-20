@@ -1,7 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -26,10 +26,10 @@ public sealed class BanRequestCommand : BaseCommandModule
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
 
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Utils.Helpers.GenerateCaseID();
         var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         var staffmembers = ctx.Guild.Members
             .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))

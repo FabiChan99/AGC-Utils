@@ -1,7 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -21,10 +21,10 @@ public sealed class KickUserCommand : BaseCommandModule
     [Description("Kickt einen User vom Server.")]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Utils.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt!")
             .WithDescription($"**Begründung:**```{reason}```")

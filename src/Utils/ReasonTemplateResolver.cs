@@ -1,7 +1,7 @@
 ﻿using AGC_Management.Services;
 using Npgsql;
 
-namespace AGC_Management.Helpers
+namespace AGC_Management.Utils
 {
     public static class ReasonTemplateResolver
     {

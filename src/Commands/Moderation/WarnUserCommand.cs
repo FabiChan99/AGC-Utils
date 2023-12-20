@@ -1,7 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using AGC_Management.Services;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -27,11 +27,11 @@ public sealed class WarnUserCommand : BaseCommandModule
             reason = await ModerationHelper.WarnReasonSelector(ctx);
         }
 
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
-        var caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Utils.Helpers.GenerateCaseID();
 
 
         var interactivity = ctx.Client.GetInteractivity();
@@ -139,7 +139,7 @@ public sealed class WarnUserCommand : BaseCommandModule
 
             if (!sent)
             {
-                await Helpers.Helpers.SendWarnAsChannel(ctx, user, uembed, caseid);
+                await Utils.Helpers.SendWarnAsChannel(ctx, user, uembed, caseid);
             }
 
             var dmsent = sent ? "✅" : "⚠️";

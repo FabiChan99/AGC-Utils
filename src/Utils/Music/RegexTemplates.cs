@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Utils;
 
 public class RegexTemplates
 {

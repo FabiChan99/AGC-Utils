@@ -12,7 +12,7 @@ using Npgsql;
 
 #endregion
 
-namespace AGC_Management.Helpers.TempVoice;
+namespace AGC_Management.Utils.TempVoice;
 
 public class TempVoiceHelper : BaseCommandModule
 {

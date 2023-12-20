@@ -1,7 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using AGC_Management.Services;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -25,8 +25,8 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         List<ulong> ids;
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         reason = await ReasonTemplateResolver.Resolve(reason);
         var users_to_flag = new List<DiscordUser>();
@@ -59,11 +59,11 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         string urls = "";
         if (imgAttachments.Count > 0)
         {
-            urls = await Helpers.Helpers.UploadToCatBox(ctx, imgAttachments);
+            urls = await Utils.Helpers.UploadToCatBox(ctx, imgAttachments);
         }
 
         var busers_formatted = string.Join("\n", users_to_flag.Select(buser => buser.UsernameWithDiscriminator));
-        var caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Utils.Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Überprüfe deine Eingabe | Aktion: MultiFlag")
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
@@ -141,7 +141,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
 
             foreach (var user in users_to_flag_obj)
             {
-                var caseid_ = Helpers.Helpers.GenerateCaseID();
+                var caseid_ = Utils.Helpers.GenerateCaseID();
                 caseid_ = $"{caseid}-{caseid_}";
                 Dictionary<string, object> data = new()
                 {

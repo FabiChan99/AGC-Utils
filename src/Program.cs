@@ -1,7 +1,7 @@
 ﻿#region
 
 using System.Reflection;
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using AGC_Management.LavaManager;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 #endregion
 
@@ -31,6 +32,7 @@ public class CurrentApplicationData
 {
     public static string VersionString { get; set; } = "v1.41.0";
     public static DiscordClient Client { get; set; }
+    public static Serilog.ILogger Logger { get; set; }
 }
 
 internal class Program : BaseCommandModule
@@ -47,6 +49,7 @@ internal class Program : BaseCommandModule
             .MinimumLevel.Information()
             .WriteTo.Console()
             .CreateLogger();
+        CurrentApplicationData.Logger = logger;
 
         logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
@@ -114,6 +117,7 @@ internal class Program : BaseCommandModule
 
         DatabaseService.OpenConnection();
         TicketDatabaseService.OpenConnection();
+        await DatabaseService.InitializeDatabaseTables();
         var discord = new DiscordClient(new DiscordConfiguration
         {
             Token = DcApiToken,

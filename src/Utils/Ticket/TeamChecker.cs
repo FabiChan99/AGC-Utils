@@ -4,7 +4,7 @@ using DisCatSharp.Entities;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Utils;
 
 public static class TeamChecker
 {

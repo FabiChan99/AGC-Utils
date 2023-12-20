@@ -1,6 +1,6 @@
 ﻿#region
 
-using AGC_Management.Helpers;
+using AGC_Management.Utils;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -24,10 +24,10 @@ public sealed class BanUserCommand : BaseCommandModule
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
 
-        if (await Helpers.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Helpers.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Helpers.Helpers.GenerateCaseID();
+        var caseid = Utils.Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +

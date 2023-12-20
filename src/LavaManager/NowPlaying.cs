@@ -12,7 +12,7 @@ using LavaSharp.LavaManager;
 
 #endregion
 
-namespace AGC_Management.Helpers;
+namespace AGC_Management.Utils;
 
 public class NowPlaying
 {
