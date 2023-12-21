@@ -20,7 +20,7 @@ namespace AGC_Management.Utils
             return template;
         }
 
-        private static async Task<Dictionary<string, string>> GetReplacements()
+        public static async Task<Dictionary<string, string>> GetReplacements()
         {
             var replacements = new Dictionary<string, string>();
             string connectionString = DatabaseService.GetConnectionString();
@@ -71,5 +71,27 @@ namespace AGC_Management.Utils
                 return false;
             }
         }
+
+        public static async Task<bool> RemoveReplacement(string key)
+        {
+            string connectionString = DatabaseService.GetConnectionString();
+
+            try
+            {
+                await using var conn = new NpgsqlConnection(connectionString);
+                await conn.OpenAsync();
+
+                await using var cmd = new NpgsqlCommand("DELETE FROM reasonmap WHERE key = @key", conn);
+                cmd.Parameters.AddWithValue("key", key);
+
+                int affectedRows = await cmd.ExecuteNonQueryAsync();
+                return affectedRows > 0;
+            }
+            catch (NpgsqlException ex)
+            {
+                return false;
+            }
+        }
+
     }
 }
