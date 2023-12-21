@@ -54,7 +54,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
 
         var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
         var imgAttachments = ctx.Message.Attachments
-            .Where(att => imgExtensions.Contains(Path.GetExtension(att.FileName).ToLower()))
+            .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
             .ToList();
         string urls = "";
         if (imgAttachments.Count > 0)

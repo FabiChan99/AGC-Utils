@@ -30,7 +30,7 @@ public sealed class CaseManagement : BaseCommandModule
             using var content = new MultipartFormDataContent();
             var fileContent = new StreamContent(stream);
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-            content.Add(fileContent, "fileToUpload", att.FileName);
+            content.Add(fileContent, "fileToUpload", att.Filename);
 
 
             content.Add(new StringContent("fileupload"), "reqtype");
@@ -250,7 +250,7 @@ public sealed class CaseManagement : BaseCommandModule
         {
             var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
             var imgAttachments = ctx.Message.Attachments
-                .Where(att => imgExtensions.Contains(Path.GetExtension(att.FileName).ToLower()))
+                .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
                 .ToList();
             string urls = "";
             if (imgAttachments.Count > 0)

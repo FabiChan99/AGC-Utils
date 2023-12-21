@@ -22,8 +22,8 @@ public class UpdateBot : ApplicationCommandsModule
             "The Software update in a payload format (Bot Onwer only)")]
         DiscordAttachment payload)
     {
-        // check filename 
-        if (payload.FileName != "update.pkg")
+        // check Filename 
+        if (payload.Filename != "update.pkg")
         {
             var errorEmbed =
                 EmbedGenerator.GetErrorEmbed(

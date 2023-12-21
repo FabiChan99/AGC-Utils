@@ -29,7 +29,7 @@ public static class Helpers
             var request = new RestRequest(apiurl, Method.Post);
             request.AddParameter("reqtype", "fileupload");
             request.AddHeader("Content-Type", "multipart/form-data");
-            request.AddFile("fileToUpload", bytesImage, att.FileName);
+            request.AddFile("fileToUpload", bytesImage, att.Filename);
 
 
             var response = await client.ExecuteAsync(request);
