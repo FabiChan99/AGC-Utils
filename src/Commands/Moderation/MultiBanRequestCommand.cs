@@ -29,8 +29,8 @@ public sealed class MultiBanRequestCommand : BaseCommandModule
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
 
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
         reason = reason.TrimEnd(' ');
         var users_to_ban = new List<DiscordUser>();
@@ -57,7 +57,7 @@ public sealed class MultiBanRequestCommand : BaseCommandModule
         }
 
         var busers_formatted = string.Join("\n", users_to_ban.Select(buser => buser.UsernameWithDiscriminator));
-        var caseid = Utils.Helpers.GenerateCaseID();
+        var caseid = Helpers.GenerateCaseID();
         var confirmEmbedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Überprüfe deine Eingabe | Aktion: Multibanrequest")
             .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)

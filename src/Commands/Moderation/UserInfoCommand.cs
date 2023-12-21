@@ -37,7 +37,7 @@ public sealed class UserInfoCommand : BaseCommandModule
         }
 
         string ticketcount = "Tickets konnten nicht abgerufen werden.";
-        var ticketcount_c = await Utils.Helpers.GetTicketCount(user.Id);
+        var ticketcount_c = await Helpers.GetTicketCount(user.Id);
         if (ticketcount_c != null)
             ticketcount = ticketcount_c.ToString();
 
@@ -91,15 +91,15 @@ public sealed class UserInfoCommand : BaseCommandModule
         {
             try
             {
-                bsflaglist = await Utils.Helpers.BSWarnToWarn(user);
-                bsreportlist = await Utils.Helpers.BSReportToWarn(user);
+                bsflaglist = await Helpers.BSWarnToWarn(user);
+                bsreportlist = await Helpers.BSReportToWarn(user);
             }
             catch (Exception)
             {
             }
         }
 
-        bs_status = Utils.Helpers.HasActiveBannSystemReport(bsreportlist);
+        bs_status = Helpers.HasActiveBannSystemReport(bsreportlist);
 
 
         string bs_icon = bs_status ? "<:BannSystem:1012006073751830529>" : "";

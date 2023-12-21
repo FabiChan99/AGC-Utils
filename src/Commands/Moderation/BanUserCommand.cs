@@ -24,10 +24,10 @@ public sealed class BanUserCommand : BaseCommandModule
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
 
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Utils.Helpers.GenerateCaseID();
+        var caseid = Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gebannt!")
             .WithDescription($"**Begründung:**```{reason}```\n" +

@@ -3,6 +3,7 @@
 using System.Net.Http.Headers;
 using AGC_Management.Attributes;
 using AGC_Management.Services;
+using AGC_Management.Utils;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
@@ -222,7 +223,7 @@ public sealed class CaseManagement : BaseCommandModule
         string sql;
         if (wcase)
         {
-            if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+            if (await Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
@@ -258,7 +259,7 @@ public sealed class CaseManagement : BaseCommandModule
                 urls = await UploadToCatBox(ctx, imgAttachments);
             }
 
-            if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+            if (await Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
@@ -346,7 +347,7 @@ public sealed class CaseManagement : BaseCommandModule
         string sql;
         if (wcase)
         {
-            if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+            if (await Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
@@ -370,7 +371,7 @@ public sealed class CaseManagement : BaseCommandModule
 
         if (fcase)
         {
-            if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
+            if (await Helpers.CheckForReason(ctx, reason)) return;
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();

@@ -27,11 +27,11 @@ public sealed class PermaWarnCommand : BaseCommandModule
             reason = await ModerationHelper.WarnReasonSelector(ctx);
         }
 
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
         var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
-        var caseid = Utils.Helpers.GenerateCaseID();
+        var caseid = Helpers.GenerateCaseID();
 
 
         var interactivity = ctx.Client.GetInteractivity();
@@ -139,7 +139,7 @@ public sealed class PermaWarnCommand : BaseCommandModule
 
             if (!sent)
             {
-                await Utils.Helpers.SendWarnAsChannel(ctx, user, uembed, caseid);
+                await Helpers.SendWarnAsChannel(ctx, user, uembed, caseid);
             }
 
             var dmsent = sent ? "✅" : "⚠️";

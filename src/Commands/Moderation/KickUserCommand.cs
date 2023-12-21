@@ -21,10 +21,10 @@ public sealed class KickUserCommand : BaseCommandModule
     [Description("Kickt einen User vom Server.")]
     public async Task KickMember(CommandContext ctx, DiscordMember user, [RemainingText] string reason)
     {
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Utils.Helpers.GenerateCaseID();
+        var caseid = Helpers.GenerateCaseID();
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle($"Du wurdest von {ctx.Guild.Name} gekickt!")
             .WithDescription($"**Begründung:**```{reason}```")

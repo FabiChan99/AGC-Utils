@@ -26,10 +26,10 @@ public sealed class BanRequestCommand : BaseCommandModule
             reason = await ModerationHelper.BanReasonSelector(ctx);
         }
 
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        if (await Utils.Helpers.TicketUrlCheck(ctx, reason)) return;
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        if (await Helpers.TicketUrlCheck(ctx, reason)) return;
         reason = await ReasonTemplateResolver.Resolve(reason);
-        var caseid = Utils.Helpers.GenerateCaseID();
+        var caseid = Helpers.GenerateCaseID();
         var staffrole = ctx.Guild.GetRole(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]));
         var staffmembers = ctx.Guild.Members
             .Where(x => x.Value.Roles.Any(y => y.Id == GlobalProperties.StaffRoleId))

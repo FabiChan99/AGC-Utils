@@ -20,8 +20,8 @@ public sealed class FlagUserCommand : BaseCommandModule
     [RequireTeamCat]
     public async Task FlagUser(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (await Utils.Helpers.CheckForReason(ctx, reason)) return;
-        var caseid = Utils.Helpers.GenerateCaseID();
+        if (await Helpers.CheckForReason(ctx, reason)) return;
+        var caseid = Helpers.GenerateCaseID();
         reason = await ReasonTemplateResolver.Resolve(reason);
 
         var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
@@ -31,7 +31,7 @@ public sealed class FlagUserCommand : BaseCommandModule
         string urls = "";
         if (imgAttachments.Count > 0)
         {
-            urls = await Utils.Helpers.UploadToCatBox(ctx, imgAttachments);
+            urls = await Helpers.UploadToCatBox(ctx, imgAttachments);
         }
 
 

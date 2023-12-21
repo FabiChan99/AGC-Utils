@@ -1145,7 +1145,7 @@ public class TempVoiceCommands : TempVoiceHelper
         _ = Task.Run(async () =>
         {
             if (SelfCheck(ctx, user)) return;
-            var caseid = Utils.Helpers.GenerateCaseID();
+            var caseid = Helpers.GenerateCaseID();
             var db_channels = await GetAllChannelIDsFromDB();
             var userchannel = user.VoiceState?.Channel;
             var userchannelid = userchannel?.Id;
@@ -1613,7 +1613,7 @@ public class TempVoiceCommands : TempVoiceHelper
                 .WithColor(BotConfig.GetEmbedColor()).WithTitle("Voice Channel Informationen")
                 //.WithThumbnail("https://cdn3.emoji.gg/emojis/2378-discord-voice-channel.png")
                 .WithFooter($"{ctx.User.UsernameWithDiscriminator}");
-            var caseid = Utils.Helpers.GenerateCaseID();
+            var caseid = Helpers.GenerateCaseID();
             List<DiscordButtonComponent> buttons = new(2)
             {
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"get_vcinfo_{caseid}",
@@ -2048,7 +2048,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             channellimit = "Kein Limit";
                         }
 
-                        var caseid = Utils.Helpers.GenerateCaseID();
+                        var caseid = Helpers.GenerateCaseID();
                         string blockedusers = user["blockedusers"].ToString();
                         string permitedusers = user["permitedusers"].ToString();
                         string locked = user["locked"].ToString();
