@@ -22,7 +22,7 @@ public class ReasonTemplateManager : BaseCommandModule
         int i = 0;
         foreach (var (key, value) in templates)
         {
-            eb.AddField(new DiscordEmbedField("-" + key, value));
+            eb.AddField(new DiscordEmbedField("-" + key, value, true));
             i++;
         }
         if (i == 0)
