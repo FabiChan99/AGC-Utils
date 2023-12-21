@@ -43,7 +43,7 @@
 
             Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
             _counter++;
-            Thread.Sleep(50);
+            Thread.Sleep(25);
         }
     }
 }
