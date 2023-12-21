@@ -93,30 +93,13 @@ internal class Program : BaseCommandModule
             .AddSingleton(client)
             .AddSingleton<LoggingService>()
             .BuildServiceProvider();
-
-        Log.Logger.Information("Environment Details\n\n" +
-                               "Dotnet Version: {Version}\n" +
-                               "OS & Version: {OSVersion}\n\n" +
-                               "OS 64x: {Is64BitOperatingSystem}\n" +
-                               "Process 64x: {Is64BitProcess}\n\n" +
-                               "MachineName: {MachineName}\n" +
-                               "UserName: {UserName}\n" +
-                               "UserDomain: {UserDomainName}\n\n" +
-                               "Current Directory: {CurrentDirectory}\n" +
-                               "Commandline: {Commandline}\n",
-            Environment.Version,
-            Environment.OSVersion,
-            Environment.Is64BitOperatingSystem,
-            Environment.Is64BitProcess,
-            Environment.MachineName,
-            Environment.UserName,
-            Environment.UserDomainName,
-            Environment.CurrentDirectory,
-            Environment.CommandLine);
-
-
+        logger.Information("Connecting to Database...");
+        var spinner = new ConsoleSpinner();
+        spinner.Start();
         DatabaseService.OpenConnection();
         TicketDatabaseService.OpenConnection();
+        spinner.Stop();
+        logger.Information("Database connected!");
         await DatabaseService.InitializeDatabaseTables();
         var discord = new DiscordClient(new DiscordConfiguration
         {

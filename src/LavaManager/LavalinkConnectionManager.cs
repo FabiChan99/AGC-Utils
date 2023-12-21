@@ -37,6 +37,7 @@ public class LavalinkConnectionManager
 
     public static async Task ConnectAsync(DiscordClient client)
     {
+        ConsoleSpinner spinner = new();
         try
         {
             if (!bool.Parse(BotConfig.GetConfig()["MusicConfig"]["Active"]))
@@ -44,8 +45,8 @@ public class LavalinkConnectionManager
                 client.Logger.LogInformation("Lavalink ist deaktiviert. Verbindung wird nicht hergestellt.");
                 return;
             }
-
             client.Logger.LogInformation("Verbinde mit Lavalink...");
+            spinner.Start();
             LavalinkExtension = client.UseLavalink();
             LavalinkSession = await LavalinkExtension.ConnectAsync(LavaConfig());
             client.Logger.LogInformation("Verbunden mit Lavalink.");
@@ -53,9 +54,11 @@ public class LavalinkConnectionManager
         }
         catch (Exception ex)
         {
+            spinner.Stop();
             client.Logger.LogCritical(ex,
                 "Lavalink failed to connect. Please Check your Lavalink Config in config.ini. " +
                 "Check if Lavalink v4 is running and the correct host/port/password is set.");
         }
+        spinner.Stop();
     }
 }
