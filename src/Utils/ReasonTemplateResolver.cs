@@ -1,5 +1,9 @@
-﻿using AGC_Management.Services;
+﻿#region
+
+using AGC_Management.Services;
 using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Utils
 {
@@ -10,8 +14,9 @@ namespace AGC_Management.Utils
             var replacements = await GetReplacements();
             foreach (var (key, value) in replacements)
             {
-                template = template.Replace("-"+key, value);
+                template = template.Replace("-" + key, value);
             }
+
             return template;
         }
 
@@ -31,7 +36,7 @@ namespace AGC_Management.Utils
 
             return replacements;
         }
-        
+
         public static async Task<bool> AddReplacement(string key, string text)
         {
             string connectionString = DatabaseService.GetConnectionString();
@@ -40,7 +45,7 @@ namespace AGC_Management.Utils
             {
                 await using var conn = new NpgsqlConnection(connectionString);
                 await conn.OpenAsync();
-                
+
                 await using (var checkCmd = new NpgsqlCommand("SELECT COUNT(*) FROM reasonmap WHERE key = @key", conn))
                 {
                     checkCmd.Parameters.AddWithValue("key", key);
@@ -50,21 +55,21 @@ namespace AGC_Management.Utils
                         return false;
                     }
                 }
-                
-                await using (var cmd = new NpgsqlCommand("INSERT INTO reasonmap (key, text) VALUES (@key, @text)", conn))
+
+                await using (var cmd = new NpgsqlCommand("INSERT INTO reasonmap (key, text) VALUES (@key, @text)",
+                                 conn))
                 {
                     cmd.Parameters.AddWithValue("key", key);
                     cmd.Parameters.AddWithValue("text", text);
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                return true; 
+                return true;
             }
             catch (NpgsqlException ex)
             {
                 return false;
             }
         }
-
     }
 }

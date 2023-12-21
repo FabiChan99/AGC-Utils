@@ -1,9 +1,9 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Services;
 using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
-using AGC_Management.Services;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;

@@ -1,8 +1,8 @@
 ﻿public class ConsoleSpinner
 {
-    private int _counter;
-    private bool _active;
     private readonly Task _task;
+    private bool _active;
+    private int _counter;
 
     public ConsoleSpinner()
     {

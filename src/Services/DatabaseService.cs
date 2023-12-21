@@ -2,7 +2,6 @@
 
 using System.Data;
 using Npgsql;
-using Serilog.Core;
 
 #endregion
 
@@ -233,12 +232,12 @@ public static class DatabaseService
         var dbstring = GetConnectionString();
         await using var conn = new NpgsqlConnection(dbstring);
         CurrentApplicationData.Logger.Information("Initializing database tables... ");
-        
+
         var spinner = new ConsoleSpinner();
         spinner.Start();
 
         await conn.OpenAsync();
-        
+
         var tableCommands = new Dictionary<string, string>
         {
             { "reasonmap", "CREATE TABLE reasonmap (key TEXT, text TEXT)" },
@@ -263,14 +262,14 @@ public static class DatabaseService
             {
                 "warns",
                 "CREATE TABLE warns (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, perma BOOLEAN, caseid VARCHAR)"
-            },
+            }
         };
 
         foreach (var kvp in tableCommands)
         {
             var tableName = kvp.Key;
             var createTableCommand = kvp.Value;
-            
+
             var checkTableCmd = $"SELECT COUNT(*) FROM pg_catalog.pg_tables WHERE tablename = '{tableName}'";
             await using var cmd = new NpgsqlCommand(checkTableCmd, conn);
             int exists = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -279,6 +278,7 @@ public static class DatabaseService
                 await using var cmdCreate = new NpgsqlCommand(createTableCommand, conn);
                 await cmdCreate.ExecuteNonQueryAsync();
             }
+
             Thread.Sleep(20);
         }
 

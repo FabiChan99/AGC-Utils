@@ -1,10 +1,10 @@
 ﻿#region
 
 using System.Reflection;
-using AGC_Management.Utils;
 using AGC_Management.LavaManager;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
+using AGC_Management.Utils;
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
@@ -22,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
+using ILogger = Serilog.ILogger;
 
 #endregion
 
@@ -32,7 +32,7 @@ public class CurrentApplicationData
 {
     public static string VersionString { get; set; } = "v1.41.0";
     public static DiscordClient Client { get; set; }
-    public static Serilog.ILogger Logger { get; set; }
+    public static ILogger Logger { get; set; }
 }
 
 internal class Program : BaseCommandModule

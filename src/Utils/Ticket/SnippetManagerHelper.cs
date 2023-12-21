@@ -46,6 +46,7 @@ public class SnippetManagerHelper
         {
             return;
         }
+
         snippet = FormatStringWithVariables(snippet);
         var eb = new DiscordEmbedBuilder()
             .WithDescription(snippet)
@@ -85,7 +86,8 @@ public class SnippetManagerHelper
                     }
                     else
                     {
-                        snippetString = snippetString.Replace(match.Value, (unixTimestamp + Convert.ToInt64(add)).ToString());
+                        snippetString = snippetString.Replace(match.Value,
+                            (unixTimestamp + Convert.ToInt64(add)).ToString());
                     }
                 }
             }
@@ -93,7 +95,6 @@ public class SnippetManagerHelper
 
         return snippetString;
     }
-
 
 
     public static async Task<List<(string snipId, string snippedText)>> GetAllSnippetsAsync()

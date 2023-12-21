@@ -1,8 +1,8 @@
 ﻿#region
 
 using AGC_Management.Enums;
-using AGC_Management.Utils;
 using AGC_Management.Managers;
+using AGC_Management.Utils;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;

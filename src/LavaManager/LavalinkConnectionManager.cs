@@ -45,6 +45,7 @@ public class LavalinkConnectionManager
                 client.Logger.LogInformation("Lavalink ist deaktiviert. Verbindung wird nicht hergestellt.");
                 return;
             }
+
             client.Logger.LogInformation("Verbinde mit Lavalink...");
             spinner.Start();
             LavalinkExtension = client.UseLavalink();
@@ -59,6 +60,7 @@ public class LavalinkConnectionManager
                 "Lavalink failed to connect. Please Check your Lavalink Config in config.ini. " +
                 "Check if Lavalink v4 is running and the correct host/port/password is set.");
         }
+
         spinner.Stop();
     }
 }

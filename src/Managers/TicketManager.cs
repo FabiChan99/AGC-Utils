@@ -2,8 +2,8 @@
 
 using AGC_Management.Components;
 using AGC_Management.Enums;
-using AGC_Management.Utils;
 using AGC_Management.Services;
+using AGC_Management.Utils;
 using DisCatSharp;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;

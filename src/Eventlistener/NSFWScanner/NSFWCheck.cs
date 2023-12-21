@@ -1,6 +1,5 @@
 ﻿#region
 
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
 using DisCatSharp;
@@ -38,12 +37,12 @@ public class NSFWCheck : BaseCommandModule
             {
                 return;
             }
-            
+
             if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
             {
                 return;
             }
-            
+
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
@@ -162,7 +161,7 @@ public class NSFWCheck : BaseCommandModule
             _httpClient.DefaultRequestHeaders.Add("api-key", apikey);
             _httpClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
-            
+
             var content = new StringContent($"{{\"imageUrl\":\"{_args.AvatarUrlAfter}\"}}", null, "application/json");
             var response = await _httpClient.PostAsync("https://api.linklens.xyz/analyze", content);
             var responseString = await response.Content.ReadAsStringAsync();
