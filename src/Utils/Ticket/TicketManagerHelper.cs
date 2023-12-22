@@ -19,6 +19,8 @@ using Npgsql;
 
 #endregion
 
+namespace AGC_Management.Managers;
+
 public class TicketManagerHelper
 {
     private static readonly Random random = new();
@@ -1202,6 +1204,8 @@ public class TicketManagerHelper
             await cmd2.ExecuteNonQueryAsync();
         }
     }
+    
+
 
     public static async Task SendTranscriptToLog(DiscordChannel channel, string ticket_url,
         DiscordInteraction interaction)
