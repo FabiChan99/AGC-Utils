@@ -152,7 +152,7 @@ public sealed class PermaWarnCommand : BaseCommandModule
                 {
                     if (BanEnabled)
                     {
-                        await ctx.Guild.BanMemberAsync(user, 7, reasonString);
+                        await ctx.Guild.BanMemberAsync(user, await Helpers.GenerateBannDeleteMessageDays(user.Id), reasonString);
                         uAction = "Gebannt";
                     }
                 }

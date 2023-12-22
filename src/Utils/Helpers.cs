@@ -1,6 +1,7 @@
 #region
 
 using AGC_Management.Entities;
+using AGC_Management.Services;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
@@ -214,6 +215,36 @@ public static class Helpers
         return uniqueID;
     }
 
+    public static async Task<bool> UserHasOpenTicket(ulong UserId)
+    {
+        string con = TicketDatabaseService.GetConnectionString();
+        await using var connection = new NpgsqlConnection(con);
+        await connection.OpenAsync();
+        string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_users @> ARRAY[{(long)UserId}::bigint]";
+        await using NpgsqlCommand cmd = new(query, connection);
+        int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
+        if (rowCount > 0)
+        {
+            await connection.CloseAsync();
+            return true;
+        }
+        await connection.CloseAsync();
+        return false;
+    }
+
+    public static async Task<int> GenerateBannDeleteMessageDays(ulong UserId)
+    {
+        bool hasOpenTicket = await UserHasOpenTicket(UserId);
+        if (hasOpenTicket)
+        {
+            return 0;
+        }
+        else
+        {
+            return 7;
+        }
+    }
+    
     public static async Task SendWarnAsChannel(CommandContext ctx, DiscordUser user, DiscordEmbed uembed, string caseid)
     {
         DiscordEmbed userembed = uembed;

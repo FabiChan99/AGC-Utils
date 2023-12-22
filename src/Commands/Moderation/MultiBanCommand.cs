@@ -147,7 +147,7 @@ public sealed class MultiBanCommand : BaseCommandModule
                 var semoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
                 try
                 {
-                    await ctx.Guild.BanMemberAsync(user.Id, 7, reasonString);
+                    await ctx.Guild.BanMemberAsync(user.Id, await Helpers.GenerateBannDeleteMessageDays(user.Id), reasonString);
                     var dm = sent ? "✅" : "❌";
                     b_users += $"{user.UsernameWithDiscriminator} | DM: {dm}\n";
                 }
