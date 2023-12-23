@@ -169,7 +169,9 @@ internal class Program : BaseCommandModule
         {
             while (true)
             {
-                await discord.UpdateStatusAsync(new DiscordActivity($"Version: {CurrentApplicationData.VersionString}",
+                try
+                {
+                                    await discord.UpdateStatusAsync(new DiscordActivity($"Version: {CurrentApplicationData.VersionString}",
                     ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
 
@@ -242,6 +244,11 @@ internal class Program : BaseCommandModule
 
                 await discord.UpdateStatusAsync(new DiscordActivity($"User in VC: {vcUsers}", ActivityType.Custom));
                 await Task.Delay(TimeSpan.FromSeconds(30));
+                }
+                catch (Exception e)
+                {
+                    CurrentApplicationData.Logger.Error(e, "Error while updating status");
+                }
             }
         });
     }
@@ -363,6 +370,7 @@ internal class Program : BaseCommandModule
 
         if (e.Exception is CommandNotFoundException)
         {
+            e.Handled = true;
             return;
         }
 
