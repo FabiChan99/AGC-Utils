@@ -48,6 +48,7 @@ internal class Program : BaseCommandModule
         var logger = Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new Serilog.Core.LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information))
             .CreateLogger();
         CurrentApplicationData.Logger = logger;
 
