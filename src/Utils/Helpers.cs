@@ -259,7 +259,7 @@ public static class Helpers
         }
         else if (hasClosedPendingTicket)
         {
-            return 1;
+            return 0;
         }
         else
         {
