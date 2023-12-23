@@ -1,8 +1,12 @@
-﻿using AGC_Management.Attributes;
-using DisCatSharp.CommandsNext;
+﻿#region
+
+using AGC_Management.Attributes;
 using AGC_Management.Utils;
+using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
+
+#endregion
 
 namespace AGC_Management.Commands;
 
@@ -25,13 +29,15 @@ public class ReasonTemplateManager : BaseCommandModule
             eb.AddField(new DiscordEmbedField("-" + key, value, true));
             i++;
         }
+
         if (i == 0)
         {
             eb.WithDescription("__Keine Templates vorhanden.__");
         }
+
         await ctx.RespondAsync(eb);
     }
-    
+
     [Command("add")]
     [RequireStaffRole]
     public async Task AddTemplate(CommandContext ctx, string key, [RemainingText] string text)
@@ -46,7 +52,7 @@ public class ReasonTemplateManager : BaseCommandModule
             await ctx.RespondAsync($"Template `{key}` existiert bereits.");
         }
     }
-    
+
     [Command("remove")]
     [RequireStaffRole]
     public async Task RemoveTemplate(CommandContext ctx, string key)
@@ -61,6 +67,4 @@ public class ReasonTemplateManager : BaseCommandModule
             await ctx.RespondAsync($"Template `{key}` existiert nicht.");
         }
     }
-    
 }
-

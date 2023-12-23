@@ -2,7 +2,6 @@
 
 using AGC_Management.Attributes;
 using AGC_Management.Utils;
-using AGC_Management.Managers;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
@@ -201,7 +200,8 @@ public sealed class BanRequestCommand : BaseCommandModule
                 var semoji = sent ? "<:yes:861266772665040917>" : "<:no:861266772724023296>";
                 try
                 {
-                    await ctx.Guild.BanMemberAsync(user.Id, await Helpers.GenerateBannDeleteMessageDays(user.Id), ReasonString);
+                    await ctx.Guild.BanMemberAsync(user.Id, await Helpers.GenerateBannDeleteMessageDays(user.Id),
+                        ReasonString);
                     var dm = sent ? "✅" : "❌";
                     b_users += $"{user.UsernameWithDiscriminator} | DM: {dm}\n";
                 }

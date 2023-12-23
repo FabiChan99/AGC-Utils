@@ -228,10 +228,11 @@ public static class Helpers
             await connection.CloseAsync();
             return true;
         }
+
         await connection.CloseAsync();
         return false;
     }
-    
+
     public static async Task<bool> UserHasOpenTicket(ulong UserId)
     {
         string con = TicketDatabaseService.GetConnectionString();
@@ -245,6 +246,7 @@ public static class Helpers
             await connection.CloseAsync();
             return true;
         }
+
         await connection.CloseAsync();
         return false;
     }
@@ -257,16 +259,15 @@ public static class Helpers
         {
             return 0;
         }
-        else if (hasClosedPendingTicket)
+
+        if (hasClosedPendingTicket)
         {
             return 0;
         }
-        else
-        {
-            return 7;
-        }
+
+        return 7;
     }
-    
+
     public static async Task SendWarnAsChannel(CommandContext ctx, DiscordUser user, DiscordEmbed uembed, string caseid)
     {
         DiscordEmbed userembed = uembed;

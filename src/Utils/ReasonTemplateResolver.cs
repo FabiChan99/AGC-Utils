@@ -92,6 +92,5 @@ namespace AGC_Management.Utils
                 return false;
             }
         }
-
     }
 }

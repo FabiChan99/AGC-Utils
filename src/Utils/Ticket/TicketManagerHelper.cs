@@ -2,11 +2,9 @@
 
 using System.Diagnostics;
 using System.Text;
-using AGC_Management;
 using AGC_Management.Components;
 using AGC_Management.Enums;
 using AGC_Management.Helper;
-using AGC_Management.Managers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 using DisCatSharp;
@@ -1204,7 +1202,6 @@ public class TicketManagerHelper
             await cmd2.ExecuteNonQueryAsync();
         }
     }
-    
 
 
     public static async Task SendTranscriptToLog(DiscordChannel channel, string ticket_url,
