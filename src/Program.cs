@@ -46,7 +46,7 @@ internal class Program : BaseCommandModule
     private static async Task MainAsync()
     {
         var logger = Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             .WriteTo.Console()
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new Serilog.Core.LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information))
             .CreateLogger();
