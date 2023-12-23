@@ -30,7 +30,7 @@ namespace AGC_Management;
 
 public class CurrentApplicationData
 {
-    public static string VersionString { get; set; } = "v1.42.0";
+    public static string VersionString { get; set; } = "v1.43.0";
     public static DiscordClient Client { get; set; }
     public static ILogger Logger { get; set; }
 }
@@ -46,7 +46,7 @@ internal class Program : BaseCommandModule
     private static async Task MainAsync()
     {
         var logger = Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Debug()
             .WriteTo.Console()
             .CreateLogger();
         CurrentApplicationData.Logger = logger;
@@ -131,7 +131,7 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider
+            ServiceProvider = serviceProvider, DebugStartup = true, EnableDefaultHelp = false
         });
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
