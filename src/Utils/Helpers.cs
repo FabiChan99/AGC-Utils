@@ -215,6 +215,23 @@ public static class Helpers
         return uniqueID;
     }
 
+    public static async Task<bool> UserHasClosedPendingTicket(ulong UserId)
+    {
+        string con = TicketDatabaseService.GetConnectionString();
+        await using var connection = new NpgsqlConnection(con);
+        await connection.OpenAsync();
+        string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_owner = '{(long)UserId}'";
+        await using NpgsqlCommand cmd = new(query, connection);
+        int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
+        if (rowCount > 0)
+        {
+            await connection.CloseAsync();
+            return true;
+        }
+        await connection.CloseAsync();
+        return false;
+    }
+    
     public static async Task<bool> UserHasOpenTicket(ulong UserId)
     {
         string con = TicketDatabaseService.GetConnectionString();
@@ -235,9 +252,14 @@ public static class Helpers
     public static async Task<int> GenerateBannDeleteMessageDays(ulong UserId)
     {
         bool hasOpenTicket = await UserHasOpenTicket(UserId);
+        bool hasClosedPendingTicket = await UserHasClosedPendingTicket(UserId);
         if (hasOpenTicket)
         {
             return 0;
+        }
+        else if (hasClosedPendingTicket)
+        {
+            return 1;
         }
         else
         {
