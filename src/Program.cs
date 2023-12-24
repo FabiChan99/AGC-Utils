@@ -113,7 +113,8 @@ internal class Program : BaseCommandModule
             DeveloperUserId = GlobalProperties.BotOwnerId,
             Locale = "de",
             ServiceProvider = serviceProvider,
-            MessageCacheSize = 10000
+            MessageCacheSize = 10000, 
+            ShowReleaseNotesInUpdateCheck = false
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
