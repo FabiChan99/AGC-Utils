@@ -60,7 +60,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="src\Modules\ServerControl\"/>
+        <Folder Include="src\Commands\ServerControl\" />
         <Folder Include="src\Utils\Music\"/>
         <Folder Include="src\Utils\TempVoice\"/>
     </ItemGroup>
