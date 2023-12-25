@@ -12,7 +12,7 @@ using DisCatSharp.Interactivity.Extensions;
 namespace AGC_Management.Commands.TempVC;
 
 [Group("session")]
-public sealed class SessionManagement : TempVoiceCommands
+public sealed class SessionManagement : TempVoiceHelper
 {
     [Command("save")]
     [Aliases("safe")]
