@@ -8,7 +8,6 @@ using AGC_Management.Services;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
-using Npgsql;
 
 #endregion
 

@@ -1,7 +1,11 @@
-﻿using AGC_Management.Utils.TempVoice;
+﻿#region
+
+using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
+
+#endregion
 
 namespace AGC_Management.Commands.TempVC;
 

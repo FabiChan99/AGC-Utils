@@ -8,7 +8,6 @@ using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
-using Npgsql;
 
 #endregion
 

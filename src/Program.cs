@@ -20,8 +20,8 @@ using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using Serilog;
+using Serilog.Core;
 using ILogger = Serilog.ILogger;
 
 #endregion
@@ -48,7 +48,7 @@ internal class Program : BaseCommandModule
         var logger = Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
-            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new Serilog.Core.LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information))
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch())
             .CreateLogger();
         CurrentApplicationData.Logger = logger;
 
@@ -113,7 +113,7 @@ internal class Program : BaseCommandModule
             DeveloperUserId = GlobalProperties.BotOwnerId,
             Locale = "de",
             ServiceProvider = serviceProvider,
-            MessageCacheSize = 10000, 
+            MessageCacheSize = 10000,
             ShowReleaseNotesInUpdateCheck = false
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
@@ -172,79 +172,81 @@ internal class Program : BaseCommandModule
             {
                 try
                 {
-                                    await discord.UpdateStatusAsync(new DiscordActivity($"Version: {CurrentApplicationData.VersionString}",
-                    ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                    await discord.UpdateStatusAsync(new DiscordActivity(
+                        $"Version: {CurrentApplicationData.VersionString}",
+                        ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
 
-                await discord.UpdateStatusAsync(new DiscordActivity(await TicketString(), ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                    await discord.UpdateStatusAsync(new DiscordActivity(await TicketString(), ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
 
-                // get tempvc count
-                int tempvcCount = 0;
-                var constring = DatabaseService.GetConnectionString();
-                await using var con = new NpgsqlConnection(constring);
-                await con.OpenAsync();
-                string query = "SELECT channelid FROM tempvoice";
-                await using var cmd = new NpgsqlCommand(query, con);
-                await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-                // get channels and fetch if they exist
-                while (reader.Read())
-                {
-                    ulong channelid = (ulong)reader.GetInt64(0);
-                    var channel = await discord.TryGetChannelAsync(channelid);
-                    if (channel != null)
+                    // get tempvc count
+                    int tempvcCount = 0;
+                    var constring = DatabaseService.GetConnectionString();
+                    await using var con = new NpgsqlConnection(constring);
+                    await con.OpenAsync();
+                    string query = "SELECT channelid FROM tempvoice";
+                    await using var cmd = new NpgsqlCommand(query, con);
+                    await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+                    // get channels and fetch if they exist
+                    while (reader.Read())
                     {
-                        tempvcCount++;
+                        ulong channelid = (ulong)reader.GetInt64(0);
+                        var channel = await discord.TryGetChannelAsync(channelid);
+                        if (channel != null)
+                        {
+                            tempvcCount++;
+                        }
                     }
-                }
 
-                await discord.UpdateStatusAsync(new DiscordActivity($" Offene Temp-VCs: {tempvcCount}",
-                    ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                    await discord.UpdateStatusAsync(new DiscordActivity($" Offene Temp-VCs: {tempvcCount}",
+                        ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
 
-                // get membercount of agc
-                var guild = await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
-                await discord.UpdateStatusAsync(new DiscordActivity($"Servermitglieder: {guild.MemberCount}",
-                    ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                    // get membercount of agc
+                    var guild = await discord.GetGuildAsync(
+                        ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
+                    await discord.UpdateStatusAsync(new DiscordActivity($"Servermitglieder: {guild.MemberCount}",
+                        ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
 
 
-                // get today messages
-                int todayMessages = 0;
-                var constring1 = DatabaseService.GetConnectionString();
-                // mod constring to connect to agchp database (agcuser -> agchp and agcdev -> agchp)
-                constring1 = constring1.Replace("agcuser", "agchp");
-                constring1 = constring1.Replace("agcdev", "agchp");
-                await using var con1 = new NpgsqlConnection(constring1);
-                await con1.OpenAsync();
-                // query SELECT count FROM todaymsgs
-                string query1 = "SELECT count FROM todaymsgs";
-                await using var cmd1 = new NpgsqlCommand(query1, con1);
-                await using NpgsqlDataReader reader1 = await cmd1.ExecuteReaderAsync();
-                // set todayMessages to count
-                while (reader1.Read())
-                {
-                    todayMessages = reader1.GetInt32(0);
-                }
-
-                await discord.UpdateStatusAsync(new DiscordActivity($"Heutige Servermessages: {todayMessages}",
-                    ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
-
-                // get vc user
-                int vcUsers = 0;
-                // for each channel in agc
-                foreach (var channel in guild.Channels.Values)
-                {
-                    // if channel is voicechannel
-                    if (channel.Type == ChannelType.Voice)
+                    // get today messages
+                    int todayMessages = 0;
+                    var constring1 = DatabaseService.GetConnectionString();
+                    // mod constring to connect to agchp database (agcuser -> agchp and agcdev -> agchp)
+                    constring1 = constring1.Replace("agcuser", "agchp");
+                    constring1 = constring1.Replace("agcdev", "agchp");
+                    await using var con1 = new NpgsqlConnection(constring1);
+                    await con1.OpenAsync();
+                    // query SELECT count FROM todaymsgs
+                    string query1 = "SELECT count FROM todaymsgs";
+                    await using var cmd1 = new NpgsqlCommand(query1, con1);
+                    await using NpgsqlDataReader reader1 = await cmd1.ExecuteReaderAsync();
+                    // set todayMessages to count
+                    while (reader1.Read())
                     {
-                        vcUsers += channel.Users.Count;
+                        todayMessages = reader1.GetInt32(0);
                     }
-                }
 
-                await discord.UpdateStatusAsync(new DiscordActivity($"User in VC: {vcUsers}", ActivityType.Custom));
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                    await discord.UpdateStatusAsync(new DiscordActivity($"Heutige Servermessages: {todayMessages}",
+                        ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
+
+                    // get vc user
+                    int vcUsers = 0;
+                    // for each channel in agc
+                    foreach (var channel in guild.Channels.Values)
+                    {
+                        // if channel is voicechannel
+                        if (channel.Type == ChannelType.Voice)
+                        {
+                            vcUsers += channel.Users.Count;
+                        }
+                    }
+
+                    await discord.UpdateStatusAsync(new DiscordActivity($"User in VC: {vcUsers}", ActivityType.Custom));
+                    await Task.Delay(TimeSpan.FromSeconds(30));
                 }
                 catch (Exception e)
                 {

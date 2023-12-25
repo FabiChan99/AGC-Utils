@@ -1,8 +1,12 @@
-﻿using AGC_Management.Utils.TempVoice;
+﻿#region
+
+using AGC_Management.Utils.TempVoice;
 using DisCatSharp;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace AGC_Management.Eventlistener.TempVoice;
 
@@ -32,7 +36,7 @@ public class PanelInterfaceInteraction : TempVoiceHelper
             if (Interaction.Channel.Id == PanelMsgChannelId)
             {
                 var customid = Interaction.Data.CustomId;
-                
+
                 if (customid == "channel_lock")
                 {
                     await PanelLockChannel(Interaction);

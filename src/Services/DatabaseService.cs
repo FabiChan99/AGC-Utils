@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Data;
-using Npgsql;
 
 #endregion
 

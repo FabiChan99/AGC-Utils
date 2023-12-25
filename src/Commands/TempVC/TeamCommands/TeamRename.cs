@@ -1,10 +1,13 @@
-﻿using AGC_Management.Attributes;
+﻿#region
+
+using AGC_Management.Attributes;
 using AGC_Management.Services;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
-using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Commands.TempVC.TeamCommands;
 
@@ -78,5 +81,4 @@ public class TeamRename : TempVoiceHelper
                 "<:success:1085333481820790944> **Erfolg!** Der Channel wurde erfolgreich umbenannt.");
         }
     }
-
 }

@@ -1,13 +1,15 @@
-﻿using AGC_Management.Attributes;
+﻿#region
+
+using AGC_Management.Attributes;
 using AGC_Management.Services;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
-using Npgsql;
+
+#endregion
 
 namespace AGC_Management.Commands.TempVC;
-
 
 [Group("channelstatus")]
 [Aliases("vcstatus", "channel-status", "vc-status")]
@@ -25,12 +27,12 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 50 Zeichen lang sein.");
                 return;
             }
-            
+
             var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             List<long> dbChannels = await GetChannelIDFromDB(ctx);
             DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
             bool isMod = await IsChannelMod(userChannel, ctx.Member);
-            
+
             if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
             {
                 await NoChannel(ctx);
@@ -72,7 +74,7 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                         "<:attention:1085333468688433232> **Fehler!** Channelstatus ist nicht mit diesem Channel kompatibel. Bitte erstelle einen neuen Channel.");
                     return;
                 }
-                
+
                 long? edittimestamp = timestampdata;
                 long? math = current_timestamp - edittimestamp;
 
@@ -94,8 +96,8 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                         "<:attention:1085333468688433232> **Fehler!** Der Channelstatus konnte nicht geändert werden. Bitte versuche es erneut.");
                     return;
                 }
-                
-                
+
+
                 await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
                 {
                     await conn.OpenAsync();
@@ -107,7 +109,7 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                         int affected = await command.ExecuteNonQueryAsync();
                     }
                 }
-                
+
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Der Channelstatus wurde erfolgreich geändert.");
             }
@@ -117,12 +119,13 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
     [Command("remove")]
     public async Task SetStatus(CommandContext ctx)
     {
-        _ = Task.Run(async () => {
+        _ = Task.Run(async () =>
+        {
             var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             List<long> dbChannels = await GetChannelIDFromDB(ctx);
             DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
             bool isMod = await IsChannelMod(userChannel, ctx.Member);
-            
+
             if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
             {
                 await NoChannel(ctx);
@@ -164,14 +167,14 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                         "<:attention:1085333468688433232> **Fehler!** Channelstatus ist nicht mit diesem Channel kompatibel. Bitte erstelle einen neuen Channel.");
                     return;
                 }
-                
-                else if (timestampdata == 0)
+
+                if (timestampdata == 0)
                 {
                     await ctx.RespondAsync(
                         "<:attention:1085333468688433232> **Fehler!** Der Channelstatus wurde noch nicht gesetzt.");
                     return;
                 }
-                
+
                 long? edittimestamp = timestampdata;
                 long? math = current_timestamp - edittimestamp;
 
@@ -184,7 +187,7 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                 }
 
                 channel.RemoveVoiceChannelStatusAsync();
-                
+
                 await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
                 {
                     await conn.OpenAsync();
@@ -196,7 +199,7 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                         int affected = await command.ExecuteNonQueryAsync();
                     }
                 }
-                
+
                 await msg.ModifyAsync(
                     "<:success:1085333481820790944> **Erfolg!** Der Channelstatus wurde erfolgreich entfernt.");
             }

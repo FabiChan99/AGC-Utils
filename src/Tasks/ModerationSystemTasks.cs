@@ -3,7 +3,6 @@
 using AGC_Management.Services;
 using DisCatSharp;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
 #endregion
 

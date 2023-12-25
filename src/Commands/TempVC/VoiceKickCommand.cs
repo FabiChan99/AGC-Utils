@@ -1,15 +1,19 @@
-﻿using AGC_Management.Utils;
+﻿#region
+
+using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Exceptions;
 
+#endregion
+
 namespace AGC_Management.Commands.TempVC;
 
 public sealed class VoiceKickCommand : TempVoiceHelper
 {
-        [Command("vckick")]
+    [Command("vckick")]
     public async Task VoiceKick(CommandContext ctx, [RemainingText] string users)
     {
         _ = Task.Run(async () =>
@@ -96,5 +100,4 @@ public sealed class VoiceKickCommand : TempVoiceHelper
             }
         );
     }
-
 }

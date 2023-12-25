@@ -1,4 +1,6 @@
-﻿using AGC_Management;
+﻿#region
+
+using AGC_Management;
 using AGC_Management.Services;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp;
@@ -6,6 +8,8 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
+
+#endregion
 
 [EventHandler]
 public class TempVCEventHandler : TempVoiceHelper
@@ -86,7 +90,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     { "ownerid", (long)e.User.Id },
                                     { "channelid", (long)voice.Id },
                                     { "lastedited", (long)0 },
-                                    { "statuslastedited", (long)0}, 
+                                    { "statuslastedited", (long)0 }
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
                                 try
@@ -189,7 +193,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     { "ownerid", (long)e.User.Id },
                                     { "channelid", (long)voice.Id },
                                     { "lastedited", (long)0 },
-                                    { "statuslastedited", (long)0},
+                                    { "statuslastedited", (long)0 }
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
                                 try

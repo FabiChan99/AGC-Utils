@@ -1,4 +1,6 @@
-﻿using AGC_Management.Attributes;
+﻿#region
+
+using AGC_Management.Attributes;
 using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
@@ -7,11 +9,12 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 
+#endregion
+
 namespace AGC_Management.Commands.TempVC;
 
 public sealed class PermitCommand : TempVoiceHelper
 {
-    
     [Command("permit")]
     [RequireDatabase]
     [Aliases("allow", "whitelist", "multipermit")]

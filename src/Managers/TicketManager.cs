@@ -9,7 +9,6 @@ using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
-using Npgsql;
 
 #endregion
 

@@ -6,7 +6,6 @@ using DisCatSharp.CommandsNext;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using Newtonsoft.Json;
-using Npgsql;
 using RestSharp;
 
 #endregion

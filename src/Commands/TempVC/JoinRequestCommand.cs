@@ -1,10 +1,14 @@
-﻿using AGC_Management.Utils;
+﻿#region
+
+using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.Interactivity.Extensions;
+
+#endregion
 
 namespace AGC_Management.Commands.TempVC;
 
@@ -200,5 +204,4 @@ public sealed class JoinRequestCommand : TempVoiceHelper
             }
         });
     }
-
 }

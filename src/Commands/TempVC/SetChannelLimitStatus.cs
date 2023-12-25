@@ -1,15 +1,17 @@
-﻿using AGC_Management.Attributes;
+﻿#region
+
+using AGC_Management.Attributes;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.CommandsNext;
 using DisCatSharp.CommandsNext.Attributes;
 using DisCatSharp.Entities;
 
+#endregion
+
 namespace AGC_Management.Commands.TempVC;
 
 public sealed class SetChannelLimitStatus : TempVoiceHelper
 {
-    
-
     [Command("limit")]
     [RequireDatabase]
     [Aliases("vclimit")]
@@ -45,6 +47,4 @@ public sealed class SetChannelLimitStatus : TempVoiceHelper
                 $"<:success:1085333481820790944> Du hast {userChannel.Mention} erfolgreich ein Userlimit von **{limit}** gesetzt.");
         }
     }
-
-
 }

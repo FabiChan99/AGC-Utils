@@ -6,7 +6,6 @@ using AGC_Management.Enums;
 using AGC_Management.Services;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using Npgsql;
 
 #endregion
 
