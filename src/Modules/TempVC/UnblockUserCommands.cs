@@ -13,7 +13,7 @@ using DisCatSharp.Exceptions;
 
 namespace AGC_Management.Commands.TempVC;
 
-public sealed class UnblockCommands : TempVoiceHelper
+public sealed class UnblockUserCommands : TempVoiceHelper
 {
     [Command("unblock")]
     [RequireDatabase]

@@ -1,1 +1,5 @@
-﻿global using Npgsql;
+﻿#region
+
+global using Npgsql;
+
+#endregion
