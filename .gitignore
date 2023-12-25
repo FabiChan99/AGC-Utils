@@ -403,3 +403,4 @@ src/Commands/Test/*
 .idea/
 /out/AGC Management.exe
 /out/payload.bin
+/src/Modules/TestCommands/TestCommands.cs
