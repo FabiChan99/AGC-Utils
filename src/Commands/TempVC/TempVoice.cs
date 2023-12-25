@@ -97,7 +97,8 @@ public class TempVCEventHandler : TempVoiceHelper
                                 {
                                     { "ownerid", (long)e.User.Id },
                                     { "channelid", (long)voice.Id },
-                                    { "lastedited", (long)0 }
+                                    { "lastedited", (long)0 },
+                                    { "statuslastedited", (long)0}, 
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
                                 try
@@ -199,7 +200,8 @@ public class TempVCEventHandler : TempVoiceHelper
                                 {
                                     { "ownerid", (long)e.User.Id },
                                     { "channelid", (long)voice.Id },
-                                    { "lastedited", (long)0 }
+                                    { "lastedited", (long)0 },
+                                    { "statuslastedited", (long)0},
                                 };
                                 await DatabaseService.InsertDataIntoTable("tempvoice", data);
                                 try
@@ -1405,6 +1407,7 @@ public class TempVoiceCommands : TempVoiceHelper
                             $"> ``{prefix}hide`` - Macht den aktuellen Channel unsichtbar¹\n" +
                             $"> ``{prefix}unhide`` - Macht den aktuellen Channel sichtbar¹\n" +
                             $"> ``{prefix}lock`` - Sperrt den aktuellen Channel¹\n" +
+                            $"> ``{prefix}vcstatus [set <name> | remove]`` - Setzt oder entfernt den Channelstatus¹\n" +
                             $"> ``{prefix}unlock`` - Entsperrt den aktuellen Channel¹\n" +
                             $"> ``{prefix}vckick @user/id`` - Kickt einen User aus dem Channel¹\n" +
                             $"> ``{prefix}block @user/id`` - Blockt einen User aus dem Channel¹\n" +

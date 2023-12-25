@@ -251,7 +251,7 @@ public static class DatabaseService
             },
             {
                 "tempvoice",
-                "CREATE TABLE tempvoice (channelid BIGINT, ownerid BIGINT, lastedited BIGINT, channelmods VARCHAR)"
+                "CREATE TABLE tempvoice (channelid BIGINT, ownerid BIGINT, lastedited BIGINT, laststatusedited BIGINT, channelmods VARCHAR)"
             },
             {
                 "tempvoicesession",

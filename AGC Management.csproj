@@ -61,7 +61,6 @@
 
     <ItemGroup>
         <Folder Include="src\Commands\ServerControl\" />
-        <Folder Include="src\Commands\TempVC\" />
         <Folder Include="src\Utils\Music\" />
         <Folder Include="src\Utils\TempVoice\" />
     </ItemGroup>
