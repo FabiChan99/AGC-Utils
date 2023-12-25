@@ -18,10 +18,10 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
     {
         _ = Task.Run(async () =>
         {
-            if (text.Length == 0 || text.Length > 50)
+            if (text.Length == 0 || text.Length > 250)
             {
                 await ctx.RespondAsync(
-                    "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 50 Zeichen lang sein.");
+                    "<:attention:1085333468688433232> **Fehler!** Der Name muss zwischen 1 und 250 Zeichen lang sein.");
                 return;
             }
 
