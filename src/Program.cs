@@ -123,7 +123,7 @@ internal class Program : BaseCommandModule
             EnableDms = false,
             EnableMentionPrefix = true,
             IgnoreExtraArguments = true,
-            EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"])
+            EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
         discord.UseInteractivity(new InteractivityConfiguration
