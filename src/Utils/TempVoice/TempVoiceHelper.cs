@@ -1,11 +1,6 @@
 ﻿#region
 
 using AGC_Management.Services;
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 using DisCatSharp.Interactivity.Extensions;
 

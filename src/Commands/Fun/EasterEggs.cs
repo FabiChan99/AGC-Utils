@@ -1,8 +1,6 @@
 ﻿#region
 
 using AGC_Management.Attributes;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
 
 #endregion
 

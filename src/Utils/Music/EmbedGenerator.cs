@@ -1,6 +1,5 @@
 ﻿#region
 
-using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using LavaSharp.LavaManager;

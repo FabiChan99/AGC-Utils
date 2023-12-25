@@ -1,11 +1,6 @@
 ﻿#region
 
-using AGC_Management.Helper;
 using AGC_Management.Utils;
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 
 #endregion
 

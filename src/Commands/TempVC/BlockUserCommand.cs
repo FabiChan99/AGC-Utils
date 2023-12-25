@@ -3,10 +3,6 @@
 using AGC_Management.Attributes;
 using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using Microsoft.Extensions.Logging;
 
 #endregion

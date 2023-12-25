@@ -3,8 +3,6 @@
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using KawaiiAPI.NET;
 using KawaiiAPI.NET.Enums;
 using Microsoft.Extensions.DependencyInjection;

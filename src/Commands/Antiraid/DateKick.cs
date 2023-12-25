@@ -1,12 +1,5 @@
 ﻿#region
 
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
-
 #endregion
 
 namespace AGC_Management.Commands.Antiraid;

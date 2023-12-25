@@ -1,10 +1,5 @@
 ﻿#region
 
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
-
 #endregion
 
 namespace AGC_Management.Commands.AutoQuoting

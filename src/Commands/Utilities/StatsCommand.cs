@@ -1,9 +1,6 @@
 ﻿#region
 
 using System.Diagnostics;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
 
 #endregion
 

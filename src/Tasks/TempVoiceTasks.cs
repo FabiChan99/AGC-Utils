@@ -1,8 +1,6 @@
 ﻿#region
 
 using AGC_Management.Services;
-using DisCatSharp;
-using DisCatSharp.Entities;
 using Microsoft.Extensions.Logging;
 
 #endregion

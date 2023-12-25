@@ -3,12 +3,6 @@
 using AGC_Management.Components;
 using AGC_Management.Enums;
 using AGC_Management.Managers;
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 
 #endregion
 

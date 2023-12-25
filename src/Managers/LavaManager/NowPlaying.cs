@@ -1,11 +1,7 @@
 ﻿#region
 
-using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using LavaSharp.LavaManager;

@@ -1,9 +1,6 @@
 ﻿#region
 
 using System.Text.RegularExpressions;
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.EventArgs;
 using Microsoft.Extensions.Logging;
 
 #endregion

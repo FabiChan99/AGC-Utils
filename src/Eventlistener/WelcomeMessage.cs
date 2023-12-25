@@ -1,11 +1,5 @@
 ﻿#region
 
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using KawaiiAPI.NET;
 using KawaiiAPI.NET.Enums;
 using Microsoft.Extensions.Logging;

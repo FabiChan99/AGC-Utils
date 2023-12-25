@@ -2,8 +2,6 @@
 
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 

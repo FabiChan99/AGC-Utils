@@ -2,9 +2,6 @@
 
 using System.Text;
 using AGC_Management.Services;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using DisCatSharp.Interactivity.Extensions;
 
 #endregion

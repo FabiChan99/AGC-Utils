@@ -3,9 +3,6 @@
 using AGC_Management.LavaManager;
 using AGC_Management.Managers;
 using AGC_Management.Services;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
 
 #endregion

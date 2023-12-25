@@ -3,10 +3,6 @@
 using AGC_Management;
 using AGC_Management.Services;
 using AGC_Management.Utils.TempVoice;
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using DisCatSharp.Exceptions;
 
 #endregion

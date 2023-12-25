@@ -2,7 +2,6 @@
 
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Entities;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Lavalink.Entities;
 using DisCatSharp.Lavalink.Enums;

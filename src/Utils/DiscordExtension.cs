@@ -2,9 +2,6 @@
 
 using System.Text.RegularExpressions;
 using AGC_Management.Utils;
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using DisCatSharp.Exceptions;
 
 #endregion

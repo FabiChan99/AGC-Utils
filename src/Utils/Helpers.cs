@@ -2,9 +2,6 @@
 
 using AGC_Management.Entities;
 using AGC_Management.Services;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using Newtonsoft.Json;
 using RestSharp;
 

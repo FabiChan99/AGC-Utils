@@ -2,12 +2,6 @@
 
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
-using DisCatSharp;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using Newtonsoft.Json.Linq;
 
 #endregion

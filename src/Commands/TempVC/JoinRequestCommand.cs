@@ -2,10 +2,6 @@
 
 using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
-using DisCatSharp.CommandsNext;
-using DisCatSharp.CommandsNext.Attributes;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 using DisCatSharp.Interactivity.Extensions;
 
 #endregion

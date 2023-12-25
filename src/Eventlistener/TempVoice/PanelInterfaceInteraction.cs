@@ -1,9 +1,6 @@
 ﻿#region
 
 using AGC_Management.Utils.TempVoice;
-using DisCatSharp;
-using DisCatSharp.Enums;
-using DisCatSharp.EventArgs;
 using Microsoft.Extensions.Logging;
 
 #endregion

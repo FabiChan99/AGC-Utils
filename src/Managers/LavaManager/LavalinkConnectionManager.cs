@@ -1,6 +1,5 @@
 ﻿#region
 
-using DisCatSharp;
 using DisCatSharp.Lavalink;
 using DisCatSharp.Net;
 using Microsoft.Extensions.Logging;
