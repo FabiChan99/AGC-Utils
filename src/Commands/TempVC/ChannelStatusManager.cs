@@ -12,7 +12,7 @@ namespace AGC_Management.Commands.TempVC;
 [Group("channelstatus")]
 [Aliases("vcstatus", "channel-status", "vc-status")]
 [RequireDatabase]
-public class ChannelStatusCommands : TempVoiceHelper
+public sealed class ChannelStatusCommands : TempVoiceHelper
 {
     [Command("set")]
     public async Task SetStatus(CommandContext ctx, [RemainingText] string text)
