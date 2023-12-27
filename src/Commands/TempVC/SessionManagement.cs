@@ -125,7 +125,7 @@ public sealed class SessionManagement : TempVoiceHelper
                     { "permitedusers", permitlist },
                     { "locked", locked },
                     { "hidden", hidden },
-                    { "sessionskip", false}
+                    { "sessionskip", false }
                 };
                 await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
                 await msg.ModifyAsync(
@@ -212,7 +212,7 @@ public sealed class SessionManagement : TempVoiceHelper
                     "\u274c Du hast keine gespeicherte Sitzung.");
                 return;
             }
-            
+
             List<string> dataQuery = new()
             {
                 "*"
@@ -234,11 +234,11 @@ public sealed class SessionManagement : TempVoiceHelper
                     sessionSkip = (bool)user["sessionskip"];
                 }
             }
-            
+
             bool newSessionSkip = !sessionSkip;
-            
+
             string named = newSessionSkip ? "aktiv" : "inaktiv";
-            
+
             await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
             await con.OpenAsync();
             await using var cmd =
@@ -254,15 +254,10 @@ public sealed class SessionManagement : TempVoiceHelper
                 successstring +=
                     "\n\n**Hinweis:** Sessionskip wird automatisch deaktiviert, wenn du dir einen Channel erstellst!";
             }
-            
+
             await msg.ModifyAsync(successstring
-                );
-            
+            );
         });
-        
-
-
-        
     }
 
     [Command("read")]

@@ -1,7 +1,5 @@
 ﻿#region
 
-using DisCatSharp;
-using DisCatSharp.Entities;
 using Microsoft.Extensions.Logging;
 
 #endregion
