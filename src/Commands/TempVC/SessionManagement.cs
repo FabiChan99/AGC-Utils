@@ -124,7 +124,8 @@ public sealed class SessionManagement : TempVoiceHelper
                     { "blockedusers", blocklist },
                     { "permitedusers", permitlist },
                     { "locked", locked },
-                    { "hidden", hidden }
+                    { "hidden", hidden },
+                    { "sessionskip", false}
                 };
                 await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
                 await msg.ModifyAsync(
@@ -179,6 +180,90 @@ public sealed class SessionManagement : TempVoiceHelper
         });
     }
 
+
+    [Command("skip")]
+    [RequireDatabase]
+    public async Task SessionSkip(CommandContext ctx)
+    {
+        _ = Task.Run(async () =>
+        {
+            var msg = await ctx.RespondAsync(
+                "<a:loading_agc:1084157150747697203> **Lade...** Versuche Sessionskip zu bearbeiten...");
+            List<string> Query = new()
+            {
+                "userid"
+            };
+
+            Dictionary<string, object> WhereCondiditons_ = new()
+            {
+                { "userid", (long)ctx.User.Id }
+            };
+            bool hasSession = false;
+            var usersession =
+                await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
+            foreach (var user in usersession)
+            {
+                hasSession = true;
+            }
+
+            if (!hasSession)
+            {
+                await msg.ModifyAsync(
+                    "\u274c Du hast keine gespeicherte Sitzung.");
+                return;
+            }
+            
+            List<string> dataQuery = new()
+            {
+                "*"
+            };
+
+            Dictionary<string, object> WhereCondiditons = new()
+            {
+                { "userid", (long)ctx.User.Id }
+            };
+
+            var session =
+                await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, WhereCondiditons);
+
+            var sessionSkip = false;
+            foreach (var user in session)
+            {
+                if (user["userid"].ToString() == ctx.User.Id.ToString())
+                {
+                    sessionSkip = (bool)user["sessionskip"];
+                }
+            }
+            
+            bool newSessionSkip = !sessionSkip;
+            
+            string named = newSessionSkip ? "aktiv" : "inaktiv";
+            
+            await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await con.OpenAsync();
+            await using var cmd =
+                new NpgsqlCommand("UPDATE tempvoicesession SET sessionskip = @sessionskip WHERE userid = @userid",
+                    con);
+            cmd.Parameters.AddWithValue("sessionskip", newSessionSkip);
+            cmd.Parameters.AddWithValue("userid", (long)ctx.User.Id);
+            await cmd.ExecuteNonQueryAsync();
+            var successstring =
+                $"<:success:1085333481820790944> **Erfolg!** Sessionskip wurde erfolgreich auf ``{named}`` **geändert**!";
+            if (newSessionSkip)
+            {
+                successstring +=
+                    "\n\n**Hinweis:** Sessionskip wird automatisch deaktiviert, wenn du dir einen Channel erstellst!";
+            }
+            
+            await msg.ModifyAsync(successstring
+                );
+            
+        });
+        
+
+
+        
+    }
 
     [Command("read")]
     [RequireDatabase]
@@ -242,6 +327,7 @@ public sealed class SessionManagement : TempVoiceHelper
                     string permitedusers = user["permitedusers"].ToString();
                     string locked = user["locked"].ToString();
                     string hidden = user["hidden"].ToString();
+                    bool sessionskip = (bool)user["sessionskip"];
                     string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
                     string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
 
@@ -254,6 +340,7 @@ public sealed class SessionManagement : TempVoiceHelper
                                       $"**Kanallimit:** {channellimit}\n\n" +
                                       $"**Gesperrte Benutzer:** ```{bu}```\n" +
                                       $"**Zugelassene Benutzer:** ```{pu}```\n" +
+                                      $"**Sessionskip aktiv:** {sessionskip}\n" +
                                       $"**Gesperrt:** {locked}\n" +
                                       $"**Versteckt:** {hidden}\n",
                         Color = BotConfig.GetEmbedColor()

@@ -36,6 +36,7 @@ public sealed class VoiceHelpCommand : TempVoiceHelper
                             "**__Sitzungsverwaltung:__** (Persistente Kanäle)\n" +
                             $"> ``{prefix}session save`` - Speichert ein Abbild des Channels in der Datenbank\n" +
                             $"> ``{prefix}session read`` - Zeigt die aktuell gespeicherte Sitzung an\n" +
+                            $"> ``{prefix}session skip`` - Überspringt die Sitzung einmalig und erstellt einen neuen Channel (Wird beim nächsten Join deaktiviert)\n" +
                             $"> ``{prefix}session delete`` -  Löscht die gespeicherte Sitzung\n" +
                             "\n" +
                             "**__Kanalmodverwaltung:__** (Mehrere Channelowner)\n" +
