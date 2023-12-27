@@ -2,8 +2,10 @@
 
 using AGC_Management;
 using AGC_Management.Services;
+using AGC_Management.Utils;
 using AGC_Management.Utils.TempVoice;
 using DisCatSharp.Exceptions;
+using Microsoft.VisualBasic.CompilerServices;
 
 #endregion
 
@@ -269,6 +271,7 @@ public class TempVCEventHandler : TempVoiceHelper
             }
             catch (Exception ex)
             {
+                await ErrorReporting.SendErrorToDev(sender, e.User, ex);
                 Console.WriteLine(ex.Message);
             }
         });
@@ -320,8 +323,9 @@ public class TempVCEventHandler : TempVoiceHelper
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception err)
             {
+                await ErrorReporting.SendErrorToDev(sender, e.User, err);
             }
         });
 

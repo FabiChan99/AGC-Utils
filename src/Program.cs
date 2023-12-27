@@ -323,11 +323,11 @@ internal class Program : BaseCommandModule
         }
     }
 
-    private static Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
+    private static async Task Discord_ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
     {
         sender.Logger.LogError($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
         sender.Logger.LogError($"Stacktrace: {e.Exception.GetType()}: {e.Exception.StackTrace}");
-        return Task.CompletedTask;
+        await Utils.ErrorReporting.SendErrorToDev(sender, sender.CurrentUser, e.Exception);
     }
 
     private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
@@ -371,6 +371,8 @@ internal class Program : BaseCommandModule
             e.Handled = true;
             return;
         }
+        
+        await Utils.ErrorReporting.SendErrorToDev(CurrentApplicationData.Client, e.Context.User, e.Exception);
 
         var embed = new DiscordEmbedBuilder
         {
@@ -396,6 +398,8 @@ public static class GlobalProperties
     public static ulong BotOwnerId { get; } = ulong.Parse(BotConfig.GetConfig()["MainConfig"]["BotOwnerId"]);
 
     public static DiscordGuild AGCGuild { get; set; }
+    
+    public static ulong ErrorTrackingChannelId { get; } = ulong.Parse(BotConfig.GetConfig()["MainConfig"]["ErrorTrackingChannelId"]);
 
     private static bool ParseBoolean(string boolString)
     {
