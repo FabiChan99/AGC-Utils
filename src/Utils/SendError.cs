@@ -45,5 +45,6 @@ public static class ErrorReporting
         }
 
         CurrentApplicationData.Client.Logger.LogError($"Exception occured: {exception.GetType()}: {exception.Message}");
+        CurrentApplicationData.Client.Logger.LogError($"Stacktrace: {exception.StackTrace}");
     }
 }
