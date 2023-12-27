@@ -254,7 +254,7 @@ public static class DatabaseService
             },
             {
                 "tempvoicesession",
-                "CREATE TABLE tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN)"
+                "CREATE TABLE tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN, sessionskip BOOLEAN)"
             },
             { "vorstellungscooldown", "CREATE TABLE vorstellungscooldown (user_id BIGINT, time BIGINT)" },
             { "warnreasons", "CREATE TABLE warnreasons (reason TEXT, custom_id VARCHAR)" },
