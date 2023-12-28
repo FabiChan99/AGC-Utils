@@ -226,62 +226,179 @@ public static class DatabaseService
     }
 
 
-    public static async Task InitializeDatabaseTables()
+    public static async Task InitializeAndUpdateDatabaseTables()
     {
         var dbstring = GetConnectionString();
         await using var conn = new NpgsqlConnection(dbstring);
-        CurrentApplicationData.Logger.Information("Initializing database tables... ");
-
-        var spinner = new ConsoleSpinner();
-        spinner.Start();
-
+        CurrentApplicationData.Logger.Information("Initializing database tables...");
+        
         await conn.OpenAsync();
 
         var tableCommands = new Dictionary<string, string>
         {
-            { "reasonmap", "CREATE TABLE reasonmap (key TEXT, text TEXT)" },
-            { "abstimmungen", "CREATE TABLE abstimmungen (channel_id BIGINT, message_id BIGINT, expires_at BIGINT)" },
-            { "antragssperre", "CREATE TABLE antragssperre (user_id BIGINT, expires_at BIGINT, reason TEXT)" },
-            { "autocompletions", "CREATE TABLE autocompletions (data TEXT, type TEXT)" },
-            { "banreasons", "CREATE TABLE banreasons (reason TEXT, custom_id VARCHAR)" },
+            { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
+            { "banreasons", "CREATE TABLE IF NOT EXISTS banreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "flags",
-                "CREATE TABLE flags (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, caseid VARCHAR)"
+                "CREATE TABLE IF NOT EXISTS flags (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, caseid VARCHAR)"
             },
             {
                 "tempvoice",
-                "CREATE TABLE tempvoice (channelid BIGINT, ownerid BIGINT, lastedited BIGINT, laststatusedited BIGINT, channelmods VARCHAR)"
+                "CREATE TABLE IF NOT EXISTS tempvoice (channelid BIGINT, ownerid BIGINT, lastedited BIGINT, laststatusedited BIGINT, channelmods VARCHAR)"
             },
             {
                 "tempvoicesession",
-                "CREATE TABLE tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN, sessionskip BOOLEAN)"
+                "CREATE TABLE IF NOT EXISTS tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN, sessionskip BOOLEAN)"
             },
-            { "vorstellungscooldown", "CREATE TABLE vorstellungscooldown (user_id BIGINT, time BIGINT)" },
-            { "warnreasons", "CREATE TABLE warnreasons (reason TEXT, custom_id VARCHAR)" },
+            { "vorstellungscooldown", "CREATE TABLE IF NOT EXISTS vorstellungscooldown (user_id BIGINT, time BIGINT)" },
+            { "warnreasons", "CREATE TABLE IF NOT EXISTS warnreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "warns",
-                "CREATE TABLE warns (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, perma BOOLEAN, caseid VARCHAR)"
+                "CREATE TABLE IF NOT EXISTS warns (userid BIGINT, punisherid BIGINT, datum BIGINT, description VARCHAR, perma BOOLEAN, caseid VARCHAR)"
             }
         };
+        var progressBar = new ConsoleProgressBar(tableCommands.Count);
 
         foreach (var kvp in tableCommands)
         {
             var tableName = kvp.Key;
             var createTableCommand = kvp.Value;
 
-            var checkTableCmd = $"SELECT COUNT(*) FROM pg_catalog.pg_tables WHERE tablename = '{tableName}'";
-            await using var cmd = new NpgsqlCommand(checkTableCmd, conn);
-            int exists = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-            if (exists == 0)
-            {
-                await using var cmdCreate = new NpgsqlCommand(createTableCommand, conn);
-                await cmdCreate.ExecuteNonQueryAsync();
-            }
+            await using var cmdCreate = new NpgsqlCommand(createTableCommand, conn);
+            await cmdCreate.ExecuteNonQueryAsync();
+            //CurrentApplicationData.Logger.Debug($"Table {tableName} initialized or updated.");
+            progressBar.Increment();
+            await Task.Delay(25);
+        }
+        await conn.CloseAsync();
+        
+        CurrentApplicationData.Logger.Information("Database tables initialized.");
+        await UpdateTables();
+    }
+    
+    private static async Task UpdateTables()
+    {
+        var dbstring = GetConnectionString();
+        await using var conn = new NpgsqlConnection(dbstring);
+        CurrentApplicationData.Logger.Information("Updating database tables...");
+        
+        await conn.OpenAsync();
 
-            Thread.Sleep(20);
+        var columnUpdates = new Dictionary<string, Dictionary<string, string>>
+        {
+            {
+                "reasonmap",
+                new Dictionary<string, string>
+                {
+                    { "key", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS key TEXT" }, 
+                    { "text", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS text TEXT" }
+                }
+            },
+            {
+                "banreasons",
+                new Dictionary<string, string>
+                {
+                    { "reason", "ALTER TABLE banreasons ADD COLUMN IF NOT EXISTS reason TEXT" }, 
+                    { "custom_id", "ALTER TABLE banreasons ADD COLUMN IF NOT EXISTS custom_id VARCHAR" }
+                }
+            },
+            {
+                "flags",
+                new Dictionary<string, string>
+                {
+                    { "userid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
+                    { "punisherid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS punisherid BIGINT" }, 
+                    { "datum", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS datum BIGINT" }, 
+                    { "description", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS description VARCHAR" }, 
+                    { "caseid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
+                }
+            },
+            {
+                "tempvoice",
+                new Dictionary<string, string>
+                {
+                    { "channelid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS channelid BIGINT" }, 
+                    { "ownerid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS ownerid BIGINT" }, 
+                    { "lastedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS lastedited BIGINT" }, 
+                    { "laststatusedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS laststatusedited BIGINT" }, 
+                    { "channelmods", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS channelmods VARCHAR" }
+                }
+            },
+            {
+                "tempvoicesession",
+                new Dictionary<string, string>
+                {
+                    { "userid", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
+                    { "channelname", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelname VARCHAR" }, 
+                    { "channelbitrate", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelbitrate INTEGER" }, 
+                    { "channellimit", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channellimit INTEGER" }, 
+                    { "blockedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS blockedusers VARCHAR" }, 
+                    { "permitedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS permitedusers VARCHAR" }, 
+                    { "locked", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS locked BOOLEAN" }, 
+                    { "hidden", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS hidden BOOLEAN" }, 
+                    { "sessionskip", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS sessionskip BOOLEAN" },
+                    
+                }
+            },
+            {
+                "vorstellungscooldown",
+                new Dictionary<string, string>
+                {
+                    { "user_id", "ALTER TABLE vorstellungscooldown ADD COLUMN IF NOT EXISTS user_id BIGINT" }, 
+                    { "time", "ALTER TABLE vorstellungscooldown ADD COLUMN IF NOT EXISTS time BIGINT" }
+                }
+            },
+            {
+                "warnreasons",
+                new Dictionary<string, string>
+                {
+                    { "reason", "ALTER TABLE warnreasons ADD COLUMN IF NOT EXISTS reason TEXT" }, 
+                    { "custom_id", "ALTER TABLE warnreasons ADD COLUMN IF NOT EXISTS custom_id VARCHAR" }
+                }
+            },
+            {
+                "warns",
+                new Dictionary<string, string>
+                {
+                    { "userid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
+                    { "punisherid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS punisherid BIGINT" }, 
+                    { "datum", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS datum BIGINT" }, 
+                    { "description", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS description VARCHAR" }, 
+                    { "perma", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS perma BOOLEAN" }, 
+                    { "caseid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
+                }
+            },
+            };
+
+        
+        var commandCount = 0;
+        foreach (var tableKvp in columnUpdates)
+        {
+            foreach (var columnKvp in tableKvp.Value)
+            {
+                commandCount++;
+            }
+        }
+        
+        var progressBar = new ConsoleProgressBar(commandCount);
+        
+
+        foreach (var tableKvp in columnUpdates)
+        {
+            var tableName = tableKvp.Key;
+            foreach (var columnKvp in tableKvp.Value)
+            {
+                var columnName = columnKvp.Key;
+                var alterColumnCommand = columnKvp.Value;
+
+                await using var cmdAlter = new NpgsqlCommand(alterColumnCommand, conn);
+                await cmdAlter.ExecuteNonQueryAsync();
+                progressBar.Increment();
+                await Task.Delay(25);
+            }
         }
 
-        spinner.Stop();
-        CurrentApplicationData.Logger.Information("Database tables initialized.");
+        await conn.CloseAsync();
+        CurrentApplicationData.Logger.Information("Database tables updated.");
     }
 }

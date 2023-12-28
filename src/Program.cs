@@ -96,7 +96,7 @@ internal class Program : BaseCommandModule
         TicketDatabaseService.OpenConnection();
         spinner.Stop();
         logger.Information("Database connected!");
-        await DatabaseService.InitializeDatabaseTables();
+        await DatabaseService.InitializeAndUpdateDatabaseTables();
         var discord = new DiscordClient(new DiscordConfiguration
         {
             Token = DcApiToken,
@@ -128,7 +128,7 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider, DebugStartup = true, EnableDefaultHelp = false
+            ServiceProvider = serviceProvider, DebugStartup = false, EnableDefaultHelp = false
         });
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
