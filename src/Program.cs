@@ -25,7 +25,7 @@ namespace AGC_Management;
 
 public class CurrentApplicationData
 {
-    public static string VersionString { get; set; } = "v1.44.0 rev.3";
+    public static string VersionString { get; set; } = "v1.45.0";
     public static DiscordClient Client { get; set; }
     public static ILogger Logger { get; set; }
 }
