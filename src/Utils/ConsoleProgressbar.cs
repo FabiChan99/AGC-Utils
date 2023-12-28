@@ -1,10 +1,10 @@
 ﻿public class ConsoleProgressBar
 {
-    private readonly int _total;
-    private int _current;
     private readonly int _barSize;
     private readonly char _progressCharacter;
-    private int _startCursorTop;
+    private readonly int _total;
+    private int _current;
+    private readonly int _startCursorTop;
 
     public ConsoleProgressBar(int total, int barSize = 50, char progressCharacter = '#')
     {

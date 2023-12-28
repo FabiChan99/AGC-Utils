@@ -231,7 +231,7 @@ public static class DatabaseService
         var dbstring = GetConnectionString();
         await using var conn = new NpgsqlConnection(dbstring);
         CurrentApplicationData.Logger.Information("Initializing database tables...");
-        
+
         await conn.OpenAsync();
 
         var tableCommands = new Dictionary<string, string>
@@ -270,18 +270,19 @@ public static class DatabaseService
             progressBar.Increment();
             await Task.Delay(25);
         }
+
         await conn.CloseAsync();
-        
+
         CurrentApplicationData.Logger.Information("Database tables initialized.");
         await UpdateTables();
     }
-    
+
     private static async Task UpdateTables()
     {
         var dbstring = GetConnectionString();
         await using var conn = new NpgsqlConnection(dbstring);
         CurrentApplicationData.Logger.Information("Updating database tables...");
-        
+
         await conn.OpenAsync();
 
         var columnUpdates = new Dictionary<string, Dictionary<string, string>>
@@ -290,7 +291,7 @@ public static class DatabaseService
                 "reasonmap",
                 new Dictionary<string, string>
                 {
-                    { "key", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS key TEXT" }, 
+                    { "key", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS key TEXT" },
                     { "text", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS text TEXT" }
                 }
             },
@@ -298,7 +299,7 @@ public static class DatabaseService
                 "banreasons",
                 new Dictionary<string, string>
                 {
-                    { "reason", "ALTER TABLE banreasons ADD COLUMN IF NOT EXISTS reason TEXT" }, 
+                    { "reason", "ALTER TABLE banreasons ADD COLUMN IF NOT EXISTS reason TEXT" },
                     { "custom_id", "ALTER TABLE banreasons ADD COLUMN IF NOT EXISTS custom_id VARCHAR" }
                 }
             },
@@ -306,10 +307,10 @@ public static class DatabaseService
                 "flags",
                 new Dictionary<string, string>
                 {
-                    { "userid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
-                    { "punisherid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS punisherid BIGINT" }, 
-                    { "datum", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS datum BIGINT" }, 
-                    { "description", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS description VARCHAR" }, 
+                    { "userid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS userid BIGINT" },
+                    { "punisherid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS punisherid BIGINT" },
+                    { "datum", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS datum BIGINT" },
+                    { "description", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS description VARCHAR" },
                     { "caseid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
                 }
             },
@@ -317,10 +318,10 @@ public static class DatabaseService
                 "tempvoice",
                 new Dictionary<string, string>
                 {
-                    { "channelid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS channelid BIGINT" }, 
-                    { "ownerid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS ownerid BIGINT" }, 
-                    { "lastedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS lastedited BIGINT" }, 
-                    { "laststatusedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS laststatusedited BIGINT" }, 
+                    { "channelid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS channelid BIGINT" },
+                    { "ownerid", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS ownerid BIGINT" },
+                    { "lastedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS lastedited BIGINT" },
+                    { "laststatusedited", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS laststatusedited BIGINT" },
                     { "channelmods", "ALTER TABLE tempvoice ADD COLUMN IF NOT EXISTS channelmods VARCHAR" }
                 }
             },
@@ -328,23 +329,24 @@ public static class DatabaseService
                 "tempvoicesession",
                 new Dictionary<string, string>
                 {
-                    { "userid", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
-                    { "channelname", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelname VARCHAR" }, 
-                    { "channelbitrate", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelbitrate INTEGER" }, 
-                    { "channellimit", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channellimit INTEGER" }, 
-                    { "blockedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS blockedusers VARCHAR" }, 
-                    { "permitedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS permitedusers VARCHAR" }, 
-                    { "locked", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS locked BOOLEAN" }, 
-                    { "hidden", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS hidden BOOLEAN" }, 
-                    { "sessionskip", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS sessionskip BOOLEAN" },
-                    
+                    { "userid", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS userid BIGINT" },
+                    { "channelname", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelname VARCHAR" },
+                    {
+                        "channelbitrate", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelbitrate INTEGER"
+                    },
+                    { "channellimit", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channellimit INTEGER" },
+                    { "blockedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS blockedusers VARCHAR" },
+                    { "permitedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS permitedusers VARCHAR" },
+                    { "locked", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS locked BOOLEAN" },
+                    { "hidden", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS hidden BOOLEAN" },
+                    { "sessionskip", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS sessionskip BOOLEAN" }
                 }
             },
             {
                 "vorstellungscooldown",
                 new Dictionary<string, string>
                 {
-                    { "user_id", "ALTER TABLE vorstellungscooldown ADD COLUMN IF NOT EXISTS user_id BIGINT" }, 
+                    { "user_id", "ALTER TABLE vorstellungscooldown ADD COLUMN IF NOT EXISTS user_id BIGINT" },
                     { "time", "ALTER TABLE vorstellungscooldown ADD COLUMN IF NOT EXISTS time BIGINT" }
                 }
             },
@@ -352,7 +354,7 @@ public static class DatabaseService
                 "warnreasons",
                 new Dictionary<string, string>
                 {
-                    { "reason", "ALTER TABLE warnreasons ADD COLUMN IF NOT EXISTS reason TEXT" }, 
+                    { "reason", "ALTER TABLE warnreasons ADD COLUMN IF NOT EXISTS reason TEXT" },
                     { "custom_id", "ALTER TABLE warnreasons ADD COLUMN IF NOT EXISTS custom_id VARCHAR" }
                 }
             },
@@ -360,17 +362,17 @@ public static class DatabaseService
                 "warns",
                 new Dictionary<string, string>
                 {
-                    { "userid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS userid BIGINT" }, 
-                    { "punisherid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS punisherid BIGINT" }, 
-                    { "datum", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS datum BIGINT" }, 
-                    { "description", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS description VARCHAR" }, 
-                    { "perma", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS perma BOOLEAN" }, 
+                    { "userid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS userid BIGINT" },
+                    { "punisherid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS punisherid BIGINT" },
+                    { "datum", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS datum BIGINT" },
+                    { "description", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS description VARCHAR" },
+                    { "perma", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS perma BOOLEAN" },
                     { "caseid", "ALTER TABLE warns ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
                 }
-            },
-            };
+            }
+        };
 
-        
+
         var commandCount = 0;
         foreach (var tableKvp in columnUpdates)
         {
@@ -379,9 +381,9 @@ public static class DatabaseService
                 commandCount++;
             }
         }
-        
+
         var progressBar = new ConsoleProgressBar(commandCount);
-        
+
 
         foreach (var tableKvp in columnUpdates)
         {
