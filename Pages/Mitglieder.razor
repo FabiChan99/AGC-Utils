@@ -1,0 +1,304 @@
+﻿@page "/mitglieder"
+@using AGC_Management.Utils
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+<h3>Mitglieder</h3>
+
+<div>
+    <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/> 
+    <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen</button>
+    <br/>
+    <input type="checkbox" @bind="showOnlyBots"/> Nur Bots anzeigen
+    <br>
+    <input type="checkbox" @bind="showOnlyStaff"/> Nur Team anzeigen
+    <br>
+
+    <!-- Pagination size dropdown with label -->
+    <label for="pageSize">User pro Seite:</label>
+    <select id="pageSize" value="@pageSize" @onchange="OnPageSizeChanged">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+    </select>
+</div>
+
+
+@if (isLoading)
+{
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+}
+else if (filteredMembers == null || !filteredMembers.Any())
+{
+    <p>
+        <em>Keine Mitglieder gefunden.</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>User ID</th>
+            <th>Erstellt</th>
+            <th>
+                Beigetreten
+                <button class="btn text-white" @onclick="() => ToggleSortOrderAsync()">@(sortAscending ? "↑" : "↓")</button>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var member in filteredMembers)
+        {
+            <tr>
+                <td>
+                    @ToolSet.GetFormattedName(member)
+                    @if (member.IsBot)
+                    {
+                        <span class="bot-tag">BOT</span>
+                    }
+                    @if (member.isTeamMember())
+                    {
+                        <span class="team-tag">TEAM</span>
+                    }
+                </td>
+                <td>@member.Id</td>
+                <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@member.JoinedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <button class="btn btn-primary-red" @onclick="() => NavigateToManageMember(member.Id.ToString())">Verwalten</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        @if (currentPage > 1)
+        {
+            <button class="btn-primary-red btn" @onclick="PreviousPage">Previous</button>
+        }
+        <div class="page-info-container">
+            <span class="btn page-info text-white-50">Seite @currentPage von @totalPages</span>
+        </div>
+        @if (currentPage < totalPages)
+        {
+            <button class="btn btn-primary-red" @onclick="NextPage">Next</button>
+        }
+    </div>
+
+    <div class="text-white">@matchingMembers.Length User entsprechen dem Filter</div>
+    <br/>
+}
+
+
+@code {
+    private DiscordMember[]? members;
+    private DiscordMember[]? filteredMembers;
+    private string userIdSearchTerm = string.Empty;
+    private string searchTerm = string.Empty;
+    private bool showOnlyBots;
+    private bool showOnlyStaff;
+    private bool sortAscending = true;
+    private DiscordMember[]? matchingMembers;
+    private bool isLoading = true;
+    private readonly CancellationTokenSource cancellationTokenSource = new();
+
+    private int currentPage = 1;
+    private int pageSize = 50;
+    private int totalPages;
+
+    private async Task MitgliederNeuEinlesen()
+    {
+        await InvokeAsync(async () =>
+        {
+            Console.WriteLine("Mitglieder neu einlesen");
+            isLoading = true;
+            await Task.Delay(1000);
+            await ForceLoadDataAsync();
+        });
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        isLoading = true;
+        try
+        {
+            members = await Task.Run(() =>
+                CurrentApplication.TargetGuild.Members.Values.OrderByDescending(m => m.JoinedAt).ToArray(), cancellationTokenSource.Token);
+            await ApplyFiltersAsync();
+            ApplyPagination();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task ForceLoadDataAsync()
+    {
+        isLoading = true;
+        try
+        {
+            var guild = await CurrentApplication.DiscordClient.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
+            // fetch all members async
+            var memberslist = await guild.GetAllMembersAsync();
+            members = Array.ConvertAll(memberslist.ToArray(), x => (DiscordMember)x);
+            
+            await ApplyFiltersAsync();
+            ApplyPagination();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void NavigateToManageMember(string memberId)
+    {
+        NavigationManager.NavigateTo($"/managemember?userid={memberId}");
+    }
+
+    private async void RefreshData()
+    {
+        await InvokeAsync(async () =>
+        {
+            isLoading = true;
+            await LoadDataAsync();
+        });
+    }
+
+    private void ApplyPagination()
+    {
+        totalPages = (int)Math.Ceiling((double)matchingMembers.Length / pageSize);
+        filteredMembers = matchingMembers.Skip((currentPage - 1) * pageSize).Take(pageSize).ToArray();
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            ApplyPagination();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            ApplyPagination();
+        }
+    }
+
+    private async Task ToggleSortOrderAsync()
+    {
+        sortAscending = !sortAscending;
+        await ApplyFiltersAsync();
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        isLoading = true;
+
+        IEnumerable<DiscordMember> tempFilteredMembers = members;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            if (ulong.TryParse(searchTerm, out var id))
+            {
+                tempFilteredMembers = tempFilteredMembers.Where(m => m.Id == id);
+            }
+            else
+            {
+                // Suchen nach Nickname, Displayname oder Username
+                tempFilteredMembers = tempFilteredMembers.Where(m => 
+                    (m.Nickname != null && m.Nickname.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (m.DisplayName != null && m.DisplayName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    m.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+        
+        if (showOnlyStaff)
+        {
+            tempFilteredMembers = tempFilteredMembers.Where(m => m.isTeamMember());
+        }
+
+        if (showOnlyBots)
+        {
+            tempFilteredMembers = tempFilteredMembers.Where(m => m.IsBot);
+        }
+
+        if (sortAscending)
+        {
+            tempFilteredMembers = tempFilteredMembers.OrderBy(m => m.JoinedAt);
+        }
+        else
+        {
+            tempFilteredMembers = tempFilteredMembers.OrderByDescending(m => m.JoinedAt);
+        }
+
+        matchingMembers = tempFilteredMembers.ToArray();
+        ApplyPagination();
+
+        isLoading = false;
+    }
+
+
+
+    private Timer? debounceTimer;
+
+    private void OnSearchTermChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        debounceTimer?.Dispose();
+        debounceTimer = new Timer(_ => { InvokeAsync(async () => { await ApplyFiltersAsync(); }); }, null, 250, Timeout.Infinite);
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out var newSize))
+        {
+            pageSize = newSize;
+            currentPage = 1;
+            await ApplyFiltersAsync();
+            ApplyPagination();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        cancellationTokenSource.Cancel();
+        cancellationTokenSource.Dispose();
+        debounceTimer?.Dispose();
+    }
+
+}

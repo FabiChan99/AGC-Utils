@@ -1,0 +1,78 @@
+﻿@page "/login"
+@using AGC_Management.Providers
+@using AGC_Management.Utils
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+@if (!isAuthenticated)
+{
+    <div class="">
+        <h1>Login</h1>
+        <EditForm Model="@loginModel" OnSubmit="@HandleLogin">
+            User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername" />
+            <br>
+            Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password" />
+            <br>
+            <br>
+            <button class="btn btn-primary" type="submit">Login</button>
+        </EditForm>
+        @if (loginFailed)
+        {
+            <br/>
+            <p class="text-danger fst-italic">Login fehlgeschlagen</p>
+        }
+    </div>
+}
+
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+
+    bool isAuthenticated = false;
+    bool shouldNavigate = false;
+    bool loginFailed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity.IsAuthenticated;
+        shouldNavigate = isAuthenticated;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldNavigate)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    
+    private async Task HandleLogin()
+    {
+        var isValidUser = await CheckUserAsync(loginModel.Username, loginModel.Password);
+        if (isValidUser)
+        {
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(loginModel.Username);
+            shouldNavigate = true;
+            StateHasChanged();
+        }
+        else
+        {
+            loginFailed = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<bool> CheckUserAsync(string username, string password)
+    {
+        bool isValidUser = false;
+        isValidUser = await Task.Run(() => AuthUtils.VerifyPassword(username, password));
+        return isValidUser;
+    }
+
+    public class LoginModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+}

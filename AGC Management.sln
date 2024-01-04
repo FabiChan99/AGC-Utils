@@ -1,14 +1,6 @@
-﻿﻿
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.33627.172
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AGC Management", "AGC Management.csproj", "{F94D2278-1BC7-41C8-AD68-80D92D8B29D0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B49B3E24-DCFC-4282-8FB0-C9ED8A1D4001}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AGC Management", "AGC Management.csproj", "{773EB7F5-C92B-4753-A98B-1AC242D690E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,15 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F94D2278-1BC7-41C8-AD68-80D92D8B29D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F94D2278-1BC7-41C8-AD68-80D92D8B29D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F94D2278-1BC7-41C8-AD68-80D92D8B29D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F94D2278-1BC7-41C8-AD68-80D92D8B29D0}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2D17B60F-63F4-4260-999E-0563B258FC20}
+		{773EB7F5-C92B-4753-A98B-1AC242D690E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773EB7F5-C92B-4753-A98B-1AC242D690E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773EB7F5-C92B-4753-A98B-1AC242D690E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{773EB7F5-C92B-4753-A98B-1AC242D690E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

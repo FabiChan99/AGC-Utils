@@ -1,0 +1,208 @@
+﻿@page "/bot"
+@using AGC_Management.Utils
+@using Npgsql
+@using AGC_Management.Services
+@attribute [Authorize]
+<h3>Botstatus</h3>
+<br>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="oi oi-dashboard"></i> Bot status</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Discord Websocket: @ping</p>
+                <div class="server-count" onmouseover="showServerPopup()" onmouseout="hideServerPopup()">
+                    <p class="card-text">Servercount: @guildcount</p>
+                    <div id="serverPopup" class="server-popup">
+                        <ul>
+                            @foreach (var server in serverList)
+                            {
+                                <li>@server</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <p class="card-text">Nutzer im Cache: @cacheduserscount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fa fa-gear"></i> Anwendungskonfiguration</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Target Server: @CurrentApplication.TargetGuild.Id</p>
+                <p class="card-text">Anwendungsmodus: @prodmode</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fa fa-database"></i> Datenbank</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Datenbank Latenz (Simple Query): @dbping</p>
+                <p class="card-text">Datenbank Latenz (Expensive Query): @dbpingexpensive</p>
+                <p class="card-text">Datenbank User: @dbuser</p>
+                <p class="card-text">Datenbank Version: @dbversion</p>
+            </div>
+        </div>
+    </div>
+    <!-- Weitere Karten hier -->
+</div>
+<style>
+    .server-popup {
+        display: none;
+    }
+</style>
+
+
+@code {
+
+    private string ping = "Loading...";
+    private string dbping = "Loading...";
+    private string dbversion = "Loading...";
+    private string dbpingexpensive = "Loading...";
+    private string dbuser = "Loading...";
+    private string guildcount = "Loading...";
+    private string cacheduserscount = "Loading...";
+    private string prodmode = "Loading...";
+    private List<string> serverList = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var timer = new System.Timers.Timer(10000);
+        timer.Elapsed += async (sender, e) => await UpdateValues();
+        timer.Start();
+        await Task.Delay(2000);
+        await UpdateValues();
+    }
+    
+    private string GetMode()
+    {
+        #if DEBUG
+        return "Development";
+        #else
+        return "Production";
+        #endif
+    }
+
+    private void GetServerList()
+    {
+        serverList.Clear();
+        var guilds = CurrentApplication.DiscordClient.Guilds.Values.ToList();
+        foreach (var guild in guilds)
+        {
+            serverList.Add(guild.Name);
+        }
+    }
+
+    
+
+    private string GetPing()
+    {
+        return CurrentApplication.DiscordClient.Ping.ToString();
+    }
+    
+    private async Task UpdateValues()
+    {
+        var pingValue = GetPing();
+        var dbPingValue = await GatherDBLatency();
+        var dbPingValueExpensive = await GatherDBLatencyExpensive();
+        var dbVersionValue = await DbVersion();
+        var dbUserValue = await DBuser();
+        var guildCountValue = await GatherGuildCount();
+        var cachedUsersCountValue = await GatherCachedUsersCount();
+        var prodmodevalue = GetMode();
+        GetServerList();
+        
+        await InvokeAsync(() =>
+        {
+            ping = pingValue + " ms";
+            dbping = dbPingValue + " ms";
+            dbpingexpensive = dbPingValueExpensive + " ms";
+            dbuser = dbUserValue;
+            dbversion = dbVersionValue;
+            guildcount = guildCountValue;
+            cacheduserscount = cachedUsersCountValue;
+            prodmode = prodmodevalue;
+            StateHasChanged();
+        });
+    }
+    
+    private async Task<string> GatherGuildCount()
+    {
+        var guilds = CurrentApplication.DiscordClient.Guilds.Values.ToList();
+        return guilds.Count.ToString();
+    }
+    
+    private async Task<string> GatherCachedUsersCount()
+    {
+        var users = new HashSet<DiscordUser>();
+        var guilds = CurrentApplication.DiscordClient.Guilds.Values.ToList();
+        foreach (var guild in guilds)
+        {
+            var guildusers = guild.Members.Values.ToList();
+            foreach (var guilduser in guildusers)
+            {
+                users.Add(guilduser);
+            }
+        }
+        return users.Count.ToString();
+    } 
+
+    private async Task<string> GatherDBLatency()
+    {
+        var unixtimestampstart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        var constring = DatabaseService.GetConnectionString();
+        await using var con = new NpgsqlConnection(constring);
+        await con.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT 1", con);
+        await cmd.ExecuteScalarAsync();
+        var unixtimestampend = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        var latency = unixtimestampend - unixtimestampstart;
+        return latency.ToString();
+    }
+    
+    
+    private async Task<string> GatherDBLatencyExpensive()
+    {
+        var unixtimestampstart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        var constring = DatabaseService.GetConnectionString();
+        await using var con = new NpgsqlConnection(constring);
+        await con.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM flags", con);
+        await cmd.ExecuteScalarAsync();
+        var unixtimestampend = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        var latency = unixtimestampend - unixtimestampstart;
+        return latency.ToString();
+    }
+    
+    private async Task<string> DBuser()
+    {
+        var constring = DatabaseService.GetConnectionString();
+        await using var con = new NpgsqlConnection(constring);
+        await con.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT current_user;", con);
+        var version = await cmd.ExecuteScalarAsync();
+        return version.ToString();
+    }
+    
+    private async Task<string> DbVersion()
+    {
+        var constring = DatabaseService.GetConnectionString();
+        await using var con = new NpgsqlConnection(constring);
+        await con.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT version();", con);
+        var version = await cmd.ExecuteScalarAsync();
+        return version.ToString();
+    }
+    
+    
+    
+    
+}

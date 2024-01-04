@@ -1,0 +1,77 @@
+﻿@page "/managemember"
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<h3>Mitgliederverwaltung</h3>
+<br>
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Nutzerinformationen</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Nutzername: @member.Username</p>
+                <p class="card-text">Nickname: @member.Nickname</p>
+                <p class="card-text">Beigetreten am: @_joinedAt</p>
+                <p class="card-text">Erstellt am: @_createdAt</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _parameter;
+
+
+    private DateTime _joinedAt;
+    private DateTime _createdAt;
+    private DiscordMember member;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("userid", out var param))
+        {
+            _parameter = param;
+        }
+
+        bool isValid = isValidUserId();
+        if (!isValid)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+        member = CurrentApplication.TargetGuild.Members[ulong.Parse(_parameter)];
+        _joinedAt = member.JoinedAt.UtcDateTime;
+        _createdAt = member.CreationTimestamp.UtcDateTime;
+    }
+
+    private bool isValidUserId()
+    {
+        if (_parameter == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            try
+            {
+                if (CurrentApplication.TargetGuild.Members.ContainsKey(ulong.Parse(_parameter)))
+                {
+                    return true;
+                }
+
+                NavigationManager.NavigateTo("/");
+            }
+            catch (Exception)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+
+        return false;
+    }
+
+}
