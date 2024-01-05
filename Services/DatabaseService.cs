@@ -237,6 +237,7 @@ public static class DatabaseService
         var tableCommands = new Dictionary<string, string>
         {
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
+            { "web_users", "CREATE TABLE IF NOT EXISTS web_users (username TEXT, hashed_password TEXT)"},
             { "banreasons", "CREATE TABLE IF NOT EXISTS banreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "flags",
@@ -312,6 +313,14 @@ public static class DatabaseService
                     { "datum", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS datum BIGINT" },
                     { "description", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS description VARCHAR" },
                     { "caseid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
+                }
+            },
+            {
+                "web_users",
+                new Dictionary<string, string>
+                {
+                    { "username", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS username TEXT" },
+                    { "hashed_password", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS hashed_password TEXT" }
                 }
             },
             {
