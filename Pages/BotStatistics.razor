@@ -24,8 +24,9 @@
                     </div>
                 </div>
                 <p class="card-text">Nutzer im Cache: @cacheduserscount</p>
-                <p class="card-text">Botuser: @CurrentApplication.DiscordClient.CurrentUser.UsernameWithDiscriminator (@CurrentApplication.DiscordClient.CurrentUser.Id)</p>
+                <p class="card-text">Botuser: @botusername</p>
                 <p class="card-text">Botversion: @CurrentApplication.VersionString</p>
+                <p class="card-text">RAM Nutzung: @ramusage</p>
             </div>
         </div>
     </div>
@@ -35,11 +36,11 @@
                 <h5 class="card-title"><i class="fa fa-gear"></i> Anwendungskonfiguration</h5>
             </div>
             <div class="card-body">
-                <p class="card-text">Target Server: @CurrentApplication.TargetGuild.Id</p>
+                <p class="card-text">Target Server: @targetserver</p>
                 <p class="card-text">Anwendungsmodus: @prodmode</p>
-                <p class="card-text">Discord Library: @CurrentApplication.DiscordClient.BotLibrary @CurrentApplication.DiscordClient.VersionString.Split("+")[0]</p>
+                <p class="card-text">Discord Library: @libversion</p>
                 <p class="card-text">Microsoft .NET Version: @Environment.Version</p>
-                <p class="card-text">Betriebssystem: @Environment.OSVersion</p>
+                <p class="card-text">Betriebssystem: @osversion</p>
             </div>
         </div>
     </div>
@@ -75,6 +76,14 @@
     private string guildcount = "Loading...";
     private string cacheduserscount = "Loading...";
     private string prodmode = "Loading...";
+    
+    private string libversion = "Loading...";
+    private string osversion = "Loading...";
+    private string ramusage = "Loading...";
+    private string targetserver = "Loading...";
+    private string botusername = "Loading...";
+    
+    
     private readonly List<string> serverList = new();
 
     protected override async Task OnInitializedAsync()
@@ -82,7 +91,7 @@
         var timer = new Timer(10000);
         timer.Elapsed += async (sender, e) => await UpdateValues();
         timer.Start();
-        await Task.Delay(2000);
+        await Task.Delay(100);
         await UpdateValues();
     }
 
@@ -133,6 +142,11 @@
             guildcount = guildCountValue;
             cacheduserscount = cachedUsersCountValue;
             prodmode = prodmodevalue;
+            botusername = CurrentApplication.DiscordClient.CurrentUser.UsernameWithDiscriminator;
+            libversion = CurrentApplication.DiscordClient.BotLibrary + " " + @CurrentApplication.DiscordClient.VersionString.Split("+")[0];
+            osversion = Environment.OSVersion.ToString();
+            ramusage = (GC.GetTotalMemory(false) / 1024 / 1024).ToString() + " MB";
+            targetserver = CurrentApplication.TargetGuild.Name + " (" + CurrentApplication.TargetGuild.Id + ")";
             StateHasChanged();
         });
     }
