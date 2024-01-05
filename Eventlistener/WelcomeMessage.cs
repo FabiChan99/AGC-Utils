@@ -2,7 +2,6 @@
 
 using KawaiiAPI.NET;
 using KawaiiAPI.NET.Enums;
-using Microsoft.Extensions.Logging;
 
 #endregion
 

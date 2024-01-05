@@ -17,13 +17,15 @@ public static class ToolSet
         {
             return $"{member.Username} ({member.Nickname})";
         }
+
         if (!string.IsNullOrEmpty(member.DisplayName))
         {
             return $"{member.Username} ({member.DisplayName})";
         }
+
         return member.Username;
     }
-    
+
     public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
     {
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));

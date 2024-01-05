@@ -5,7 +5,6 @@ using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using KawaiiAPI.NET;
 using KawaiiAPI.NET.Enums;
-using Microsoft.Extensions.DependencyInjection;
 
 #endregion
 

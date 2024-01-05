@@ -10,17 +10,11 @@ using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
 using DisCatSharp.ApplicationCommands.Exceptions;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Components.Authorization;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -37,7 +31,6 @@ public class CurrentApplication
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
     public static ILogger logger { get; set; } // Compatibilityfield
-    
 }
 
 internal class Program : BaseCommandModule
@@ -56,7 +49,8 @@ internal class Program : BaseCommandModule
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .WriteTo.Console()
             // errors to errorfile
-            .WriteTo.File("logs/errors/error-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch(LogEventLevel.Error))
+            .WriteTo.File("logs/errors/error-.txt", rollingInterval: RollingInterval.Day,
+                levelSwitch: new LoggingLevelSwitch(LogEventLevel.Error))
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch())
             .CreateLogger();
         CurrentApplication.Logger = logger;
@@ -98,15 +92,16 @@ internal class Program : BaseCommandModule
 
         var client = new KawaiiClient();
 
-        
+
         builder.Services.AddRazorPages();
         builder.Services.AddDistributedMemoryCache();
-        builder.Services.AddServerSideBlazor(); ;
+        builder.Services.AddServerSideBlazor();
+        ;
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
-            
+
         builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
-            
+
         builder.Services.AddAuthentication("CookieAuth")
             .AddCookie("CookieAuth", config =>
             {
@@ -403,12 +398,12 @@ internal class Program : BaseCommandModule
         embed.WithFooter($"Fehler ausgelöst von {e.Context.User.UsernameWithDiscriminator}");
         await e.Context.RespondAsync(embed: embed, content: e.Context.User.Mention);
     }
-    
+
     private static async Task RunAspAsync(WebApplication app)
     {
         bool enabled;
         int port;
-        
+
         try
         {
             enabled = bool.Parse(BotConfig.GetConfig()["WebUI"]["Active"]);
@@ -417,13 +412,13 @@ internal class Program : BaseCommandModule
         {
             enabled = false;
         }
-        
+
         if (!enabled)
         {
             CurrentApplication.Logger.Information("WebUI is disabled.");
             return;
         }
-        
+
         try
         {
             port = int.Parse(BotConfig.GetConfig()["WebUI"]["Port"]);
@@ -432,14 +427,14 @@ internal class Program : BaseCommandModule
         {
             port = 5000; // fallback
         }
-        
-        
+
+
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
-        
+
         // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
 
@@ -449,13 +444,13 @@ internal class Program : BaseCommandModule
 
         app.UseSession();
 
-        
+
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
-        
+
         CurrentApplication.Logger.Information("Starting WebUI on port " + port + "...");
         await app.StartAsync();
         TempVariables.IsWebUiRunning = true;
@@ -465,9 +460,8 @@ internal class Program : BaseCommandModule
 
     public static class TempVariables
     {
-        public static bool IsWebUiRunning { get; set; } = false;
+        public static bool IsWebUiRunning { get; set; }
     }
-    
 }
 
 public static class GlobalProperties

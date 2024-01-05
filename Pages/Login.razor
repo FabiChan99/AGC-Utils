@@ -9,9 +9,9 @@
     <div class="">
         <h1>Login</h1>
         <EditForm Model="@loginModel" OnSubmit="@HandleLogin">
-            User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername" />
+            User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername"/>
             <br>
-            Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password" />
+            Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password"/>
             <br>
             <br>
             <button class="btn btn-primary" type="submit">Login</button>
@@ -26,11 +26,11 @@
 
 
 @code {
-    private LoginModel loginModel = new LoginModel();
+    private readonly LoginModel loginModel = new();
 
-    bool isAuthenticated = false;
-    bool shouldNavigate = false;
-    bool loginFailed = false;
+    bool isAuthenticated;
+    bool shouldNavigate;
+    bool loginFailed;
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,7 +46,7 @@
             NavigationManager.NavigateTo("/");
         }
     }
-    
+
     private async Task HandleLogin()
     {
         var isValidUser = await CheckUserAsync(loginModel.Username, loginModel.Password);
@@ -75,4 +75,5 @@
         public string Username { get; set; }
         public string Password { get; set; }
     }
+
 }

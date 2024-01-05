@@ -5,7 +5,7 @@
 <h3>Mitglieder</h3>
 
 <div>
-    <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/> 
+    <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
     <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen</button>
     <br/>
     <input type="checkbox" @bind="showOnlyBots"/> Nur Bots anzeigen
@@ -124,7 +124,7 @@ else
             await ForceLoadDataAsync();
         });
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -152,7 +152,7 @@ else
             isLoading = false;
         }
     }
-    
+
     private async Task ForceLoadDataAsync()
     {
         isLoading = true;
@@ -161,8 +161,8 @@ else
             var guild = await CurrentApplication.DiscordClient.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
             // fetch all members async
             var memberslist = await guild.GetAllMembersAsync();
-            members = Array.ConvertAll(memberslist.ToArray(), x => (DiscordMember)x);
-            
+            members = Array.ConvertAll(memberslist.ToArray(), x => x);
+
             await ApplyFiltersAsync();
             ApplyPagination();
         }
@@ -238,13 +238,13 @@ else
             else
             {
                 // Suchen nach Nickname, Displayname oder Username
-                tempFilteredMembers = tempFilteredMembers.Where(m => 
+                tempFilteredMembers = tempFilteredMembers.Where(m =>
                     (m.Nickname != null && m.Nickname.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                     (m.DisplayName != null && m.DisplayName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                     m.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
             }
         }
-        
+
         if (showOnlyStaff)
         {
             tempFilteredMembers = tempFilteredMembers.Where(m => m.isTeamMember());
@@ -269,7 +269,6 @@ else
 
         isLoading = false;
     }
-
 
 
     private Timer? debounceTimer;

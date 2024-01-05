@@ -1,7 +1,7 @@
 ﻿#region
 
-using AGC_Management.Utils;
 using AGC_Management.TempVoice;
+using AGC_Management.Utils;
 using DisCatSharp.Interactivity.Extensions;
 
 #endregion

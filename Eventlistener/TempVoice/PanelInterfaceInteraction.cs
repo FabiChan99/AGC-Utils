@@ -1,7 +1,6 @@
 ﻿#region
 
 using AGC_Management.TempVoice;
-using Microsoft.Extensions.Logging;
 
 #endregion
 

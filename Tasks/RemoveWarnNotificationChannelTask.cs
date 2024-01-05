@@ -1,7 +1,5 @@
 ﻿#region
 
-using Microsoft.Extensions.Logging;
-
 #endregion
 
 namespace AGC_Management.Tasks;

@@ -1,12 +1,15 @@
-﻿using System.Security.Claims;
+﻿#region
+
+using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Threading.Tasks;
+
+#endregion
 
 namespace AGC_Management.Providers;
 
 public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+    private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
     public void MarkUserAsAuthenticated(string username)
     {

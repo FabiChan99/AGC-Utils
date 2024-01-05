@@ -1,6 +1,5 @@
 ﻿@page "/bot"
-@using AGC_Management.Utils
-@using Npgsql
+@using System.Timers
 @using AGC_Management.Services
 @attribute [Authorize]
 <h3>Botstatus</h3>
@@ -71,24 +70,24 @@
     private string guildcount = "Loading...";
     private string cacheduserscount = "Loading...";
     private string prodmode = "Loading...";
-    private List<string> serverList = new List<string>();
+    private readonly List<string> serverList = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var timer = new System.Timers.Timer(10000);
+        var timer = new Timer(10000);
         timer.Elapsed += async (sender, e) => await UpdateValues();
         timer.Start();
         await Task.Delay(2000);
         await UpdateValues();
     }
-    
+
     private string GetMode()
     {
-        #if DEBUG
+#if DEBUG
         return "Development";
-        #else
+#else
         return "Production";
-        #endif
+#endif
     }
 
     private void GetServerList()
@@ -101,13 +100,12 @@
         }
     }
 
-    
 
     private string GetPing()
     {
         return CurrentApplication.DiscordClient.Ping.ToString();
     }
-    
+
     private async Task UpdateValues()
     {
         var pingValue = GetPing();
@@ -119,7 +117,7 @@
         var cachedUsersCountValue = await GatherCachedUsersCount();
         var prodmodevalue = GetMode();
         GetServerList();
-        
+
         await InvokeAsync(() =>
         {
             ping = pingValue + " ms";
@@ -133,13 +131,13 @@
             StateHasChanged();
         });
     }
-    
+
     private async Task<string> GatherGuildCount()
     {
         var guilds = CurrentApplication.DiscordClient.Guilds.Values.ToList();
         return guilds.Count.ToString();
     }
-    
+
     private async Task<string> GatherCachedUsersCount()
     {
         var users = new HashSet<DiscordUser>();
@@ -152,8 +150,9 @@
                 users.Add(guilduser);
             }
         }
+
         return users.Count.ToString();
-    } 
+    }
 
     private async Task<string> GatherDBLatency()
     {
@@ -167,8 +166,8 @@
         var latency = unixtimestampend - unixtimestampstart;
         return latency.ToString();
     }
-    
-    
+
+
     private async Task<string> GatherDBLatencyExpensive()
     {
         var unixtimestampstart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -181,7 +180,7 @@
         var latency = unixtimestampend - unixtimestampstart;
         return latency.ToString();
     }
-    
+
     private async Task<string> DBuser()
     {
         var constring = DatabaseService.GetConnectionString();
@@ -191,7 +190,7 @@
         var version = await cmd.ExecuteScalarAsync();
         return version.ToString();
     }
-    
+
     private async Task<string> DbVersion()
     {
         var constring = DatabaseService.GetConnectionString();
@@ -201,8 +200,6 @@
         var version = await cmd.ExecuteScalarAsync();
         return version.ToString();
     }
-    
-    
-    
-    
+
+
 }

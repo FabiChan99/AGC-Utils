@@ -1,6 +1,4 @@
-﻿using DisCatSharp.Entities;
-
-namespace AGC_Management.Utils;
+﻿namespace AGC_Management.Utils;
 
 internal static class DiscordExtension
 {

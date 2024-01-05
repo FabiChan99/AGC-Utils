@@ -2,7 +2,6 @@
 
 using DisCatSharp.Lavalink;
 using DisCatSharp.Net;
-using Microsoft.Extensions.Logging;
 
 #endregion
 

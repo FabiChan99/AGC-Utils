@@ -1,7 +1,5 @@
 ﻿#region
 
-using Microsoft.Extensions.Logging;
-
 #endregion
 
 namespace AGC_Management.Utils;
@@ -42,7 +40,8 @@ public static class ErrorReporting
         {
         }
 
-        CurrentApplication.DiscordClient.Logger.LogError($"Exception occured: {exception.GetType()}: {exception.Message}");
+        CurrentApplication.DiscordClient.Logger.LogError(
+            $"Exception occured: {exception.GetType()}: {exception.Message}");
         CurrentApplication.DiscordClient.Logger.LogError($"Stacktrace: {exception.StackTrace}");
     }
 }
