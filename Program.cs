@@ -408,6 +408,7 @@ internal class Program : BaseCommandModule
     private static async Task RunAsp(WebApplication app)
     {
         bool enabled;
+        int port;
         
         try
         {
@@ -420,7 +421,17 @@ internal class Program : BaseCommandModule
         
         if (!enabled)
         {
+            CurrentApplication.Logger.Information("WebUI is disabled.");
             return;
+        }
+        
+        try
+        {
+            port = int.Parse(BotConfig.GetConfig()["WebUI"]["Port"]);
+        }
+        catch
+        {
+            port = 5000; // fallback
         }
         
         
@@ -431,6 +442,8 @@ internal class Program : BaseCommandModule
         }
 
         app.UseHttpsRedirection();
+        
+        app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
 
@@ -440,7 +453,8 @@ internal class Program : BaseCommandModule
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
-
+        
+        CurrentApplication.Logger.Information("Starting WebUI on port " + port + "...");
         await app.RunAsync();
     }
     
