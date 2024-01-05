@@ -407,6 +407,23 @@ internal class Program : BaseCommandModule
     
     private static async Task RunAsp(WebApplication app)
     {
+        bool enabled;
+        
+        try
+        {
+            enabled = bool.Parse(BotConfig.GetConfig()["WebUI"]["Active"]);
+        }
+        catch
+        {
+            enabled = false;
+        }
+        
+        if (!enabled)
+        {
+            return;
+        }
+        
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Error");
