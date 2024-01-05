@@ -30,7 +30,6 @@ public class CurrentApplication
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
-    public static ILogger logger { get; set; } // Compatibilityfield
 }
 
 internal class Program : BaseCommandModule
@@ -54,7 +53,6 @@ internal class Program : BaseCommandModule
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch())
             .CreateLogger();
         CurrentApplication.Logger = logger;
-        CurrentApplication.logger = logger; // Compatibilityfield
 
         logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
