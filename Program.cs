@@ -401,6 +401,7 @@ internal class Program : BaseCommandModule
 
     private static async Task RunAspAsync(WebApplication app)
     {
+        
         bool enabled;
         int port;
 
@@ -452,6 +453,7 @@ internal class Program : BaseCommandModule
         app.MapFallbackToPage("/_Host");
 
         CurrentApplication.Logger.Information("Starting WebUI on port " + port + "...");
+        TempVariables.WebUiApp = app;
         await app.StartAsync();
         TempVariables.IsWebUiRunning = true;
         CurrentApplication.Logger.Information("WebUI started!");
@@ -461,6 +463,7 @@ internal class Program : BaseCommandModule
     public static class TempVariables
     {
         public static bool IsWebUiRunning { get; set; }
+        public static WebApplication WebUiApp { get; set; }
     }
 }
 
