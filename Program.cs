@@ -180,7 +180,7 @@ internal class Program : BaseCommandModule
         await Task.Delay(3000);
         CurrentApplication.TargetGuild =
             await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
-        _ = RunAsp(builder.Build());
+        _ = RunAspAsync(builder.Build());
         await Task.Delay(-1);
     }
 
@@ -404,7 +404,7 @@ internal class Program : BaseCommandModule
         await e.Context.RespondAsync(embed: embed, content: e.Context.User.Mention);
     }
     
-    private static async Task RunAsp(WebApplication app)
+    private static async Task RunAspAsync(WebApplication app)
     {
         bool enabled;
         int port;
@@ -440,7 +440,7 @@ internal class Program : BaseCommandModule
             app.UseHsts();
         }
         
-        
+        // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
@@ -457,7 +457,15 @@ internal class Program : BaseCommandModule
         app.MapFallbackToPage("/_Host");
         
         CurrentApplication.Logger.Information("Starting WebUI on port " + port + "...");
-        await app.RunAsync();
+        await app.StartAsync();
+        TempVariables.IsWebUiRunning = true;
+        CurrentApplication.Logger.Information("WebUI started!");
+    }
+
+
+    public static class TempVariables
+    {
+        public static bool IsWebUiRunning { get; set; } = false;
     }
     
 }
