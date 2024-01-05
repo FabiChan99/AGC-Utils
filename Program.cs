@@ -26,7 +26,7 @@ namespace AGC_Management;
 
 public class CurrentApplication
 {
-    public static string VersionString { get; set; } = "v2.0.0";
+    public static string VersionString { get; set; } = "v2.0.1";
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
@@ -94,9 +94,7 @@ internal class Program : BaseCommandModule
         builder.Services.AddRazorPages();
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddServerSideBlazor();
-        ;
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
-
         builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
 
