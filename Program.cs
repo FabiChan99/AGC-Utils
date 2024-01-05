@@ -162,7 +162,7 @@ internal class Program : BaseCommandModule
 
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
-        await Task.Delay(3000);
+        await Task.Delay(5000);
         
         CurrentApplication.DiscordClient = discord;
 
