@@ -390,6 +390,10 @@ public class TempVCEventHandler : TempVoiceHelper
                     }
                 }
             }
+            catch (NotFoundException)
+            {
+                // ignored // Normal if user leaves vc before user get the vc
+            }
             catch (Exception err)
             {
                 await ErrorReporting.SendErrorToDev(sender, e.User, err);
