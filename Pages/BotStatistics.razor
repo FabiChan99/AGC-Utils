@@ -24,6 +24,8 @@
                     </div>
                 </div>
                 <p class="card-text">Nutzer im Cache: @cacheduserscount</p>
+                <p class="card-text">Botuser: @CurrentApplication.DiscordClient.CurrentUser.UsernameWithDiscriminator (@CurrentApplication.DiscordClient.CurrentUser.Id)</p>
+                <p class="card-text">Botversion: @CurrentApplication.VersionString</p>
             </div>
         </div>
     </div>
@@ -35,6 +37,9 @@
             <div class="card-body">
                 <p class="card-text">Target Server: @CurrentApplication.TargetGuild.Id</p>
                 <p class="card-text">Anwendungsmodus: @prodmode</p>
+                <p class="card-text">Discord Library: @CurrentApplication.DiscordClient.BotLibrary @CurrentApplication.DiscordClient.VersionString.Split("+")[0]</p>
+                <p class="card-text">Microsoft .NET Version: @Environment.Version</p>
+                <p class="card-text">Betriebssystem: @Environment.OSVersion</p>
             </div>
         </div>
     </div>
