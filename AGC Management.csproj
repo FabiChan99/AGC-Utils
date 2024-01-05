@@ -58,4 +58,10 @@
         <_ContentIncludedByDefault Remove="wwwroot\js\helpers.js"/>
     </ItemGroup>
 
+
+    <ItemGroup>
+      <AdditionalFiles Include="Pages\SharedPages\MainLayout.razor" />
+      <AdditionalFiles Include="Pages\SharedPages\NavMenu.razor" />
+    </ItemGroup>
+
 </Project>
