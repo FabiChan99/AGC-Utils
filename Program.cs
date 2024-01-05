@@ -1,7 +1,6 @@
 #region
 
 using System.Reflection;
-using AGC_Management.LavaManager;
 using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
@@ -163,7 +162,6 @@ internal class Program : BaseCommandModule
 
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
-        await LavalinkConnectionManager.ConnectAsync(discord);
         CurrentApplication.DiscordClient = discord;
 
         await StartTasks(discord);
