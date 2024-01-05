@@ -6,7 +6,7 @@
 
 <div>
     <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
-    <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen</button>
+    <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️</button>
     <br/>
     <input type="checkbox" @bind="showOnlyBots"/> Nur Bots anzeigen
     <br>
@@ -101,7 +101,6 @@ else
 @code {
     private DiscordMember[]? members;
     private DiscordMember[]? filteredMembers;
-    private string userIdSearchTerm = string.Empty;
     private string searchTerm = string.Empty;
     private bool showOnlyBots;
     private bool showOnlyStaff;
