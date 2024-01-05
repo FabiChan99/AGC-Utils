@@ -119,7 +119,6 @@ internal class Program : BaseCommandModule
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
             options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
         });
 
         var serviceProvider = new ServiceCollection()
@@ -440,8 +439,7 @@ internal class Program : BaseCommandModule
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
-
-        app.UseHttpsRedirection();
+        
         
         app.Urls.Add($"http://localhost:{port}");
 
@@ -451,6 +449,10 @@ internal class Program : BaseCommandModule
 
         app.UseSession();
 
+        
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
         

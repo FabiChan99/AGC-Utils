@@ -1,6 +1,5 @@
 function showServerPopup() {
     var serverPopup = document.getElementById("serverPopup");
-    console.log(serverPopup);
     serverPopup.style.display = "block";
 }
 
