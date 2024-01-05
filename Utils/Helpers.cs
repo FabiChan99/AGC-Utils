@@ -11,6 +11,14 @@ namespace AGC_Management.Utils;
 
 public static class ToolSet
 {
+    public static string GetFaviconUrl()
+    {
+        return CurrentApplication.TargetGuild.IconUrl != null
+            ? CurrentApplication.TargetGuild.IconUrl
+            : "favicon.png";
+    }
+    
+    
     public static string GetFormattedName(DiscordMember member)
     {
         if (!string.IsNullOrEmpty(member.Nickname))
