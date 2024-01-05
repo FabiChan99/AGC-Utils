@@ -162,11 +162,12 @@ internal class Program : BaseCommandModule
 
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
+        await Task.Delay(3000);
+        
         CurrentApplication.DiscordClient = discord;
 
         await StartTasks(discord);
-
-        await Task.Delay(3000);
+        
         CurrentApplication.TargetGuild =
             await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
         _ = RunAspAsync(builder.Build());
