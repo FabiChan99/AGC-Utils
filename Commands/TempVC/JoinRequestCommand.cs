@@ -153,7 +153,7 @@ public sealed class JoinRequestCommand : TempVoiceHelper
                     var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                     overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                         Permissions.None);
-                    int channellimit = userchannel.Users.Count;
+                    int? channellimit = userchannel.UserLimit;
 
                     if (channellimit != 0 && (channellimit <= userchannel.Users.Count()))
                     {
