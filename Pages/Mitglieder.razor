@@ -1,104 +1,116 @@
 ﻿@page "/mitglieder"
 @using AGC_Management.Utils
-@attribute [Authorize]
+@using AGC_Management.Interfaces
+@using AGC_Management.Enums.Web
+
+@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 <h3>Mitglieder</h3>
-
-<div>
-    <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
-    <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️</button>
-    <br/>
-    <input type="checkbox" @bind="showOnlyBots"/> Nur Bots anzeigen
-    <br>
-    <input type="checkbox" @bind="showOnlyStaff"/> Nur Team anzeigen
-    <br>
-
-    <!-- Pagination size dropdown with label -->
-    <label for="pageSize">User pro Seite:</label>
-    <select id="pageSize" value="@pageSize" @onchange="OnPageSizeChanged">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="500">500</option>
-        <option value="1000">1000</option>
-    </select>
-</div>
-
-
-@if (isLoading)
+@if (isAccessAllowed)
 {
-    <div class="loader-overlay">
-        <div class="loader"></div>
+    <div>
+        <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
+        <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️</button>
+        <br/>
+        <input type="checkbox" @bind="showOnlyBots"/> Nur Bots anzeigen
+        <br>
+        <input type="checkbox" @bind="showOnlyStaff"/> Nur Team anzeigen
+        <br>
+
+        <!-- Pagination size dropdown with label -->
+        <label for="pageSize">User pro Seite:</label>
+        <select id="pageSize" value="@pageSize" @onchange="OnPageSizeChanged">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+        </select>
     </div>
-}
-else if (filteredMembers == null || !filteredMembers.Any())
-{
-    <p>
-        <em>Keine Mitglieder gefunden.</em>
-    </p>
+
+
+    @if (isLoading)
+    {
+        <div class="loader-overlay">
+            <div class="loader"></div>
+        </div>
+    }
+    else if (filteredMembers == null || !filteredMembers.Any())
+    {
+        <p>
+            <em>Keine Mitglieder gefunden.</em>
+        </p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Erstellt</th>
+                <th @onclick="() => ToggleSortOrderAsync()"> Beigetreten@(sortAscending ? " ↑" : " ↓")
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var member in filteredMembers)
+            {
+                <tr>
+                    <td>
+                        @ToolSet.GetFormattedName(member)
+                        @if (member.IsBot)
+                        {
+                            <span class="bot-tag">BOT</span>
+                        }
+                        @if (member.isTeamMember())
+                        {
+                            <span class="team-tag">TEAM</span>
+                        }
+                    </td>
+                    <td>@member.Id</td>
+                    <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@member.JoinedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        <button class="btn btn-primary-red" @onclick="() => NavigateToManageMember(member.Id.ToString())">Verwalten</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            @if (currentPage > 1)
+            {
+                <button class="btn-primary-red btn" @onclick="PreviousPage">Previous</button>
+            }
+            <div class="page-info-container">
+                <span class="btn page-info text-white-50">Seite @currentPage von @totalPages</span>
+            </div>
+            @if (currentPage < totalPages)
+            {
+                <button class="btn btn-primary-red" @onclick="NextPage">Next</button>
+            }
+        </div>
+
+        <div class="text-white">@matchingMembers.Length User entsprechen dem Filter</div>
+        <br/>
+    }
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>User ID</th>
-            <th>Erstellt</th>
-            <th @onclick="() => ToggleSortOrderAsync()"> Beigetreten@(sortAscending ? " ↑" : " ↓")
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var member in filteredMembers)
-        {
-            <tr>
-                <td>
-                    @ToolSet.GetFormattedName(member)
-                    @if (member.IsBot)
-                    {
-                        <span class="bot-tag">BOT</span>
-                    }
-                    @if (member.isTeamMember())
-                    {
-                        <span class="team-tag">TEAM</span>
-                    }
-                </td>
-                <td>@member.Id</td>
-                <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@member.JoinedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>
-                    <button class="btn btn-primary-red" @onclick="() => NavigateToManageMember(member.Id.ToString())">Verwalten</button>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-
-    <div class="pagination">
-        @if (currentPage > 1)
-        {
-            <button class="btn-primary-red btn" @onclick="PreviousPage">Previous</button>
-        }
-        <div class="page-info-container">
-            <span class="btn page-info text-white-50">Seite @currentPage von @totalPages</span>
-        </div>
-        @if (currentPage < totalPages)
-        {
-            <button class="btn btn-primary-red" @onclick="NextPage">Next</button>
-        }
-    </div>
-
-    <div class="text-white">@matchingMembers.Length User entsprechen dem Filter</div>
-    <br/>
+    <p>
+        <br/>
+        <em class="alert alert-danger">Keine Berechtigung.</em>
+    </p>
 }
-
 
 @code {
     private DiscordMember[]? members;
     private DiscordMember[]? filteredMembers;
+    private bool isAccessAllowed;
     private string searchTerm = string.Empty;
     private bool showOnlyBots;
     private bool showOnlyStaff;
@@ -124,6 +136,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        isAccessAllowed = AuthUtils.isAccessAllowed(AccessLevel.Supporter, NavigationManager, AuthService);
+        if (!isAccessAllowed)
+        {
+            return;
+        }
+        
         await LoadDataAsync();
     }
 

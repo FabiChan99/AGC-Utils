@@ -1,6 +1,34 @@
 ﻿@page "/"
-@attribute [Authorize]
+@using AGC_Management.Utils
+@using AGC_Management.Interfaces
+@using AGC_Management.Enums.Web
 
-<PageTitle>Index</PageTitle>
+@inject NavigationManager NavigationManager
+@inject IAuthService AuthService
 
-<h1>Willkommen!</h1>
+<PageTitle>Start</PageTitle>
+
+<h1>Willkommen! @userName</h1>
+
+@if (!isAuthenticated)
+{
+    <br/>
+    <em class="alert alert-warning">Nicht eingeloggt.</em>
+}
+
+
+@code {
+    private bool isAuthenticated;
+    private string userName;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = AuthService.IsUserAuthenticated();
+        if (isAuthenticated)
+        {
+            userName = AuthService.GetUsername();
+        }
+        
+    }
+    
+}

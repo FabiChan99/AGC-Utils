@@ -320,7 +320,8 @@ public static class DatabaseService
                 new Dictionary<string, string>
                 {
                     { "username", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS username TEXT" },
-                    { "hashed_password", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS hashed_password TEXT" }
+                    { "hashed_password", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS hashed_password TEXT" },
+                    { "access_level", "ALTER TABLE web_users ADD COLUMN IF NOT EXISTS access_level TEXT"}
                 }
             },
             {

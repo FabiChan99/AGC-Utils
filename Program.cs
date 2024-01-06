@@ -1,8 +1,10 @@
 #region
 
 using System.Reflection;
+using AGC_Management.Interfaces;
 using AGC_Management.Providers;
 using AGC_Management.Services;
+using AGC_Management.Services.Web;
 using AGC_Management.Tasks;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands;
@@ -94,7 +96,8 @@ internal class Program : BaseCommandModule
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddServerSideBlazor();
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
-        builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddHttpContextAccessor();
 
 
         builder.Services.AddAuthentication("CookieAuth")
@@ -109,6 +112,7 @@ internal class Program : BaseCommandModule
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
             options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
         });
 
         var serviceProvider = new ServiceCollection()
@@ -435,14 +439,24 @@ internal class Program : BaseCommandModule
         app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
-
+        
+        
         app.UseRouting();
 
         app.UseSession();
-
-
+        
+        
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.Use(async delegate (HttpContext Context, Func<Task> Next)
+        {
+            var TempKey = Guid.NewGuid().ToString(); 
+            Context.Session.Set(TempKey, Array.Empty<byte>()); 
+            Context.Session.Remove(TempKey);
+            await Next(); 
+        });
+
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");

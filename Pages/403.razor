@@ -1,0 +1,26 @@
+﻿@page "/403"
+@using AGC_Management.Interfaces
+@inject IAuthService AuthService
+<PageTitle>403 - Unauthorized</PageTitle>
+<h3>403 - Unauthorized</h3>
+
+<br/>
+<em class="alert alert-danger">Du hast nicht die nötigen Rechte um diese Seite zu sehen.</em>
+
+@if (AuthLevel == "null")
+{
+    <p>Bitte logge dich ein um diese Seite zu sehen.</p>
+}
+else
+{
+    <p>Dein aktueller Zugriffslevel ist: @AuthLevel</p>
+}
+
+@code {
+    private string AuthLevel = "null";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        AuthLevel = AuthService.GetUserAccessLevel();
+    }
+}
