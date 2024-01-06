@@ -46,9 +46,7 @@ else
             <th>Name</th>
             <th>User ID</th>
             <th>Erstellt</th>
-            <th>
-                Beigetreten
-                <button class="btn text-white" @onclick="() => ToggleSortOrderAsync()">@(sortAscending ? "↑" : "↓")</button>
+            <th @onclick="() => ToggleSortOrderAsync()"> Beigetreten@(sortAscending ? " ↑" : " ↓")
             </th>
             <th></th>
         </tr>
