@@ -82,15 +82,6 @@ namespace AGC_Management.Services.Web
 
             if (!string.IsNullOrWhiteSpace(userAccessLevelStr) && Enum.TryParse(userAccessLevelStr, out AccessLevel userAccessLevel))
             {
-                Console.WriteLine("Access Level (from session): " + userAccessLevel);
-                Console.WriteLine("Requested Access Level: " + accessLevel);
-                
-                Console.WriteLine("Allow:");
-                // User has Administrator access level
-                // Requested access level is Supporter
-                // Why is this not working?
-                Console.WriteLine(userAccessLevel >= accessLevel);
-
                 return userAccessLevel >= accessLevel;
             }
             
