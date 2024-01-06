@@ -155,6 +155,11 @@ public sealed class JoinRequestCommand : TempVoiceHelper
                         Permissions.None);
                     int channellimit = userchannel.Users.Count;
 
+                    if (channellimit != 0 && (channellimit <= userchannel.Users.Count()))
+                    {
+                        channellimit = userchannel.Users.Count() + 1;
+                    }
+
                     await userchannel.ModifyAsync(x =>
                     {
                         x.PermissionOverwrites = overwrites;
