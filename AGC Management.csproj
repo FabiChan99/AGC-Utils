@@ -9,7 +9,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
         <PackageReference Include="DisCatSharp" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.Analyzer.Roselyn" Version="6.2.2">
             <PrivateAssets>all</PrivateAssets>
@@ -61,8 +61,8 @@
 
 
     <ItemGroup>
-      <AdditionalFiles Include="Pages\SharedPages\MainLayout.razor" />
-      <AdditionalFiles Include="Pages\SharedPages\NavMenu.razor" />
+        <AdditionalFiles Include="Pages\SharedPages\MainLayout.razor"/>
+        <AdditionalFiles Include="Pages\SharedPages\NavMenu.razor"/>
     </ItemGroup>
 
 </Project>

@@ -17,8 +17,8 @@ public static class ToolSet
             ? CurrentApplication.TargetGuild.IconUrl
             : "favicon.png";
     }
-    
-    
+
+
     public static string GetFormattedName(DiscordMember member)
     {
         if (!string.IsNullOrEmpty(member.Nickname))

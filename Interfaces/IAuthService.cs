@@ -1,4 +1,8 @@
-﻿using AGC_Management.Enums.Web;
+﻿#region
+
+using AGC_Management.Enums.Web;
+
+#endregion
 
 namespace AGC_Management.Interfaces;
 
@@ -11,4 +15,3 @@ public interface IAuthService
     bool isAuthorized(AccessLevel accessLevel);
     string GetUsername();
 }
-

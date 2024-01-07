@@ -2,7 +2,6 @@
 
 using System.Reflection;
 using AGC_Management.Interfaces;
-using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Services.Web;
 using AGC_Management.Tasks;
@@ -15,7 +14,6 @@ using DisCatSharp.CommandsNext.Exceptions;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
-using Microsoft.AspNetCore.Components.Authorization;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -167,11 +165,11 @@ internal class Program : BaseCommandModule
         commands.CommandErrored += Commands_CommandErrored;
         await discord.ConnectAsync();
         await Task.Delay(5000);
-        
+
         CurrentApplication.DiscordClient = discord;
 
         await StartTasks(discord);
-        
+
         CurrentApplication.TargetGuild =
             await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
         _ = RunAspAsync(builder.Build());
@@ -400,7 +398,6 @@ internal class Program : BaseCommandModule
 
     private static async Task RunAspAsync(WebApplication app)
     {
-        
         bool enabled;
         int port;
 
@@ -439,26 +436,26 @@ internal class Program : BaseCommandModule
         app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
-        
-        
+
+
         app.UseRouting();
 
         app.UseSession();
-        
-        
+
+
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.Use(async delegate (HttpContext Context, Func<Task> Next)
+        app.Use(async delegate(HttpContext Context, Func<Task> Next)
         {
-            var TempKey = Guid.NewGuid().ToString(); 
-            Context.Session.Set(TempKey, Array.Empty<byte>()); 
+            var TempKey = Guid.NewGuid().ToString();
+            Context.Session.Set(TempKey, Array.Empty<byte>());
             Context.Session.Remove(TempKey);
-            await Next(); 
+            await Next();
         });
-        
+
         TempVariables.hasAdminUsers = await AuthUtils.HasAdministrativeUsers();
-        
+
         if (!TempVariables.hasAdminUsers)
         {
             CurrentApplication.Logger.Warning("[WEBUI] No administrative users found. Starting SetupTool...");
@@ -467,7 +464,7 @@ internal class Program : BaseCommandModule
             TempVariables.IntialConfigToken = token;
             CurrentApplication.Logger.Warning("[WEBUI] Initial config token -> " + token);
         }
-        
+
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
 
@@ -481,7 +478,7 @@ internal class Program : BaseCommandModule
 
     public static class TempVariables
     {
-        public static string IntialConfigToken { get; internal set;}
+        public static string IntialConfigToken { get; internal set; }
         public static bool hasAdminUsers { get; internal set; }
         public static bool IsWebUiRunning { get; set; }
         public static WebApplication WebUiApp { get; set; }

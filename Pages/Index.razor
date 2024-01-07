@@ -1,7 +1,5 @@
 ﻿@page "/"
-@using AGC_Management.Utils
 @using AGC_Management.Interfaces
-@using AGC_Management.Enums.Web
 
 @inject NavigationManager NavigationManager
 @inject IAuthService AuthService
@@ -20,7 +18,7 @@
 @code {
     private bool isAuthenticated;
     private string userName;
-    
+
     protected override async Task OnInitializedAsync()
     {
         isAuthenticated = AuthService.IsUserAuthenticated();
@@ -28,7 +26,6 @@
         {
             userName = AuthService.GetUsername();
         }
-        
     }
-    
+
 }

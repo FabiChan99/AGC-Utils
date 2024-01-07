@@ -14,6 +14,7 @@
 </Router>
 
 @code {
+
     protected override void OnInitialized()
     {
         if (!Program.TempVariables.hasAdminUsers && !NavigationManager.Uri.EndsWith("/setuptool"))
@@ -21,4 +22,5 @@
             NavigationManager.NavigateTo("/setuptool", true);
         }
     }
+
 }

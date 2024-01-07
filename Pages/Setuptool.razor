@@ -1,8 +1,9 @@
 ﻿@page "/setuptool"
 @using AGC_Management.Entities.Web
 @using AGC_Management.Enums.Web
-@using AGC_Management.Services
 @using AGC_Management.Utils
+@using BCrypt.Net
+@using AGC_Management.Services
 @inject NavigationManager NavigationManager
 
 
@@ -12,24 +13,24 @@
     <EditForm Model="@model" OnValidSubmit="HandleSubmit">
         <div class="form-group">
             <label for="Username">User:</label>
-            <InputText id="Username" class="form-control" @bind-Value="model.Username" placeholder="Benutzername" />
+            <InputText id="Username" class="form-control" @bind-Value="model.Username" placeholder="Benutzername"/>
         </div>
-    
+
         <div class="form-group">
             <label for="Password">Pass:</label>
-            <InputText id="Password" class="form-control" @bind-Value="model.Password" placeholder="Passwort" type="password" />
+            <InputText id="Password" class="form-control" @bind-Value="model.Password" placeholder="Passwort" type="password"/>
         </div>
-    
+
         <div class="form-group">
             <label for="ConfirmPassword">Confirm Pass:</label>
-            <InputText id="ConfirmPassword" class="form-control" @bind-Value="model.ConfirmPassword" placeholder="Passwort erneut" type="password" />
+            <InputText id="ConfirmPassword" class="form-control" @bind-Value="model.ConfirmPassword" placeholder="Passwort erneut" type="password"/>
         </div>
-    
+
         <div class="form-group">
             <label for="CreationToken">Authorization Key:</label>
-            <InputText id="CreationToken" class="form-control" @bind-Value="model.CreationToken" placeholder="Schlüssel" type="password" />
+            <InputText id="CreationToken" class="form-control" @bind-Value="model.CreationToken" placeholder="Schlüssel" type="password"/>
         </div>
-    
+
         <br>
         <button class="btn btn-primary" type="submit">Create Admin User</button>
     </EditForm>
@@ -47,48 +48,47 @@ else
 }
 
 @code {
-    CreateFirstAdminModel model = new ();
-    
+    readonly CreateFirstAdminModel model = new();
+
     private bool existAdminUser = true;
-    
-    private bool keywrong = false;
-    private bool passwordsNotEqual = false;
-    
-    
-    
+
+    private bool keywrong;
+    private bool passwordsNotEqual;
+
+
     protected override async Task OnInitializedAsync()
     {
         existAdminUser = await AuthUtils.HasAdministrativeUsers();
     }
-    
+
     private async Task HandleSubmit()
     {
         passwordsNotEqual = false;
         keywrong = false;
-        
+
         if (model.Password != model.ConfirmPassword)
         {
             passwordsNotEqual = true;
             return;
         }
-        
+
         if (!IsValidCreationToken(model.CreationToken))
         {
             keywrong = true;
             return;
         }
-        
+
         await CreateAdminUser(model);
         NavigationManager.NavigateTo("/");
     }
-    
-    
+
+
     private bool IsValidCreationToken(string token)
     {
         return token == Program.TempVariables.IntialConfigToken;
     }
-    
-    
+
+
     private async Task CreateAdminUser(CreateFirstAdminModel userModel)
     {
         var user = model;
@@ -103,13 +103,11 @@ else
         await con.CloseAsync();
         existAdminUser = true;
     }
-    
+
     private string HashPassword(string password)
     {
-        return BCrypt.Net.BCrypt.HashPassword(password);
+        return BCrypt.HashPassword(password);
     }
-    
-    
-    
-    
+
+
 }

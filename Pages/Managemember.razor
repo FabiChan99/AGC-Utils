@@ -1,9 +1,8 @@
 ﻿@page "/managemember"
-@using Microsoft.AspNetCore.WebUtilities
-@using AGC_Management.Services.Web
 @using AGC_Management.Interfaces
 @using AGC_Management.Utils
 @using AGC_Management.Enums.Web
+@using Microsoft.AspNetCore.WebUtilities
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager_
 @inject IAuthService AuthService_
@@ -44,6 +43,7 @@
         {
             return;
         }
+
         var uri = new Uri(NavigationManager_.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("userid", out var param))
         {
@@ -61,7 +61,6 @@
         _joinedAt = member.JoinedAt.UtcDateTime;
         _createdAt = member.CreationTimestamp.UtcDateTime;
     }
-    
 
 
     private bool isValidUserId()

@@ -1,11 +1,8 @@
 ﻿#region
 
-using System.Security.Cryptography;
-using System.Text;
 using AGC_Management.Enums.Web;
 using AGC_Management.Interfaces;
 using AGC_Management.Services;
-using AGC_Management.Services.Web;
 using Microsoft.AspNetCore.Components;
 
 #endregion
@@ -26,7 +23,7 @@ public sealed class AuthUtils
         if (reader.Read())
         {
             var storedHashedPassword = reader.GetString(0);
-            
+
             return BCrypt.Net.BCrypt.Verify(password, storedHashedPassword);
         }
 
@@ -34,13 +31,14 @@ public sealed class AuthUtils
     }
 
     /// <summary>
-    /// Checks if access is allowed based on the given access level.
+    ///     Checks if access is allowed based on the given access level.
     /// </summary>
     /// <param name="AccessLevel">The access level to check for.</param>
     /// <param name="_NavigationManager">The navigation manager used for redirecting unauthorized or unauthenticated users.</param>
     /// <param name="_AuthService">The service used for authentication and authorization.</param>
     /// <returns>True if access is allowed, False otherwise.</returns>
-    public static bool isAccessAllowed(AccessLevel AccessLevel, NavigationManager _NavigationManager, IAuthService _AuthService)
+    public static bool isAccessAllowed(AccessLevel AccessLevel, NavigationManager _NavigationManager,
+        IAuthService _AuthService)
     {
         var isAuthenticated = _AuthService.IsUserAuthenticated();
         if (!isAuthenticated)
@@ -48,21 +46,24 @@ public sealed class AuthUtils
             _NavigationManager.NavigateTo("/401");
             return false;
         }
+
         var isAuthorized = _AuthService.isAuthorized(AccessLevel);
         if (!isAuthorized)
         {
             _NavigationManager.NavigateTo("/403");
             return false;
         }
+
         return true;
     }
-    
+
     public static async Task<bool> HasAdministrativeUsers()
     {
         var constring = DatabaseService.GetConnectionString();
         await using var conn = new NpgsqlConnection(constring);
         await conn.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM web_users WHERE access_level = @access_level", conn);
+        await using var cmd =
+            new NpgsqlCommand("SELECT COUNT(*) FROM web_users WHERE access_level = @access_level", conn);
         cmd.Parameters.AddWithValue("access_level", AccessLevel.Administrator.ToString());
 
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -74,7 +75,7 @@ public sealed class AuthUtils
 
         return false;
     }
-    
+
     public static string GenerateToken(int charcount)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -88,5 +89,4 @@ public sealed class AuthUtils
 
         return new string(stringChars);
     }
-
 }

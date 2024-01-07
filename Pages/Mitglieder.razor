@@ -50,7 +50,8 @@
                 <th>Name</th>
                 <th>User ID</th>
                 <th>Erstellt</th>
-                <th @onclick="() => ToggleSortOrderAsync()"> Beigetreten@(sortAscending ? " ↑" : " ↓")
+                <th @onclick="() => ToggleSortOrderAsync()">
+                    Beigetreten@(sortAscending ? " ↑" : " ↓")
                 </th>
                 <th></th>
             </tr>
@@ -153,7 +154,7 @@ else
         {
             return;
         }
-        
+
         await LoadDataAsync();
     }
 

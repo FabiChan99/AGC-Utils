@@ -95,7 +95,6 @@ public class ACRequireStaffRole : CheckBaseAttribute
     }
 }
 
-
 public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)

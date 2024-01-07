@@ -1,11 +1,10 @@
-﻿using AGC_Management.Entities.Web;
+﻿#region
+
+using AGC_Management.Enums.Web;
 using AGC_Management.Interfaces;
 using AGC_Management.Utils;
-using Microsoft.AspNetCore.Http;
-using Npgsql;
-using System;
-using System.Threading.Tasks;
-using AGC_Management.Enums.Web;
+
+#endregion
 
 namespace AGC_Management.Services.Web
 {
@@ -29,7 +28,9 @@ namespace AGC_Management.Services.Web
             await using var con = new NpgsqlConnection(constring);
             await con.OpenAsync();
 
-            await using var cmd = new NpgsqlCommand("SELECT hashed_password, access_level FROM web_users WHERE username = @username", con);
+            await using var cmd =
+                new NpgsqlCommand("SELECT hashed_password, access_level FROM web_users WHERE username = @username",
+                    con);
             cmd.Parameters.AddWithValue("username", nutzername);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -59,13 +60,13 @@ namespace AGC_Management.Services.Web
             var context = _httpContextAccessor.HttpContext;
             return context.Session.GetString("AccessLevel");
         }
-        
+
         public string GetUsername()
         {
             var context = _httpContextAccessor.HttpContext;
             return context.Session.GetString("Username");
         }
-        
+
         public async Task Logout()
         {
             var context = _httpContextAccessor.HttpContext;
@@ -73,21 +74,20 @@ namespace AGC_Management.Services.Web
             context.Session.SetString("AccessLevel", "");
             await context.Session.CommitAsync();
         }
-        
+
         public bool isAuthorized(AccessLevel accessLevel)
         {
             var context = _httpContextAccessor.HttpContext;
             var userAccessLevelStr = context.Session.GetString("AccessLevel");
-            
 
-            if (!string.IsNullOrWhiteSpace(userAccessLevelStr) && Enum.TryParse(userAccessLevelStr, out AccessLevel userAccessLevel))
+
+            if (!string.IsNullOrWhiteSpace(userAccessLevelStr) &&
+                Enum.TryParse(userAccessLevelStr, out AccessLevel userAccessLevel))
             {
                 return userAccessLevel >= accessLevel;
             }
-            
+
             return false;
         }
-
-
     }
 }

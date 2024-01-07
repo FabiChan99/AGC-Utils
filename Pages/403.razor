@@ -18,9 +18,10 @@ else
 
 @code {
     private string AuthLevel = "null";
-    
+
     protected override async Task OnInitializedAsync()
     {
         AuthLevel = AuthService.GetUserAccessLevel();
     }
+
 }

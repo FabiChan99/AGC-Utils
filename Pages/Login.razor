@@ -1,19 +1,16 @@
 ﻿@page "/login"
-@using AGC_Management.Providers
-@using AGC_Management.Utils
 @using AGC_Management.Entities.Web
 @using AGC_Management.Interfaces
-@using AGC_Management.Services.Web
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IAuthService AuthService
 
 <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername" />
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername"/>
     <br>
-    Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password" />
+    Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password"/>
     <br>
     <br>
     <button class="btn btn-primary" type="submit">Login</button>
@@ -43,7 +40,7 @@
     private async Task HandleLogin()
     {
         var httpContext = HttpContextAccessor.HttpContext;
-        
+
         httpContext.Session.SetString("IsAuthenticated", "false");
 
         var (loginSuccess, accessLevel) = await AuthService.Login(loginModel.Username, loginModel.Password);
@@ -58,7 +55,7 @@
         else
         {
             loginFailed = true;
-            StateHasChanged(); 
+            StateHasChanged();
         }
     }
 
