@@ -11,22 +11,17 @@
 <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
     <DataAnnotationsValidator />
     <ValidationSummary />
-
-    <div class="form-group">
-        <label for="nutzername">Nutzername:</label>
-        <InputText id="nutzername" class="form-control" @bind-Value="loginModel.Username" />
-    </div>
-
-    <div class="form-group">
-        <label for="passwort">Passwort:</label>
-        <InputText id="passwort" type="password" class="form-control" @bind-Value="loginModel.Password" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
+    User: <InputText class="rounded border-6" @bind-Value="loginModel.Username" placeholder="Benutzername" />
+    <br>
+    Pass: <InputText class="rounded border-1" @bind-Value="loginModel.Password" placeholder="Passwort" type="password" />
+    <br>
+    <br>
+    <button class="btn btn-primary" type="submit">Login</button>
 </EditForm>
 
 @if (loginFailed)
 {
+    <br/>
     <div class="alert alert-danger" role="alert">
         Login fehlgeschlagen. Bitte überprüfe deine Anmeldeinformationen.
     </div>

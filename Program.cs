@@ -456,8 +456,18 @@ internal class Program : BaseCommandModule
             Context.Session.Remove(TempKey);
             await Next(); 
         });
-
-
+        
+        TempVariables.hasAdminUsers = await AuthUtils.HasAdministrativeUsers();
+        
+        if (!TempVariables.hasAdminUsers)
+        {
+            CurrentApplication.Logger.Warning("[WEBUI] No administrative users found. Starting SetupTool...");
+            CurrentApplication.Logger.Warning("[WEBUI] Restart is required after completing the setup.");
+            var token = AuthUtils.GenerateToken(32);
+            TempVariables.IntialConfigToken = token;
+            CurrentApplication.Logger.Warning("[WEBUI] Initial config token -> " + token);
+        }
+        
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
 
@@ -471,6 +481,8 @@ internal class Program : BaseCommandModule
 
     public static class TempVariables
     {
+        public static string IntialConfigToken { get; internal set;}
+        public static bool hasAdminUsers { get; internal set; }
         public static bool IsWebUiRunning { get; set; }
         public static WebApplication WebUiApp { get; set; }
     }
