@@ -69,6 +69,18 @@
                         {
                             <span class="team-tag">TEAM</span>
                         }
+                        @if (member.PremiumSince.HasValue)
+                        {
+                            <span class="booster-tag">BOOSTER</span>
+                        }
+                        @if (member.IsCommunicationDisabled)
+                        {
+                            <span class="timeout-tag">TIMEOUTED</span>
+                        }
+                        @if (member.HasUnusualDmActivity)
+                        {
+                            <span class="suspect-tag">SUS DM ACTIVTIY</span>
+                        }
                     </td>
                     <td>@member.Id</td>
                     <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>

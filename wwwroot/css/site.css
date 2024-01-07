@@ -147,10 +147,37 @@ a, .btn-link {
     border-radius: 3px;
 }
 
+.suspect-tag {
+    margin-left: 5px;
+    padding: 2px 4px;
+    background-color: #dd6ff1;
+    color: white;
+    font-size: 0.75em;
+    border-radius: 3px;
+}
+
 .team-tag {
     margin-left: 5px;
     padding: 2px 4px;
     background-color: #da7272;
+    color: white;
+    font-size: 0.75em;
+    border-radius: 3px;
+}
+
+.booster-tag {
+    margin-left: 5px;
+    padding: 2px 4px;
+    background-color: #825ee1;
+    color: white;
+    font-size: 0.75em;
+    border-radius: 3px;
+}
+
+.timeout-tag {
+    margin-left: 5px;
+    padding: 2px 4px;
+    background-color: #f15a5a;
     color: white;
     font-size: 0.75em;
     border-radius: 3px;
