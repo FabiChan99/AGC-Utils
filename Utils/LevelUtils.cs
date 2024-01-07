@@ -11,6 +11,47 @@ public static class LevelUtils
         int alvl = lvl - 1;
         return (int)(5 / 6.0 * (151 * alvl + 33 * Math.Pow(alvl, 2) + 2 * Math.Pow(alvl, 3)) + 100);
     }
+    
+    public static Dictionary<int, int> MinAndMaxXpForThisLevel(int lvl)
+    {
+        int min = 0;
+        int max = 0;
+        if (lvl <= 0)
+        {
+            return new Dictionary<int, int> { { min, max } };
+        }
+        int alvl = lvl - 1;
+        min = (int)(5 / 6.0 * (151 * alvl + 33 * Math.Pow(alvl, 2) + 2 * Math.Pow(alvl, 3)) + 100);
+        max = (int)(5 / 6.0 * (151 * lvl + 33 * Math.Pow(lvl, 2) + 2 * Math.Pow(lvl, 3)) + 100);
+        return new Dictionary<int, int> { { min, max } };
+    }
+    
+    // example [#######-----] percentage: 50%
+    // idk if this make sense, will see later
+    public static string GenerateLevelProgressBarString(int xp, int currentLevel)
+    {
+        int xpForCurrentLevel = XpForLevel(currentLevel);
+        int xpForNextLevel = XpForLevel(currentLevel + 1);
+        int xpForThisLevel = xpForNextLevel - xpForCurrentLevel;
+        int xpForThisLevelUntilNow = xp - xpForCurrentLevel;
+        int percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
+        int percentageForProgressBar = (int)(percentage / 10.0);
+        string progressBar = "";
+        for (int i = 0; i < 10; i++)
+        {
+            if (i < percentageForProgressBar)
+            {
+                progressBar += "#";
+            }
+            else
+            {
+                progressBar += "-";
+            }
+        }
+        return progressBar;
+    }
+    
+    
 
     public static int LevelAtXp(int totalXp)
     {
