@@ -2,7 +2,7 @@
 @using AGC_Management.Interfaces
 
 @inject NavigationManager NavigationManager
-@inject IAuthService AuthService
+
 
 <PageTitle>Start</PageTitle>
 
@@ -21,11 +21,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthenticated = AuthService.IsUserAuthenticated();
-        if (isAuthenticated)
-        {
-            userName = AuthService.GetUsername();
-        }
+
     }
 
 }

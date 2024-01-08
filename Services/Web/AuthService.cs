@@ -38,11 +38,7 @@ namespace AGC_Management.Services.Web
             {
                 var storedHashedPassword = reader.GetString(0);
                 var accessLevel = reader.GetString(1);
-
-                if (AuthUtils.VerifyPassword(nutzername, passwort))
-                {
-                    return (true, accessLevel);
-                }
+                
             }
 
             return (false, null);

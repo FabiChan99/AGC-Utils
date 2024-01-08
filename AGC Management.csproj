@@ -18,6 +18,7 @@
         <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.Common" Version="10.6.0-nightly-005"/>
+        <PackageReference Include="DisCatSharp.Extensions.OAuth2Web" Version="3.0.0-nightly-006" />
         <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.0-nightly-005"/>
         <PackageReference Include="ini-parser-new" Version="2.6.2"/>
@@ -63,6 +64,11 @@
     <ItemGroup>
         <AdditionalFiles Include="Pages\SharedPages\MainLayout.razor"/>
         <AdditionalFiles Include="Pages\SharedPages\NavMenu.razor"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Entities\Web\" />
     </ItemGroup>
 
 </Project>

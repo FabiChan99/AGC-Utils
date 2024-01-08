@@ -1,26 +1,14 @@
-﻿@inject NavigationManager NavigationManager
-
-<Router AppAssembly="@typeof(App).Assembly">
+﻿<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="typeof(MainLayout)">
+            <NotAuthorized>
+                <p>Sie haben nicht die erforderlichen Berechtigungen, um diese Seite zu sehen.</p>
+            </NotAuthorized>
+        </AuthorizeRouteView>
     </Found>
     <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+        <LayoutView Layout="typeof(MainLayout)">
+            <p>Seite nicht gefunden.</p>
         </LayoutView>
     </NotFound>
 </Router>
-
-@code {
-
-    protected override void OnInitialized()
-    {
-        if (!Program.TempVariables.hasAdminUsers && !NavigationManager.Uri.EndsWith("/setuptool"))
-        {
-            NavigationManager.NavigateTo("/setuptool", true);
-        }
-    }
-
-}

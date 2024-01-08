@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using AGC_Management.Interfaces;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Services.Web;
 using AGC_Management.Tasks;
@@ -11,9 +12,13 @@ using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
 using DisCatSharp.ApplicationCommands.Exceptions;
 using DisCatSharp.CommandsNext.Exceptions;
+using DisCatSharp.Extensions.OAuth2Web;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using KawaiiAPI.NET;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Session;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -27,6 +32,7 @@ public class CurrentApplication
 {
     public static string VersionString { get; set; } = "v2.1.0";
     public static DiscordClient DiscordClient { get; set; }
+    public static DiscordOAuth2Client OAuthClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
 }
@@ -94,17 +100,12 @@ internal class Program : BaseCommandModule
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddServerSideBlazor();
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
-        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+        builder.Services.AddScoped<CustomAuthenticationStateProvider>();
         builder.Services.AddHttpContextAccessor();
 
 
-        builder.Services.AddAuthentication("CookieAuth")
-            .AddCookie("CookieAuth", config =>
-            {
-                config.Cookie.Name = "User.Login.Cookie";
-                config.LoginPath = "/login";
-                config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            });
+        builder.Services.AddAuthentication();
 
         builder.Services.AddSession(options =>
         {
@@ -112,6 +113,8 @@ internal class Program : BaseCommandModule
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
         });
+        builder.Services.AddAuthorization();
+        
 
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
@@ -150,6 +153,15 @@ internal class Program : BaseCommandModule
             EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
+        
+        discord.UseOAuth2Web(new OAuth2WebConfiguration()
+        {
+          ClientId  = ulong.Parse(BotConfig.GetConfig()["WebUI"]["ClientID"]),
+          ClientSecret = BotConfig.GetConfig()["WebUI"]["ClientSecret"],
+          RedirectUri = BotConfig.GetConfig()["WebUI"]["RedirectURI"]
+        });
+        
+        
         discord.UseInteractivity(new InteractivityConfiguration
         {
             Timeout = TimeSpan.FromMinutes(2)
@@ -163,6 +175,11 @@ internal class Program : BaseCommandModule
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
 
         commands.CommandErrored += Commands_CommandErrored;
+        
+        DiscordOAuth2Client oauth2client = CurrentApplication.OAuthClient = new DiscordOAuth2Client(ulong.Parse(BotConfig.GetConfig()["WebUI"]["ClientID"]),
+            BotConfig.GetConfig()["WebUI"]["ClientSecret"],
+            BotConfig.GetConfig()["WebUI"]["RedirectURI"], minimumLogLevel:LogLevel.Trace);
+        
         await discord.ConnectAsync();
         await Task.Delay(5000);
 
@@ -441,8 +458,6 @@ internal class Program : BaseCommandModule
         app.UseRouting();
 
         app.UseSession();
-
-
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -453,18 +468,7 @@ internal class Program : BaseCommandModule
             Context.Session.Remove(TempKey);
             await Next();
         });
-
-        TempVariables.hasAdminUsers = await AuthUtils.HasAdministrativeUsers();
-
-        if (!TempVariables.hasAdminUsers)
-        {
-            CurrentApplication.Logger.Warning("[WEBUI] No administrative users found. Starting SetupTool...");
-            CurrentApplication.Logger.Warning("[WEBUI] Restart is required after completing the setup.");
-            var token = AuthUtils.GenerateToken(32);
-            TempVariables.IntialConfigToken = token;
-            CurrentApplication.Logger.Warning("[WEBUI] Initial config token -> " + token);
-        }
-
+        
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
 
@@ -478,8 +482,6 @@ internal class Program : BaseCommandModule
 
     public static class TempVariables
     {
-        public static string IntialConfigToken { get; internal set; }
-        public static bool hasAdminUsers { get; internal set; }
         public static bool IsWebUiRunning { get; set; }
         public static WebApplication WebUiApp { get; set; }
     }
