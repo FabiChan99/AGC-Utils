@@ -112,6 +112,15 @@ public sealed class AuthUtils
         var servercfg = BotConfig.GetConfig()["ServerConfig"];
         DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
         DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        DiscordRole? overrideRole = null;
+        try
+        {
+            overrideRole = guild.GetRole(ulong.Parse(servercfg["WebOverrideRoleId"]));
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
         DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
         DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try
@@ -121,6 +130,18 @@ public sealed class AuthUtils
         catch (NotFoundException)
         {
             return AccessLevel.NichtImServer.ToString();
+        }
+
+        try
+        {
+            if (overrideRole != null && user.Roles.Contains(overrideRole))
+            {
+                return AccessLevel.Administrator.ToString();
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
         // bot owner
