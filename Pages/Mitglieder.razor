@@ -1,13 +1,11 @@
 ﻿@page "/mitglieder"
+@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter")]
 @using AGC_Management.Utils
-@using AGC_Management.Interfaces
 @using AGC_Management.Enums.Web
 
-@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 <h3>Mitglieder</h3>
-@if (isAccessAllowed)
-{
+
     <div>
         <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
         <button class="btn btn-warning" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️</button>
@@ -111,19 +109,10 @@
         <div class="text-white">@matchingMembers.Length User entsprechen dem Filter</div>
         <br/>
     }
-}
-else
-{
-    <p>
-        <br/>
-        <em class="alert alert-danger">Keine Berechtigung.</em>
-    </p>
-}
 
 @code {
     private DiscordMember[]? members;
     private DiscordMember[]? filteredMembers;
-    private bool isAccessAllowed;
     private string searchTerm = string.Empty;
     private bool showOnlyBots;
     private bool showOnlyStaff;
@@ -140,7 +129,6 @@ else
     {
         await InvokeAsync(async () =>
         {
-            Console.WriteLine("Mitglieder neu einlesen");
             isLoading = true;
             await Task.Delay(1000);
             await ForceLoadDataAsync();
@@ -149,12 +137,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        isAccessAllowed = AuthUtils.isAccessAllowed(AccessLevel.Supporter, NavigationManager, AuthService);
-        if (!isAccessAllowed)
-        {
-            return;
-        }
-
         await LoadDataAsync();
     }
 

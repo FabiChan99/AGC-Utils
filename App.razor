@@ -1,9 +1,9 @@
 ﻿<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="typeof(MainLayout)">
-            <NotAuthorized>
-                <p>Sie haben nicht die erforderlichen Berechtigungen, um diese Seite zu sehen.</p>
-            </NotAuthorized>
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" >
+        <NotAuthorized>
+            <RedirectToDiscordLogin />
+        </NotAuthorized>
         </AuthorizeRouteView>
     </Found>
     <NotFound>
