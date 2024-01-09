@@ -457,6 +457,8 @@ internal class Program : BaseCommandModule
             app.UseHsts();
         }
 
+        app.Urls.Add(BotConfig.GetConfig()["WebUI"]["DashboardURL"]);
+        
         // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
 
