@@ -1,71 +1,69 @@
 ﻿@page "/bot"
-@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter, Team")]
-@using AGC_Management.Utils
-@using AGC_Management.Enums.Web
 @using System.Timers
 @using AGC_Management.Services
+@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter, Team")]
 
 
 @inject NavigationManager NavigationManager_
 
-    <h3>Botstatus</h3>
-    <br>
-    <div class="row">
-        <div class="col-md-3 mb-3">
-            <div class="card dark-mode">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="oi oi-dashboard"></i> Bot status</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Discord Websocket: @ping</p>
-                    <div class="server-count" onmouseover="showServerPopup()" onmouseout="hideServerPopup()">
-                        <p class="card-text">Servercount: @guildcount</p>
-                        <div id="serverPopup" class="server-popup">
-                            <ul>
-                                @foreach (var server in serverList)
-                                {
-                                    <li>@server</li>
-                                }
-                            </ul>
-                        </div>
+<h3>Botstatus</h3>
+<br>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="oi oi-dashboard"></i> Bot status</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Discord Websocket: @ping</p>
+                <div class="server-count" onmouseover="showServerPopup()" onmouseout="hideServerPopup()">
+                    <p class="card-text">Servercount: @guildcount</p>
+                    <div id="serverPopup" class="server-popup">
+                        <ul>
+                            @foreach (var server in serverList)
+                            {
+                                <li>@server</li>
+                            }
+                        </ul>
                     </div>
-                    <p class="card-text">Nutzer im Cache: @cacheduserscount</p>
-                    <p class="card-text">Botuser: @botusername</p>
-                    <p class="card-text">Botversion: @CurrentApplication.VersionString</p>
-                    <p class="card-text">RAM Nutzung: @ramusage</p>
                 </div>
+                <p class="card-text">Nutzer im Cache: @cacheduserscount</p>
+                <p class="card-text">Botuser: @botusername</p>
+                <p class="card-text">Botversion: @CurrentApplication.VersionString</p>
+                <p class="card-text">RAM Nutzung: @ramusage</p>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dark-mode">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="fa fa-gear"></i> Anwendungskonfiguration</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Target Server: @targetserver</p>
-                    <p class="card-text">Anwendungsmodus: @prodmode</p>
-                    <p class="card-text">Discord Library: @libversion</p>
-                    <p class="card-text">Microsoft .NET Version: @Environment.Version</p>
-                    <p class="card-text">Betriebssystem: @osversion</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dark-mode">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="fa fa-database"></i> Datenbank</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Datenbank Latenz (Simple Query): @dbping</p>
-                    <p class="card-text">Datenbank Latenz (Expensive Query): @dbpingexpensive</p>
-                    <p class="card-text">Datenbank User: @dbuser</p>
-                    <p class="card-text">Datenbank Version: @dbversion</p>
-                </div>
-            </div>
-        </div>
-        <!-- Weitere Karten hier -->
     </div>
-    <style>
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fa fa-gear"></i> Anwendungskonfiguration</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Target Server: @targetserver</p>
+                <p class="card-text">Anwendungsmodus: @prodmode</p>
+                <p class="card-text">Discord Library: @libversion</p>
+                <p class="card-text">Microsoft .NET Version: @Environment.Version</p>
+                <p class="card-text">Betriebssystem: @osversion</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card dark-mode">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fa fa-database"></i> Datenbank</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Datenbank Latenz (Simple Query): @dbping</p>
+                <p class="card-text">Datenbank Latenz (Expensive Query): @dbpingexpensive</p>
+                <p class="card-text">Datenbank User: @dbuser</p>
+                <p class="card-text">Datenbank Version: @dbversion</p>
+            </div>
+        </div>
+    </div>
+    <!-- Weitere Karten hier -->
+</div>
+<style>
     .server-popup {
         display: none;
     }
@@ -88,14 +86,12 @@
     private string ramusage = "Loading...";
     private string targetserver = "Loading...";
     private string botusername = "Loading...";
-    
 
 
     private readonly List<string> serverList = new();
 
     protected override async Task OnInitializedAsync()
     {
-
         var timer = new Timer(10000);
         timer.Elapsed += async (sender, e) => await UpdateValues();
         timer.Start();

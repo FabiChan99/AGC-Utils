@@ -2,9 +2,7 @@
 
 using System.Reflection;
 using System.Security.Claims;
-using AGC_Management;
 using AGC_Management.Controller;
-using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
 using AGC_Management.Utils;
@@ -13,16 +11,12 @@ using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
 using DisCatSharp.ApplicationCommands.Exceptions;
 using DisCatSharp.CommandsNext.Exceptions;
-using DisCatSharp.Extensions.OAuth2Web;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using Discord.OAuth2;
 using KawaiiAPI.NET;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Session;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -125,17 +119,13 @@ internal class Program : BaseCommandModule
                 x.AppSecret = BotConfig.GetConfig()["WebUI"]["ClientSecret"];
                 x.Scope.Add("guilds");
                 x.SaveTokens = true;
-                x.ClaimActions.MapCustomJson(ClaimTypes.Role, element =>
-                {
-                    return AuthUtils.RetrieveRole(element).Result;
-                });
-                x.ClaimActions.MapCustomJson("FullQualifiedDiscordName", element =>
-                {
-                    return AuthUtils.RetrieveName(element).Result;
-                });
+                x.ClaimActions.MapCustomJson(ClaimTypes.Role,
+                    element => { return AuthUtils.RetrieveRole(element).Result; });
+                x.ClaimActions.MapCustomJson("FullQualifiedDiscordName",
+                    element => { return AuthUtils.RetrieveName(element).Result; });
             });
         builder.Services.AddAuthorization();
-        
+
 
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
@@ -174,7 +164,7 @@ internal class Program : BaseCommandModule
             EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
-        
+
         discord.UseInteractivity(new InteractivityConfiguration
         {
             Timeout = TimeSpan.FromMinutes(2)
@@ -188,7 +178,7 @@ internal class Program : BaseCommandModule
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
 
         commands.CommandErrored += Commands_CommandErrored;
-        
+
         await discord.ConnectAsync();
         await Task.Delay(5000);
 
@@ -459,12 +449,12 @@ internal class Program : BaseCommandModule
         }
 
         app.Urls.Add(BotConfig.GetConfig()["WebUI"]["DashboardURL"]);
-        
+
         // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
-        
+
         app.UseStaticFiles();
 
         app.UseRouting();
@@ -474,11 +464,11 @@ internal class Program : BaseCommandModule
             ctx.Request.Scheme = "https";
             return next();
         });
-        
+
 
         app.UseAuthentication();
-        
-        app.UseCookiePolicy(new CookiePolicyOptions()
+
+        app.UseCookiePolicy(new CookiePolicyOptions
         {
             MinimumSameSitePolicy = SameSiteMode.Lax
         });

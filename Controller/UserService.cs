@@ -1,31 +1,19 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿#region
+
 using System.Security.Claims;
-using System.Threading.Tasks;
 using AGC_Management.Entities.Web;
 using AGC_Management.Utils;
+
+#endregion
 
 namespace AGC_Management.Controller
 {
     public class UserService
     {
-        private static HttpClient client = new HttpClient();
+        private static HttpClient client = new();
 
         /// <summary>
-        /// Parses the user's discord claim for their `identify` information
+        ///     Parses the user's discord claim for their `identify` information
         /// </summary>
         /// <param name="httpContext"></param>
         /// <returns></returns>
@@ -49,10 +37,11 @@ namespace AGC_Management.Controller
 
             var Role = await AuthUtils.RetrieveRole(ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
-            string? displayname = await AuthUtils.RetrieveRole(ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier)
+            string? displayname = await AuthUtils.RetrieveRole(ulong.Parse(claims
+                .First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
             string? fullQualifiedDiscordName = claims.First(x => x.Type == "FullQualifiedDiscordName").Value;
-            var userClaim = new DiscordUserWebClaim()
+            var userClaim = new DiscordUserWebClaim
             {
                 UserId = ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value),
                 Name = claims.First(x => x.Type == ClaimTypes.Name).Value,

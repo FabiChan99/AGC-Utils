@@ -1,8 +1,6 @@
 ﻿@page "/managemember"
-@using AGC_Management.Utils
-@using AGC_Management.Enums.Web
 @using Microsoft.AspNetCore.WebUtilities
-@attribute [Authorize (Roles = "BotOwner, Administrator, Moderator, Supporter")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter")]
 @inject NavigationManager NavigationManager_
 
 <h3>Mitgliederverwaltung</h3>
@@ -25,14 +23,13 @@
 
 @code {
     private string _parameter;
-    
+
     private DateTime _joinedAt;
     private DateTime _createdAt;
     private DiscordMember member;
 
     protected override async Task OnInitializedAsync()
     {
-
         var uri = new Uri(NavigationManager_.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("userid", out var param))
         {

@@ -1,25 +1,23 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿#region
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
+
+#endregion
 
 namespace AGC_Management.Controller
 {
     [Route("/[action]")]
     public class AccountController : ControllerBase
     {
-        public IDataProtectionProvider Provider { get; }
-
         public AccountController(IDataProtectionProvider provider)
         {
             Provider = provider;
         }
+
+        public IDataProtectionProvider Provider { get; }
 
         [HttpGet]
         public IActionResult Login(string returnUrl = "/")
