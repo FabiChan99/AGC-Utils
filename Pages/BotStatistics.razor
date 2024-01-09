@@ -1,15 +1,13 @@
 ﻿@page "/bot"
-@using AGC_Management.Interfaces
+@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter, Team")]
 @using AGC_Management.Utils
 @using AGC_Management.Enums.Web
 @using System.Timers
 @using AGC_Management.Services
 
-@inject IAuthService AuthService_
+
 @inject NavigationManager NavigationManager_
 
-@if (isAuthorized)
-{
     <h3>Botstatus</h3>
     <br>
     <div class="row">
@@ -72,7 +70,6 @@
         display: none;
     }
 </style>
-}
 
 
 @code {
@@ -91,19 +88,13 @@
     private string ramusage = "Loading...";
     private string targetserver = "Loading...";
     private string botusername = "Loading...";
-
-    private bool isAuthorized;
+    
 
 
     private readonly List<string> serverList = new();
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthorized = AuthUtils.isAccessAllowed(AccessLevel.Supporter, NavigationManager_, AuthService_);
-        if (!isAuthorized)
-        {
-            return;
-        }
 
         var timer = new Timer(10000);
         timer.Elapsed += async (sender, e) => await UpdateValues();

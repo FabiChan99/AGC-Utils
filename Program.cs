@@ -1,9 +1,11 @@
 #region
 
 using System.Reflection;
-using AGC_Management.Interfaces;
+using System.Security.Claims;
+using AGC_Management;
+using AGC_Management.Controller;
+using AGC_Management.Providers;
 using AGC_Management.Services;
-using AGC_Management.Services.Web;
 using AGC_Management.Tasks;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands;
@@ -11,9 +13,15 @@ using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
 using DisCatSharp.ApplicationCommands.Exceptions;
 using DisCatSharp.CommandsNext.Exceptions;
+using DisCatSharp.Extensions.OAuth2Web;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
+using Discord.OAuth2;
 using KawaiiAPI.NET;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Session;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -45,6 +53,7 @@ internal class Program : BaseCommandModule
         var logger = Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("Discord.OAuth2", LogEventLevel.Warning)
             .WriteTo.Console()
             // errors to errorfile
             .WriteTo.File("logs/errors/error-.txt", rollingInterval: RollingInterval.Day,
@@ -94,24 +103,38 @@ internal class Program : BaseCommandModule
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddServerSideBlazor();
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
-        builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddHttpContextAccessor();
-
-
-        builder.Services.AddAuthentication("CookieAuth")
-            .AddCookie("CookieAuth", config =>
-            {
-                config.Cookie.Name = "User.Login.Cookie";
-                config.LoginPath = "/login";
-                config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            });
-
+        builder.Services.AddSingleton<UserService>();
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
         });
+        builder.Services.AddAuthentication(opt =>
+            {
+                opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddDiscord(x =>
+            {
+                x.AppId = BotConfig.GetConfig()["WebUI"]["ClientID"];
+                x.AppSecret = BotConfig.GetConfig()["WebUI"]["ClientSecret"];
+                x.Scope.Add("guilds");
+                x.SaveTokens = true;
+                x.ClaimActions.MapCustomJson(ClaimTypes.Role, element =>
+                {
+                    return AuthUtils.RetrieveRole(element).Result;
+                });
+                x.ClaimActions.MapCustomJson("FullQualifiedDiscordName", element =>
+                {
+                    return AuthUtils.RetrieveName(element).Result;
+                });
+            });
+        builder.Services.AddAuthorization();
+        
 
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
@@ -150,6 +173,7 @@ internal class Program : BaseCommandModule
             EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
+        
         discord.UseInteractivity(new InteractivityConfiguration
         {
             Timeout = TimeSpan.FromMinutes(2)
@@ -163,6 +187,7 @@ internal class Program : BaseCommandModule
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
 
         commands.CommandErrored += Commands_CommandErrored;
+        
         await discord.ConnectAsync();
         await Task.Delay(5000);
 
@@ -436,36 +461,19 @@ internal class Program : BaseCommandModule
         app.Urls.Add($"http://localhost:{port}");
 
         app.UseStaticFiles();
-
+        
+        app.UseStaticFiles();
 
         app.UseRouting();
 
-        app.UseSession();
-
-
         app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.Use(async delegate(HttpContext Context, Func<Task> Next)
+        
+        app.UseCookiePolicy(new CookiePolicyOptions()
         {
-            var TempKey = Guid.NewGuid().ToString();
-            Context.Session.Set(TempKey, Array.Empty<byte>());
-            Context.Session.Remove(TempKey);
-            await Next();
+            MinimumSameSitePolicy = SameSiteMode.Lax
         });
-
-        TempVariables.hasAdminUsers = await AuthUtils.HasAdministrativeUsers();
-
-        if (!TempVariables.hasAdminUsers)
-        {
-            CurrentApplication.Logger.Warning("[WEBUI] No administrative users found. Starting SetupTool...");
-            CurrentApplication.Logger.Warning("[WEBUI] Restart is required after completing the setup.");
-            var token = AuthUtils.GenerateToken(32);
-            TempVariables.IntialConfigToken = token;
-            CurrentApplication.Logger.Warning("[WEBUI] Initial config token -> " + token);
-        }
-
         app.MapBlazorHub();
+        app.MapDefaultControllerRoute();
         app.MapFallbackToPage("/_Host");
 
         CurrentApplication.Logger.Information("Starting WebUI on port " + port + "...");
@@ -478,8 +486,6 @@ internal class Program : BaseCommandModule
 
     public static class TempVariables
     {
-        public static string IntialConfigToken { get; internal set; }
-        public static bool hasAdminUsers { get; internal set; }
         public static bool IsWebUiRunning { get; set; }
         public static WebApplication WebUiApp { get; set; }
     }

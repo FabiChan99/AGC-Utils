@@ -2,7 +2,12 @@
 
 public enum AccessLevel
 {
-    Administrator = 2,
-    Moderator = 1,
-    Supporter = 0
+    BotOwner = 7,
+    Administrator = 6,
+    Moderator = 5,
+    Supporter = 4,
+    Team = 3,
+    User = 2,
+    NichtImServer = 1,
+    Blacklisted = 0
 }

@@ -1,8 +1,9 @@
 ﻿#region
 
+using System.Text.Json;
 using AGC_Management.Enums.Web;
-using AGC_Management.Interfaces;
 using AGC_Management.Services;
+using DisCatSharp.Exceptions;
 using Microsoft.AspNetCore.Components;
 
 #endregion
@@ -11,82 +12,121 @@ namespace AGC_Management.Utils;
 
 public sealed class AuthUtils
 {
-    public static bool VerifyPassword(string username, string password)
+
+    public static async Task<string> RetrieveRole(ulong userId)
     {
-        var constring = DatabaseService.GetConnectionString();
-        using var conn = new NpgsqlConnection(constring);
-        conn.Open();
-        using var cmd = new NpgsqlCommand("SELECT hashed_password FROM web_users WHERE username = @username", conn);
-        cmd.Parameters.AddWithValue("username", username);
-
-        using var reader = cmd.ExecuteReader();
-        if (reader.Read())
+        var guild = CurrentApplication.TargetGuild;
+        DiscordMember? user = null;
+        var servercfg = BotConfig.GetConfig()["ServerConfig"];
+        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+        try
         {
-            var storedHashedPassword = reader.GetString(0);
-
-            return BCrypt.Net.BCrypt.Verify(password, storedHashedPassword);
+            user = await guild.GetMemberAsync(userId);
+        }
+        catch (NotFoundException)
+        {
+            return AccessLevel.NichtImServer.ToString();
         }
 
-        return false;
+        // bot owner
+        if (user.Id == GlobalProperties.BotOwnerId)
+        {
+            return AccessLevel.BotOwner.ToString();
+        }
+        // admin
+        if (user.Roles.Contains(adminRole))
+        {
+            return AccessLevel.Administrator.ToString();
+        }
+        // mod
+        if (user.Roles.Contains(modRole))
+        {
+            return AccessLevel.Moderator.ToString();
+        }
+        // sup
+        if (user.Roles.Contains(supRole))
+        {
+            return AccessLevel.Supporter.ToString();
+        }
+        // staff
+        if (user.Roles.Contains(staffRole))
+        {
+            return AccessLevel.Team.ToString();
+        }
+        // user
+        return AccessLevel.User.ToString();
     }
 
-    /// <summary>
-    ///     Checks if access is allowed based on the given access level.
-    /// </summary>
-    /// <param name="AccessLevel">The access level to check for.</param>
-    /// <param name="_NavigationManager">The navigation manager used for redirecting unauthorized or unauthenticated users.</param>
-    /// <param name="_AuthService">The service used for authentication and authorization.</param>
-    /// <returns>True if access is allowed, False otherwise.</returns>
-    public static bool isAccessAllowed(AccessLevel AccessLevel, NavigationManager _NavigationManager,
-        IAuthService _AuthService)
+
+    public static async Task<string> RetrieveName(JsonElement userClaims)
     {
-        var isAuthenticated = _AuthService.IsUserAuthenticated();
-        if (!isAuthenticated)
-        {
-            _NavigationManager.NavigateTo("/401");
-            return false;
-        }
+        string userId_ = userClaims.GetProperty("id").ToString();
+        ulong userId = ulong.Parse(userId_);
 
-        var isAuthorized = _AuthService.isAuthorized(AccessLevel);
-        if (!isAuthorized)
-        {
-            _NavigationManager.NavigateTo("/403");
-            return false;
-        }
+        return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).UsernameWithDiscriminator;
+    }
+    
+    public static async Task<string?> RetrieveDisplayName(JsonElement userClaims)
+    {
+        string userId_ = userClaims.GetProperty("id").ToString();
+        ulong userId = ulong.Parse(userId_);
 
-        return true;
+        return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).GlobalName;
     }
 
-    public static async Task<bool> HasAdministrativeUsers()
-    {
-        var constring = DatabaseService.GetConnectionString();
-        await using var conn = new NpgsqlConnection(constring);
-        await conn.OpenAsync();
-        await using var cmd =
-            new NpgsqlCommand("SELECT COUNT(*) FROM web_users WHERE access_level = @access_level", conn);
-        cmd.Parameters.AddWithValue("access_level", AccessLevel.Administrator.ToString());
 
-        await using var reader = await cmd.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
+    public static async Task<string> RetrieveRole(JsonElement userClaims)
+    {
+
+        string userId_ = userClaims.GetProperty("id").ToString();
+        ulong userId = ulong.Parse(userId_);
+        
+        
+        var guild = CurrentApplication.TargetGuild;
+        DiscordMember? user = null;
+        var servercfg = BotConfig.GetConfig()["ServerConfig"];
+        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+        try
         {
-            var count = reader.GetInt32(0);
-            return count > 0;
+            user = await guild.GetMemberAsync(userId);
+        }
+        catch (NotFoundException)
+        {
+            return AccessLevel.NichtImServer.ToString();
         }
 
-        return false;
-    }
-
-    public static string GenerateToken(int charcount)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var stringChars = new char[charcount];
-        var random = new Random();
-
-        for (var i = 0; i < stringChars.Length; i++)
+        // bot owner
+        if (user.Id == GlobalProperties.BotOwnerId)
         {
-            stringChars[i] = chars[random.Next(chars.Length)];
+            return AccessLevel.BotOwner.ToString();
         }
-
-        return new string(stringChars);
+        // admin
+        if (user.Roles.Contains(adminRole))
+        {
+            return AccessLevel.Administrator.ToString();
+        }
+        // mod
+        if (user.Roles.Contains(modRole))
+        {
+            return AccessLevel.Moderator.ToString();
+        }
+        // sup
+        if (user.Roles.Contains(supRole))
+        {
+            return AccessLevel.Supporter.ToString();
+        }
+        // staff
+        if (user.Roles.Contains(staffRole))
+        {
+            return AccessLevel.Team.ToString();
+        }
+        // user
+        return AccessLevel.User.ToString();
     }
 }
