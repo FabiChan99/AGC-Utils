@@ -21,6 +21,7 @@ using KawaiiAPI.NET;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Session;
 using Serilog;
 using Serilog.Core;
@@ -467,6 +468,13 @@ internal class Program : BaseCommandModule
         app.UseStaticFiles();
 
         app.UseRouting();
+        app.Use((ctx, next) =>
+        {
+            ctx.Request.Host = new HostString(BotConfig.GetConfig()["WebUI"]["DashboardURL"]);
+            ctx.Request.Scheme = "https";
+            return next();
+        });
+        
 
         app.UseAuthentication();
         
