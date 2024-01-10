@@ -1,4 +1,9 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using AGC_Management.Entities.Web
+@using AGC_Management.Controller
+@inject IHttpContextAccessor httpContextAccessor
+@inject UserService usrSvc
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -9,6 +14,22 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/logout">
+                        <span class="oi oi-account-logout" aria-hidden="true"></span> Abmelden
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/login">
+                        <span class="oi oi-account-login" aria-hidden="true"></span> Anmelden
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
@@ -29,11 +50,19 @@
             </div>
         </AuthorizeView>
 
+
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
+    private DiscordUserWebClaim claim;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        claim = await usrSvc.GetInfo(httpContextAccessor.HttpContext);
+    }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
