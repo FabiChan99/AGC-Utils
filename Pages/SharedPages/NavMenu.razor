@@ -1,5 +1,6 @@
-﻿@using AGC_Management.Entities.Web
+@using AGC_Management.Entities.Web
 @using AGC_Management.Controller
+@using AGC_Management.Utils
 @inject IHttpContextAccessor httpContextAccessor
 @inject UserService usrSvc
 
@@ -12,14 +13,22 @@
     </div>
 </div>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+<div class="@NavMenuCssClass nav-scrollable">
     <nav class="flex-column">
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/logout">
-                        <span class="oi oi-account-logout" aria-hidden="true"></span> Abmelden
-                    </NavLink>
+                <div class="nav-item dropdown px-3">
+                    <a class="nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="@user.AvatarUrl" class="nav-profile-pic" alt="" />
+                        <span class="dropdown-label">@user.Username @(!user.IsMigrated ? "#" + user.Discriminator : "")</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <li><h6 class="dropdown-header">@user.UsernameWithDiscriminator</h6></li>
+                        <li><h6 class="dropdown-header">@claim.UserId</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><span class="oi oi-account-logout"></span> Abmelden</a></li>
+
+                    </ul>
                 </div>
             </Authorized>
             <NotAuthorized>
@@ -62,19 +71,34 @@
                 </NavLink>
             </div>
         </AuthorizeView>
-
-
     </nav>
 </div>
+<style>
+    .nav-link {
+        color: #fff !important;
+        padding-left: 1rem;
+    }
+</style>
 
 @code {
     private bool collapseNavMenu = true;
     private DiscordUserWebClaim claim;
+    private DiscordUser? user;
 
 
     protected override async Task OnInitializedAsync()
     {
         claim = await usrSvc.GetInfo(httpContextAccessor.HttpContext);
+        
+        try
+        {
+            user = await CurrentApplication.DiscordClient.GetUserAsync(claim.UserId);
+        }
+        catch (Exception)
+        {
+            user = null;
+        }
+        
     }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
