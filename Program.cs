@@ -459,7 +459,7 @@ internal class Program : BaseCommandModule
         app.Use((ctx, next) =>
         {
             ctx.Request.Host = new HostString(BotConfig.GetConfig()["WebUI"]["DashboardURL"]);
-            ctx.Request.Scheme = "https";
+            ctx.Request.Scheme = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]) ? "https" : "http";
             return next();
         });
 
