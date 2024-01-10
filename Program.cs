@@ -112,7 +112,11 @@ internal class Program : BaseCommandModule
                 opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-            .AddCookie()
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/login";
+                options.LogoutPath = "/logout";
+            })
             .AddDiscord(x =>
             {
                 x.AppId = BotConfig.GetConfig()["WebUI"]["ClientID"];
