@@ -1,30 +1,30 @@
 ﻿@page "/"
-@using AGC_Management.Interfaces
-
+@using AGC_Management.Entities.Web
+@using AGC_Management.Controller
+@inject IHttpContextAccessor httpContextAccessor
+@inject UserService userService
 @inject NavigationManager NavigationManager
-@inject IAuthService AuthService
+
 
 <PageTitle>Start</PageTitle>
 
-<h1>Willkommen! @userName</h1>
-
-@if (!isAuthenticated)
-{
-    <br/>
-    <em class="alert alert-warning">Nicht eingeloggt.</em>
-}
-
+<h1>Willkommen! @username</h1>
 
 @code {
-    private bool isAuthenticated;
-    private string userName;
+    private DiscordUserWebClaim claim;
+    private string username = "";
+
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthenticated = AuthService.IsUserAuthenticated();
-        if (isAuthenticated)
+        try
         {
-            userName = AuthService.GetUsername();
+            claim = await userService.GetInfo(httpContextAccessor.HttpContext);
+            username = claim.Name;
+        }
+        catch (Exception)
+        {
+            // ignored
         }
     }
 

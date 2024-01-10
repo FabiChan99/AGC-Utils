@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>AGC_Management</RootNamespace>
@@ -18,8 +18,10 @@
         <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.Common" Version="10.6.0-nightly-005"/>
+        <PackageReference Include="DisCatSharp.Extensions.OAuth2Web" Version="3.0.0-nightly-006"/>
         <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.0-nightly-005"/>
         <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.0-nightly-005"/>
+        <PackageReference Include="Discord.OAuth2.AspNetCore" Version="3.0.0"/>
         <PackageReference Include="ini-parser-new" Version="2.6.2"/>
         <PackageReference Include="KawaiiAPI.NET" Version="1.1.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.5-beta1.23225.2">

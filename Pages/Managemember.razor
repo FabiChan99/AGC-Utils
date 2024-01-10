@@ -1,49 +1,35 @@
 ﻿@page "/managemember"
-@using AGC_Management.Interfaces
-@using AGC_Management.Utils
-@using AGC_Management.Enums.Web
 @using Microsoft.AspNetCore.WebUtilities
-@inject IAuthService AuthService
+@attribute [Authorize(Roles = "BotOwner, Administrator, Moderator, Supporter")]
 @inject NavigationManager NavigationManager_
-@inject IAuthService AuthService_
 
-@if (isAuthorized)
-{
-    <h3>Mitgliederverwaltung</h3>
-    <br>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Nutzerinformationen</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Nutzername: @member.Username</p>
-                    <p class="card-text">Nickname: @member.Nickname</p>
-                    <p class="card-text">Beigetreten am: @_joinedAt</p>
-                    <p class="card-text">Erstellt am: @_createdAt</p>
-                </div>
+<h3>Mitgliederverwaltung</h3>
+<br>
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Nutzerinformationen</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Nutzername: @member.Username</p>
+                <p class="card-text">Nickname: @member.Nickname</p>
+                <p class="card-text">Beigetreten am: @_joinedAt</p>
+                <p class="card-text">Erstellt am: @_createdAt</p>
             </div>
         </div>
     </div>
-}
+</div>
 
 @code {
     private string _parameter;
 
-    private bool isAuthorized;
     private DateTime _joinedAt;
     private DateTime _createdAt;
     private DiscordMember member;
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthorized = AuthUtils.isAccessAllowed(AccessLevel.Supporter, NavigationManager_, AuthService_);
-        if (!isAuthorized)
-        {
-            return;
-        }
-
         var uri = new Uri(NavigationManager_.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("userid", out var param))
         {
