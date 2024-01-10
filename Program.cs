@@ -450,6 +450,27 @@ internal class Program : BaseCommandModule
 
         // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
+        
+        
+        bool useHttps;
+        try
+        {
+            useHttps = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]);
+        }
+        catch
+        {
+            useHttps = false;
+        }
+        
+        string dashboardUrl;
+        try
+        {
+            dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
+        }
+        catch
+        {
+            dashboardUrl = "localhost";
+        }
 
         app.UseStaticFiles();
 
@@ -458,8 +479,8 @@ internal class Program : BaseCommandModule
         app.UseRouting();
         app.Use((ctx, next) =>
         {
-            ctx.Request.Host = new HostString(BotConfig.GetConfig()["WebUI"]["DashboardURL"]);
-            ctx.Request.Scheme = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]) ? "https" : "http";
+            ctx.Request.Host = new HostString(dashboardUrl);
+            ctx.Request.Scheme = useHttps ? "https" : "http";
             return next();
         });
 
