@@ -37,7 +37,7 @@ namespace AGC_Management.Controller
 
             var Role = await AuthUtils.RetrieveRole(ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
-            string? displayname = await AuthUtils.RetrieveRole(ulong.Parse(claims
+            string? displayname = await AuthUtils.RetrieveDisplayName(ulong.Parse(claims
                 .First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
             string? fullQualifiedDiscordName = claims.First(x => x.Type == "FullQualifiedDiscordName").Value;
