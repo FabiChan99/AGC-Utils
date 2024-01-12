@@ -336,6 +336,10 @@ public class TempVCEventHandler : TempVoiceHelper
                     }
                 }
             }
+            catch (NotFoundException)
+            {
+                // pass
+            }
             catch (Exception ex)
             {
                 await ErrorReporting.SendErrorToDev(sender, e.User, ex);
