@@ -12,6 +12,23 @@ namespace AGC_Management.Controller
     {
         private static HttpClient client = new();
 
+        public bool IsAuthenticated(HttpContext httpContext)
+        {
+            return httpContext.User.Identity.IsAuthenticated;
+        }
+        
+        public ulong? GetUserId(HttpContext httpContext)
+        {
+            if (!httpContext.User.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var claims = httpContext.User.Claims;
+            return ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+        }
+        
+        
         /// <summary>
         ///     Parses the user's discord claim for their `identify` information
         /// </summary>
@@ -37,7 +54,7 @@ namespace AGC_Management.Controller
 
             var Role = await AuthUtils.RetrieveRole(ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
-            string? displayname = await AuthUtils.RetrieveRole(ulong.Parse(claims
+            string? displayname = await AuthUtils.RetrieveDisplayName(ulong.Parse(claims
                 .First(x => x.Type == ClaimTypes.NameIdentifier)
                 .Value));
             string? fullQualifiedDiscordName = claims.First(x => x.Type == "FullQualifiedDiscordName").Value;

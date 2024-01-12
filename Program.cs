@@ -112,12 +112,17 @@ internal class Program : BaseCommandModule
                 opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
             })
-            .AddCookie()
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/login";
+                options.LogoutPath = "/logout";
+            })
             .AddDiscord(x =>
             {
                 x.AppId = BotConfig.GetConfig()["WebUI"]["ClientID"];
                 x.AppSecret = BotConfig.GetConfig()["WebUI"]["ClientSecret"];
                 x.Scope.Add("guilds");
+                x.AccessDeniedPath = "/OAuthError";
                 x.SaveTokens = true;
                 x.ClaimActions.MapCustomJson(ClaimTypes.Role,
                     element => { return AuthUtils.RetrieveRole(element).Result; });
@@ -152,7 +157,8 @@ internal class Program : BaseCommandModule
             Locale = "de",
             ServiceProvider = serviceProvider,
             MessageCacheSize = 10000,
-            ShowReleaseNotesInUpdateCheck = false
+            ShowReleaseNotesInUpdateCheck = false,
+            HttpTimeout = TimeSpan.FromSeconds(40),
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration

@@ -84,12 +84,19 @@ public sealed class AuthUtils
     }
 
 
+
     public static async Task<string> RetrieveName(JsonElement userClaims)
     {
         string userId_ = userClaims.GetProperty("id").ToString();
         ulong userId = ulong.Parse(userId_);
 
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).UsernameWithDiscriminator;
+    }
+    
+    public static async Task<string> RetrieveDisplayName(ulong userId)
+    {
+
+        return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).GlobalName;
     }
 
     public static async Task<string?> RetrieveDisplayName(JsonElement userClaims)

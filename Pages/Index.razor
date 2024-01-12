@@ -10,6 +10,15 @@
 
 <h1>Willkommen! @username</h1>
 
+
+@if (!userService.IsAuthenticated(httpContextAccessor.HttpContext))
+{
+    <div class="alert alert-warning" role="alert">
+        Nicht angemeldet! Bitte <a href="/login">anmelden</a>  
+    </div>
+}
+
+
 @code {
     private DiscordUserWebClaim claim;
     private string username = "";
@@ -19,8 +28,9 @@
     {
         try
         {
-            claim = await userService.GetInfo(httpContextAccessor.HttpContext);
-            username = claim.Name;
+            var userid = userService.GetUserId(httpContextAccessor.HttpContext);
+            var user = await CurrentApplication.DiscordClient.GetUserAsync(userid.Value);
+            username = user.Username;
         }
         catch (Exception)
         {

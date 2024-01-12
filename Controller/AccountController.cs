@@ -22,6 +22,12 @@ namespace AGC_Management.Controller
         [HttpGet]
         public IActionResult Login(string returnUrl = "/")
         {
+            if (!Url.IsLocalUrl(returnUrl))
+            {
+                returnUrl = "/";
+            }
+
+            
             return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
         }
 

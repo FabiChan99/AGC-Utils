@@ -1,8 +1,4 @@
-﻿@using AGC_Management.Entities.Web
-@using AGC_Management.Controller
-@inherits LayoutComponentBase
-@inject IHttpContextAccessor httpContextAccessor
-@inject UserService usrSvc
+﻿@inherits LayoutComponentBase
 
 <PageTitle>@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</PageTitle>
 
@@ -10,33 +6,9 @@
     <div class="sidebar">
         <NavMenu/>
     </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://github.com/FabiChan99/AGC-Utils" target="_blank">Source</a>
-            <AuthorizeView>
-                <Authorized>
-                    <a href="/logout">Logout @claim.FullQualifiedDiscordName</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login">Login</a>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
-
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
-
-@code
-{
-    private DiscordUserWebClaim claim;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        claim = await usrSvc.GetInfo(httpContextAccessor.HttpContext);
-    }
-}

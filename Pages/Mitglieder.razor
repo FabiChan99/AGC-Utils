@@ -8,7 +8,9 @@
 <div>
     <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
     <button class="btn btn-success" @onclick="ResetPage">Inputfilter anwenden</button>
-    <button class="btn btn-danger" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️(Ratelimit)</button>
+    <AuthorizeView Roles="BotOwner, Administrator">
+            <button class="btn btn-danger" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️(Ratelimit)</button>
+    </AuthorizeView>
     <br/>
     <input type="checkbox" @bind-value="showOnlyBots" @bind-value:event="oninput" @onchange="ApplyFiltersAndPaginationAsync"/> Nur Bots anzeigen
     <br>
