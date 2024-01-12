@@ -4,7 +4,9 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject UserService usrSvc
 
-<div class="top-row ps-3 navbar navbar-dark">
+@if (initialized)
+{
+    <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -19,12 +21,12 @@
             <Authorized>
                 <div class="nav-item dropdown px-3">
                     <a class="nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="@user.AvatarUrl" class="nav-profile-pic" alt="" />
+                        <img src="@user.AvatarUrl" class="nav-profile-pic" alt=""/>
                         <span class="dropdown-label">@user.Username @(!user.IsMigrated ? "#" + user.Discriminator : "")</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <li><h6 class="dropdown-header">@user.UsernameWithDiscriminator</h6></li>
-                        <li><h6 class="dropdown-header">@claim.UserId</h6></li>
+                        <li><h6 class="dropdown-header">@user.Id</h6></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/logout"><span class="oi oi-account-logout"></span> Abmelden</a></li>
 
@@ -80,25 +82,28 @@
     }
 </style>
 
+}
+
 @code {
     private bool collapseNavMenu = true;
-    private DiscordUserWebClaim claim;
+    private ulong? userId = null;
     private DiscordUser? user;
+    private bool initialized = false;
 
 
     protected override async Task OnInitializedAsync()
     {
-        claim = await usrSvc.GetInfo(httpContextAccessor.HttpContext);
+        userId = usrSvc.GetUserId(httpContextAccessor.HttpContext);
         
         try
         {
-            user = await CurrentApplication.DiscordClient.GetUserAsync(claim.UserId);
+            user = await CurrentApplication.DiscordClient.GetUserAsync(userId.Value);
         }
         catch (Exception)
         {
             user = null;
         }
-        
+        initialized = true;
     }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;

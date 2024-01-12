@@ -12,6 +12,19 @@ namespace AGC_Management.Controller
     {
         private static HttpClient client = new();
 
+        
+        public ulong? GetUserId(HttpContext httpContext)
+        {
+            if (!httpContext.User.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var claims = httpContext.User.Claims;
+            return ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+        }
+        
+        
         /// <summary>
         ///     Parses the user's discord claim for their `identify` information
         /// </summary>
