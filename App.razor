@@ -1,12 +1,13 @@
 ﻿@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
                     @{
-                        var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-                        NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}");
+                        HandleNotAuthorized();
                     }
                 </NotAuthorized>
             </AuthorizeRouteView>
@@ -18,3 +19,19 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private async void HandleNotAuthorized()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/403");
+        }
+        else
+        {
+            var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}");
+        }
+    }
+}
