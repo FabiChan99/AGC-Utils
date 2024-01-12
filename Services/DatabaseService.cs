@@ -237,6 +237,8 @@ public static class DatabaseService
         var tableCommands = new Dictionary<string, string>
         {
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
+            { "levelingdata", "CREATE TABLE IF NOT EXISTS levelingdata (userid BIGINT, current_xp INTEGER, current_level INTEGER, last_text_reward BIGINT DEFAULT 0, last_vc_reward BIGINT DEFAULT 0, pingactive BOOLEAN DEFAULT true)" },
+            { "levelingsettings", "CREATE TABLE IF NOT EXISTS levelingsettings (guildid BIGINT, text_active BOOLEAN DEFAULT false, vc_active BOOLEAN DEFAULT FALSE, text_multi FLOAT DEFAULT 1.0, vc_multi FLOAT DEFAULT 1.0, multioverrides JSON, levelupchannelid BIGINT, levelupmessage TEXT, levelupmessagereward TEXT, retainroles BOOLEAN DEFAULT true, excludedchannels BIGINT[], excludedroles BIGINT[])" },
             { "banreasons", "CREATE TABLE IF NOT EXISTS banreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "flags",
@@ -314,6 +316,37 @@ public static class DatabaseService
                     { "caseid", "ALTER TABLE flags ADD COLUMN IF NOT EXISTS caseid VARCHAR" }
                 }
             },
+            {
+                "levelingdata",
+                new Dictionary<string, string>
+                {
+                    { "userid", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS userid BIGINT" },
+                    { "current_xp", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS current_xp INTEGER" },
+                    { "current_level", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS current_level INTEGER" },
+                    { "last_text_reward", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS last_text_reward BIGINT DEFAULT 0" },
+                    { "last_vc_reward", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS last_vc_reward BIGINT DEFAULT 0" },
+                    { "pingactive", "ALTER TABLE levelingdata ADD COLUMN IF NOT EXISTS pingactive BOOLEAN DEFAULT true" }
+                }
+            },
+            {
+                "levelingsettings",
+                new Dictionary<string, string>
+                {
+                    { "guildid", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS guildid BIGINT" },
+                    { "text_active", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS text_active BOOLEAN DEFAULT false" },
+                    { "vc_active", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS vc_active BOOLEAN DEFAULT false" },
+                    { "text_multi", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS text_multi FLOAT DEFAULT 1.0" },
+                    { "vc_multi", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS vc_multi FLOAT DEFAULT 1.0" },
+                    { "multioverrides", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS multioverrides JSON" },
+                    { "levelupchannelid", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupchannelid BIGINT" },
+                    { "levelupmessage", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessage TEXT" },
+                    { "levelupmessagereward", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessagereward TEXT" },
+                    { "retainroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS retainroles BOOLEAN DEFAULT true" },
+                    { "excludedchannels", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedchannels BIGINT[]" },
+                    { "excludedroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedroles BIGINT[]" }
+                }
+            },
+
             {
                 "tempvoice",
                 new Dictionary<string, string>

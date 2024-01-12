@@ -1,4 +1,7 @@
-﻿namespace AGC_Management.Utils;
+﻿using AGC_Management.Entities;
+using AGC_Management.Services;
+
+namespace AGC_Management.Utils;
 
 public static class LevelUtils
 {
@@ -74,4 +77,43 @@ public static class LevelUtils
         int xpForNextLevel = XpForLevel(currentLevel + 1);
         return xpForNextLevel - xp;
     }
+
+
+    /// <summary>
+    /// Retrieves the rank data for a specified user.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    /// <returns>A dictionary containing the rank data, where the key is the user ID and the value is the RankData object.</returns>
+    public static async Task<Dictionary<ulong, RankData>> GetRank(ulong userId)
+    {
+        var rank = new Dictionary<ulong, RankData>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+
+        var cmd = new NpgsqlCommand("SELECT current_xp FROM levelingdata WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@id", (long)userId);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var xp = reader.GetInt32(0);
+                var level = LevelAtXp(xp);
+                rank[userId] = new RankData { Level = level, Xp = xp };
+            }
+        }
+        else
+        {
+            rank[userId] = new RankData { Level = 0, Xp = 0 };
+        }
+
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return rank;
+    }
+
+    
+    
+    
 }

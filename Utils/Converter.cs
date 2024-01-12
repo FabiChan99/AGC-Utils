@@ -36,6 +36,11 @@ public class Converter
             }
     }
 
+    
+    public static string FormatWithCommas(int number)
+    {
+        return number.ToString("N0");
+    }
 
     public static List<ulong> ExtractUserIDsFromString(string users)
     {

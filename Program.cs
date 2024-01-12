@@ -178,7 +178,7 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider, DebugStartup = false, EnableDefaultHelp = false
+            ServiceProvider = serviceProvider, DebugStartup = true, EnableDefaultHelp = false
         });
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
