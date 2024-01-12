@@ -19,8 +19,9 @@
     {
         try
         {
-            claim = await userService.GetInfo(httpContextAccessor.HttpContext);
-            username = claim.Name;
+            var userid = userService.GetUserId(httpContextAccessor.HttpContext);
+            var user = await CurrentApplication.DiscordClient.GetUserAsync(userid.Value);
+            username = user.Username;
         }
         catch (Exception)
         {
