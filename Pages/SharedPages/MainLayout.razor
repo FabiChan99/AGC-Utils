@@ -1,8 +1,4 @@
-﻿@using AGC_Management.Entities.Web
-@using AGC_Management.Controller
-@inherits LayoutComponentBase
-@inject IHttpContextAccessor httpContextAccessor
-@inject UserService usrSvc
+﻿@inherits LayoutComponentBase
 
 <PageTitle>@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</PageTitle>
 
@@ -16,14 +12,3 @@
         </article>
     </main>
 </div>
-
-@code
-{
-    private DiscordUserWebClaim claim;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        claim = await usrSvc.GetInfo(httpContextAccessor.HttpContext);
-    }
-}
