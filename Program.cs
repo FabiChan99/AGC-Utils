@@ -156,7 +156,8 @@ internal class Program : BaseCommandModule
             Locale = "de",
             ServiceProvider = serviceProvider,
             MessageCacheSize = 10000,
-            ShowReleaseNotesInUpdateCheck = false
+            ShowReleaseNotesInUpdateCheck = false,
+            HttpTimeout = TimeSpan.FromSeconds(40),
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
