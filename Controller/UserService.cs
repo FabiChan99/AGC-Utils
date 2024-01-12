@@ -12,6 +12,10 @@ namespace AGC_Management.Controller
     {
         private static HttpClient client = new();
 
+        public bool IsAuthenticated(HttpContext httpContext)
+        {
+            return httpContext.User.Identity.IsAuthenticated;
+        }
         
         public ulong? GetUserId(HttpContext httpContext)
         {

@@ -10,6 +10,15 @@
 
 <h1>Willkommen! @username</h1>
 
+
+@if (!userService.IsAuthenticated(httpContextAccessor.HttpContext))
+{
+    <div class="alert alert-warning" role="alert">
+        Nicht angemeldet!
+    </div>
+}
+
+
 @code {
     private DiscordUserWebClaim claim;
     private string username = "";
