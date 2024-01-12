@@ -122,6 +122,7 @@ internal class Program : BaseCommandModule
                 x.AppId = BotConfig.GetConfig()["WebUI"]["ClientID"];
                 x.AppSecret = BotConfig.GetConfig()["WebUI"]["ClientSecret"];
                 x.Scope.Add("guilds");
+                x.AccessDeniedPath = "/OAuthError";
                 x.SaveTokens = true;
                 x.ClaimActions.MapCustomJson(ClaimTypes.Role,
                     element => { return AuthUtils.RetrieveRole(element).Result; });
