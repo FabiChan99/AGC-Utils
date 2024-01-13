@@ -178,8 +178,47 @@ public static class LevelUtils
         await db.CloseAsync();
         return rank;
     }
+    
+    
+    // leaderboard data for the leaderboard command
+    public static async Task<List<LeaderboardData>> FetchLeaderboardData()
+    {
+        var leaderboardData = new List<LeaderboardData>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        
+        var cmd = new NpgsqlCommand("SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC", db);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var userId = reader.GetInt64(0);
+                var xp = reader.GetInt32(1);
+                var level = reader.GetInt32(2);
+                leaderboardData.Add(new LeaderboardData { UserId = (ulong)userId, XP = xp, Level = level });
+            }
+        }
+        else
+        {
+            leaderboardData.Add(new LeaderboardData { UserId = 0, XP = 0, Level = 0 });
+        }
+        
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return leaderboardData;
+    }
 
-    
-    
-    
+    public static int GetUserRank(ulong invokingUserId, List<LeaderboardData> leaderboardData)
+    {
+        for (int i = 0; i < leaderboardData.Count; i++)
+        {
+            if (leaderboardData[i].UserId == invokingUserId)
+            {
+                return i + 1;
+            }
+        }
+        
+        return -1;
+    }
 }
