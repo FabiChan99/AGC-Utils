@@ -265,4 +265,18 @@ public static class LevelUtils
         
         return -1;
     }
+    
+    public static int GetBaseXp(XpRewardType type)
+    {
+        var rng = new Random();
+        switch (type)
+        {
+            case XpRewardType.Message:
+                return rng.Next(15, 25);
+            case XpRewardType.Voice:
+                return rng.Next(3, 5);
+            default:
+                return 0;
+        }
+    }
 }
