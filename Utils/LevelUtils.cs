@@ -144,6 +144,50 @@ public static class LevelUtils
         return rank;
     }
 
+    /// <summary>
+    /// Recalculates the user level based on their experience points (xp) and updates the database.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    public static async Task RecalculateUserLevel(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        var xp = rank[userId].Xp;
+        var level = LevelAtXp(xp);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@level", level);
+        cmd.Parameters.AddWithValue("@id", (long)userId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task RecalculateAllUserLevels()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT userid, current_xp FROM levelingdata", db);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            CurrentApplication.Logger.Information("Recalculating all user levels...");
+            while (await reader.ReadAsync())
+            {
+                var userId = reader.GetInt64(0);
+                var xp = reader.GetInt32(1);
+                var level = LevelAtXp(xp);
+                await using var db2 = new NpgsqlConnection(DatabaseService.GetConnectionString());
+                await db2.OpenAsync();
+                await using var cmd2 = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level WHERE userid = @id", db2);
+                cmd2.Parameters.AddWithValue("@level", level);
+                cmd2.Parameters.AddWithValue("@id", userId);
+                await cmd2.ExecuteNonQueryAsync();
+                await db2.CloseAsync();
+            }
+            CurrentApplication.Logger.Information("Recalculated all user levels.");
+        }
+        await db.CloseAsync();
+    }
 
     /// <summary>
     /// Retrieves the rank data for a specified user.

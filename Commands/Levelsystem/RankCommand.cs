@@ -26,6 +26,8 @@ public class RankCommand : ApplicationCommandsModule
             Title = "Rang von " + user.Username,
             Color = BotConfig.GetEmbedColor()
         };
+
+        await LevelUtils.RecalculateUserLevel(user.Id);
         
         var rank = await LevelUtils.GetRank(user.Id);
         var level = rank[user.Id].Level;
