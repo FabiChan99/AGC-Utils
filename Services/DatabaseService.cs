@@ -238,7 +238,7 @@ public static class DatabaseService
         {
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
             { "levelingdata", "CREATE TABLE IF NOT EXISTS levelingdata (userid BIGINT, current_xp INTEGER, current_level INTEGER, last_text_reward BIGINT DEFAULT 0, last_vc_reward BIGINT DEFAULT 0, pingactive BOOLEAN DEFAULT true)" },
-            { "levelingsettings", "CREATE TABLE IF NOT EXISTS levelingsettings (guildid BIGINT, text_active BOOLEAN DEFAULT false, vc_active BOOLEAN DEFAULT FALSE, text_multi FLOAT DEFAULT 1.0, vc_multi FLOAT DEFAULT 1.0, multioverrides JSON, levelupchannelid BIGINT, levelupmessage TEXT, levelupmessagereward TEXT, retainroles BOOLEAN DEFAULT true, excludedchannels BIGINT[], excludedroles BIGINT[])" },
+            { "levelingsettings", "CREATE TABLE IF NOT EXISTS levelingsettings (guildid BIGINT, text_active BOOLEAN DEFAULT false, vc_active BOOLEAN DEFAULT FALSE, text_multi FLOAT DEFAULT 1.0, vc_multi FLOAT DEFAULT 1.0, multioverrides JSON, levelupchannelid BIGINT, levelupmessage TEXT, levelupmessagereward TEXT, retainroles BOOLEAN DEFAULT true, excludedchannels BIGINT[], excludedroles BIGINT[], lastrecalc BIGINT DEFAULT 0)" },
             { "banreasons", "CREATE TABLE IF NOT EXISTS banreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "flags",
@@ -342,6 +342,7 @@ public static class DatabaseService
                     { "levelupmessage", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessage TEXT" },
                     { "levelupmessagereward", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessagereward TEXT" },
                     { "retainroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS retainroles BOOLEAN DEFAULT true" },
+                    { "lastrecalc", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS lastrecalc BIGINT DEFAULT 0" },
                     { "excludedchannels", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedchannels BIGINT[]" },
                     { "excludedroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedroles BIGINT[]" }
                 }
