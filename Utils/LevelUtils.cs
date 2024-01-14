@@ -424,4 +424,50 @@ public static class LevelUtils
         await db.CloseAsync();
         return 0;
     }
+    
+    public static async Task<List<Reward>> GetLevelRewards()
+    {
+        var rewards = new List<Reward>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        
+        var cmd = new NpgsqlCommand("SELECT level, roleid FROM levelrewards WHERE guildid = @guildid ORDER BY level ASC", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var level = reader.GetInt32(0);
+                var roleId = reader.GetInt64(1);
+                rewards.Add(new Reward { Level = level, RoleId = (ulong)roleId });
+            }
+        }
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return rewards;
+    }
+    
+    public static async Task<List<MultiplicatorOverrides>> GetMultiplicatorOverrides()
+    {
+        var overrides = new List<MultiplicatorOverrides>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        
+        var cmd = new NpgsqlCommand("SELECT type, multiplier FROM multiplicatoroverrides WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var roleId = reader.GetInt64(0);
+                var multiplier = reader.GetFloat(1);
+                overrides.Add(new MultiplicatorOverrides { RoleId = (ulong)roleId , Multiplicator = multiplier });
+            }
+        }
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return overrides;
+    }
 }
