@@ -238,7 +238,11 @@ public static class DatabaseService
         {
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
             { "levelingdata", "CREATE TABLE IF NOT EXISTS levelingdata (userid BIGINT, current_xp INTEGER, current_level INTEGER, last_text_reward BIGINT DEFAULT 0, last_vc_reward BIGINT DEFAULT 0, pingactive BOOLEAN DEFAULT true)" },
-            { "levelingsettings", "CREATE TABLE IF NOT EXISTS levelingsettings (guildid BIGINT, text_active BOOLEAN DEFAULT false, vc_active BOOLEAN DEFAULT FALSE, text_multi FLOAT DEFAULT 1.0, vc_multi FLOAT DEFAULT 1.0, multioverrides JSON, levelupchannelid BIGINT, levelupmessage TEXT, levelupmessagereward TEXT, retainroles BOOLEAN DEFAULT true, excludedchannels BIGINT[], excludedroles BIGINT[], lastrecalc BIGINT DEFAULT 0)" },
+            { "levelingsettings", "CREATE TABLE IF NOT EXISTS levelingsettings (guildid BIGINT, text_active BOOLEAN DEFAULT false, vc_active BOOLEAN DEFAULT FALSE, text_multi FLOAT DEFAULT 1.0, vc_multi FLOAT DEFAULT 1.0, levelupchannelid BIGINT, levelupmessage TEXT, levelupmessagereward TEXT, retainroles BOOLEAN DEFAULT true, lastrecalc BIGINT DEFAULT 0)" },
+            { "level_rewards", "CREATE TABLE IF NOT EXISTS level_rewards (level INTEGER, roleid BIGINT)" },
+            { "level_multiplicatoroverrideroles", "CREATE TABLE IF NOT EXISTS level_multiplicatoroverrideroles (roleid BIGINT, multiplicator FLOAT)" },
+            { "level_excludedchannels", "CREATE TABLE IF NOT EXISTS level_excludedchannels (channelid BIGINT)" },
+            { "level_excludedroles", "CREATE TABLE IF NOT EXISTS level_excludedroles (roleid BIGINT)" },
             { "banreasons", "CREATE TABLE IF NOT EXISTS banreasons (reason TEXT, custom_id VARCHAR)" },
             {
                 "flags",
@@ -337,15 +341,42 @@ public static class DatabaseService
                     { "vc_active", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS vc_active BOOLEAN DEFAULT false" },
                     { "text_multi", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS text_multi FLOAT DEFAULT 1.0" },
                     { "vc_multi", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS vc_multi FLOAT DEFAULT 1.0" },
-                    { "multioverrides", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS multioverrides JSON" },
                     { "levelupchannelid", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupchannelid BIGINT" },
                     { "levelupmessage", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessage TEXT" },
                     { "levelupmessagereward", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS levelupmessagereward TEXT" },
                     { "retainroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS retainroles BOOLEAN DEFAULT true" },
                     { "lastrecalc", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS lastrecalc BIGINT DEFAULT 0" },
-                    { "excludedchannels", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedchannels BIGINT[]" },
-                    { "excludedroles", "ALTER TABLE levelingsettings ADD COLUMN IF NOT EXISTS excludedroles BIGINT[]" }
                 }
+            },
+
+            {
+                "level_excludedchannels", new Dictionary<string, string>
+                {
+                    { "channelid", "ALTER TABLE level_excludedchannels ADD COLUMN IF NOT EXISTS channelid BIGINT" }
+                }
+            },
+
+            {
+                "level_excludedroles", new Dictionary<string, string>
+                {
+                    { "roleid", "ALTER TABLE level_excludedroles ADD COLUMN IF NOT EXISTS roleid BIGINT" }
+                }
+            },
+
+            {
+              "level_multiplicatoroverrideroles" , new Dictionary<string, string>
+              {
+                  { "roleid", "ALTER TABLE level_multiplicatoroverrideroles ADD COLUMN IF NOT EXISTS roleid BIGINT" },
+                  { "multiplicator", "ALTER TABLE level_multiplicatoroverrideroles ADD COLUMN IF NOT EXISTS multiplicator FLOAT" }
+              }  
+            },
+
+            {
+              "level_rewards" , new Dictionary<string, string>
+              {
+                  { "level", "ALTER TABLE level_rewards ADD COLUMN IF NOT EXISTS level INTEGER" },
+                  { "roleid", "ALTER TABLE level_rewards ADD COLUMN IF NOT EXISTS roleid BIGINT" }
+              }
             },
 
             {
@@ -435,6 +466,33 @@ public static class DatabaseService
         }
 
         await conn.CloseAsync();
+        await InitLeveling();
         CurrentApplication.Logger.Information("Database tables updated.");
     }
+
+
+    private static async Task InitLeveling()
+    {
+        ulong targetGuildId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
+        await using var con = new NpgsqlConnection(GetConnectionString());
+        await con.OpenAsync();
+        await using var cmd = new NpgsqlCommand($"SELECT * FROM levelingsettings WHERE guildid = '{targetGuildId}'", con);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var result = await reader.ReadAsync();
+        await reader.CloseAsync();
+        await con.CloseAsync();
+        if (!result)
+        {
+            await using var con2 = new NpgsqlConnection(GetConnectionString());
+            await con2.OpenAsync();
+            await using var cmd2 = new NpgsqlCommand(
+                "INSERT INTO levelingsettings (guildid, text_active, vc_active, text_multi, vc_multi, levelupchannelid, levelupmessage, levelupmessagereward, retainroles, lastrecalc) VALUES (@guildid, false, false, 1.0, 1.0, 0, 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', 'Herzlichen Glückwunsch {usermention}!', true, 0)",
+                con2);
+            cmd2.Parameters.AddWithValue("guildid", (long)targetGuildId);
+            await cmd2.ExecuteNonQueryAsync();
+            await con2.CloseAsync();
+        }
+    }
 }
+
+
