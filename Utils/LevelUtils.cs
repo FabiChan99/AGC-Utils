@@ -396,10 +396,10 @@ public static class LevelUtils
         }
         else
         {
-            return "Congratulations {user}! You just advanced to level {level} and received {reward}!";
+            return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
         }
         await db.CloseAsync();
-        return "Congratulations {user}! You just advanced to level {level} and received {reward}!";
+        return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
     }
     
     public static async Task<ulong> GetLevelUpChannelId()
