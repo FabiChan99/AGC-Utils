@@ -5,6 +5,7 @@ namespace AGC_Management.Utils;
 
 public static class LevelUtils
 {
+    private static ulong levelguildid = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
     /// <summary>
     /// Calculates the experience points required to reach a given level.
     /// </summary>
@@ -261,5 +262,166 @@ public static class LevelUtils
             default:
                 return 0;
         }
+    }
+
+    public static async Task<bool> isVcLevelingEnabled()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT vc_active FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var vcLevelingEnabled = reader.GetBoolean(0);
+                return vcLevelingEnabled;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        await db.CloseAsync();
+        return false;
+    }
+    
+    public static async Task<bool> isMessageLevelingEnabled()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT text_active FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var messageLevelingEnabled = reader.GetBoolean(0);
+                return messageLevelingEnabled;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        await db.CloseAsync();
+        return false;
+    }
+    
+    public static async Task<float> GetVcXpMultiplier()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT vc_multi FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var vcXpMultiplier = reader.GetFloat(0);
+                return vcXpMultiplier;
+            }
+        }
+        else
+        {
+            return 1;
+        }
+        await db.CloseAsync();
+        return 1;
+    } 
+    
+    public static async Task<float> GetMessageXpMultiplier()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT text_multi FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var messageXpMultiplier = reader.GetFloat(0);
+                return messageXpMultiplier;
+            }
+        }
+        else
+        {
+            return 1;
+        }
+        await db.CloseAsync();
+        return 1;
+    }
+    
+    public static async Task<string> GetLevelUpMessage()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT levelupmessage FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var levelUpMessage = reader.GetString(0);
+                return levelUpMessage;
+            }
+        }
+        else
+        {
+            return "Congratulations {user}! You just advanced to level {level}!";
+        }
+        await db.CloseAsync();
+        return "Congratulations {user}! You just advanced to level {level}!";
+    }
+    
+    public static async Task<string> GetLevelUpRewardMessage()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT leveluprewardmessage FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var levelUpRewardMessage = reader.GetString(0);
+                return levelUpRewardMessage;
+            }
+        }
+        else
+        {
+            return "Congratulations {user}! You just advanced to level {level} and received {reward}!";
+        }
+        await db.CloseAsync();
+        return "Congratulations {user}! You just advanced to level {level} and received {reward}!";
+    }
+    
+    public static async Task<ulong> GetLevelUpChannelId()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT levelupchannelid FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var levelUpChannelId = reader.GetInt64(0);
+                return (ulong)levelUpChannelId;
+            }
+        }
+        else
+        {
+            return 0;
+        }
+        await db.CloseAsync();
+        return 0;
     }
 }
