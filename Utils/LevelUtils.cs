@@ -59,30 +59,6 @@ public static class LevelUtils
         return new Dictionary<int, int> { { min, max } };
     }
     
-    // example [#######-----] percentage: 50%
-    // idk if this make sense, will see later
-    public static string GenerateLevelProgressBarString(int xp, int currentLevel)
-    {
-        int xpForCurrentLevel = XpForLevel(currentLevel);
-        int xpForNextLevel = XpForLevel(currentLevel + 1);
-        int xpForThisLevel = xpForNextLevel - xpForCurrentLevel;
-        int xpForThisLevelUntilNow = xp - xpForCurrentLevel;
-        int percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
-        int percentageForProgressBar = (int)(percentage / 10.0);
-        string progressBar = "";
-        for (int i = 0; i < 10; i++)
-        {
-            if (i < percentageForProgressBar)
-            {
-                progressBar += "#";
-            }
-            else
-            {
-                progressBar += "-";
-            }
-        }
-        return progressBar;
-    }
 
 
     /// <summary>
