@@ -1,4 +1,4 @@
-﻿namespace AGC_Management.Tasks.Levelsystem;
+﻿namespace AGC_Management.Tasks;
 
 public static class CheckVCLevellingTask
 {

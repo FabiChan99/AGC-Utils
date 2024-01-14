@@ -211,6 +211,7 @@ internal class Program : BaseCommandModule
         _ = StatusUpdateTask(discord);
         _ = UpdateGuild(discord);
         _ = ExtendedModerationSystemLoop.LaunchLoops();
+        _ = RecalculateRanks.LaunchLoops();
 
         return Task.CompletedTask;
     }

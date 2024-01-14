@@ -184,6 +184,13 @@ public static class LevelUtils
                 await cmd2.ExecuteNonQueryAsync();
                 await db2.CloseAsync();
             }
+            // set timestamp for last recalculation unix timestamp
+            await using var db3 = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await db3.OpenAsync();
+            await using var cmd3 = new NpgsqlCommand("UPDATE levelingsettings SET lastrecalc = @timestamp", db3);
+            cmd3.Parameters.AddWithValue("@timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            await cmd3.ExecuteNonQueryAsync();
+            await db3.CloseAsync();
             CurrentApplication.Logger.Information("Recalculated all user levels.");
         }
         await db.CloseAsync();
