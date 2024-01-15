@@ -383,7 +383,7 @@ public static class LevelUtils
     {
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT leveluprewardmessage FROM levelingsettings WHERE guildid = @guildid", db);
+        await using var cmd = new NpgsqlCommand("SELECT levelupmessagereward FROM levelingsettings WHERE guildid = @guildid", db);
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
@@ -431,7 +431,7 @@ public static class LevelUtils
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
         
-        var cmd = new NpgsqlCommand("SELECT level, roleid FROM levelrewards WHERE guildid = @guildid ORDER BY level ASC", db);
+        var cmd = new NpgsqlCommand("SELECT level, roleid FROM level_rewards ORDER BY level ASC", db);
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
@@ -454,7 +454,7 @@ public static class LevelUtils
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
         
-        var cmd = new NpgsqlCommand("SELECT type, multiplier FROM multiplicatoroverrides WHERE guildid = @guildid", db);
+        var cmd = new NpgsqlCommand("SELECT roleid, multiplicator FROM level_multiplicatoroverrideroles", db);
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
@@ -470,4 +470,200 @@ public static class LevelUtils
         await db.CloseAsync();
         return overrides;
     }
+    
+    public static async Task<bool> IsLevelingActive(XpRewardType type)
+    {
+        if (type == XpRewardType.Message)
+        {
+            return await isMessageLevelingEnabled();
+        }
+        else if (type == XpRewardType.Voice)
+        {
+            return await isVcLevelingEnabled();
+        }
+        return false;
+    }
+    
+    
+    public static async Task GiveXP(DiscordUser user, float xp, XpRewardType type)
+    {
+        _ = Task.Run(async () =>
+        { 
+            if (!await IsLevelingActive(type))
+            {
+                return;
+            }
+            await AddUserToDbIfNot(user);
+            var typeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
+            await using var cooldowndb = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await cooldowndb.OpenAsync();
+            await using var cooldowncmd = new NpgsqlCommand("SELECT " + typeString + " FROM levelingdata WHERE userid = @id", cooldowndb);
+            cooldowncmd.Parameters.AddWithValue("@id", (long)user.Id);
+            await using var cooldownreader = await cooldowncmd.ExecuteReaderAsync();
+            // cooldown is 60 seconds
+            if (cooldownreader.HasRows)
+            {
+                while (await cooldownreader.ReadAsync())
+                {
+                    var lastReward = cooldownreader.GetInt64(0);
+                    var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    if (now - lastReward < 60)
+                    {
+                        await cooldownreader.CloseAsync();
+                        await cooldowndb.CloseAsync();
+                        return;
+                    }
+                }
+            }
+            await cooldownreader.CloseAsync();
+            await cooldowndb.CloseAsync();
+            
+            var rank = await GetRank(user.Id);
+            var currentXp = rank[user.Id].Xp;
+            var currentLevel = rank[user.Id].Level;
+            var xpMultiplier = 1f;
+            if (type == XpRewardType.Message)
+            {
+                xpMultiplier = await GetMessageXpMultiplier();
+            }
+            else if (type == XpRewardType.Voice)
+            {
+                xpMultiplier = await GetVcXpMultiplier();
+            }
+            var xpToGive = (int)(xpMultiplier * xp);
+            var multiplicatorOverrides = await GetMultiplicatorOverrides();
+            var member = await user.ConvertToMember(CurrentApplication.TargetGuild);
+            foreach (var multiplicatorOverride in multiplicatorOverrides)
+            {
+                if (member.Roles.Any(role => role.Id == multiplicatorOverride.RoleId))
+                {
+                    xpToGive = (int)(xpToGive * multiplicatorOverride.Multiplicator);
+                }
+            }
+            var newXp = currentXp + xpToGive;
+            var newLevel = LevelAtXp(newXp);
+            var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var rewardTypeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
+            await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await db.OpenAsync();
+            await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp, current_level = @level, " + rewardTypeString + " = @timestamp WHERE userid = @id", db);
+            cmd.Parameters.AddWithValue("@xp", newXp);
+            cmd.Parameters.AddWithValue("@level", newLevel);
+            cmd.Parameters.AddWithValue("@id", (long)user.Id);
+            cmd.Parameters.AddWithValue("@timestamp", current_timestamp);
+            await cmd.ExecuteNonQueryAsync();
+            await db.CloseAsync();
+            Console.WriteLine("Gave " + xpToGive + " xp to " + user.Username);
+            if (newLevel > currentLevel)
+            {
+                await SendLevelUpMessageAndReward(user, newLevel);
+            }
+        });
+        await Task.CompletedTask;
+    }
+
+    public static async Task AddUserToDbIfNot(DiscordUser user)
+    {
+        // check if user is in the database
+        await using var checkdb = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await checkdb.OpenAsync();
+        await using var checkcmd = new NpgsqlCommand("SELECT userid FROM levelingdata WHERE userid = @id", checkdb);
+        checkcmd.Parameters.AddWithValue("@id", (long)user.Id);
+        await using var checkreader = await checkcmd.ExecuteReaderAsync();
+
+        if (!checkreader.HasRows)
+        {
+            await using var __db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await __db.OpenAsync();
+            await using var __cmd = new NpgsqlCommand("INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level)", __db);
+            __cmd.Parameters.AddWithValue("@id", (long)user.Id);
+            __cmd.Parameters.AddWithValue("@xp", 0);
+            __cmd.Parameters.AddWithValue("@level", 0);
+            await __cmd.ExecuteNonQueryAsync();
+            await __db.CloseAsync();
+            Console.WriteLine("Added user to database.");
+        }
+        await checkreader.CloseAsync();
+        await checkdb.CloseAsync();
+    }
+
+    private static async Task SendLevelUpMessageAndReward(DiscordUser user, int level)
+    {
+        Console.WriteLine("Sending level up message and reward...");
+        var levelUpMessage = await GetLevelUpMessage();
+        var isReward = await IsLevelRewarded(level);
+        var rewardMessage = await GetLevelUpRewardMessage();
+        var reward = await GetRewardForaLevel(level);
+        Console.WriteLine("Is reward: " + isReward);
+        if (isReward)
+        {
+            var member = await user.ConvertToMember(CurrentApplication.TargetGuild);
+            var role = CurrentApplication.TargetGuild.GetRole(reward[true]);
+            try
+            {
+                await member.GrantRoleAsync(role);
+                var formattedMessage = await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role);
+                var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
+                await channel.SendMessageAsync(formattedMessage);
+            }
+            catch (Exception e)
+            {
+                CurrentApplication.Logger.Error(e.Message);
+            }
+
+        }
+        else
+        {
+            var formattedMessage = await MessageFormatter.FormatLevelUpMessage(levelUpMessage, false, user);
+            var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
+            await channel.SendMessageAsync(formattedMessage);
+        }
+        
+    }
+    
+    private static async Task<bool> IsLevelRewarded(int level)
+    {
+        var rewards = await GetLevelRewards();
+        var reward = rewards.FirstOrDefault(r => r.Level == level);
+        if (reward != null)
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    private static async Task<Dictionary<bool, ulong>> GetRewardForaLevel(int level)
+    {
+        var rewards = await GetLevelRewards();
+        var reward = rewards.FirstOrDefault(r => r.Level == level);
+        if (reward != null)
+        {
+            return new Dictionary<bool, ulong> { { true, reward.RoleId } };
+        }
+        return new Dictionary<bool, ulong> { { false, 0 } };
+    }
+    
+    
+    // restore all roles for a user that match the level or below
+    public static async Task RestoreRoles(DiscordMember user)
+    {
+        var rank = await GetRank(user.Id);
+        var level = rank[user.Id].Level;
+        var rewards = await GetLevelRewards();
+        var rolesToRestore = rewards.Where(r => r.Level <= level).ToList();
+        foreach (var roleToRestore in rolesToRestore)
+        {
+            var role = CurrentApplication.TargetGuild.GetRole(roleToRestore.RoleId);
+            try
+            {
+                await user.GrantRoleAsync(role);
+            }
+            catch (Exception e)
+            {
+                CurrentApplication.Logger.Error(e.Message);
+            }
+        }
+    }
+    
+    
 }

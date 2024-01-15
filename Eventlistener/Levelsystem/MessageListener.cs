@@ -1,4 +1,6 @@
-﻿using DisCatSharp.ApplicationCommands;
+﻿using AGC_Management.Entities;
+using AGC_Management.Utils;
+using DisCatSharp.ApplicationCommands;
 
 namespace AGC_Management.Eventlistener.Levelsystem;
 
@@ -27,8 +29,9 @@ public sealed class MessageListener : ApplicationCommandsModule
             {
                 return;
             }
-            
-            // later implemention here
+            Console.WriteLine("Trying to give xp");
+            var basexp = LevelUtils.GetBaseXp(XpRewardType.Message);
+            await LevelUtils.GiveXP(args.Author, basexp, XpRewardType.Message);
         });
         return Task.CompletedTask;
     }
