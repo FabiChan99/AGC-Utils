@@ -490,6 +490,72 @@ public static class LevelUtils
         return false;
     }
     
+    public static async Task<List<ulong>> BlockedChannels()
+    {
+        var blockedChannels = new List<ulong>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        
+        var cmd = new NpgsqlCommand("SELECT channelid FROM level_excludedchannels", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var channelId = reader.GetInt64(0);
+                blockedChannels.Add((ulong)channelId);
+            }
+        }
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return blockedChannels;
+    }
+    
+    public static async Task<List<ulong>> BlockedRoles()
+    {
+        var blockedRoles = new List<ulong>();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        
+        var cmd = new NpgsqlCommand("SELECT roleid FROM level_excludedroles", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var roleId = reader.GetInt64(0);
+                blockedRoles.Add((ulong)roleId);
+            }
+        }
+        await reader.CloseAsync();
+        await db.CloseAsync();
+        return blockedRoles;
+    }
+    
+    public static async Task<bool> IsChannelBlocked(ulong channelId)
+    {
+        var blockedChannels = await BlockedChannels();
+        if (blockedChannels.Contains(channelId))
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    public static async Task<bool> UserHasBlockedRole(DiscordMember member)
+    {
+        var blockedRoles = await BlockedRoles();
+        foreach (var role in member.Roles)
+        {
+            if (blockedRoles.Contains(role.Id))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     
     public static async Task GiveXP(DiscordUser user, float xp, XpRewardType type)
     {
@@ -497,6 +563,12 @@ public static class LevelUtils
         { 
             if (!await IsLevelingActive(type))
             {
+                return;
+            }
+            
+            if (await UserHasBlockedRole(await user.ConvertToMember(CurrentApplication.TargetGuild)))
+            {
+                Console.WriteLine("User has blocked role.");
                 return;
             }
             await AddUserToDbIfNot(user);
