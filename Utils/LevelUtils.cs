@@ -587,7 +587,6 @@ public static class LevelUtils
                     var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                     if (now - lastReward < 60)
                     {
-                        Console.WriteLine("Cooldown not over yet.");
                         await cooldownreader.CloseAsync();
                         await cooldowndb.CloseAsync();
                         return;
@@ -632,7 +631,7 @@ public static class LevelUtils
             cmd.Parameters.AddWithValue("@timestamp", current_timestamp);
             await cmd.ExecuteNonQueryAsync();
             await db.CloseAsync();
-            Console.WriteLine("Gave " + xpToGive + " xp to " + user.Username);
+            CurrentApplication.Logger.Debug("Gave " + xpToGive + " xp to " + user.Username);
             if (newLevel > currentLevel)
             {
                 await SendLevelUpMessageAndReward(user, newLevel);
@@ -660,7 +659,7 @@ public static class LevelUtils
             __cmd.Parameters.AddWithValue("@level", 0);
             await __cmd.ExecuteNonQueryAsync();
             await __db.CloseAsync();
-            Console.WriteLine("Added user to database.");
+            Console.WriteLine($"Added user {user.Username} to database.");
         }
         await checkreader.CloseAsync();
         await checkdb.CloseAsync();
@@ -673,7 +672,6 @@ public static class LevelUtils
         var isReward = await IsLevelRewarded(level);
         var rewardMessage = await GetLevelUpRewardMessage();
         var reward = await GetRewardForaLevel(level);
-        Console.WriteLine("Is reward: " + isReward);
         if (isReward)
         {
             var member = await user.ConvertToMember(CurrentApplication.TargetGuild);

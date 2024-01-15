@@ -72,7 +72,7 @@ public class LeaderboardCommand : ApplicationCommandsModule
             Color = DiscordColor.Blurple
         };
         
-        embedBuilder.WithFooter($"{user.GetFormattedUserName()} ist auf Platz {userRank} von {leaderboardData.Count} | {ctx.User.UsernameWithDiscriminator}", ctx.User.AvatarUrl);
+        embedBuilder.WithFooter("AGC Leveling System");
         
         var emb = embedBuilder.Build();
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(emb));
