@@ -1,5 +1,9 @@
-﻿using AGC_Management.Services;
+﻿#region
+
+using AGC_Management.Services;
 using AGC_Management.Utils;
+
+#endregion
 
 namespace AGC_Management.Tasks;
 
@@ -31,7 +35,7 @@ public static class RecalculateRanks
             {
                 await LevelUtils.RecalculateAllUserLevels();
             }
-            
+
             await Task.Delay(TimeSpan.FromHours(2));
         }
     }
