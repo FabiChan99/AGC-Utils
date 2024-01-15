@@ -34,8 +34,7 @@ public sealed class MessageListener : ApplicationCommandsModule
                 return;
             }
             Console.WriteLine("Trying to give xp");
-            var basexp = LevelUtils.GetBaseXp(XpRewardType.Message);
-            await LevelUtils.GiveXP(args.Author, basexp, XpRewardType.Message);
+            await LevelUtils.GiveXP(args.Author, LevelUtils.GetBaseXp(XpRewardType.Message), XpRewardType.Message);
         });
         return Task.CompletedTask;
     }
