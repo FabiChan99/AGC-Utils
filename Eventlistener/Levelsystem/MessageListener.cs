@@ -12,6 +12,10 @@ public sealed class MessageListener : ApplicationCommandsModule
     [Event]
     private Task MessageCreated(DiscordClient client, MessageCreateEventArgs args)
     {
+        if (args.Author.IsBot)
+        {
+            return Task.CompletedTask;
+        }
         _ = Task.Run(async () =>
         {
             bool lvlactive = false;
