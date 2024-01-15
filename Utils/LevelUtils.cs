@@ -206,6 +206,12 @@ public static class LevelUtils
         await db.CloseAsync();
         return rank;
     }
+
+    public static async Task<int> GetUserLevel(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        return rank[userId].Level;
+    }
     
     
     // leaderboard data for the leaderboard command
@@ -509,6 +515,7 @@ public static class LevelUtils
                     var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                     if (now - lastReward < 60)
                     {
+                        Console.WriteLine("Cooldown not over yet.");
                         await cooldownreader.CloseAsync();
                         await cooldowndb.CloseAsync();
                         return;

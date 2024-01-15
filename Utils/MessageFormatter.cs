@@ -5,6 +5,7 @@ public class MessageFormatter
     public static async Task<string> FormatLevelUpMessage(string message, bool isWithReward, DiscordUser user,
         DiscordRole role = null)
     {
+        var level = await LevelUtils.GetUserLevel(user.Id);
         var formattedMessage = message.Replace("{usermention}", user.Mention);
         formattedMessage = formattedMessage.Replace("{username}", user.Username);
         if (isWithReward)
@@ -15,6 +16,7 @@ public class MessageFormatter
                 formattedMessage = formattedMessage.Replace("{rolename}", role.Name);
             }
         }
+        formattedMessage = formattedMessage.Replace("{level}", level.ToString());
 
         return formattedMessage;
     }
