@@ -20,7 +20,7 @@ public static class CheckVCLevellingTask
                 await Task.Delay(TimeSpan.FromSeconds(5));
                 continue;
             }
-
+            Console.WriteLine("Checking vc levelling");
             try
             {
                             // get all users and their voice channel to a dictionary
@@ -48,6 +48,11 @@ public static class CheckVCLevellingTask
                             foreach (var user in channel.Users)
                             {
                                 if (user.IsBot)
+                                {
+                                    continue;
+                                }
+                                if (user.VoiceState?.IsSelfMuted == true || user.VoiceState?.IsSelfDeafened == true ||
+                                    user.VoiceState?.IsServerMuted == true || user.VoiceState?.IsServerDeafened == true)
                                 {
                                     continue;
                                 }
