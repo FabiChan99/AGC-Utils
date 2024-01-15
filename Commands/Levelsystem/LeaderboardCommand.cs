@@ -18,6 +18,12 @@ public class LeaderboardCommand : ApplicationCommandsModule
         {
             user = ctx.User;
         }
+        
+        if (user.IsBot)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("<:attention:1085333468688433232> **Fehler!** Dies ist ein Bot!"));
+            return;
+        }
 
         var leaderboardData = await LevelUtils.FetchLeaderboardData();
         var userRank = await LevelUtils.GetUserRankAsync(user.Id);

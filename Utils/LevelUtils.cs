@@ -101,6 +101,7 @@ public static class LevelUtils
     public static async Task<int> GetUserRankAsync(ulong userid)
     {
         int rank = 0;
+        await AddUserToDbIfNot(await CurrentApplication.TargetGuild.GetMemberAsync(userid));
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
         await using var cmd = new NpgsqlCommand("SELECT userid, current_xp FROM levelingdata ORDER BY current_xp DESC", db);
