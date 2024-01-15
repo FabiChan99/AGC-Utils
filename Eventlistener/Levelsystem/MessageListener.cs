@@ -18,6 +18,10 @@ public sealed class MessageListener : ApplicationCommandsModule
         }
         _ = Task.Run(async () =>
         {
+            if (CurrentApplication.TargetGuild == null) // check init
+            {
+                return;
+            }
             bool lvlactive = false;
             try
             {
