@@ -262,9 +262,9 @@ public static class LevelUtils
         switch (type)
         {
             case XpRewardType.Message:
-                return rng.Next(15, 25);
+                return rng.Next(15, 26);
             case XpRewardType.Voice:
-                return rng.Next(3, 5);
+                return rng.Next(3, 6);
             default:
                 return 0;
         }
