@@ -20,7 +20,7 @@ public static class CheckVCLevellingTask
                 await Task.Delay(TimeSpan.FromSeconds(5));
                 continue;
             }
-            Console.WriteLine("Checking vc levelling");
+
             try
             {
                             // get all users and their voice channel to a dictionary

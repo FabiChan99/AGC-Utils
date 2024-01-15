@@ -33,7 +33,7 @@ public sealed class MessageListener : ApplicationCommandsModule
                 return;
             }
             
-            Console.WriteLine("Trying to give xp");
+            CurrentApplication.Logger.Debug("Trying to handout xp to user " + args.Author.Username);
             await LevelUtils.GiveXP(args.Author, LevelUtils.GetBaseXp(XpRewardType.Message), XpRewardType.Message);
         });
         return Task.CompletedTask;
