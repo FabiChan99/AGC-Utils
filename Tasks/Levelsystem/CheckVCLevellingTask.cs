@@ -43,6 +43,22 @@ public static class CheckVCLevellingTask
                             {
                                 continue;
                             }
+
+                            var count = 0;
+                            foreach (var user in channel.Users)
+                            {
+                                if (user.IsBot)
+                                {
+                                    continue;
+                                }
+                                count++;
+                            }
+                            if (count < 2)
+                            {
+                                continue;
+                            }
+                            
+                            
                             if (await LevelUtils.IsChannelBlocked(channel.Id))
                             {
                                 continue;
