@@ -27,6 +27,12 @@ public sealed class MessageListener : ApplicationCommandsModule
             {
                 return;
             }
+
+            if (await LevelUtils.IsChannelBlocked(args.Channel.Id))
+            {
+                return;
+            }
+            
             Console.WriteLine("Trying to give xp");
             await LevelUtils.GiveXP(args.Author, LevelUtils.GetBaseXp(XpRewardType.Message), XpRewardType.Message);
         });
