@@ -146,7 +146,7 @@ public partial class LevelSystemSettings
         {
             embedDescString.AppendLine($"❌ - Keine Kanäle ausgeschlossen");
         }
-        embedDescString.AppendLine();
+
         embedDescString.AppendLine("__**Ausgeschlossene Rollen**__");
         if (blockedroles.Count > 0)
         {
@@ -168,7 +168,7 @@ public partial class LevelSystemSettings
         {
             embedDescString.AppendLine($"❌ - Keine Rollenbelohnungen");
         }
-        embedDescString.AppendLine();
+
         embedDescString.AppendLine("__**Level Multiplicatoroverriderollen**__");
         if (multiplicatorOverrides.Count > 0)
         {
