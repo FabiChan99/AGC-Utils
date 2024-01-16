@@ -668,7 +668,6 @@ public static class LevelUtils
 
     private static async Task SendLevelUpMessageAndReward(DiscordUser user, int level)
     {
-        Console.WriteLine("Sending level up message and reward...");
         var levelUpMessage = await GetLevelUpMessage();
         var pingEnabled = await UserHasPingEnabled(user.Id);
         var isReward = await IsLevelRewarded(level);
