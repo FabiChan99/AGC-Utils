@@ -486,7 +486,7 @@ public static class DatabaseService
             await using var con2 = new NpgsqlConnection(GetConnectionString());
             await con2.OpenAsync();
             await using var cmd2 = new NpgsqlCommand(
-                "INSERT INTO levelingsettings (guildid, text_active, vc_active, text_multi, vc_multi, levelupchannelid, levelupmessage, levelupmessagereward, retainroles, lastrecalc) VALUES (@guildid, false, false, 1.0, 1.0, 0, 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', 'Herzlichen Glückwunsch {usermention}!', true, 0)",
+                "INSERT INTO levelingsettings (guildid, text_active, vc_active, text_multi, vc_multi, levelupchannelid, levelupmessage, levelupmessagereward, retainroles, lastrecalc) VALUES (@guildid, false, false, 1.0, 1.0, 0, 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', true, 0)",
                 con2);
             cmd2.Parameters.AddWithValue("guildid", (long)targetGuildId);
             await cmd2.ExecuteNonQueryAsync();
