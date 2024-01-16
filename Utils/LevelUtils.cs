@@ -457,6 +457,7 @@ public static class LevelUtils
     
     public static async Task<bool> ToggleLevelUpPing(ulong userId)
     {
+        await AddUserToDbIfNot(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
         var pingEnabled = await IsLevelUpPingEnabled(userId);
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
