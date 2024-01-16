@@ -670,6 +670,7 @@ public static class LevelUtils
     {
         Console.WriteLine("Sending level up message and reward...");
         var levelUpMessage = await GetLevelUpMessage();
+        var pingEnabled = await UserHasPingEnabled(user.Id);
         var isReward = await IsLevelRewarded(level);
         var rewardMessage = await GetLevelUpRewardMessage();
         var reward = await GetRewardForaLevel(level);
@@ -682,7 +683,13 @@ public static class LevelUtils
                 await member.GrantRoleAsync(role);
                 var formattedMessage = await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role);
                 var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
-                await channel.SendMessageAsync(formattedMessage);
+                var messagebuilder = new DiscordMessageBuilder();
+                messagebuilder.WithContent(formattedMessage);
+                if (!pingEnabled)
+                {
+                    messagebuilder.WithAllowedMentions(Mentions.None);
+                }
+                await channel.SendMessageAsync(messagebuilder);
             }
             catch (Exception e)
             {
@@ -694,7 +701,13 @@ public static class LevelUtils
         {
             var formattedMessage = await MessageFormatter.FormatLevelUpMessage(levelUpMessage, false, user);
             var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
-            await channel.SendMessageAsync(formattedMessage);
+            var messagebuilder = new DiscordMessageBuilder();
+            messagebuilder.WithContent(formattedMessage);
+            if (!pingEnabled)
+            {
+                messagebuilder.WithAllowedMentions(Mentions.None);
+            }
+            await channel.SendMessageAsync(messagebuilder);
         }
         
     }
@@ -707,6 +720,29 @@ public static class LevelUtils
         {
             return true;
         }
+        return false;
+    }
+    
+    public static async Task<bool> UserHasPingEnabled(ulong userId)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT pingactive FROM levelingdata WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@id", (long)userId);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var pingEnabled = reader.GetBoolean(0);
+                return pingEnabled;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        await db.CloseAsync();
         return false;
     }
     
