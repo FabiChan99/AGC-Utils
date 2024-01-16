@@ -777,6 +777,32 @@ public static class LevelUtils
             }
         }
     }
-    
+
+    public static async Task<bool> IsLevelUpMessageEnabled()
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT levelupchannelid FROM levelingsettings WHERE guildid = @guildid", db);
+        cmd.Parameters.AddWithValue("@guildid", (long)CurrentApplication.TargetGuild.Id);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var levelUpChannelId = reader.GetInt64(0);
+                if (levelUpChannelId == 0)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        await db.CloseAsync();
+        return false;
+    }
     
 }

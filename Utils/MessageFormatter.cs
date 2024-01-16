@@ -20,4 +20,9 @@ public class MessageFormatter
 
         return formattedMessage;
     }
+    
+    public static string BoolToEmoji(bool value)
+    {
+        return value ? "✅" : "❌";
+    }
 }

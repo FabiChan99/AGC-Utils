@@ -44,9 +44,14 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
+        var loglevel = LogEventLevel.Information;
+        #if DEBUG
+        loglevel = LogEventLevel.Debug;
+        #endif
+        
         var builder = WebApplication.CreateBuilder();
         var logger = Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(loglevel)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Discord.OAuth2", LogEventLevel.Warning)
             .WriteTo.Console()
