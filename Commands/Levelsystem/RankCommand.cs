@@ -46,7 +46,7 @@ public class RankCommand : ApplicationCommandsModule
         var userRank = await LevelUtils.GetUserRankAsync(user.Id);
         using var bar = ImageUtils.CreateProgressBar(200, 20, percentage / 100f, $"{percentage}%");
         using var image = SKImage.FromBitmap(bar);
-        using var stream = image.Encode(SKEncodedImageFormat.Png, 100).AsStream();
+        await using var stream = image.Encode(SKEncodedImageFormat.Png, 100).AsStream();
         stream.Position = 0;
         
         embed.WithTitle("Rang von " + user.Username);
