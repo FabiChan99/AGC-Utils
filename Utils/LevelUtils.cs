@@ -455,6 +455,41 @@ public static class LevelUtils
         return rewards;
     }
     
+    public static async Task<bool> ToggleLevelUpPing(ulong userId)
+    {
+        var pingEnabled = await IsLevelUpPingEnabled(userId);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET pingactive = @pingenabled WHERE userid = @userid", db);
+        cmd.Parameters.AddWithValue("@pingenabled", !pingEnabled);
+        cmd.Parameters.AddWithValue("@userid", (long)userId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        return !pingEnabled;
+    }
+    
+    public static async Task<bool> IsLevelUpPingEnabled(ulong userId)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("SELECT pingactive FROM levelingdata WHERE userid = @userid", db);
+        cmd.Parameters.AddWithValue("@userid", (long)userId);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                return reader.GetBoolean(0);
+            }
+        }
+        else
+        {
+            return false;
+        }
+        await db.CloseAsync();
+        return false;
+    }
+    
     public static async Task<List<MultiplicatorOverrides>> GetMultiplicatorOverrides()
     {
         var overrides = new List<MultiplicatorOverrides>();
