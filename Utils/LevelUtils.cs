@@ -265,7 +265,7 @@ public static class LevelUtils
             case XpRewardType.Message:
                 return rng.Next(15, 26);
             case XpRewardType.Voice:
-                return rng.Next(3, 6);
+                return rng.Next(2, 6);
             default:
                 return 0;
         }
