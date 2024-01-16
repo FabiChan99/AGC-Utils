@@ -78,7 +78,7 @@ public partial class LevelSystemSettings
                 var role = CurrentApplication.TargetGuild?.GetRole(reward.RoleId);
                 if (role != null)
                 {
-                    sb.AppendLine($"- {role.Mention} - Level {reward.Level}");
+                    sb.AppendLine($"- Level ``{reward.Level}``: {role.Mention}");
                 }
                 else
                 {
@@ -168,6 +168,7 @@ public partial class LevelSystemSettings
         {
             embedDescString.AppendLine($"❌ - Keine Rollenbelohnungen");
         }
+        embedDescString.AppendLine();
 
         embedDescString.AppendLine("__**Level Multiplicatoroverriderollen**__");
         if (multiplicatorOverrides.Count > 0)
