@@ -51,8 +51,6 @@ public static class LevelUtils
         {
             var rank = await GetRank(member.Id);
             var level = rank[member.Id].Level;
-            Console.WriteLine($"Updating level roles for {member.Id}.");
-            Console.WriteLine($"- User is level {level}.");
             var rewards = await GetLevelRewards();
 
 
