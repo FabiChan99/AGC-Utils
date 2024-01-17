@@ -41,7 +41,7 @@ public static class LevelUtils
     /// <param name="member">The DiscordMember whose level roles need to be updated.</param>
     public static async Task UpdateLevelRoles(DiscordMember? member)
     {
-        // check if member is null
+        // Check if member is null
         if (member == null)
         {
             return;
@@ -51,25 +51,22 @@ public static class LevelUtils
         {
             var rank = await GetRank(member.Id);
             var level = rank[member.Id].Level;
+            Console.WriteLine($"Updating level roles for {member.Id}.");
+            Console.WriteLine($"- User is level {level}.");
             var rewards = await GetLevelRewards();
+
+
+            var currentRoles = new HashSet<ulong>(member.Roles.Select(role => role.Id));
+
             foreach (var reward in rewards)
             {
-                if (member.Roles.Any(role => role.Id == reward.RoleId))
+                if (currentRoles.Contains(reward.RoleId) && level < reward.Level)
                 {
-                    if (level < reward.Level)
-                    {
-                        await member.RevokeRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
-                    }
+                    await member.RevokeRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
                 }
-            }
-            foreach (var reward in rewards)
-            {
-                if (level >= reward.Level)
+                else if (!currentRoles.Contains(reward.RoleId) && level >= reward.Level)
                 {
-                    if (!member.Roles.Any(role => role.Id == reward.RoleId))
-                    {
-                        await member.GrantRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
-                    }
+                    await member.GrantRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
                 }
             }
         }
@@ -78,6 +75,10 @@ public static class LevelUtils
             await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
         }
     }
+
+
+
+
 
     /// <summary>
     /// Transfers XP from a source user to a destination user.
@@ -245,6 +246,20 @@ public static class LevelUtils
                 await using var cmd2 = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level WHERE userid = @id", db2);
                 cmd2.Parameters.AddWithValue("@level", level);
                 cmd2.Parameters.AddWithValue("@id", userId);
+                try
+                {
+                    var guildmembers = CurrentApplication.TargetGuild.Members;
+                    var member = guildmembers.Values.FirstOrDefault(x => x.Id == (ulong)userId);
+                    if (member != null)
+                    {
+                        await UpdateLevelRoles(member);
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
                 await cmd2.ExecuteNonQueryAsync();
                 await db2.CloseAsync();
             }
