@@ -121,6 +121,12 @@ public static class LevelUtils
         await db.CloseAsync();
         return rank;
     }
+    
+    public static async Task<int> GetXp(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        return rank[userId].Xp;
+    }
 
     /// <summary>
     /// Recalculates the user level based on their experience points (xp) and updates the database.
