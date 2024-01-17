@@ -78,7 +78,12 @@ public static class LevelUtils
             await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
         }
     }
-    
+
+    /// <summary>
+    /// Transfers XP from a source user to a destination user.
+    /// </summary>
+    /// <param name="sourceUserId">The ID of the source user.</param>
+    /// <param name="destinationUserId">The ID of the destination user.</param>
     public static async Task TransferXp(ulong sourceUserId, ulong destinationUserId)
     {
         var sourceRank = await GetRank(sourceUserId);
