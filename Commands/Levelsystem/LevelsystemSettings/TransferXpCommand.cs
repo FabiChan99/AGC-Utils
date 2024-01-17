@@ -1,4 +1,5 @@
-﻿using AGC_Management.Utils;
+﻿using AGC_Management.Attributes;
+using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Interactivity.Extensions;
@@ -7,7 +8,7 @@ namespace AGC_Management.Commands.Levelsystem;
 
 public partial class LevelSystemSettings
 {
-    
+    [ACRequireStaffRole]
     [SlashCommand("transferxp", "Transferiere XP von einem Nutzer zu einem anderen", defaultMemberPermissions: (long)Permissions.Administrator)]
     public static async Task TransferXp(InteractionContext ctx, [Option("sourceuser", "Der Nutzer von dem die XP abgezogen werden sollen.")] DiscordUser sourceuser, [Option("destinationuser", "Der Nutzer zu dem die XP hinzugefügt werden sollen.")] DiscordUser destinationuser)
     {
