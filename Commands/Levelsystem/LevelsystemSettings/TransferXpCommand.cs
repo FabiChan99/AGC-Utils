@@ -9,6 +9,7 @@ namespace AGC_Management.Commands.Levelsystem;
 
 public partial class LevelSystemSettings
 {
+    [RequireTeamCat]
     [ACRequireStaffRole]
     [SlashCommand("transferxp", "Transferiere XP von einem Nutzer zu einem anderen", defaultMemberPermissions: (long)Permissions.Administrator)]
     public static async Task TransferXp(InteractionContext ctx, [Option("sourceuser", "Der Nutzer von dem die XP abgezogen werden sollen.")] DiscordUser sourceuser, [Option("destinationuser", "Der Nutzer zu dem die XP hinzugefügt werden sollen.")] DiscordUser destinationuser)
