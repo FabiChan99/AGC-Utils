@@ -34,6 +34,81 @@ public static class LevelUtils
         int xpForNextLevel = XpForLevel(level + 1);
         return xpForNextLevel - xp;
     }
+
+    /// <summary>
+    /// Updates the level roles for a member.
+    /// </summary>
+    /// <param name="member">The DiscordMember whose level roles need to be updated.</param>
+    public static async Task UpdateLevelRoles(DiscordMember? member)
+    {
+        // check if member is null
+        if (member == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var rank = await GetRank(member.Id);
+            var level = rank[member.Id].Level;
+            var rewards = await GetLevelRewards();
+            foreach (var reward in rewards)
+            {
+                if (member.Roles.Any(role => role.Id == reward.RoleId))
+                {
+                    if (level < reward.Level)
+                    {
+                        await member.RevokeRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
+                    }
+                }
+            }
+            foreach (var reward in rewards)
+            {
+                if (level >= reward.Level)
+                {
+                    if (!member.Roles.Any(role => role.Id == reward.RoleId))
+                    {
+                        await member.GrantRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
+        }
+    }
+    
+    public static async Task TransferXp(ulong sourceUserId, ulong destinationUserId)
+    {
+        var sourceRank = await GetRank(sourceUserId);
+        var destinationRank = await GetRank(destinationUserId);
+        var sourceXp = sourceRank[sourceUserId].Xp;
+        var destinationXp = destinationRank[destinationUserId].Xp;
+        var newXp = sourceXp + destinationXp;
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@xp", newXp);
+        cmd.Parameters.AddWithValue("@id", (long)destinationUserId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        await using var db2 = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db2.OpenAsync();
+        await using var cmd2 = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id", db2);
+        cmd2.Parameters.AddWithValue("@xp", 0);
+        cmd2.Parameters.AddWithValue("@id", (long)sourceUserId);
+        await cmd2.ExecuteNonQueryAsync();
+        await db2.CloseAsync();
+        await RecalculateAndUpdate(destinationUserId);
+        await RecalculateAndUpdate(sourceUserId);
+    }
+    
+    private static async Task RecalculateAndUpdate(ulong userId)
+    {
+        await RecalculateUserLevel(userId);
+        await UpdateLevelRoles(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
+    }
     
     
     
