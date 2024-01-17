@@ -926,5 +926,50 @@ public static class LevelUtils
         await db.CloseAsync();
         return false;
     }
+
+    public static async Task SetXp(DiscordUser user , int xp)
+    {
+        await AddUserToDbIfNot(user);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@xp", xp);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        await RecalculateAndUpdate(user.Id);
+    }
+    
+    public static async Task AddXp(DiscordUser user, int xp)
+    {
+        await AddUserToDbIfNot(user);
+        var rank = await GetRank(user.Id);
+        var currentXp = rank[user.Id].Xp;
+        var newXp = currentXp + xp;
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@xp", newXp);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        await RecalculateAndUpdate(user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task RemoveXp(DiscordUser user, int xp)
+    {
+        await AddUserToDbIfNot(user);
+        var rank = await GetRank(user.Id);
+        var currentXp = rank[user.Id].Xp;
+        var newXp = currentXp - xp;
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@xp", newXp);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        await RecalculateAndUpdate(user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
     
 }
