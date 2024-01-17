@@ -782,7 +782,7 @@ public static class LevelUtils
             __cmd.Parameters.AddWithValue("@level", 0);
             await __cmd.ExecuteNonQueryAsync();
             await __db.CloseAsync();
-            Console.WriteLine($"Added user {user.Username} to database.");
+            CurrentApplication.Logger.Debug("Added user " + user.Username + " to database.");
         }
         await checkreader.CloseAsync();
         await checkdb.CloseAsync();
