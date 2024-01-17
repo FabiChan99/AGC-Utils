@@ -1,4 +1,5 @@
-﻿using AGC_Management.Attributes;
+﻿using System.Drawing;
+using AGC_Management.Attributes;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
@@ -12,7 +13,7 @@ public partial class LevelSystemSettings
     [SlashCommand("transferxp", "Transferiere XP von einem Nutzer zu einem anderen", defaultMemberPermissions: (long)Permissions.Administrator)]
     public static async Task TransferXp(InteractionContext ctx, [Option("sourceuser", "Der Nutzer von dem die XP abgezogen werden sollen.")] DiscordUser sourceuser, [Option("destinationuser", "Der Nutzer zu dem die XP hinzugefügt werden sollen.")] DiscordUser destinationuser)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> XP werden transferiert..."));
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> Transfer wird vorbereitet..."));
 
         if (sourceuser.IsBot)
         {
@@ -45,18 +46,31 @@ public partial class LevelSystemSettings
         var result = await msg.WaitForButtonAsync(ctx.User, TimeSpan.FromSeconds(120));
         if (result.TimedOut)
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:attention:1085333468688433232> **Fehler!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde abgebrochen, da du nicht rechtzeitig geantwortet hast!")); 
+            var errorMsg = new DiscordEmbedBuilder().WithTitle("Fehler")
+                .WithDescription($"<:attention:1085333468688433232> **Fehler!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde abgebrochen, da du nicht rechtzeitig geantwortet hast!")
+                .WithColor(DiscordColor.Orange).WithFooter($"{ctx.User.Username}", ctx.User.AvatarUrl);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(errorMsg.Build()));
             return;
         }
         if (result.Result.Id == "transferconfirm")
         {
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<a:loading_agc:1084157150747697203> XP werden transferiert..."));
             await LevelUtils.TransferXp(sourceuser.Id, destinationuser.Id);
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:success:1085333481820790944> **Erfolgreich!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde durchgeführt!"));
+
+            var successMsg = new DiscordEmbedBuilder().WithTitle("Erfolg")
+                .WithDescription($"<:success:1085333481820790944> **Erfolgreich!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde durchgeführt! \n" +
+                $"```diff\n" +
+                $"- {sourceuser.Username}: {Converter.FormatWithCommas(await LevelUtils.GetXp(sourceuser.Id))} -> 0 XP \n" +
+                $"+ {destinationuser.Username}: {Converter.FormatWithCommas(await LevelUtils.GetXp(destinationuser.Id))} -> {Converter.FormatWithCommas(await LevelUtils.GetXp(sourceuser.Id) + await LevelUtils.GetXp(destinationuser.Id))} XP```")
+                .WithColor(DiscordColor.Green).WithFooter($"{ctx.User.Username}", ctx.User.AvatarUrl);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(successMsg.Build()));
         }
         else if (result.Result.Id == "transfercancel")
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:attention:1085333468688433232> **Fehler!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde abgebrochen!"));
+            var cancelMsg = new DiscordEmbedBuilder().WithTitle("Abgebrochen")
+                .WithDescription($"<:attention:1085333468688433232> **Fehler!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde abgebrochen!")
+                .WithColor(DiscordColor.Red).WithFooter($"{ctx.User.Username}", ctx.User.AvatarUrl);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(cancelMsg.Build()));
         }
     }
     
