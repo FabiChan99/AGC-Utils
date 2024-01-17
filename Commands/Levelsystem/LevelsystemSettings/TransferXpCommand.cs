@@ -54,7 +54,7 @@ public partial class LevelSystemSettings
             await LevelUtils.TransferXp(sourceuser.Id, destinationuser.Id);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:success:1085333481820790944> **Erfolgreich!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde durchgeführt!"));
         }
-        else
+        else if (result.Result.Id == "transfercancel")
         {
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:attention:1085333468688433232> **Fehler!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde abgebrochen!"));
         }
