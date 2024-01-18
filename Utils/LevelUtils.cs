@@ -985,4 +985,60 @@ public static class LevelUtils
         await db.CloseAsync();
     }
     
+    public static async Task<int> GetLevel(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        return rank[userId].Level;
+    }
+    
+    public static async Task SetLevel(DiscordUser user, int level)
+    {
+        await AddUserToDbIfNot(user);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        var xp = XpForLevel(level);
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level AND current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@level", level);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        await RecalculateAndUpdate(user.Id);
+    }
+    
+    public static async Task AddLevel(DiscordUser user, int level)
+    {
+        await AddUserToDbIfNot(user);
+        var rank = await GetRank(user.Id);
+        var currentLevel = rank[user.Id].Level;
+        var newLevel = currentLevel + level;
+        var xp = XpForLevel(newLevel);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level AND current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@level", newLevel);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        cmd.Parameters.AddWithValue("@xp", xp);
+        await RecalculateAndUpdate(user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task RemoveLevel(DiscordUser user, int level)
+    {
+        await AddUserToDbIfNot(user);
+        var rank = await GetRank(user.Id);
+        var currentLevel = rank[user.Id].Level;
+        var newLevel = currentLevel - level;
+        var xp = XpForLevel(newLevel);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("UPDATE levelingdata SET current_level = @level AND current_xp = @xp WHERE userid = @id", db);
+        cmd.Parameters.AddWithValue("@level", newLevel);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        cmd.Parameters.AddWithValue("@xp", xp);
+        await RecalculateAndUpdate(user.Id);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
 }
