@@ -17,10 +17,10 @@ public partial class LevelSystemSettings
     {
         if (aktion == ModifyAction.Set && xpmenge < 0)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<:attention:1085333468688433232> **Fehler!** Die Menge muss größer als 0 sein!"));
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<:attention:1085333468688433232> **Fehler!** Die Menge muss größer als 0 sein!").AsEphemeral());
             return;
         }
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> Aktion wird vorbereitet..."));
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> Aktion wird ausgeführt...").AsEphemeral());
         if (aktion == ModifyAction.Add)
         {
             await LevelUtils.AddXp(user, xpmenge);
