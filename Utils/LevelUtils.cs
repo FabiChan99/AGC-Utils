@@ -88,6 +88,54 @@ public static class LevelUtils
         return false;
     }
     
+    public static async Task<bool> IsBlacklistedChannel(ulong channelId)
+    {
+        var blockedChannels = await BlockedChannels();
+        foreach (var blockedChannel in blockedChannels)
+        {
+            if (blockedChannel == channelId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    public static async Task<bool> AddBlacklistedChannel(ulong channelId)
+    {
+        var blockedChannels = await BlockedChannels();
+        if (blockedChannels.Contains(channelId))
+        {
+            return false;
+        }
+        blockedChannels.Add(channelId);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("INSERT INTO blocked_channels (channelid) VALUES (@channelid)", db);
+        cmd.Parameters.AddWithValue("@channelid", (long)channelId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        return true;
+    }
+    
+    public static async Task<bool> RemoveBlacklistedChannel(ulong channelId)
+    {
+        var blockedChannels = await BlockedChannels();
+        if (!blockedChannels.Contains(channelId))
+        {
+            return false;
+        }
+        blockedChannels.Remove(channelId);
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("DELETE FROM blocked_channels WHERE channelid = @channelid", db);
+        cmd.Parameters.AddWithValue("@channelid", (long)channelId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+        return true;
+    }
+    
     public static async Task<bool> IsRewardRole(ulong roleId)
     {
         var rewards = await GetLevelRewards();
