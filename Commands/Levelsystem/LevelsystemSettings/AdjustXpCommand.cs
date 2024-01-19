@@ -46,6 +46,17 @@ public partial class LevelSystemSettings
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"<:success:1085333481820790944> **Erfolgreich!** {user.Username} hat nun {xpmenge} XP!"));
         }
 
+        try
+        {
+            var member = await CurrentApplication.TargetGuild.GetMemberAsync(user.Id);
+            await LevelUtils.UpdateLevelRoles(member);
+        }
+        catch (Exception)
+        {
+            //
+        }
+
+
     }
 
 }
