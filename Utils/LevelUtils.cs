@@ -88,6 +88,41 @@ public static class LevelUtils
         return false;
     }
     
+    public static async Task AddOverrideRole(ulong roleId, float multiplicator)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("INSERT INTO level_multiplicatoroverrideroles (roleid, multiplicator) VALUES (@roleid, @multiplicator)", db);
+        cmd.Parameters.AddWithValue("@roleid", (long)roleId);
+        cmd.Parameters.AddWithValue("@multiplicator", multiplicator);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task RemoveOverrideRole(ulong roleId)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("DELETE FROM level_multiplicatoroverrideroles WHERE roleid = @roleid", db);
+        cmd.Parameters.AddWithValue("@roleid", (long)roleId);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task<bool> IsOverrideRole(ulong roleId)
+    {
+        var overrides = await GetMultiplicatorOverrides();
+        foreach (var overrideRole in overrides)
+        {
+            if (overrideRole.RoleId == roleId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
     public static async Task<bool> IsBlacklistedChannel(ulong channelId)
     {
         var blockedChannels = await BlockedChannels();
