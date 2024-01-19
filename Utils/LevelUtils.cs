@@ -88,6 +88,44 @@ public static class LevelUtils
         return false;
     }
     
+    public static string GetLeveltypeString(XpRewardType type)
+    {
+        switch (type)
+        {
+            case XpRewardType.Message:
+                return "text";
+            case XpRewardType.Voice:
+                return "vc";
+            default:
+                return "Unbekannt";
+        }
+    }
+    
+    public static async Task SetMultiplier(XpRewardType rewardType, float multiplicator)
+    {
+        if (multiplicator == 0)
+        {
+            // var {type}_active 
+            // eg. vc_active or text_active
+            await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await db.OpenAsync();
+            var cmd = new NpgsqlCommand($"UPDATE levelingsettings SET {GetLeveltypeString(rewardType)}_active = @active WHERE guildid = @guildid", db);
+            cmd.Parameters.AddWithValue("@active", false);
+            cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+            await cmd.ExecuteNonQueryAsync();
+            return;
+        }
+        
+        // set multi and type_active
+        await using var db2 = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db2.OpenAsync();
+        var cmd2 = new NpgsqlCommand($"UPDATE levelingsettings SET {GetLeveltypeString(rewardType)}_multi = @multi, {rewardType.ToString().ToLower()}_active = @active WHERE guildid = @guildid", db2);
+        cmd2.Parameters.AddWithValue("@multi", multiplicator);
+        cmd2.Parameters.AddWithValue("@active", true);
+        cmd2.Parameters.AddWithValue("@guildid", (long)levelguildid);
+        await cmd2.ExecuteNonQueryAsync();
+    }
+    
     public static async Task AddOverrideRole(ulong roleId, float multiplicator)
     {
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
