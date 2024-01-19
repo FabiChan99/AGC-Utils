@@ -73,10 +73,57 @@ public static class LevelUtils
             await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
         }
     }
+    
+    public static async Task<bool> IsRewardLevel(int level)
+    {
+        var rewards = await GetLevelRewards();
+        foreach (var reward in rewards)
+        {
+            if (reward.Level == level)
+            {
+                return true;
+            }
+        }
 
+        return false;
+    }
+    
+    public static async Task<bool> IsRewardRole(ulong roleId)
+    {
+        var rewards = await GetLevelRewards();
+        foreach (var reward in rewards)
+        {
+            if (reward.RoleId == roleId)
+            {
+                return true;
+            }
+        }
 
+        return false;
+    }
 
-
+    public static async Task AddRewardRole(ulong roleId, int level)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("INSERT INTO level_rewards (roleid, level) VALUES (@roleid, @level)", db);
+        cmd.Parameters.AddWithValue("@roleid", (long)roleId);
+        cmd.Parameters.AddWithValue("@level", level);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
+    public static async Task RemoveRewardRole(ulong roleId, int level)
+    {
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand("DELETE FROM level_rewards WHERE roleid = @roleid AND level = @level", db);
+        cmd.Parameters.AddWithValue("@roleid", (long)roleId);
+        cmd.Parameters.AddWithValue("@level", level);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
+    }
+    
 
     /// <summary>
     /// Transfers XP from a source user to a destination user.
