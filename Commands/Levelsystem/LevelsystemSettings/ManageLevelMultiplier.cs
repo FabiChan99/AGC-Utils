@@ -40,7 +40,7 @@ public partial class LevelSystemSettings
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .WithContent(
-                        $"<:success:1085333481820790944> **Erfolgreich!** Der Multiplier für ``{levelType}`` wurde deaktiviert!"));
+                        $"<:success:1085333481820790944> **Erfolgreich!** Leveling für ``{levelType}`` wurde deaktiviert!"));
         }
     }
     
