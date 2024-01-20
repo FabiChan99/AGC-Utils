@@ -252,7 +252,7 @@ public static class ModerationHelper
             return "";
         }
 
-        Console.WriteLine(interaction.Result.Id);
+
         var valIds = new List<string>();
         foreach (var option in interaction.Result.Values)
         {
@@ -271,8 +271,7 @@ public static class ModerationHelper
         }
 
         var reason = reasonBuilder.ToString();
-
-        Console.WriteLine(reason);
+        
         await message.DeleteAsync();
         return reason;
     }

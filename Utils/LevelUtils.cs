@@ -1053,7 +1053,6 @@ public static class LevelUtils
 
             if (await UserHasBlockedRole(await user.ConvertToMember(CurrentApplication.TargetGuild)))
             {
-                Console.WriteLine("User has blocked role.");
                 return;
             }
 
