@@ -1063,14 +1063,17 @@ public static class LevelUtils
             await using var cooldowndb = new NpgsqlConnection(DatabaseService.GetConnectionString());
             await cooldowndb.OpenAsync();
             await using var cooldowncmd =
-                new NpgsqlCommand($"SELECT {typeString} FROM levelingdata WHERE userid = @id AND {typeString} > @cooldown", cooldowndb);
+                new NpgsqlCommand(
+                    $"SELECT {typeString} FROM levelingdata WHERE userid = @id AND {typeString} > @cooldown",
+                    cooldowndb);
             cooldowncmd.Parameters.AddWithValue("@id", (long)user.Id);
             cooldowncmd.Parameters.AddWithValue("@cooldown", now - 60);
             await using var cooldownreader = await cooldowncmd.ExecuteReaderAsync();
             // cooldown is 60 seconds
             if (cooldownreader.HasRows)
             {
-                CurrentApplication.Logger.Debug("Cooldown is active for " + user.Username + $" RewardType: {type.ToString()}");
+                CurrentApplication.Logger.Debug("Cooldown is active for " + user.Username +
+                                                $" RewardType: {type.ToString()}");
                 return;
             }
 
@@ -1131,7 +1134,7 @@ public static class LevelUtils
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
         await using var cmd = new NpgsqlCommand(
-            "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level) ON CONFLICT (userid) DO NOTHING", 
+            "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level) ON CONFLICT (userid) DO NOTHING",
             db);
         cmd.Parameters.AddWithValue("@id", (long)user.Id);
         cmd.Parameters.AddWithValue("@xp", 0);
@@ -1167,6 +1170,7 @@ public static class LevelUtils
                     CurrentApplication.Logger.Error(e.Message);
                 }
             }
+
             messageBuilder.Append(await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role));
         }
         else

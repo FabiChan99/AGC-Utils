@@ -16,7 +16,8 @@ public partial class LevelSystemSettings
     [SlashCommand("manage-leveling", "Verwaltet das Levelsystem", (long)Permissions.ManageGuild)]
     public static async Task MangeleLevelMulitplier(InteractionContext ctx,
         [Option("leveltype", "Der Leveltyp")] XpRewardType levelType,
-        [Option("multiplier", "Der Multiplier")] MultiplicatorItem multiplier)
+        [Option("multiplier", "Der Multiplier")]
+        MultiplicatorItem multiplier)
     {
         float _multiplier;
 

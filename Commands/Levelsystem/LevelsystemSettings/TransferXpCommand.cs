@@ -16,8 +16,10 @@ public partial class LevelSystemSettings
     [ACRequireStaffRole]
     [SlashCommand("transferxp", "Transferiere XP von einem Nutzer zu einem anderen", (long)Permissions.Administrator)]
     public static async Task TransferXp(InteractionContext ctx,
-        [Option("sourceuser", "Der Nutzer von dem die XP abgezogen werden sollen.")] DiscordUser sourceuser,
-        [Option("destinationuser", "Der Nutzer zu dem die XP hinzugefügt werden sollen.")] DiscordUser destinationuser)
+        [Option("sourceuser", "Der Nutzer von dem die XP abgezogen werden sollen.")]
+        DiscordUser sourceuser,
+        [Option("destinationuser", "Der Nutzer zu dem die XP hinzugefügt werden sollen.")]
+        DiscordUser destinationuser)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
@@ -37,9 +39,10 @@ public partial class LevelSystemSettings
             }
         }
         catch (Exception)
-        { }
+        {
+        }
 
-        
+
         if (sourceuser.IsBot)
         {
             await ctx.EditResponseAsync(

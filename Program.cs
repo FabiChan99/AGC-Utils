@@ -61,8 +61,8 @@ internal class Program : BaseCommandModule
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch())
             .CreateLogger();
         CurrentApplication.Logger = logger;
-        
-        
+
+
         logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
         try

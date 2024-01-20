@@ -14,8 +14,10 @@ public partial class LevelSystemSettings
     [ApplicationCommandRequirePermissions(Permissions.ManageGuild)]
     [SlashCommand("blacklisted-channels", "Setzt oder Entfernt Kanalblacklists", (long)Permissions.ManageGuild)]
     public static async Task ChannelBlacklistingCommands(InteractionContext ctx,
-        [Option("action", "Die auszuführende Aktion")] ModifyRoleChannelAction aktion,
-        [Option("channel", "Der Channel der hinzugefügt oder entfernt werden soll")] DiscordChannel channel)
+        [Option("action", "Die auszuführende Aktion")]
+        ModifyRoleChannelAction aktion,
+        [Option("channel", "Der Channel der hinzugefügt oder entfernt werden soll")]
+        DiscordChannel channel)
     {
         // check if role or level is used
         if (aktion == ModifyRoleChannelAction.Add && await LevelUtils.IsBlacklistedChannel(channel.Id))

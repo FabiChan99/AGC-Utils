@@ -14,9 +14,12 @@ public partial class LevelSystemSettings
     [ApplicationCommandRequirePermissions(Permissions.ManageGuild)]
     [SlashCommand("reward-roles", "Setzt oder Entfernt Belohnungsrollen", (long)Permissions.ManageGuild)]
     public static async Task RewardRoleCommand(InteractionContext ctx,
-        [Option("action", "Die auszuführende Aktion")] ModifyRoleChannelAction aktion,
-        [Option("role", "Die Rolle die hinzugefügt oder entfernt werden soll")] DiscordRole role,
-        [Option("level", "Das Level ab dem die Rolle vergeben werden soll")] int level)
+        [Option("action", "Die auszuführende Aktion")]
+        ModifyRoleChannelAction aktion,
+        [Option("role", "Die Rolle die hinzugefügt oder entfernt werden soll")]
+        DiscordRole role,
+        [Option("level", "Das Level ab dem die Rolle vergeben werden soll")]
+        int level)
     {
         // check if role is managed by integration
         if (role.IsManaged)

@@ -16,8 +16,10 @@ public partial class LevelSystemSettings
     [ApplicationCommandRequirePermissions(Permissions.Administrator)]
     [SlashCommand("adjust-level", "Modifiziere den XP Stand eines Users", (long)Permissions.Administrator)]
     public static async Task AdjustLevel(InteractionContext ctx,
-        [Option("action", "Die auszuführende Aktion")] ModifyAction aktion,
-        [Option("user", "Der Benutzer der bearbeitet werden soll")] DiscordUser user,
+        [Option("action", "Die auszuführende Aktion")]
+        ModifyAction aktion,
+        [Option("user", "Der Benutzer der bearbeitet werden soll")]
+        DiscordUser user,
         [Option("menge", "Level")] int levelmenge)
     {
         if (aktion == ModifyAction.Set && levelmenge < 0)
