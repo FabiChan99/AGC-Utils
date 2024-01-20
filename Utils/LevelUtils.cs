@@ -93,22 +93,44 @@ public static class LevelUtils
     {
         if (type == XpRewardType.Message)
         {
-            var multiplier = await GetMessageXpMultiplier();
-            if (multiplier == 0)
+            await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await db.OpenAsync();
+            var cmd = new NpgsqlCommand($"SELECT text_active FROM levelingsettings WHERE guildid = @guildid", db);
+            cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (reader.HasRows)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var messageLevelingEnabled = reader.GetBoolean(0);
+                    return messageLevelingEnabled;
+                }
+            }
+            else
             {
                 return false;
             }
-            return true;
         }
 
         if (type == XpRewardType.Voice)
         {
-            var multiplier = await GetVcXpMultiplier();
-            if (multiplier == 0)
+            await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+            await db.OpenAsync();
+            var cmd = new NpgsqlCommand($"SELECT vc_active FROM levelingsettings WHERE guildid = @guildid", db);
+            cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (reader.HasRows)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var vcLevelingEnabled = reader.GetBoolean(0);
+                    return vcLevelingEnabled;
+                }
+            }
+            else
             {
                 return false;
             }
-            return true;
         }
 
         return false;
