@@ -45,10 +45,15 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
-        var loglevel = LogEventLevel.Information;
-#if DEBUG
-        loglevel = LogEventLevel.Debug;
-#endif
+        LogEventLevel loglevel;
+        try
+        {
+            loglevel = bool.Parse(BotConfig.GetConfig()["MainConfig"]["VerboseLogging"]) ? LogEventLevel.Debug : LogEventLevel.Information;
+        }
+        catch
+        {
+            loglevel = LogEventLevel.Information;
+        }
 
         var builder = WebApplication.CreateBuilder();
         var logger = Log.Logger = new LoggerConfiguration()
@@ -138,7 +143,15 @@ internal class Program : BaseCommandModule
             });
         builder.Services.AddAuthorization();
 
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(DatabaseService.GetConnectionString());
+        ILoggerFactory loggerFactory = null;
+        if (loglevel == LogEventLevel.Debug)
+        {
+            loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(logger));
+        }
+
+            
+        
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(DatabaseService.GetConnectionString()).UseLoggerFactory(loggerFactory);
         var dataSource = dataSourceBuilder.Build();
 
         var serviceProvider = new ServiceCollection()
@@ -201,7 +214,6 @@ internal class Program : BaseCommandModule
         CurrentApplication.DiscordClient = discord;
 
         await StartTasks(discord);
-
         CurrentApplication.TargetGuild =
             await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
         _ = RunAspAsync(builder.Build());
@@ -246,10 +258,10 @@ internal class Program : BaseCommandModule
                     // get tempvc count
                     int tempvcCount = 0;
                     var constring = DatabaseService.GetConnectionString();
-                    await using var con = new NpgsqlConnection(constring);
-                    await con.OpenAsync();
+                    var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+                    
                     string query = "SELECT channelid FROM tempvoice";
-                    await using var cmd = new NpgsqlCommand(query, con);
+                    await using var cmd = con.CreateCommand(query);
                     await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
                     // get channels and fetch if they exist
                     while (reader.Read())

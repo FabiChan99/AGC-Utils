@@ -43,12 +43,12 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task AddSnippet(CommandContext ctx, string name, [RemainingText] string content)
     {
-        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
 
 
         await using var checkCmd =
-            new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM snippets WHERE snip_id = @name)", con);
+            con.CreateCommand("SELECT EXISTS (SELECT 1 FROM snippets WHERE snip_id = @name)");
         checkCmd.Parameters.AddWithValue("name", name);
         var exists = (bool)await checkCmd.ExecuteScalarAsync();
 
@@ -62,7 +62,7 @@ public class SnippetManagerCommands : BaseCommandModule
         }
 
         await using var cmd =
-            new NpgsqlCommand("INSERT INTO snippets (snip_id, snipped_text) VALUES (@name, @content)", con);
+            con.CreateCommand("INSERT INTO snippets (snip_id, snipped_text) VALUES (@name, @content)");
         cmd.Parameters.AddWithValue("name", name);
         cmd.Parameters.AddWithValue("content", content);
         await cmd.ExecuteNonQueryAsync();
@@ -78,9 +78,9 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task RemoveSnippet(CommandContext ctx, string name)
     {
-        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("DELETE FROM snippets WHERE snip_id = @name", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
+        await using var cmd = con.CreateCommand("DELETE FROM snippets WHERE snip_id = @name");
         cmd.Parameters.AddWithValue("name", name);
         int rowsAffected = await cmd.ExecuteNonQueryAsync();
         var eb = new DiscordEmbedBuilder();
@@ -105,10 +105,10 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task ListSnippets(CommandContext ctx)
     {
-        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
 
-        await using var cmd = new NpgsqlCommand("SELECT snip_id FROM snippets", con);
+        await using var cmd = con.CreateCommand("SELECT snip_id FROM snippets");
         await using var reader = await cmd.ExecuteReaderAsync();
 
         var eb = new DiscordEmbedBuilder()
@@ -144,9 +144,9 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task SearchSnippets(CommandContext ctx, string snippet_id)
     {
-        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippet_id", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
+        await using var cmd = con.CreateCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippet_id");
         cmd.Parameters.AddWithValue("snippet_id", snippet_id);
         await using var reader = await cmd.ExecuteReaderAsync();
         var eb = new DiscordEmbedBuilder()
@@ -172,8 +172,8 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task ShortcutSnippets(CommandContext ctx)
     {
-        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
 
         var words = Regex.Split(ctx.Message.Content, @"\W+");
 
@@ -187,7 +187,7 @@ public class SnippetManagerCommands : BaseCommandModule
         foreach (var word in words)
         {
             await using var cmd =
-                new NpgsqlCommand("SELECT snip_id, snipped_text FROM snippets WHERE snipped_text ~* @word", con);
+                con.CreateCommand("SELECT snip_id, snipped_text FROM snippets WHERE snipped_text ~* @word");
 
             cmd.Parameters.AddWithValue("word", $"\\m{word}\\M");
             await using var reader = await cmd.ExecuteReaderAsync();

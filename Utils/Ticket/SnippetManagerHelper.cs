@@ -97,13 +97,12 @@ public class SnippetManagerHelper
 
     public static async Task<List<(string snipId, string snippedText)>> GetAllSnippetsAsync()
     {
-        var newcon = DatabaseService.GetConnectionString();
         var resultList = new List<(string, string)>();
 
-        await using var con = new NpgsqlConnection(newcon);
-        await con.OpenAsync();
+        await using var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
 
-        await using var cmd = new NpgsqlCommand("SELECT snip_id, snipped_text FROM snippets", con);
+        await using var cmd = con.CreateCommand("SELECT snip_id, snipped_text FROM snippets");
 
         await using var reader = await cmd.ExecuteReaderAsync();
 

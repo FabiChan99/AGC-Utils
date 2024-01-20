@@ -5,6 +5,7 @@ using AGC_Management.Entities;
 using AGC_Management.Services;
 using Newtonsoft.Json;
 using RestSharp;
+using NpgsqlDataSource = Npgsql.NpgsqlDataSource;
 
 #endregion
 
@@ -228,37 +229,31 @@ public static class ToolSet
 
     public static async Task<bool> UserHasClosedPendingTicket(ulong UserId)
     {
-        string con = DatabaseService.GetConnectionString();
-        await using var connection = new NpgsqlConnection(con);
-        await connection.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_owner = '{(long)UserId}'";
-        await using NpgsqlCommand cmd = new(query, connection);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         if (rowCount > 0)
         {
-            await connection.CloseAsync();
+
             return true;
         }
 
-        await connection.CloseAsync();
+
         return false;
     }
 
     public static async Task<bool> UserHasOpenTicket(ulong UserId)
     {
-        string con = DatabaseService.GetConnectionString();
-        await using var connection = new NpgsqlConnection(con);
-        await connection.OpenAsync();
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_users @> ARRAY[{(long)UserId}::bigint]";
-        await using NpgsqlCommand cmd = new(query, connection);
+        await using NpgsqlCommand cmd = connection.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         if (rowCount > 0)
         {
-            await connection.CloseAsync();
             return true;
         }
-
-        await connection.CloseAsync();
+        
         return false;
     }
 

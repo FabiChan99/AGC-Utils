@@ -27,8 +27,8 @@ public static class DatabaseService
     {
         try
         {
-            using var dbConnection = new NpgsqlConnection(GetConnectionString());
-            using var cmd = new NpgsqlCommand(sql, dbConnection);
+            var dbConnection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            using var cmd = dbConnection.CreateCommand(sql);
             return cmd.ExecuteReader();
         }
         catch (Exception ex)
@@ -42,11 +42,10 @@ public static class DatabaseService
     {
         string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
                              $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
+        
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-        await using NpgsqlConnection connection = new(GetConnectionString());
-        await connection.OpenAsync();
-
-        await using NpgsqlCommand command = new(insertQuery, connection);
+        await using NpgsqlCommand command = connection.CreateCommand(insertQuery);
         foreach (var kvp in columnValuePairs)
         {
             NpgsqlParameter parameter = new($"@{kvp.Key}", kvp.Value);

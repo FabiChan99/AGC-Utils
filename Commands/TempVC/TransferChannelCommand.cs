@@ -43,11 +43,10 @@ public sealed class TransferChannelCommand : TempVoiceHelper
         if (userchannelobj.Users.Contains(orig_owner) && db_channels.Contains((long)userchannel) &&
             userchannelobj.Users.Contains(new_owner))
         {
-            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            await using (var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>())
             {
-                await conn.OpenAsync();
                 string sql = "UPDATE tempvoice SET ownerid = @userid WHERE channelid = @channelid";
-                await using (NpgsqlCommand command = new(sql, conn))
+                await using (NpgsqlCommand command = conn.CreateCommand(sql))
                 {
                     command.Parameters.AddWithValue("@userid", (long)new_owner.Id);
                     command.Parameters.AddWithValue("@channelid", (long)userchannel);
