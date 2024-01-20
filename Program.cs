@@ -28,7 +28,7 @@ namespace AGC_Management;
 
 public class CurrentApplication
 {
-    public static string VersionString { get; set; } = "v2.1.0";
+    public static string VersionString { get; set; } = "v2.2.0";
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
@@ -61,7 +61,8 @@ internal class Program : BaseCommandModule
             .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, levelSwitch: new LoggingLevelSwitch())
             .CreateLogger();
         CurrentApplication.Logger = logger;
-
+        
+        
         logger.Information("Starting AGC Management Bot...");
         bool DebugMode;
         try

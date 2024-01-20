@@ -1062,26 +1062,19 @@ public static class LevelUtils
 
             await AddUserToDbIfNot(user);
             var typeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             await using var cooldowndb = new NpgsqlConnection(DatabaseService.GetConnectionString());
             await cooldowndb.OpenAsync();
             await using var cooldowncmd =
-                new NpgsqlCommand("SELECT " + typeString + " FROM levelingdata WHERE userid = @id", cooldowndb);
+                new NpgsqlCommand($"SELECT {typeString} FROM levelingdata WHERE userid = @id AND {typeString} > @cooldown", cooldowndb);
             cooldowncmd.Parameters.AddWithValue("@id", (long)user.Id);
+            cooldowncmd.Parameters.AddWithValue("@cooldown", now - 60);
             await using var cooldownreader = await cooldowncmd.ExecuteReaderAsync();
             // cooldown is 60 seconds
             if (cooldownreader.HasRows)
             {
-                while (await cooldownreader.ReadAsync())
-                {
-                    var lastReward = cooldownreader.GetInt64(0);
-                    var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    if (now - lastReward < 60)
-                    {
-                        await cooldownreader.CloseAsync();
-                        await cooldowndb.CloseAsync();
-                        return;
-                    }
-                }
+                CurrentApplication.Logger.Debug("Cooldown is active for " + user.Username + $" RewardType: {type.ToString()}");
+                return;
             }
 
             await cooldownreader.CloseAsync();
