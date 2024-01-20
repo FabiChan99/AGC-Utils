@@ -79,7 +79,7 @@ public class RequireDatabase : CheckBaseAttribute
 
 public class ACRequireStaffRole : CheckBaseAttribute
 {
-    private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ACStaffRoleId"]);
+    private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {

@@ -6,7 +6,7 @@ namespace AGC_Management.Utils;
 
 public static class ErrorReporting
 {
-    public static async Task SendErrorToDev(DiscordClient client, DiscordUser user,
+    public static async Task SendErrorToDev(DiscordClient client, DiscordUser? user,
         Exception exception)
     {
         var botOwner = await client.GetUserAsync(GlobalProperties.BotOwnerId);

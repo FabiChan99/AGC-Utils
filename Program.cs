@@ -44,9 +44,14 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
+        var loglevel = LogEventLevel.Information;
+        #if DEBUG
+        loglevel = LogEventLevel.Debug;
+        #endif
+        
         var builder = WebApplication.CreateBuilder();
         var logger = Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(loglevel)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Discord.OAuth2", LogEventLevel.Warning)
             .WriteTo.Console()
@@ -178,7 +183,7 @@ internal class Program : BaseCommandModule
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
         {
-            ServiceProvider = serviceProvider, DebugStartup = false, EnableDefaultHelp = false
+            ServiceProvider = serviceProvider, DebugStartup = true, EnableDefaultHelp = false
         });
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
@@ -211,6 +216,8 @@ internal class Program : BaseCommandModule
         _ = StatusUpdateTask(discord);
         _ = UpdateGuild(discord);
         _ = ExtendedModerationSystemLoop.LaunchLoops();
+        _ = RecalculateRanks.LaunchLoops();
+        _ = CheckVCLevellingTask.Run();
 
         return Task.CompletedTask;
     }
