@@ -47,6 +47,15 @@ public static class LevelUtils
         {
             return;
         }
+        if (member.IsBot)
+        {
+            return;
+        }
+        if (member.IsPending != null && member.IsPending == true)
+        {
+            return;
+        }
+
 
         try
         {
