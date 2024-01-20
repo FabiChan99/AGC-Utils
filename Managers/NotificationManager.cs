@@ -14,10 +14,8 @@ public class NotificationManager
     public static async Task<List<DiscordMember?>> GetSubscribedStaffs(DiscordChannel channel)
     {
         long cid = (long)channel.Id;
-        var constring = TicketDatabaseService.GetConnectionString();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT user_id FROM subscriptions WHERE channel_id = @cid", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand("SELECT user_id FROM subscriptions WHERE channel_id = @cid");
         cmd.Parameters.AddWithValue("cid", cid);
         await using var reader = await cmd.ExecuteReaderAsync();
         var L = new List<DiscordMember>();
@@ -48,11 +46,9 @@ public class NotificationManager
         long cid = (long)channel_id;
         long uid = (long)user_id;
         await RemoveMode(channel_id, user_id);
-        var constring = TicketDatabaseService.GetConnectionString();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
-            new NpgsqlCommand("INSERT INTO subscriptions (user_id, channel_id, mode) VALUES (@uid, @cid, @mode)", con);
+            con.CreateCommand("INSERT INTO subscriptions (user_id, channel_id, mode) VALUES (@uid, @cid, @mode)");
         cmd.Parameters.AddWithValue("mode", (int)mode);
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
@@ -63,11 +59,9 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring = TicketDatabaseService.GetConnectionString();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
-            new NpgsqlCommand("DELETE FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
+            con.CreateCommand("DELETE FROM subscriptions WHERE user_id = @uid AND channel_id = @cid");
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
         await cmd.ExecuteNonQueryAsync();
@@ -76,10 +70,8 @@ public class NotificationManager
     public static async Task ClearMode(ulong channel_id)
     {
         long cid = (long)channel_id;
-        var constring = TicketDatabaseService.GetConnectionString();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
-        await using var cmd = new NpgsqlCommand("DELETE FROM subscriptions WHERE channel_id = @cid", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand("DELETE FROM subscriptions WHERE channel_id = @cid");
         cmd.Parameters.AddWithValue("cid", cid);
         await cmd.ExecuteNonQueryAsync();
     }
@@ -111,11 +103,10 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring = TicketDatabaseService.GetConnectionString();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        
         await using var cmd =
-            new NpgsqlCommand("SELECT mode FROM subscriptions WHERE user_id = @uid AND channel_id = @cid", con);
+            con.CreateCommand("SELECT mode FROM subscriptions WHERE user_id = @uid AND channel_id = @cid");
         cmd.Parameters.AddWithValue("uid", uid);
         cmd.Parameters.AddWithValue("cid", cid);
         await using var reader = await cmd.ExecuteReaderAsync();

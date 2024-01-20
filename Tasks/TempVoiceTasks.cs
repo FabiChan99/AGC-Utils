@@ -10,20 +10,14 @@ public class TempVoiceTasks
 {
     public async Task StartRemoveEmptyTempVoices(DiscordClient discord)
     {
-        if (DatabaseService.IsConnected())
+        await Task.Delay(TimeSpan.FromSeconds(15));
+        discord.Logger.LogInformation(
+            "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
+        while (true)
         {
-            await Task.Delay(TimeSpan.FromSeconds(15));
-            discord.Logger.LogInformation(
-                "Datenbank verbunden. Starte automatische überprüfung auf leere TempVoices.");
-            while (true)
-            {
-                await RemoveEmptyTempVoices(discord);
-                await Task.Delay(TimeSpan.FromSeconds(90));
-            }
+            await RemoveEmptyTempVoices(discord);
+            await Task.Delay(TimeSpan.FromSeconds(90));
         }
-
-        discord.Logger.LogWarning(
-            "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf leere TempVoices.");
     }
 
     private static async Task RemoveEmptyTempVoices(DiscordClient discord)

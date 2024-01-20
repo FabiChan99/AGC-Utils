@@ -239,11 +239,10 @@ public sealed class SessionManagement : TempVoiceHelper
 
             string named = newSessionSkip ? "aktiv" : "inaktiv";
 
-            await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-            await con.OpenAsync();
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            
             await using var cmd =
-                new NpgsqlCommand("UPDATE tempvoicesession SET sessionskip = @sessionskip WHERE userid = @userid",
-                    con);
+                con.CreateCommand("UPDATE tempvoicesession SET sessionskip = @sessionskip WHERE userid = @userid");
             cmd.Parameters.AddWithValue("sessionskip", newSessionSkip);
             cmd.Parameters.AddWithValue("userid", (long)ctx.User.Id);
             await cmd.ExecuteNonQueryAsync();

@@ -17,7 +17,7 @@ public class SupportComponents
         };
 
         List<Dictionary<string, object>> query =
-            await TicketDatabaseService.SelectDataFromTable("ticketcategories", columns, null);
+            await DatabaseService.SelectDataFromTable("ticketcategories", columns, null);
         Dictionary<string, string> categories = new();
 
         foreach (var category in query)

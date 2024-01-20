@@ -216,27 +216,24 @@ public sealed class CaseManagement : BaseCommandModule
 
         string reason = newreason;
         string sql;
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         if (wcase)
         {
             if (await ToolSet.CheckForReason(ctx, reason)) return;
-            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
+            sql = "UPDATE warns SET description = @description WHERE caseid = @caseid";
+            await using (NpgsqlCommand command = con.CreateCommand(sql))
             {
-                await conn.OpenAsync();
-                sql = "UPDATE warns SET description = @description WHERE caseid = @caseid";
-                await using (NpgsqlCommand command = new(sql, conn))
-                {
-                    command.Parameters.AddWithValue("@description", newreason);
-                    command.Parameters.AddWithValue("@caseid", caseid);
+                command.Parameters.AddWithValue("@description", newreason);
+                command.Parameters.AddWithValue("@caseid", caseid);
 
-                    int affected = await command.ExecuteNonQueryAsync();
+                int affected = await command.ExecuteNonQueryAsync();
 
-                    DiscordEmbed ue = new DiscordEmbedBuilder()
-                        .WithTitle("Case Update").WithDescription(
-                            $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
-                            $"Case-Typ: {ctyp}\n" +
-                            $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
-                    await ctx.RespondAsync(ue);
-                }
+                DiscordEmbed ue = new DiscordEmbedBuilder()
+                    .WithTitle("Case Update").WithDescription(
+                        $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
+                        $"Case-Typ: {ctyp}\n" +
+                        $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
+                await ctx.RespondAsync(ue);
             }
 
             return;
@@ -255,24 +252,19 @@ public sealed class CaseManagement : BaseCommandModule
             }
 
             if (await ToolSet.CheckForReason(ctx, reason)) return;
-            await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
-            {
-                await conn.OpenAsync();
-                sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
-                await using (NpgsqlCommand command = new(sql, conn))
-                {
-                    command.Parameters.AddWithValue("@description", newreason + urls);
-                    command.Parameters.AddWithValue("@caseid", caseid);
+            
+            sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
+            await using NpgsqlCommand command = con.CreateCommand(sql);
+            command.Parameters.AddWithValue("@description", newreason + urls);
+            command.Parameters.AddWithValue("@caseid", caseid);
 
-                    int affected = await command.ExecuteNonQueryAsync();
-                    DiscordEmbed ue = new DiscordEmbedBuilder()
-                        .WithTitle("Case Update").WithDescription(
-                            $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
-                            $"Case-Typ: {ctyp}\n" +
-                            $"Neuer Grund: ```{reason + urls}```").WithColor(BotConfig.GetEmbedColor()).Build();
-                    await ctx.RespondAsync(ue);
-                }
-            }
+            int affected = await command.ExecuteNonQueryAsync();
+            DiscordEmbed ue = new DiscordEmbedBuilder()
+                .WithTitle("Case Update").WithDescription(
+                    $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
+                    $"Case-Typ: {ctyp}\n" +
+                    $"Neuer Grund: ```{reason + urls}```").WithColor(BotConfig.GetEmbedColor()).Build();
+            await ctx.RespondAsync(ue);
 
             return;
         }

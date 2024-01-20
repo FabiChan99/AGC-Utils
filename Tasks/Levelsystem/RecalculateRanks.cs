@@ -20,14 +20,12 @@ public static class RecalculateRanks
         while (true)
         {
             // get timestamp from last recalculation
-            await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
-            await con.OpenAsync();
-            await using var cmd = new NpgsqlCommand("SELECT lastrecalc FROM levelingsettings", con);
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var cmd = con.CreateCommand("SELECT lastrecalc FROM levelingsettings");
             await using var reader = await cmd.ExecuteReaderAsync();
             await reader.ReadAsync();
             var lastrecalc = reader.GetInt64(0);
             await reader.CloseAsync();
-            await con.CloseAsync();
             var currenttimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var difference = currenttimestamp - lastrecalc;
 
