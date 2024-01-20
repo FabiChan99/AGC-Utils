@@ -1,4 +1,5 @@
 ﻿using AGC_Management.Entities;
+using AGC_Management.Enums.LevelSystem;
 using AGC_Management.Services;
 
 namespace AGC_Management.Utils;
@@ -119,11 +120,52 @@ public static class LevelUtils
         // set multi and type_active
         await using var db2 = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db2.OpenAsync();
-        var cmd2 = new NpgsqlCommand($"UPDATE levelingsettings SET {GetLeveltypeString(rewardType)}_multi = @multi, {rewardType.ToString().ToLower()}_active = @active WHERE guildid = @guildid", db2);
+        var cmd2 = new NpgsqlCommand($"UPDATE levelingsettings SET {GetLeveltypeString(rewardType)}_multi = @multi, {GetLeveltypeString(rewardType)}_active = @active WHERE guildid = @guildid", db2);
         cmd2.Parameters.AddWithValue("@multi", multiplicator);
         cmd2.Parameters.AddWithValue("@active", true);
         cmd2.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await cmd2.ExecuteNonQueryAsync();
+    }
+    
+    public static float GetFloatFromMultiplicatorItem(MultiplicatorItem multiplicatorItem)
+    {
+        if (multiplicatorItem == MultiplicatorItem.Disabled)
+        {
+            return 0;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Quarter)
+        {
+            return 0.25f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Half)
+        {
+            return 0.5f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.One)
+        {
+            return 1.0f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.OneAndHalf)
+        {
+            return 1.5f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Two)
+        {
+            return 2.0f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Three)
+        {
+            return 3.0f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Four)
+        {
+            return 4.0f;
+        }
+        if (multiplicatorItem == MultiplicatorItem.Five)
+        {
+            return 5.0f;
+        }
+        return 0;
     }
     
     public static async Task AddOverrideRole(ulong roleId, float multiplicator)

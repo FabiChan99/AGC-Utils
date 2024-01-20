@@ -17,7 +17,7 @@ public partial class LevelSystemSettings
         
         if (multiplier != MultiplicatorItem.Disabled)
         {
-            _multiplier = float.Parse(multiplier.ToString().Replace("x", "").Replace("X", "").Replace(" ", ""));
+            _multiplier = LevelUtils.GetFloatFromMultiplicatorItem(multiplier);
         }
         else
         {
@@ -33,7 +33,7 @@ public partial class LevelSystemSettings
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .WithContent(
-                        $"<:success:1085333481820790944> **Erfolgreich!** Der Multiplier für ``{levelType}`` wurde auf ``{multiplier}`` gesetzt!"));
+                        $"<:success:1085333481820790944> **Erfolgreich!** Der Multiplier für ``{levelType}`` wurde auf ``{LevelUtils.GetFloatFromMultiplicatorItem(multiplier)}`` gesetzt!"));
         }
         else
         {
