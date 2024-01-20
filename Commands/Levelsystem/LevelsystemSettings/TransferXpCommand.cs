@@ -22,7 +22,24 @@ public partial class LevelSystemSettings
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
                 "<a:loading_agc:1084157150747697203> Transfer wird vorbereitet..."));
+        try
+        {
+            if (CurrentApplication.TargetGuild.Id == 750365461945778209)
+            {
+                // check if user has event top role 1066374671131480105 ctx
+                var role = ctx.Guild.GetRole(ulong.Parse("1066374671131480105"));
+                if (ctx.Member.Roles.Contains(role))
+                {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
+                        "<:attention:1085333468688433232> **Fehler!** Du kannst keine XP transferieren, wenn du den Eventler bist!"));
+                    return;
+                }
+            }
+        }
+        catch (Exception)
+        { }
 
+        
         if (sourceuser.IsBot)
         {
             await ctx.EditResponseAsync(
