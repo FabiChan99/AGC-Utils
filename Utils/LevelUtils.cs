@@ -51,7 +51,7 @@ public static class LevelUtils
         {
             return;
         }
-        if (member.IsPending != null && member.IsPending == true)
+        if (member.IsPending is true)
         {
             return;
         }
