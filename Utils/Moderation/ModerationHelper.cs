@@ -271,7 +271,7 @@ public static class ModerationHelper
         }
 
         var reason = reasonBuilder.ToString();
-        
+
         await message.DeleteAsync();
         return reason;
     }

@@ -62,7 +62,7 @@ public sealed class JoinRequestCommand : TempVoiceHelper
                     return;
                 }
 
-                
+
                 if (TargetUser.VoiceState?.Channel != null && TargetUser.VoiceState?.Channel.Id != userchannelid)
                 {
                     await msg.ModifyAsync(
