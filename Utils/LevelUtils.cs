@@ -89,6 +89,57 @@ public static class LevelUtils
         return false;
     }
     
+    public static async Task<bool> IsLevelingEnabled(XpRewardType type)
+    {
+        if (type == XpRewardType.Message)
+        {
+            var multiplier = await GetMessageXpMultiplier();
+            if (multiplier == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        if (type == XpRewardType.Voice)
+        {
+            var multiplier = await GetVcXpMultiplier();
+            if (multiplier == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    public static async Task<string> GetLevelMultiplier(XpRewardType type)
+    {
+        if (type == XpRewardType.Message)
+        {
+            var multiplier = await GetMessageXpMultiplier();
+            if (multiplier == 0)
+            {
+                return "Deaktiviert";
+            }
+            return multiplier.ToString();
+        }
+
+        if (type == XpRewardType.Voice)
+        {
+            var multiplier = await GetVcXpMultiplier();
+            if (multiplier == 0)
+            {
+                return "Deaktiviert";
+            }
+            return multiplier.ToString();
+        }
+
+        return "Deaktiviert";
+    }
+    
+    
     public static string GetLeveltypeString(XpRewardType type)
     {
         switch (type)

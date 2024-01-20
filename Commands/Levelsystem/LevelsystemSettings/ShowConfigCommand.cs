@@ -29,7 +29,12 @@ public partial class LevelSystemSettings
         List<ulong> blockedroles = await LevelUtils.BlockedRoles();
         List<Reward> rewards = await LevelUtils.GetLevelRewards();
         List<MultiplicatorOverrides> multiplicatorOverrides = await LevelUtils.GetMultiplicatorOverrides();
-        // also respect deleted channels and say deleted if channel is null but ID is not 0
+        string levelmulti_vc = await LevelUtils.GetLevelMultiplier(XpRewardType.Voice);
+        string levelmulti_msg = await LevelUtils.GetLevelMultiplier(XpRewardType.Message);
+        
+        bool isLevelingEnabledForVoice = await LevelUtils.IsLevelingEnabled(XpRewardType.Voice);
+        bool isLevelingEnabledForMessage = await LevelUtils.IsLevelingEnabled(XpRewardType.Message);
+        
         
         // local methode
         string GetBlockedChannelsString()
@@ -122,6 +127,12 @@ public partial class LevelSystemSettings
         }
         
         embedDescString.AppendLine();
+        
+        embedDescString.AppendLine($"__**Level Multiplikator**__");
+        embedDescString.AppendLine($"{MessageFormatter.BoolToEmoji(isLevelingEnabledForVoice)} - Voice: ``{levelmulti_vc}x``");
+        embedDescString.AppendLine($"{MessageFormatter.BoolToEmoji(isLevelingEnabledForMessage)} - Message: ``{levelmulti_msg}x``");
+        embedDescString.AppendLine();
+        
         embedDescString.AppendLine("__**Kanal für Levelup Nachrichten**__");
         if (levelupchannel != null)
         {
