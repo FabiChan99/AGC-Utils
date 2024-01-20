@@ -493,7 +493,7 @@ public static class LevelUtils
     public static async Task<int> GetUserRankAsync(ulong userid)
     {
         int rank = 0;
-        await AddUserToDbIfNot(await CurrentApplication.TargetGuild.GetMemberAsync(userid));
+        await AddUserToDbIfNot(userid);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         
         await using var cmd =
@@ -1028,7 +1028,7 @@ public static class LevelUtils
                 return;
             }
 
-            await AddUserToDbIfNot(user);
+            await AddUserToDbIfNot(user.Id);
             var typeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
             var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var cooldowndb = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>(); 
@@ -1102,6 +1102,17 @@ public static class LevelUtils
         await using var cmd = db.CreateCommand(
             "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level) ON CONFLICT (userid) DO NOTHING");
         cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        cmd.Parameters.AddWithValue("@xp", 0);
+        cmd.Parameters.AddWithValue("@level", 0);
+        await cmd.ExecuteNonQueryAsync();
+    }
+    
+    public static async Task AddUserToDbIfNot(ulong userid)
+    {
+        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = db.CreateCommand(
+            "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level) ON CONFLICT (userid) DO NOTHING");
+        cmd.Parameters.AddWithValue("@id", (long)userid);
         cmd.Parameters.AddWithValue("@xp", 0);
         cmd.Parameters.AddWithValue("@level", 0);
         await cmd.ExecuteNonQueryAsync();
@@ -1249,7 +1260,7 @@ public static class LevelUtils
 
     public static async Task SetXp(DiscordUser user, int xp)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd = db.CreateCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id");
         cmd.Parameters.AddWithValue("@xp", xp);
@@ -1260,7 +1271,7 @@ public static class LevelUtils
 
     public static async Task AddXp(DiscordUser user, int xp)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var rank = await GetRank(user.Id);
         var currentXp = rank[user.Id].Xp;
         var newXp = currentXp + xp;
@@ -1274,7 +1285,7 @@ public static class LevelUtils
 
     public static async Task RemoveXp(DiscordUser user, int xp)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var rank = await GetRank(user.Id);
         var currentXp = rank[user.Id].Xp;
         var newXp = currentXp - xp;
@@ -1294,7 +1305,7 @@ public static class LevelUtils
 
     public static async Task SetLevel(DiscordUser user, int level)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         
         var xp = XpForLevel(level);
@@ -1310,7 +1321,7 @@ public static class LevelUtils
 
     public static async Task AddLevel(DiscordUser user, int level)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var rank = await GetRank(user.Id);
         var currentLevel = rank[user.Id].Level;
         var newLevel = currentLevel + level;
@@ -1329,7 +1340,7 @@ public static class LevelUtils
 
     public static async Task RemoveLevel(DiscordUser user, int level)
     {
-        await AddUserToDbIfNot(user);
+        await AddUserToDbIfNot(user.Id);
         var rank = await GetRank(user.Id);
         var currentLevel = rank[user.Id].Level;
         var newLevel = currentLevel - level;
