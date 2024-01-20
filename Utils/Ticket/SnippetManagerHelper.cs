@@ -99,7 +99,7 @@ public class SnippetManagerHelper
     {
         var resultList = new List<(string, string)>();
 
-        await using var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         
 
         await using var cmd = con.CreateCommand("SELECT snip_id, snipped_text FROM snippets");

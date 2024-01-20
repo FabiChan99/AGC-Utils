@@ -237,7 +237,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     await voice.ModifyAsync(async x => { x.PermissionOverwrites = overwrites2; });
 
                                     // write sessionskip false to db
-                                    await using var conn = CurrentApplication.ServiceProvider
+                                    var conn = CurrentApplication.ServiceProvider
                                         .GetRequiredService<NpgsqlDataSource>();
                                     await using var cmd = conn.CreateCommand(
                                         "UPDATE tempvoicesession SET sessionskip = @sessionskip WHERE userid = @userid");
