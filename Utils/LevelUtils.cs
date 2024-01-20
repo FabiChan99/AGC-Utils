@@ -881,7 +881,6 @@ public static class LevelUtils
         await db.OpenAsync();
 
         var cmd = new NpgsqlCommand("SELECT level, roleid FROM level_rewards ORDER BY level ASC", db);
-        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
         {
@@ -943,7 +942,6 @@ public static class LevelUtils
         await db.OpenAsync();
 
         var cmd = new NpgsqlCommand("SELECT roleid, multiplicator FROM level_multiplicatoroverrideroles", db);
-        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
         {
@@ -982,7 +980,6 @@ public static class LevelUtils
         await db.OpenAsync();
 
         var cmd = new NpgsqlCommand("SELECT channelid FROM level_excludedchannels", db);
-        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
         {
@@ -1005,7 +1002,6 @@ public static class LevelUtils
         await db.OpenAsync();
 
         var cmd = new NpgsqlCommand("SELECT roleid FROM level_excludedroles", db);
-        cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
         {
@@ -1132,30 +1128,16 @@ public static class LevelUtils
 
     public static async Task AddUserToDbIfNot(DiscordUser user)
     {
-        // check if user is in the database
-        await using var checkdb = new NpgsqlConnection(DatabaseService.GetConnectionString());
-        await checkdb.OpenAsync();
-        await using var checkcmd = new NpgsqlCommand("SELECT userid FROM levelingdata WHERE userid = @id", checkdb);
-        checkcmd.Parameters.AddWithValue("@id", (long)user.Id);
-        await using var checkreader = await checkcmd.ExecuteReaderAsync();
-
-        if (!checkreader.HasRows)
-        {
-            await using var __db = new NpgsqlConnection(DatabaseService.GetConnectionString());
-            await __db.OpenAsync();
-            await using var __cmd =
-                new NpgsqlCommand(
-                    "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level)", __db);
-            __cmd.Parameters.AddWithValue("@id", (long)user.Id);
-            __cmd.Parameters.AddWithValue("@xp", 0);
-            __cmd.Parameters.AddWithValue("@level", 0);
-            await __cmd.ExecuteNonQueryAsync();
-            await __db.CloseAsync();
-            CurrentApplication.Logger.Debug("Added user " + user.Username + " to database.");
-        }
-
-        await checkreader.CloseAsync();
-        await checkdb.CloseAsync();
+        await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
+        await db.OpenAsync();
+        await using var cmd = new NpgsqlCommand(
+            "INSERT INTO levelingdata (userid, current_xp, current_level) VALUES (@id, @xp, @level) ON CONFLICT (userid) DO NOTHING", 
+            db);
+        cmd.Parameters.AddWithValue("@id", (long)user.Id);
+        cmd.Parameters.AddWithValue("@xp", 0);
+        cmd.Parameters.AddWithValue("@level", 0);
+        await cmd.ExecuteNonQueryAsync();
+        await db.CloseAsync();
     }
 
     private static async Task SendLevelUpMessageAndReward(DiscordUser user, int level)
@@ -1222,17 +1204,13 @@ public static class LevelUtils
         await using var cmd = new NpgsqlCommand("SELECT pingactive FROM levelingdata WHERE userid = @id", db);
         cmd.Parameters.AddWithValue("@id", (long)userId);
         await using var reader = await cmd.ExecuteReaderAsync();
+
         if (reader.HasRows)
         {
             while (await reader.ReadAsync())
             {
-                var pingEnabled = reader.GetBoolean(0);
-                return pingEnabled;
+                return reader.GetBoolean(0);
             }
-        }
-        else
-        {
-            return false;
         }
 
         await db.CloseAsync();
