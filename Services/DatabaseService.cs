@@ -20,7 +20,7 @@ public static class DatabaseService
             var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
             var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
 
-            dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
+            dbConnection = new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName};Maximum Pool Size=90");
             try
             {
                 if (dbConnection.State != ConnectionState.Open)
