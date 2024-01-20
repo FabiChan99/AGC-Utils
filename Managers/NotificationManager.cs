@@ -14,7 +14,7 @@ public class NotificationManager
     public static async Task<List<DiscordMember?>> GetSubscribedStaffs(DiscordChannel channel)
     {
         long cid = (long)channel.Id;
-        var constring = TicketDatabaseService.GetConnectionString();
+        var constring = DatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd = new NpgsqlCommand("SELECT user_id FROM subscriptions WHERE channel_id = @cid", con);
@@ -48,7 +48,7 @@ public class NotificationManager
         long cid = (long)channel_id;
         long uid = (long)user_id;
         await RemoveMode(channel_id, user_id);
-        var constring = TicketDatabaseService.GetConnectionString();
+        var constring = DatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd =
@@ -63,7 +63,7 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring = TicketDatabaseService.GetConnectionString();
+        var constring = DatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd =
@@ -76,7 +76,7 @@ public class NotificationManager
     public static async Task ClearMode(ulong channel_id)
     {
         long cid = (long)channel_id;
-        var constring = TicketDatabaseService.GetConnectionString();
+        var constring = DatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd = new NpgsqlCommand("DELETE FROM subscriptions WHERE channel_id = @cid", con);
@@ -111,7 +111,7 @@ public class NotificationManager
     {
         long cid = (long)channel_id;
         long uid = (long)user_id;
-        var constring = TicketDatabaseService.GetConnectionString();
+        var constring = DatabaseService.GetConnectionString();
         await using var con = new NpgsqlConnection(constring);
         await con.OpenAsync();
         await using var cmd =

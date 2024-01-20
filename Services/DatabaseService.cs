@@ -8,83 +8,6 @@ namespace AGC_Management.Services;
 
 public static class DatabaseService
 {
-    private static NpgsqlConnection? dbConnection;
-
-    public static void OpenConnection()
-    {
-        try
-        {
-            var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
-            var DbHost = BotConfig.GetConfig()[dbConfigSection]["Database_Host"];
-            var DbUser = BotConfig.GetConfig()[dbConfigSection]["Database_User"];
-            var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
-            var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
-
-            dbConnection =
-                new NpgsqlConnection(
-                    $"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName};Maximum Pool Size=90");
-            try
-            {
-                if (dbConnection.State != ConnectionState.Open)
-                    dbConnection.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred while opening the database connection: " + ex.Message +
-                                  "\nFunctionality will be restricted and the Program can be Unstable. Continue at your own risk!\nPress any key to continue");
-                Console.ReadKey();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("An error occurred while opening the database connection: " + ex.Message);
-            throw;
-        }
-    }
-
-
-    public static void CloseConnection()
-    {
-        try
-        {
-            dbConnection.Close();
-            dbConnection.Dispose();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("An error occurred while closing the database connection: " + ex.Message);
-            throw;
-        }
-    }
-
-    public static bool IsConnected()
-    {
-        try
-        {
-            if (dbConnection.State == ConnectionState.Open)
-                return true;
-            return false;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
-    // Change DBContent
-    public static void ExecuteCommand(string sql)
-    {
-        try
-        {
-            using var cmd = new NpgsqlCommand(sql, dbConnection);
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("An error occurred while executing the database command: " + ex.Message);
-            throw;
-        }
-    }
 
     public static string GetConnectionString()
     {
@@ -95,16 +18,18 @@ public static class DatabaseService
         var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
         return $"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}";
     }
+    
+    
+    
 
     // Read DBContent
     public static NpgsqlDataReader ExecuteQuery(string sql)
     {
         try
         {
-            using (var cmd = new NpgsqlCommand(sql, dbConnection))
-            {
-                return cmd.ExecuteReader();
-            }
+            using var dbConnection = new NpgsqlConnection(GetConnectionString());
+            using var cmd = new NpgsqlCommand(sql, dbConnection);
+            return cmd.ExecuteReader();
         }
         catch (Exception ex)
         {
@@ -153,10 +78,9 @@ public static class DatabaseService
 
         List<Dictionary<string, object>> results = new();
 
-        await using NpgsqlConnection connection = new(GetConnectionString());
-        await connection.OpenAsync();
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>(); 
 
-        await using NpgsqlCommand command = new(selectQuery, connection);
+        await using NpgsqlCommand command = connection.CreateCommand(selectQuery);
         if (whereConditions != null && whereConditions.Count > 0)
             foreach (var condition in whereConditions)
             {
@@ -196,21 +120,18 @@ public static class DatabaseService
         }
 
         int rowsAffected;
+        
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-        await using NpgsqlConnection connection = new(GetConnectionString());
-        await connection.OpenAsync();
+        await using NpgsqlCommand command = connection.CreateCommand(deleteQuery);
+        if (whereConditions != null && whereConditions.Count > 0)
+            foreach (var condition in whereConditions)
+            {
+                NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value.value);
+                command.Parameters.Add(parameter);
+            }
 
-        await using (NpgsqlCommand command = new(deleteQuery, connection))
-        {
-            if (whereConditions != null && whereConditions.Count > 0)
-                foreach (var condition in whereConditions)
-                {
-                    NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value.value);
-                    command.Parameters.Add(parameter);
-                }
-
-            rowsAffected = await command.ExecuteNonQueryAsync();
-        }
+        rowsAffected = await command.ExecuteNonQueryAsync();
 
         return rowsAffected;
     }
@@ -219,11 +140,9 @@ public static class DatabaseService
     public static async Task InitializeAndUpdateDatabaseTables()
     {
         var dbstring = GetConnectionString();
-        await using var conn = new NpgsqlConnection(dbstring);
+        var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         CurrentApplication.Logger.Information("Initializing database tables...");
-
-        await conn.OpenAsync();
-
+        
         var tableCommands = new Dictionary<string, string>
         {
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
@@ -269,14 +188,14 @@ public static class DatabaseService
             var tableName = kvp.Key;
             var createTableCommand = kvp.Value;
 
-            await using var cmdCreate = new NpgsqlCommand(createTableCommand, conn);
+            await using var cmdCreate = conn.CreateCommand(createTableCommand);
             await cmdCreate.ExecuteNonQueryAsync();
             //CurrentApplication.Logger.Debug($"Table {tableName} initialized or updated.");
             progressBar.Increment();
             await Task.Delay(25);
         }
 
-        await conn.CloseAsync();
+
 
         CurrentApplication.Logger.Information("Database tables initialized.");
         await UpdateTables();
@@ -285,10 +204,9 @@ public static class DatabaseService
     private static async Task UpdateTables()
     {
         var dbstring = GetConnectionString();
-        await using var conn = new NpgsqlConnection(dbstring);
+        var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         CurrentApplication.Logger.Information("Updating database tables...");
 
-        await conn.OpenAsync();
 
         var columnUpdates = new Dictionary<string, Dictionary<string, string>>
         {
@@ -494,14 +412,13 @@ public static class DatabaseService
                 var columnName = columnKvp.Key;
                 var alterColumnCommand = columnKvp.Value;
 
-                await using var cmdAlter = new NpgsqlCommand(alterColumnCommand, conn);
+                await using var cmdAlter = conn.CreateCommand(alterColumnCommand);
                 await cmdAlter.ExecuteNonQueryAsync();
                 progressBar.Increment();
                 await Task.Delay(25);
             }
         }
-
-        await conn.CloseAsync();
+        
         await InitLeveling();
         CurrentApplication.Logger.Information("Database tables updated.");
     }
@@ -510,24 +427,18 @@ public static class DatabaseService
     private static async Task InitLeveling()
     {
         ulong targetGuildId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
-        await using var con = new NpgsqlConnection(GetConnectionString());
-        await con.OpenAsync();
-        await using var cmd =
-            new NpgsqlCommand($"SELECT * FROM levelingsettings WHERE guildid = '{targetGuildId}'", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+       
+        await using var cmd = con.CreateCommand($"SELECT * FROM levelingsettings WHERE guildid = '{targetGuildId}'");
         await using var reader = await cmd.ExecuteReaderAsync();
         var result = await reader.ReadAsync();
         await reader.CloseAsync();
-        await con.CloseAsync();
         if (!result)
         {
-            await using var con2 = new NpgsqlConnection(GetConnectionString());
-            await con2.OpenAsync();
-            await using var cmd2 = new NpgsqlCommand(
-                "INSERT INTO levelingsettings (guildid, text_active, vc_active, text_multi, vc_multi, levelupchannelid, levelupmessage, levelupmessagereward, retainroles, lastrecalc) VALUES (@guildid, false, false, 1.0, 1.0, 0, 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', true, 0)",
-                con2);
+            await using var cmd2 = con.CreateCommand(
+                "INSERT INTO levelingsettings (guildid, text_active, vc_active, text_multi, vc_multi, levelupchannelid, levelupmessage, levelupmessagereward, retainroles, lastrecalc) VALUES (@guildid, false, false, 1.0, 1.0, 0, 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', 'Herzlichen Glückwunsch {usermention}! Du bist nun Level {level}!', true, 0)");
             cmd2.Parameters.AddWithValue("guildid", (long)targetGuildId);
             await cmd2.ExecuteNonQueryAsync();
-            await con2.CloseAsync();
         }
     }
 }

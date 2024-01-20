@@ -1,5 +1,6 @@
 #region
 
+using System.Data;
 using AGC_Management.Managers;
 using AGC_Management.Services;
 using DisCatSharp.Lavalink;
@@ -63,7 +64,10 @@ public class RequireDatabase : CheckBaseAttribute
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
         // Check if database is connected
-        if (DatabaseService.IsConnected()) return true;
+        var db = CurrentApplication.ServiceProvider.GetService<NpgsqlDataSource>();
+        await using var cmd = db.CreateCommand("SELECT 1");
+        await using var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow);
+        if (reader.HasRows) return true;
 
         Console.WriteLine("Database is not connected! Command disabled.");
         var embedBuilder = new DiscordEmbedBuilder().WithTitle("Fehler: Datenbank nicht verbunden!")

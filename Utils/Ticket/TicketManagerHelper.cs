@@ -24,39 +24,33 @@ public class TicketManagerHelper
 
     public static async Task<long> GetTicketOwnerFromChannel(DiscordChannel channel)
     {
-        var new_constr = TicketDatabaseService.GetConnectionString();
-        var newcon = new NpgsqlConnection(new_constr);
-        await newcon.OpenAsync();
+        var newcon = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_owner FROM ticketcache where tchannel_id = '{channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, newcon);
+        await using NpgsqlCommand cmd = newcon.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         long ticket_owner = 0;
         while (reader.Read())
         {
             ticket_owner = reader.GetInt64(0);
         }
-
         await reader.CloseAsync();
-
-        await newcon.CloseAsync();
-
         return ticket_owner;
     }
 
     public static async Task<int> GetPreviousTicketCount(TicketType ticketType)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketstore where tickettype = '{ticketType.ToString().ToLower()}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         return rowCount;
     }
 
     public static async Task<int> GetTicketCountFromThisUser(long user_id)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketstore where ticket_owner = '{user_id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         return rowCount;
     }
@@ -71,9 +65,9 @@ public class TicketManagerHelper
     public static async Task<bool> CheckForOpenTicket(long user_id)
     {
         bool isTicketOpen = false;
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketstore where ticket_owner = '{user_id}' AND closed = False";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         if (rowCount > 0)
         {
@@ -86,8 +80,7 @@ public class TicketManagerHelper
     public static async Task<bool> IsOpenTicket(DiscordChannel ch)
     {
         bool isTicketOpen = false;
-        await using var newcon = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
-        await newcon.OpenAsync();
+        var newcon = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         string query = $@"
         SELECT COUNT(*)
@@ -99,7 +92,7 @@ public class TicketManagerHelper
         )
         AND closed = false";
 
-        await using NpgsqlCommand cmd = new(query, newcon);
+        await using NpgsqlCommand cmd = newcon.CreateCommand(query);
         int rowCount = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         if (rowCount > 0)
@@ -113,9 +106,9 @@ public class TicketManagerHelper
     public static async Task<long> GetOpenTicketChannel(long user_id)
     {
         long channel_id = 0;
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT tchannel_id FROM ticketcache where ticket_owner = '{user_id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         while (reader.Read())
         {
@@ -144,9 +137,9 @@ public class TicketManagerHelper
 
     public static async Task<string> GetTicketIdFromChannel(DiscordChannel channel)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -357,11 +350,11 @@ public class TicketManagerHelper
         }
 
         await Claim_UpdateHeaderComponents(interaction);
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query =
             $"SELECT ticket_id FROM ticketcache where claimed = False AND tchannel_id = '{(long)interaction.Interaction.ChannelId}'";
 
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (await reader.ReadAsync())
@@ -380,14 +373,12 @@ public class TicketManagerHelper
         claimembed.WithFooter(
             $"{interaction.User.UsernameWithDiscriminator} wird sich um dein Anliegen kümmern | {ticket_id}");
 
-        await using NpgsqlCommand cmd2 = new($"UPDATE ticketcache SET claimed = True WHERE ticket_id = '{ticket_id}'",
-            con);
+        await using NpgsqlCommand cmd2 = con.CreateCommand($"UPDATE ticketcache SET claimed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
         await using NpgsqlCommand cmd3 =
-            new(
-                $"UPDATE ticketcache SET claimed_from = '{(long)interaction.User.Id}' WHERE tchannel_id = '{(long)interaction.Interaction.ChannelId}'",
-                con);
+            con.CreateCommand(
+                $"UPDATE ticketcache SET claimed_from = '{(long)interaction.User.Id}' WHERE tchannel_id = '{(long)interaction.Interaction.ChannelId}'");
         await cmd3.ExecuteNonQueryAsync();
         await interaction.Interaction.Channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(claimembed));
     }
@@ -395,9 +386,9 @@ public class TicketManagerHelper
     public static async Task AddUserToTicket(CommandContext ctx, DiscordChannel ticket_channel, DiscordUser user,
         bool addedAfter = false)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -407,9 +398,8 @@ public class TicketManagerHelper
 
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
-            new(
-                $"UPDATE ticketcache SET ticket_users = array_append(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'",
-                con);
+            con.CreateCommand(
+                $"UPDATE ticketcache SET ticket_users = array_append(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         // add perms
         var channel = ticket_channel;
@@ -463,9 +453,9 @@ public class TicketManagerHelper
             await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
 
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -475,9 +465,8 @@ public class TicketManagerHelper
 
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
-            new(
-                $"UPDATE ticketcache SET ticket_users = array_append(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'",
-                con);
+            con.CreateCommand(
+                $"UPDATE ticketcache SET ticket_users = array_append(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         // add perms
         var channel = ticket_channel;
@@ -575,12 +564,10 @@ public class TicketManagerHelper
         string caseid = Guid.NewGuid().ToString("N").Substring(0, 8);
         var constring = $"Host={con_host};Username={con_user};Password={con_pass};Database={con_db}";
         var current_unix_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        await using var con = new NpgsqlConnection(constring);
-        await con.OpenAsync();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
-            new NpgsqlCommand(
-                "INSERT INTO flags (description, userid, punisherid, datum, caseid) VALUES (@description, @userid, @punisherid, @datum, @caseid)",
-                con);
+        con.CreateCommand(
+                "INSERT INTO flags (description, userid, punisherid, datum, caseid) VALUES (@description, @userid, @punisherid, @datum, @caseid)");
         cmd.Parameters.AddWithValue("@description",
             $"Angehängtes Transcript aus {ticket_id} (Von User: {ticket_owner} -> {transcriptURL}  |  Dazugehörige Notiz: {notes}");
         cmd.Parameters.AddWithValue("@userid", (long)user.Id);
@@ -588,7 +575,6 @@ public class TicketManagerHelper
         cmd.Parameters.AddWithValue("@datum", current_unix_timestamp);
         cmd.Parameters.AddWithValue("@caseid", caseid);
         await cmd.ExecuteNonQueryAsync();
-        await con.CloseAsync();
         await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(
             $"Transcript wurde in die Datenbank eingetragen bei {user.UsernameWithDiscriminator} ``{user.Id}`` eingetragen!"));
     }
@@ -709,9 +695,9 @@ public class TicketManagerHelper
     public static async Task<List<DiscordUser>> GetTicketUsers(DiscordInteraction interaction)
     {
         // get them to list
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)interaction.Channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())
@@ -733,9 +719,9 @@ public class TicketManagerHelper
 
     public static async Task<List<DiscordUser>> GetTicketUsers(DiscordChannel tchannel, DiscordClient client)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)tchannel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())
@@ -758,9 +744,9 @@ public class TicketManagerHelper
 
     public static async Task<List<DiscordUser>> GetTicketUsers(DiscordChannel tchannel)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)tchannel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())
@@ -784,9 +770,9 @@ public class TicketManagerHelper
     public static async Task RemoveUserFromTicket(CommandContext ctx, DiscordChannel ticket_channel,
         DiscordUser user, bool noautomatic = false)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -796,9 +782,8 @@ public class TicketManagerHelper
 
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
-            new(
-                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'",
-                con);
+            con.CreateCommand(
+                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         var channel = ticket_channel;
         var member = await ctx.Guild.GetMemberAsync(user.Id);
@@ -828,9 +813,9 @@ public class TicketManagerHelper
     public static async Task RemoveUserFromTicket(DiscordChannel ticket_channel,
         DiscordUser user, DiscordClient client, bool noautomatic = false)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -840,9 +825,8 @@ public class TicketManagerHelper
 
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
-            new(
-                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'",
-                con);
+            con.CreateCommand(
+                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         var channel = ticket_channel;
         var member = await client.GetUserAsync(user.Id);
@@ -884,9 +868,9 @@ public class TicketManagerHelper
             await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
 
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -897,8 +881,7 @@ public class TicketManagerHelper
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
             new(
-                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'",
-                con);
+                $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         var channel = ticket_channel;
         var member = await interaction.Guild.GetMemberAsync(user.Id);
@@ -937,9 +920,9 @@ public class TicketManagerHelper
 
     private static async Task<List<string>> GetOpenTicketsFromUser(DiscordUser user)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache WHERE ticket_users @> ARRAY[{(long)user.Id}::bigint]";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<string> ticket_ids = new();
         while (reader.Read())
@@ -953,9 +936,9 @@ public class TicketManagerHelper
 
     private static async Task<long> GetTicketChannelFromTicketID(string ticket_id)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT tchannel_id FROM ticketcache where ticket_id = '{ticket_id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         long tchannel_id = 0;
         while (reader.Read())
@@ -970,9 +953,9 @@ public class TicketManagerHelper
     public static async Task<bool> CheckIfUserIsInTicket(DiscordInteraction interaction, DiscordChannel ticket_channel,
         DiscordUser user)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())
@@ -1121,17 +1104,17 @@ public class TicketManagerHelper
 
     public static async Task DeleteCache(DiscordChannel ticket_channel)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"DELETE FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await cmd.ExecuteNonQueryAsync();
     }
 
     public static async Task<bool> IsTicket(DiscordChannel channel)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT COUNT(*) FROM ticketcache where tchannel_id = '{(long)channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         if (rowCount > 0)
         {
@@ -1164,9 +1147,9 @@ public class TicketManagerHelper
     public static async Task InsertTransscriptIntoDB(DiscordChannel ticket_channel, TranscriptType transcriptType,
         string transcript_url)
     {
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         string ticket_id = "";
         while (reader.Read())
@@ -1180,18 +1163,16 @@ public class TicketManagerHelper
         {
             // insert
             await using NpgsqlCommand cmd2 =
-                new(
-                    $"UPDATE ticketstore SET user_transscript_url = '{transcript_url}' WHERE ticket_id = '{ticket_id}'",
-                    con);
+                con.CreateCommand(
+                    $"UPDATE ticketstore SET user_transscript_url = '{transcript_url}' WHERE ticket_id = '{ticket_id}'");
             await cmd2.ExecuteNonQueryAsync();
         }
         else if (transcriptType == TranscriptType.Team)
         {
             // insert
             await using NpgsqlCommand cmd2 =
-                new(
-                    $"UPDATE ticketstore SET team_transscript_url = '{transcript_url}' WHERE ticket_id = '{ticket_id}'",
-                    con);
+                con.CreateCommand(
+                    $"UPDATE ticketstore SET team_transscript_url = '{transcript_url}' WHERE ticket_id = '{ticket_id}'");
             await cmd2.ExecuteNonQueryAsync();
         }
     }
@@ -1208,9 +1189,9 @@ public class TicketManagerHelper
         eb.AddField(new DiscordEmbedField("Ticket Name", channel.Name, true));
 
         List<DiscordUser> users = new();
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())
@@ -1264,9 +1245,9 @@ public class TicketManagerHelper
         eb.AddField(new DiscordEmbedField("Ticket Name", ctx.Channel.Name, true));
 
         List<DiscordUser> users = new();
-        var con = TicketDatabaseService.GetConnection();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         string query = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ctx.Channel.Id}'";
-        await using NpgsqlCommand cmd = new(query, con);
+        await using NpgsqlCommand cmd = con.CreateCommand(query);
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
         List<long> ticket_users = new();
         while (reader.Read())

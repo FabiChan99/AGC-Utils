@@ -43,7 +43,7 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task AddSnippet(CommandContext ctx, string name, [RemainingText] string content)
     {
-        await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
+        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await con.OpenAsync();
 
 
@@ -78,7 +78,7 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task RemoveSnippet(CommandContext ctx, string name)
     {
-        await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
+        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await con.OpenAsync();
         await using var cmd = new NpgsqlCommand("DELETE FROM snippets WHERE snip_id = @name", con);
         cmd.Parameters.AddWithValue("name", name);
@@ -105,7 +105,7 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task ListSnippets(CommandContext ctx)
     {
-        await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
+        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await con.OpenAsync();
 
         await using var cmd = new NpgsqlCommand("SELECT snip_id FROM snippets", con);
@@ -144,7 +144,7 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task SearchSnippets(CommandContext ctx, string snippet_id)
     {
-        await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
+        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await con.OpenAsync();
         await using var cmd = new NpgsqlCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippet_id", con);
         cmd.Parameters.AddWithValue("snippet_id", snippet_id);
@@ -172,7 +172,7 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task ShortcutSnippets(CommandContext ctx)
     {
-        await using var con = new NpgsqlConnection(TicketDatabaseService.GetConnectionString());
+        await using var con = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await con.OpenAsync();
 
         var words = Regex.Split(ctx.Message.Content, @"\W+");

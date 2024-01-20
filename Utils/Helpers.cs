@@ -1,5 +1,6 @@
 #region
 
+using System.Threading.RateLimiting;
 using AGC_Management.Entities;
 using AGC_Management.Services;
 using Newtonsoft.Json;
@@ -189,19 +190,10 @@ public static class ToolSet
     {
         try
         {
-            var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
-            var DbHost = BotConfig.GetConfig()[dbConfigSection]["Database_Host"];
-            var DbUser = BotConfig.GetConfig()[dbConfigSection]["Database_User"];
-            var DbPass = BotConfig.GetConfig()[dbConfigSection]["Database_Password"];
-            var DbName = BotConfig.GetConfig()[dbConfigSection]["Ticket_Database"];
-
-            await using var con =
-                new NpgsqlConnection($"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName}");
-            await con.OpenAsync();
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
             await using var cmd =
-                new NpgsqlCommand($"SELECT COUNT(*) FROM ticketstore WHERE ticket_owner = {userid}", con);
+                con.CreateCommand($"SELECT COUNT(*) FROM ticketstore WHERE ticket_owner = {userid}");
             var result = await cmd.ExecuteScalarAsync();
-            await con.CloseAsync();
             return (long)result;
         }
         catch (Exception e)
@@ -236,7 +228,7 @@ public static class ToolSet
 
     public static async Task<bool> UserHasClosedPendingTicket(ulong UserId)
     {
-        string con = TicketDatabaseService.GetConnectionString();
+        string con = DatabaseService.GetConnectionString();
         await using var connection = new NpgsqlConnection(con);
         await connection.OpenAsync();
         string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_owner = '{(long)UserId}'";
@@ -254,7 +246,7 @@ public static class ToolSet
 
     public static async Task<bool> UserHasOpenTicket(ulong UserId)
     {
-        string con = TicketDatabaseService.GetConnectionString();
+        string con = DatabaseService.GetConnectionString();
         await using var connection = new NpgsqlConnection(con);
         await connection.OpenAsync();
         string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_users @> ARRAY[{(long)UserId}::bigint]";

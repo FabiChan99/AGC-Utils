@@ -24,9 +24,8 @@ namespace AGC_Management.Utils
             var replacements = new Dictionary<string, string>();
             string connectionString = DatabaseService.GetConnectionString();
 
-            await using var conn = new NpgsqlConnection(connectionString);
-            conn.Open();
-            await using var cmd = new NpgsqlCommand("SELECT key, text FROM reasonmap", conn);
+            var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var cmd = conn.CreateCommand("SELECT key, text FROM reasonmap");
             await using var reader = cmd.ExecuteReader();
             while (await reader.ReadAsync())
             {
@@ -42,10 +41,9 @@ namespace AGC_Management.Utils
 
             try
             {
-                await using var conn = new NpgsqlConnection(connectionString);
-                await conn.OpenAsync();
-
-                await using (var checkCmd = new NpgsqlCommand("SELECT COUNT(*) FROM reasonmap WHERE key = @key", conn))
+                var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+                
+                await using (var checkCmd = conn.CreateCommand("SELECT COUNT(*) FROM reasonmap WHERE key = @key"))
                 {
                     checkCmd.Parameters.AddWithValue("key", key);
                     int exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
@@ -55,8 +53,7 @@ namespace AGC_Management.Utils
                     }
                 }
 
-                await using (var cmd = new NpgsqlCommand("INSERT INTO reasonmap (key, text) VALUES (@key, @text)",
-                                 conn))
+                await using (var cmd = conn.CreateCommand("INSERT INTO reasonmap (key, text) VALUES (@key, @text)"))
                 {
                     cmd.Parameters.AddWithValue("key", key);
                     cmd.Parameters.AddWithValue("text", text);
@@ -77,10 +74,8 @@ namespace AGC_Management.Utils
 
             try
             {
-                await using var conn = new NpgsqlConnection(connectionString);
-                await conn.OpenAsync();
-
-                await using var cmd = new NpgsqlCommand("DELETE FROM reasonmap WHERE key = @key", conn);
+                var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+                await using var cmd = conn.CreateCommand("DELETE FROM reasonmap WHERE key = @key");
                 cmd.Parameters.AddWithValue("key", key);
 
                 int affectedRows = await cmd.ExecuteNonQueryAsync();

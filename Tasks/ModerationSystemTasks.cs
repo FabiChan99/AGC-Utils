@@ -17,18 +17,13 @@ public class ModerationSystemTasks
             return;
         }
 
-        if (DatabaseService.IsConnected())
+        discord.Logger.LogInformation("Starte überprüfung auf abgelaufene Warns..");
+        while (true)
         {
-            discord.Logger.LogInformation("Starte überprüfung auf abgelaufene Warns..");
-            while (true)
-            {
-                await RemoveWarnsOlderThan7Days(discord);
-                await Task.Delay(TimeSpan.FromMinutes(5));
-            }
+            await RemoveWarnsOlderThan7Days(discord);
+            await Task.Delay(TimeSpan.FromMinutes(5));
         }
 
-        discord.Logger.LogWarning(
-            "Datenbank nicht verbunden. Deaktiviere automatische überprüfung auf abgelaufene warns.");
     }
 
     private int GetWarnExpiringTime()

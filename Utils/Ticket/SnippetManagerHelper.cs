@@ -17,8 +17,8 @@ public class SnippetManagerHelper
             return null;
         }
 
-        var con = TicketDatabaseService.GetConnection();
-        await using var cmd = new NpgsqlCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippetId", con);
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippetId");
         cmd.Parameters.AddWithValue("@snippetId", snippetId);
 
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
@@ -97,7 +97,7 @@ public class SnippetManagerHelper
 
     public static async Task<List<(string snipId, string snippedText)>> GetAllSnippetsAsync()
     {
-        var newcon = TicketDatabaseService.GetConnectionString();
+        var newcon = DatabaseService.GetConnectionString();
         var resultList = new List<(string, string)>();
 
         await using var con = new NpgsqlConnection(newcon);
