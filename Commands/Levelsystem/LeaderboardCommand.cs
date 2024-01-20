@@ -1,8 +1,12 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
+
+#endregion
 
 namespace AGC_Management.Commands.Levelsystem;
 
@@ -13,15 +17,19 @@ public class LeaderboardCommand : ApplicationCommandsModule
         [Option("user", "Der Nutzer von dem das Leaderboard angezeigt werden soll.")]
         DiscordUser user = null)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> Leaderboard wird geladen..."));
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().WithContent(
+                "<a:loading_agc:1084157150747697203> Leaderboard wird geladen..."));
         if (user == null)
         {
             user = ctx.User;
         }
-        
+
         if (user.IsBot)
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("<:attention:1085333468688433232> **Fehler!** Dies ist ein Bot!"));
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().WithContent(
+                    "<:attention:1085333468688433232> **Fehler!** Dies ist ein Bot!"));
             return;
         }
 
@@ -37,11 +45,14 @@ public class LeaderboardCommand : ApplicationCommandsModule
                 var user_ = leaderboardData[i];
                 var user__ = await ctx.Client.GetUserAsync(user_.UserId);
                 var Uname = user__.GetFormattedUserName();
-                string lineText = $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
+                string lineText =
+                    $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
                 if (user.Id == user_.UserId)
                 {
-                    lineText = $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
+                    lineText =
+                        $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
                 }
+
                 descriptionBuilder.AppendLine(lineText);
             }
         }
@@ -49,7 +60,7 @@ public class LeaderboardCommand : ApplicationCommandsModule
         descriptionBuilder.AppendLine("..................");
 
 
-        int startRange = Math.Max(userRank - 5, 6); 
+        int startRange = Math.Max(userRank - 5, 6);
         int endRange = Math.Min(userRank + 5, leaderboardData.Count);
 
         if (userRank <= 5)
@@ -63,11 +74,14 @@ public class LeaderboardCommand : ApplicationCommandsModule
             var user_ = leaderboardData[i];
             var user__ = await ctx.Client.GetUserAsync(user_.UserId);
             var Uname = user__.GetFormattedUserName();
-            string lineText = $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
+            string lineText =
+                $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
             if (user.Id == user_.UserId)
             {
-                lineText = $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
+                lineText =
+                    $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
             }
+
             descriptionBuilder.AppendLine(lineText);
         }
 
@@ -77,12 +91,10 @@ public class LeaderboardCommand : ApplicationCommandsModule
             Description = descriptionBuilder.ToString(),
             Color = DiscordColor.Blurple
         };
-        
+
         embedBuilder.WithFooter("AGC Leveling System");
-        
+
         var emb = embedBuilder.Build();
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(emb));
-        
     }
-
 }

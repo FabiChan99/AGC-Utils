@@ -9,7 +9,7 @@
     <input type="text" @bind="searchTerm" @oninput="OnSearchTermChanged" placeholder="Name oder User ID suchen..."/>
     <button class="btn btn-success" @onclick="ResetPage">Inputfilter anwenden</button>
     <AuthorizeView Roles="BotOwner, Administrator">
-            <button class="btn btn-danger" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️(Ratelimit)</button>
+        <button class="btn btn-danger" @onclick="MitgliederNeuEinlesen">Mitglieder neu einlesen ⚠️(Ratelimit)</button>
     </AuthorizeView>
     <br/>
     <input type="checkbox" @bind-value="showOnlyBots" @bind-value:event="oninput" @onchange="ApplyFiltersAndPaginationAsync"/> Nur Bots anzeigen
@@ -44,58 +44,58 @@ else if (filteredMembers == null || !filteredMembers.Any())
     </p>
 }
 else
-{ 
-<div class="table-responsive-md">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>User ID</th>
-            <th>Erstellt</th>
-            <th @onclick="() => ToggleSortOrderAsync()">
-                Beigetreten@(sortAscending ? " ↑" : " ↓")
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var member in filteredMembers)
-        {
+{
+    <div class="table-responsive-md">
+        <table class="table">
+            <thead>
             <tr>
-                <td>
-                    @ToolSet.GetFormattedName(member)
-                    @if (member.IsBot)
-                    {
-                        <span class="bot-tag">BOT</span>
-                    }
-                    @if (member.isTeamMember())
-                    {
-                        <span class="team-tag">TEAM</span>
-                    }
-                    @if (member.PremiumSince.HasValue)
-                    {
-                        <span class="booster-tag">BOOSTER</span>
-                    }
-                    @if (member.IsCommunicationDisabled)
-                    {
-                        <span class="timeout-tag">TIMEOUTED</span>
-                    }
-                    @if (member.HasUnusualDmActivity)
-                    {
-                        <span class="suspect-tag">SUS DM ACTIVTIY</span>
-                    }
-                </td>
-                <td>@member.Id</td>
-                <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@member.JoinedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>
-                    <button class="btn btn-primary-red" @onclick="() => NavigateToManageMember(member.Id.ToString())">Verwalten</button>
-                </td>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Erstellt</th>
+                <th @onclick="() => ToggleSortOrderAsync()">
+                    Beigetreten@(sortAscending ? " ↑" : " ↓")
+                </th>
+                <th></th>
             </tr>
-        }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+            @foreach (var member in filteredMembers)
+            {
+                <tr>
+                    <td>
+                        @ToolSet.GetFormattedName(member)
+                        @if (member.IsBot)
+                        {
+                            <span class="bot-tag">BOT</span>
+                        }
+                        @if (member.isTeamMember())
+                        {
+                            <span class="team-tag">TEAM</span>
+                        }
+                        @if (member.PremiumSince.HasValue)
+                        {
+                            <span class="booster-tag">BOOSTER</span>
+                        }
+                        @if (member.IsCommunicationDisabled)
+                        {
+                            <span class="timeout-tag">TIMEOUTED</span>
+                        }
+                        @if (member.HasUnusualDmActivity)
+                        {
+                            <span class="suspect-tag">SUS DM ACTIVTIY</span>
+                        }
+                    </td>
+                    <td>@member.Id</td>
+                    <td>@member.CreationTimestamp.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@member.JoinedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        <button class="btn btn-primary-red" @onclick="() => NavigateToManageMember(member.Id.ToString())">Verwalten</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 
     <div class="pagination">
         @if (currentPage > 1)
@@ -140,13 +140,10 @@ else
             await ForceLoadDataAsync();
         });
     }
-    
+
     private async Task ResetPage()
     {
-        await InvokeAsync(async () =>
-        {
-            await ApplyFiltersAndPaginationAsync();
-        });
+        await InvokeAsync(async () => { await ApplyFiltersAndPaginationAsync(); });
     }
 
     private async Task ApplyFiltersAndPaginationAsync()
@@ -154,7 +151,7 @@ else
         await ApplyFiltersAsync();
         ApplyPagination();
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -178,7 +175,7 @@ else
             isLoading = false;
         }
     }
-    
+
     private async Task<DiscordMember[]> FetchMembersAsync()
     {
         return await Task.Run(() =>
@@ -301,22 +298,23 @@ else
         isLoading = false;
     }
 
-    
+
     private void OnSearchTermChanged(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? string.Empty;
         ResetDebounceTimer();
     }
-    
+
     private void OnFilterChanged(ChangeEventArgs e)
     {
         Console.WriteLine(e.Value);
-        InvokeAsync(async () => {
+        InvokeAsync(async () =>
+        {
             await ApplyFiltersAsync();
             ApplyPagination();
         });
     }
-    
+
     private async Task OnShowOnlyBotsChanged(ChangeEventArgs e)
     {
         showOnlyBots = (bool)e.Value;
@@ -329,7 +327,6 @@ else
         await ApplyFiltersAndPaginationAsync();
     }
 
-    
 
     private void ResetDebounceTimer()
     {

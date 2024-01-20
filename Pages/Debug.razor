@@ -1,5 +1,5 @@
 ﻿@attribute [Authorize(Roles = "BotOwner, Administrator, User, NichtImServer")]
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor Context
+@inject IHttpContextAccessor Context
 @page "/Debug"
 <PageTitle>Debug</PageTitle>
 
@@ -16,5 +16,5 @@
 }
 
 @code {
-    
+
 }

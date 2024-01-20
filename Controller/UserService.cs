@@ -16,7 +16,7 @@ namespace AGC_Management.Controller
         {
             return httpContext.User.Identity.IsAuthenticated;
         }
-        
+
         public ulong? GetUserId(HttpContext httpContext)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
@@ -27,8 +27,8 @@ namespace AGC_Management.Controller
             var claims = httpContext.User.Claims;
             return ulong.Parse(claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
         }
-        
-        
+
+
         /// <summary>
         ///     Parses the user's discord claim for their `identify` information
         /// </summary>

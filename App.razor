@@ -21,6 +21,7 @@
 </CascadingAuthenticationState>
 
 @code {
+
     private async void HandleNotAuthorized()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -34,4 +35,5 @@
             NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}");
         }
     }
+
 }

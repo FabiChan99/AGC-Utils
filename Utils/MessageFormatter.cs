@@ -16,11 +16,12 @@ public class MessageFormatter
                 formattedMessage = formattedMessage.Replace("{rolename}", role.Name);
             }
         }
+
         formattedMessage = formattedMessage.Replace("{level}", level.ToString());
 
         return formattedMessage;
     }
-    
+
     public static string BoolToEmoji(bool value)
     {
         return value ? "✅" : "❌";

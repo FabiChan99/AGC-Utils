@@ -25,6 +25,7 @@ public sealed class AuthUtils
         {
             // ignored
         }
+
         DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
         DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
         DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
@@ -84,7 +85,6 @@ public sealed class AuthUtils
     }
 
 
-
     public static async Task<string> RetrieveName(JsonElement userClaims)
     {
         string userId_ = userClaims.GetProperty("id").ToString();
@@ -92,10 +92,9 @@ public sealed class AuthUtils
 
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).UsernameWithDiscriminator;
     }
-    
+
     public static async Task<string> RetrieveDisplayName(ulong userId)
     {
-
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).GlobalName;
     }
 
@@ -128,6 +127,7 @@ public sealed class AuthUtils
         {
             // ignored
         }
+
         DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
         DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try

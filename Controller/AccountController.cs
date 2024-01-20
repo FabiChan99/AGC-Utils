@@ -27,7 +27,7 @@ namespace AGC_Management.Controller
                 returnUrl = "/";
             }
 
-            
+
             return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
         }
 

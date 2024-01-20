@@ -1,15 +1,20 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
 using AGC_Management.Entities;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
+
+#endregion
 
 namespace AGC_Management.Commands.Levelsystem;
 
 public partial class LevelSystemSettings
 {
     [ApplicationCommandRequirePermissions(Permissions.Administrator)]
-    [SlashCommand("showconfig", "Zeigt die aktuelle Konfiguration des Levelsystems an", defaultMemberPermissions:(long)Permissions.Administrator)]
+    [SlashCommand("showconfig", "Zeigt die aktuelle Konfiguration des Levelsystems an",
+        (long)Permissions.Administrator)]
     public static async Task SetupLevelcommand(InteractionContext ctx)
     {
         var msgbuilder = await GetSetupEmbedAndComponents();
@@ -31,11 +36,11 @@ public partial class LevelSystemSettings
         List<MultiplicatorOverrides> multiplicatorOverrides = await LevelUtils.GetMultiplicatorOverrides();
         string levelmulti_vc = await LevelUtils.GetLevelMultiplier(XpRewardType.Voice);
         string levelmulti_msg = await LevelUtils.GetLevelMultiplier(XpRewardType.Message);
-        
+
         bool isLevelingEnabledForVoice = await LevelUtils.IsLevelingEnabled(XpRewardType.Voice);
         bool isLevelingEnabledForMessage = await LevelUtils.IsLevelingEnabled(XpRewardType.Message);
-        
-        
+
+
         // local methode
         string GetBlockedChannelsString()
         {
@@ -52,9 +57,10 @@ public partial class LevelSystemSettings
                     sb.AppendLine($"- Kanal gelöscht ``{blockedchannel}``");
                 }
             }
+
             return sb.ToString();
         }
-        
+
         // local methode
         string GetBlockedRolesString()
         {
@@ -71,9 +77,10 @@ public partial class LevelSystemSettings
                     sb.AppendLine($"- Rolle gelöscht ``{blockedrole}``");
                 }
             }
+
             return sb.ToString();
         }
-        
+
         // local methode
         string GetLevelUpRolesStringSorted()
         {
@@ -90,9 +97,10 @@ public partial class LevelSystemSettings
                     sb.AppendLine($"- Rolle gelöscht ``{reward.RoleId}`` - Level {reward.Level}");
                 }
             }
+
             return sb.ToString();
         }
-        
+
         // local methode
         string GetOverrideRolesString()
         {
@@ -109,30 +117,33 @@ public partial class LevelSystemSettings
                     sb.AppendLine($"- Rolle gelöscht ``{overrideRole.RoleId}`` - {overrideRole.Multiplicator}x");
                 }
             }
+
             return sb.ToString();
         }
 
         var embedDescString = new StringBuilder();
-        embedDescString.AppendLine($"__**Levelup Nachricht**__");
+        embedDescString.AppendLine("__**Levelup Nachricht**__");
         if (isLevelUpMessageEnabled)
         {
-            embedDescString.AppendLine($"✅ - Wenn kein Reward vergeben wird:");
+            embedDescString.AppendLine("\u2705 - Wenn kein Reward vergeben wird:");
             embedDescString.AppendLine($"```{levelupmessage}```");
-            embedDescString.AppendLine($"Wenn ein Reward vergeben wird:");
+            embedDescString.AppendLine("Wenn ein Reward vergeben wird:");
             embedDescString.AppendLine($"```{leveluprewardmessage}```");
         }
         else
         {
-            embedDescString.AppendLine($"❌ Deaktiviert");
+            embedDescString.AppendLine("\u274c Deaktiviert");
         }
-        
+
         embedDescString.AppendLine();
-        
-        embedDescString.AppendLine($"__**Level Multiplikator**__");
-        embedDescString.AppendLine($"{MessageFormatter.BoolToEmoji(isLevelingEnabledForVoice)} - Voice: ``{levelmulti_vc}x``");
-        embedDescString.AppendLine($"{MessageFormatter.BoolToEmoji(isLevelingEnabledForMessage)} - Message: ``{levelmulti_msg}x``");
+
+        embedDescString.AppendLine("__**Level Multiplikator**__");
+        embedDescString.AppendLine(
+            $"{MessageFormatter.BoolToEmoji(isLevelingEnabledForVoice)} - Voice: ``{levelmulti_vc}x``");
+        embedDescString.AppendLine(
+            $"{MessageFormatter.BoolToEmoji(isLevelingEnabledForMessage)} - Message: ``{levelmulti_msg}x``");
         embedDescString.AppendLine();
-        
+
         embedDescString.AppendLine("__**Kanal für Levelup Nachrichten**__");
         if (levelupchannel != null)
         {
@@ -140,34 +151,38 @@ public partial class LevelSystemSettings
         }
         else if (levelupchannelid != 0)
         {
-            embedDescString.AppendLine($"❌ - Kanal gelöscht ``levelupchannelid``");
+            embedDescString.AppendLine("\u274c - Kanal gelöscht ``levelupchannelid``");
         }
         else if (levelupchannelid == 0)
         {
-            embedDescString.AppendLine($"❌ - Kein Kanal ausgewählt");
+            embedDescString.AppendLine("\u274c - Kein Kanal ausgewählt");
         }
+
         embedDescString.AppendLine();
         embedDescString.AppendLine("__**Ausgeschlossene Kanäle**__");
         if (blockedchannels.Count > 0)
         {
-            embedDescString.AppendLine($"✅ - **In diesen Kanälen wird kein XP vergeben ``{blockedchannels.Count} Kanäle``**");
+            embedDescString.AppendLine(
+                $"✅ - **In diesen Kanälen wird kein XP vergeben ``{blockedchannels.Count} Kanäle``**");
             embedDescString.AppendLine(GetBlockedChannelsString());
         }
         else
         {
-            embedDescString.AppendLine($"❌ - Keine Kanäle ausgeschlossen");
+            embedDescString.AppendLine("\u274c - Keine Kanäle ausgeschlossen");
         }
 
         embedDescString.AppendLine("__**Ausgeschlossene Rollen**__");
         if (blockedroles.Count > 0)
         {
-            embedDescString.AppendLine($"✅ - **User mit diesen Rollen erhalten kein XP ``{blockedroles.Count} Rollen``**");
+            embedDescString.AppendLine(
+                $"✅ - **User mit diesen Rollen erhalten kein XP ``{blockedroles.Count} Rollen``**");
             embedDescString.AppendLine(GetBlockedRolesString());
         }
         else
         {
-            embedDescString.AppendLine($"❌ - Keine Rollen ausgeschlossen");
+            embedDescString.AppendLine("\u274c - Keine Rollen ausgeschlossen");
         }
+
         embedDescString.AppendLine();
         embedDescString.AppendLine("__**Level Rollenbelohnung**__");
         if (rewards.Count > 0)
@@ -177,29 +192,31 @@ public partial class LevelSystemSettings
         }
         else
         {
-            embedDescString.AppendLine($"❌ - Keine Rollenbelohnungen");
+            embedDescString.AppendLine("\u274c - Keine Rollenbelohnungen");
         }
+
         embedDescString.AppendLine();
 
         embedDescString.AppendLine("__**Level Multiplicatoroverriderollen**__");
         if (multiplicatorOverrides.Count > 0)
         {
-            embedDescString.AppendLine($"✅ - **User erhalten für diese Rollen einen XP-Multiplikator ``{multiplicatorOverrides.Count} Rollen``**");
+            embedDescString.AppendLine(
+                $"✅ - **User erhalten für diese Rollen einen XP-Multiplikator ``{multiplicatorOverrides.Count} Rollen``**");
             embedDescString.AppendLine(GetOverrideRolesString());
         }
         else
         {
-            embedDescString.AppendLine($"❌ - Keine Multiplicatoroverriderollen");
+            embedDescString.AppendLine("\u274c - Keine Multiplicatoroverriderollen");
         }
+
         embedDescString.AppendLine();
-        
-        
-        
+
+
         var embed = new DiscordEmbedBuilder()
             .WithTitle("Levelsystem Konfiguration")
             .WithDescription(embedDescString.ToString())
             .WithColor(DiscordColor.Blurple);
-        
+
         var messageBuilder = new DiscordMessageBuilder().WithEmbed(embed.Build());
 
         return messageBuilder;

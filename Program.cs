@@ -45,10 +45,10 @@ internal class Program : BaseCommandModule
     private static async Task MainAsync()
     {
         var loglevel = LogEventLevel.Information;
-        #if DEBUG
+#if DEBUG
         loglevel = LogEventLevel.Debug;
-        #endif
-        
+#endif
+
         var builder = WebApplication.CreateBuilder();
         var logger = Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Is(loglevel)
@@ -163,7 +163,7 @@ internal class Program : BaseCommandModule
             ServiceProvider = serviceProvider,
             MessageCacheSize = 10000,
             ShowReleaseNotesInUpdateCheck = false,
-            HttpTimeout = TimeSpan.FromSeconds(40),
+            HttpTimeout = TimeSpan.FromSeconds(40)
         });
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
@@ -463,8 +463,8 @@ internal class Program : BaseCommandModule
 
         // bind to localhost to use a reverse proxy like nginx, apache or iis
         app.Urls.Add($"http://localhost:{port}");
-        
-        
+
+
         bool useHttps;
         try
         {
@@ -474,7 +474,7 @@ internal class Program : BaseCommandModule
         {
             useHttps = false;
         }
-        
+
         string dashboardUrl;
         try
         {

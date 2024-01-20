@@ -1,4 +1,8 @@
-﻿using SkiaSharp;
+﻿#region
+
+using SkiaSharp;
+
+#endregion
 
 namespace AGC_Management.Utils;
 
@@ -9,19 +13,19 @@ public sealed class ImageUtils
         var bmp = new SKBitmap(width, height);
         using var canvas = new SKCanvas(bmp);
         canvas.Clear(SKColors.White);
-        
+
         var backgroundPaint = new SKPaint
         {
             Color = SKColors.Gray
         };
         canvas.DrawRect(0, 0, width, height, backgroundPaint);
-        
+
         var progressPaint = new SKPaint
         {
             Color = SKColors.BlueViolet
         };
         canvas.DrawRect(0, 0, width * percentage, height, progressPaint);
-        
+
         var textPaint = new SKPaint
         {
             Color = SKColors.White,

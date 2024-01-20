@@ -1,9 +1,11 @@
-﻿using System.Text;
-using AGC_Management.Entities;
+﻿#region
+
 using AGC_Management.Enums.LevelSystem;
 using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
+
+#endregion
 
 namespace AGC_Management.Commands.Levelsystem;
 
@@ -11,10 +13,12 @@ public partial class LevelSystemSettings
 {
     [ApplicationCommandRequirePermissions(Permissions.ManageGuild)]
     [SlashCommand("override-roles", "Setzt oder Entfernt Overrideroles",
-        defaultMemberPermissions: (long)Permissions.ManageGuild)]
+        (long)Permissions.ManageGuild)]
     public static async Task ManageOverrideRoles(InteractionContext ctx,
-        [Option("action", "Die auszuführende Aktion")] ModifyRoleChannelAction aktion,
-        [Option("role", "Die Rolle die hinzugefügt oder entfernt werden soll")] DiscordRole role, [Option("multiplier", "Der Multiplier")] OverrideMultiplicatorItem multiplier)
+        [Option("action", "Die auszuführende Aktion")]
+        ModifyRoleChannelAction aktion,
+        [Option("role", "Die Rolle die hinzugefügt oder entfernt werden soll")]
+        DiscordRole role, [Option("multiplier", "Der Multiplier")] OverrideMultiplicatorItem multiplier)
     {
         var _multiplier = float.Parse(multiplier.ToString().Replace("x", "").Replace("X", "").Replace(" ", ""));
         // check if role is managed by integration
@@ -50,7 +54,8 @@ public partial class LevelSystemSettings
         }
 
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent("<a:loading_agc:1084157150747697203> Aktion wird ausgeführt...")
+            new DiscordInteractionResponseBuilder()
+                .WithContent("<a:loading_agc:1084157150747697203> Aktion wird ausgeführt...")
                 .AsEphemeral());
         if (aktion == ModifyRoleChannelAction.Add)
         {

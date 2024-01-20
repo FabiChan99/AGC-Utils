@@ -36,7 +36,7 @@ public class Converter
             }
     }
 
-    
+
     public static string FormatWithCommas(int number)
     {
         return number.ToString("N0");

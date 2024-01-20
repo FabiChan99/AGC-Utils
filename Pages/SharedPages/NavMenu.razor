@@ -1,87 +1,88 @@
-@using AGC_Management.Entities.Web
 @using AGC_Management.Controller
-@using AGC_Management.Utils
 @inject IHttpContextAccessor httpContextAccessor
 @inject UserService usrSvc
 
 @if (initialized)
 {
     <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">@CurrentApplication.DiscordClient.CurrentUser.Username WebUtils</a>
+            <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
     </div>
-</div>
 
-<div class="@NavMenuCssClass nav-scrollable">
-    <nav class="flex-column">
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item dropdown px-3">
-                    <a class="nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="@user.AvatarUrl" class="nav-profile-pic" alt=""/>
-                        <span class="dropdown-label">@user.Username @(!user.IsMigrated ? "#" + user.Discriminator : "")</span>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><h6 class="dropdown-header">@user.UsernameWithDiscriminator</h6></li>
-                        <li><h6 class="dropdown-header">@user.Id</h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/logout"><span class="oi oi-account-logout"></span> Abmelden</a></li>
+    <div class="@NavMenuCssClass nav-scrollable">
+        <nav class="flex-column">
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item dropdown px-3">
+                        <a class="nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="@user.AvatarUrl" class="nav-profile-pic" alt=""/>
+                            <span class="dropdown-label">@user.Username @(!user.IsMigrated ? "#" + user.Discriminator : "")</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <li>
+                                <h6 class="dropdown-header">@user.UsernameWithDiscriminator</h6>
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">@user.Id</h6>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/logout"><span class="oi oi-account-logout"></span> Abmelden</a>
+                            </li>
 
-                    </ul>
-                </div>
-            </Authorized>
-            <NotAuthorized>
+                        </ul>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/login">
+                            <span class="oi oi-account-login" aria-hidden="true"></span> Anmelden
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+            <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter">
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/login">
-                        <span class="oi oi-account-login" aria-hidden="true"></span> Anmelden
+                    <NavLink class="nav-link" href="mitglieder">
+                        <span class="oi oi-person" aria-hidden="true"></span> Mitglieder
                     </NavLink>
                 </div>
-            </NotAuthorized>
-        </AuthorizeView>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="mitglieder">
-                    <span class="oi oi-person" aria-hidden="true"></span> Mitglieder
-                </NavLink>
-            </div>
-        </AuthorizeView>
-        <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter, Team">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="bot">
-                    <span class="oi oi-dashboard" aria-hidden="true"></span> Botinformationen
-                </NavLink>
-            </div>
-        </AuthorizeView>
-        
-        
-        
-        
-        
-        
-        <AuthorizeView Roles="BotOwner, Administrator">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="debug">
-                    <span class="oi oi-code" aria-hidden="true"></span> Debug
-                </NavLink>
-            </div>
-        </AuthorizeView>
-    </nav>
-</div>
-<style>
+            </AuthorizeView>
+            <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter, Team">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="bot">
+                        <span class="oi oi-dashboard" aria-hidden="true"></span> Botinformationen
+                    </NavLink>
+                </div>
+            </AuthorizeView>
+
+
+            <AuthorizeView Roles="BotOwner, Administrator">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="debug">
+                        <span class="oi oi-code" aria-hidden="true"></span> Debug
+                    </NavLink>
+                </div>
+            </AuthorizeView>
+        </nav>
+    </div>
+    <style>
     .nav-link {
         color: #fff !important;
         padding-left: 1rem;
     }
 </style>
-
 }
 
 @code {
@@ -94,7 +95,7 @@
     protected override async Task OnInitializedAsync()
     {
         userId = usrSvc.GetUserId(httpContextAccessor.HttpContext);
-        
+
         try
         {
             user = await CurrentApplication.DiscordClient.GetUserAsync(userId.Value);
@@ -103,6 +104,7 @@
         {
             user = null;
         }
+
         initialized = true;
     }
 
