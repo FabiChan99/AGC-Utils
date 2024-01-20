@@ -118,21 +118,17 @@ public static class DatabaseService
         string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
                              $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
 
-        await using (NpgsqlConnection connection = new(GetConnectionString()))
+        await using NpgsqlConnection connection = new(GetConnectionString());
+        await connection.OpenAsync();
+
+        await using NpgsqlCommand command = new(insertQuery, connection);
+        foreach (var kvp in columnValuePairs)
         {
-            await connection.OpenAsync();
-
-            await using (NpgsqlCommand command = new(insertQuery, connection))
-            {
-                foreach (var kvp in columnValuePairs)
-                {
-                    NpgsqlParameter parameter = new($"@{kvp.Key}", kvp.Value);
-                    command.Parameters.Add(parameter);
-                }
-
-                await command.ExecuteNonQueryAsync();
-            }
+            NpgsqlParameter parameter = new($"@{kvp.Key}", kvp.Value);
+            command.Parameters.Add(parameter);
         }
+
+        await command.ExecuteNonQueryAsync();
     }
 
     public static async Task<List<Dictionary<string, object>>> SelectDataFromTable(string tableName,
@@ -157,37 +153,31 @@ public static class DatabaseService
 
         List<Dictionary<string, object>> results = new();
 
-        await using (NpgsqlConnection connection = new(GetConnectionString()))
-        {
-            await connection.OpenAsync();
+        await using NpgsqlConnection connection = new(GetConnectionString());
+        await connection.OpenAsync();
 
-            await using (NpgsqlCommand command = new(selectQuery, connection))
+        await using NpgsqlCommand command = new(selectQuery, connection);
+        if (whereConditions != null && whereConditions.Count > 0)
+            foreach (var condition in whereConditions)
             {
-                if (whereConditions != null && whereConditions.Count > 0)
-                    foreach (var condition in whereConditions)
-                    {
-                        NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value);
-                        command.Parameters.Add(parameter);
-                    }
-
-                await using (NpgsqlDataReader reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        Dictionary<string, object> row = new();
-
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            string columnName = reader.GetName(i);
-                            object columnValue = reader.GetValue(i);
-
-                            row[columnName] = columnValue;
-                        }
-
-                        results.Add(row);
-                    }
-                }
+                NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value);
+                command.Parameters.Add(parameter);
             }
+
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            Dictionary<string, object> row = new();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                string columnName = reader.GetName(i);
+                object columnValue = reader.GetValue(i);
+
+                row[columnName] = columnValue;
+            }
+
+            results.Add(row);
         }
 
         return results;
@@ -207,21 +197,19 @@ public static class DatabaseService
 
         int rowsAffected;
 
-        await using (NpgsqlConnection connection = new(GetConnectionString()))
+        await using NpgsqlConnection connection = new(GetConnectionString());
+        await connection.OpenAsync();
+
+        await using (NpgsqlCommand command = new(deleteQuery, connection))
         {
-            await connection.OpenAsync();
+            if (whereConditions != null && whereConditions.Count > 0)
+                foreach (var condition in whereConditions)
+                {
+                    NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value.value);
+                    command.Parameters.Add(parameter);
+                }
 
-            await using (NpgsqlCommand command = new(deleteQuery, connection))
-            {
-                if (whereConditions != null && whereConditions.Count > 0)
-                    foreach (var condition in whereConditions)
-                    {
-                        NpgsqlParameter parameter = new($"@{condition.Key}", condition.Value.value);
-                        command.Parameters.Add(parameter);
-                    }
-
-                rowsAffected = await command.ExecuteNonQueryAsync();
-            }
+            rowsAffected = await command.ExecuteNonQueryAsync();
         }
 
         return rowsAffected;
