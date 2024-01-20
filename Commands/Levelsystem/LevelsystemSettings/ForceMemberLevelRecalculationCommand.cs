@@ -36,7 +36,7 @@ public class ForceMemberLevelRecalculationCommand : ApplicationCommandsModule
             await LevelUtils.UpdateLevelRoles(member);
         }
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
-            "<:success:1085333481820790944> **Erfolgreich!** Level wurden neu berechnet!"));
+            "<:success:1085333481820790944> **Erfolgreich!** Level von ``" + user.Username + "`` wurden neu berechnet!"));
 
     }
 }
