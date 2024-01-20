@@ -39,7 +39,20 @@ public class RankCommand : ApplicationCommandsModule
             Color = BotConfig.GetEmbedColor()
         };
 
+        DiscordMember member = null;
+        try
+        {
+            member = await ctx.Guild.GetMemberAsync(user.Id);
+            await LevelUtils.UpdateLevelRoles(member);
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+        
         await LevelUtils.RecalculateUserLevel(user.Id);
+        
+        
 
         var rank = await LevelUtils.GetRank(user.Id);
         var level = rank[user.Id].Level;
