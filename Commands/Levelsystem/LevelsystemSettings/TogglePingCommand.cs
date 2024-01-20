@@ -1,10 +1,11 @@
 ﻿using AGC_Management.Utils;
+using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 
 namespace AGC_Management.Commands.Levelsystem;
 
-public partial class LevelSystemSettings
+public partial class TogglePingCommand: ApplicationCommandsModule
 {
     [SlashCommand("togglelevelping", "Schalte die Levelup-Pings ein oder aus")]
     public static async Task ToggleLevelPingCommand(InteractionContext ctx)
