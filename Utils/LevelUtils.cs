@@ -309,7 +309,7 @@ public static class LevelUtils
         blockedChannels.Add(channelId);
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
-        await using var cmd = new NpgsqlCommand("INSERT INTO blocked_channels (channelid) VALUES (@channelid)", db);
+        await using var cmd = new NpgsqlCommand("INSERT INTO level_excludedchannels (channelid) VALUES (@channelid)", db);
         cmd.Parameters.AddWithValue("@channelid", (long)channelId);
         await cmd.ExecuteNonQueryAsync();
         await db.CloseAsync();
@@ -326,7 +326,7 @@ public static class LevelUtils
         blockedChannels.Remove(channelId);
         await using var db = new NpgsqlConnection(DatabaseService.GetConnectionString());
         await db.OpenAsync();
-        await using var cmd = new NpgsqlCommand("DELETE FROM blocked_channels WHERE channelid = @channelid", db);
+        await using var cmd = new NpgsqlCommand("DELETE FROM level_excludedchannels WHERE channelid = @channelid", db);
         cmd.Parameters.AddWithValue("@channelid", (long)channelId);
         await cmd.ExecuteNonQueryAsync();
         await db.CloseAsync();
