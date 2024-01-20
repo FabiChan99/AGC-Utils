@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Text;
 using AGC_Management.Entities;
 using AGC_Management.Enums.LevelSystem;
 using AGC_Management.Services;
@@ -1159,47 +1160,47 @@ public static class LevelUtils
 
     private static async Task SendLevelUpMessageAndReward(DiscordUser user, int level)
     {
+        // Fetch all necessary data at once
         var levelUpMessage = await GetLevelUpMessage();
         var pingEnabled = await UserHasPingEnabled(user.Id);
         var isReward = await IsLevelRewarded(level);
         var rewardMessage = await GetLevelUpRewardMessage();
         var reward = await GetRewardForaLevel(level);
+        var member = await user.ConvertToMember(CurrentApplication.TargetGuild);
+
+        // Use StringBuilder for string concatenation
+        var messageBuilder = new StringBuilder();
+
         if (isReward)
         {
-            var member = await user.ConvertToMember(CurrentApplication.TargetGuild);
             var role = CurrentApplication.TargetGuild.GetRole(reward[true]);
-            try
+            if (!member.Roles.Contains(role))
             {
-                await member.GrantRoleAsync(role);
-                var formattedMessage = await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role);
-                var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
-                var messagebuilder = new DiscordMessageBuilder();
-                messagebuilder.WithContent(formattedMessage);
-                if (!pingEnabled)
+                try
                 {
-                    messagebuilder.WithAllowedMentions(Mentions.None);
+                    await member.GrantRoleAsync(role);
                 }
-
-                await channel.SendMessageAsync(messagebuilder);
+                catch (Exception e)
+                {
+                    CurrentApplication.Logger.Error(e.Message);
+                }
             }
-            catch (Exception e)
-            {
-                CurrentApplication.Logger.Error(e.Message);
-            }
+            messageBuilder.Append(await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role));
         }
         else
         {
-            var formattedMessage = await MessageFormatter.FormatLevelUpMessage(levelUpMessage, false, user);
-            var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
-            var messagebuilder = new DiscordMessageBuilder();
-            messagebuilder.WithContent(formattedMessage);
-            if (!pingEnabled)
-            {
-                messagebuilder.WithAllowedMentions(Mentions.None);
-            }
-
-            await channel.SendMessageAsync(messagebuilder);
+            messageBuilder.Append(await MessageFormatter.FormatLevelUpMessage(levelUpMessage, false, user));
         }
+
+        var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
+        var messagebuilder = new DiscordMessageBuilder();
+        messagebuilder.WithContent(messageBuilder.ToString());
+        if (!pingEnabled)
+        {
+            messagebuilder.WithAllowedMentions(Mentions.None);
+        }
+
+        await channel.SendMessageAsync(messagebuilder);
     }
 
     private static async Task<bool> IsLevelRewarded(int level)
