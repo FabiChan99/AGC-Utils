@@ -60,7 +60,7 @@ public class LeaderboardCommand : ApplicationCommandsModule
         descriptionBuilder.AppendLine("..................");
 
 
-        int startRange = Math.Max(userRank - 5, 6);
+        int startRange = Math.Max(userRank - 5, 5);
         int endRange = Math.Min(userRank + 5, leaderboardData.Count);
 
         if (userRank <= 5)
