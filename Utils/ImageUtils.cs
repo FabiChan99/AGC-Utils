@@ -158,6 +158,11 @@ public sealed class ImageUtils
             barcolor = SKColor.Parse("#9f00ff");
         }
 
+        if (overridecard)
+        {
+            barcolor = SKColor.Parse("#9f00ff");
+        }
+
         if (cardid != 0)
         {
             canvas.DrawRoundRect(new SKRect(15, 15, cardWidth - 15, cardHeight - 15), 20, 20, darkenPaint);
@@ -194,7 +199,7 @@ public sealed class ImageUtils
             Color = SKColors.White,
             TextSize = 25,
             IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Verdana", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright),
+            Typeface = SKTypeface.FromFamilyName(font, SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright),
         };
         
         canvas.DrawText($"Rang #{rank}   Level: {level}", 300, 110, rankLevelPaint);
@@ -224,7 +229,7 @@ public sealed class ImageUtils
             TextAlign = SKTextAlign.Center,
             Color = SKColors.White,
             IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Verdana")
+            Typeface = SKTypeface.FromFamilyName(font)
         };
 
         float xpTextWidth = xpPaint.MeasureText(xpText);
@@ -257,7 +262,7 @@ public sealed class ImageUtils
             TextAlign = SKTextAlign.Center,
             Color = SKColors.White,
             IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Verdana")
+            Typeface = SKTypeface.FromFamilyName(font)
         };
 
         string totalXpText = $"Gesamt XP: {totalXP}";
