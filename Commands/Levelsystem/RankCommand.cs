@@ -71,7 +71,9 @@ public class RankCommand : ApplicationCommandsModule
             var imagedata = await ImageUtils.GenerateRankCard(user, level, userRank, percentage, totalxp,
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("rank.png", imgstream));
+            var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",
+                "Hintergrund ändern (bald verfügbar)", true, new DiscordComponentEmoji("🖼️"));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button));
             return;
         }
         catch (Exception e)
