@@ -1310,7 +1310,7 @@ public static class LevelUtils
         
         var xp = XpForLevel(level);
         await using var cmd =
-            db.CreateCommand("UPDATE levelingdata SET current_level = @level AND current_xp = @xp WHERE userid = @id");
+            db.CreateCommand("UPDATE levelingdata SET current_level = @level, current_xp = @xp WHERE userid = @id");
         cmd.Parameters.AddWithValue("@level", level);
         cmd.Parameters.AddWithValue("@id", (long)user.Id);
         cmd.Parameters.AddWithValue("@xp", xp);
