@@ -49,10 +49,9 @@ public class RankCommand : ApplicationCommandsModule
         {
             // ignored
         }
-        
+
         await LevelUtils.RecalculateUserLevel(user.Id);
-        
-        
+
 
         var rank = await LevelUtils.GetRank(user.Id);
         var level = rank[user.Id].Level;
@@ -68,12 +67,14 @@ public class RankCommand : ApplicationCommandsModule
         var errorMessage = "";
         try
         {
-            var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage, totalxp,
+            var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage,
+                totalxp,
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
             var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",
                 "Hintergrund ändern (bald verfügbar)", true, new DiscordComponentEmoji("🖼️"));
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button));
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button));
             return;
         }
         catch (Exception e)
@@ -82,8 +83,8 @@ public class RankCommand : ApplicationCommandsModule
             errorMessage = e.Message;
             errored = true;
         }
-        
-        
+
+
         using var bar = ImageUtils.CreateProgressBar(200, 20, percentage / 100f, $"{percentage}%");
         using var image = SKImage.FromBitmap(bar);
         await using var stream = image.Encode(SKEncodedImageFormat.Png, 100).AsStream();
@@ -106,5 +107,4 @@ public class RankCommand : ApplicationCommandsModule
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed).AddFile("progress.png", stream));
     }
-    
 }

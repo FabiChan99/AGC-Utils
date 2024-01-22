@@ -3,7 +3,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using AGC_Management.Attributes;
-using AGC_Management.Services;
 
 #endregion
 
@@ -44,7 +43,6 @@ public class SnippetManagerCommands : BaseCommandModule
     public async Task AddSnippet(CommandContext ctx, string name, [RemainingText] string content)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
 
 
         await using var checkCmd =
@@ -79,7 +77,7 @@ public class SnippetManagerCommands : BaseCommandModule
     public async Task RemoveSnippet(CommandContext ctx, string name)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = con.CreateCommand("DELETE FROM snippets WHERE snip_id = @name");
         cmd.Parameters.AddWithValue("name", name);
         int rowsAffected = await cmd.ExecuteNonQueryAsync();
@@ -106,7 +104,7 @@ public class SnippetManagerCommands : BaseCommandModule
     public async Task ListSnippets(CommandContext ctx)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         await using var cmd = con.CreateCommand("SELECT snip_id FROM snippets");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -145,7 +143,7 @@ public class SnippetManagerCommands : BaseCommandModule
     public async Task SearchSnippets(CommandContext ctx, string snippet_id)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = con.CreateCommand("SELECT snipped_text FROM snippets WHERE snip_id = @snippet_id");
         cmd.Parameters.AddWithValue("snippet_id", snippet_id);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -173,7 +171,7 @@ public class SnippetManagerCommands : BaseCommandModule
     public async Task ShortcutSnippets(CommandContext ctx)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         var words = Regex.Split(ctx.Message.Content, @"\W+");
 

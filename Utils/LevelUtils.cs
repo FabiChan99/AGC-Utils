@@ -3,7 +3,6 @@
 using System.Text;
 using AGC_Management.Entities;
 using AGC_Management.Enums.LevelSystem;
-using AGC_Management.Services;
 
 #endregion
 
@@ -325,12 +324,12 @@ public static class LevelUtils
 
         blockedChannels.Add(channelId);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("INSERT INTO level_excludedchannels (channelid) VALUES (@channelid)");
         cmd.Parameters.AddWithValue("@channelid", (long)channelId);
         await cmd.ExecuteNonQueryAsync();
-        
+
         return true;
     }
 
@@ -344,11 +343,11 @@ public static class LevelUtils
 
         blockedChannels.Remove(channelId);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("DELETE FROM level_excludedchannels WHERE channelid = @channelid");
         cmd.Parameters.AddWithValue("@channelid", (long)channelId);
         await cmd.ExecuteNonQueryAsync();
-        
+
         return true;
     }
 
@@ -369,25 +368,23 @@ public static class LevelUtils
     public static async Task AddRewardRole(ulong roleId, int level)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("INSERT INTO level_rewards (roleid, level) VALUES (@roleid, @level)");
         cmd.Parameters.AddWithValue("@roleid", (long)roleId);
         cmd.Parameters.AddWithValue("@level", level);
         await cmd.ExecuteNonQueryAsync();
-        
     }
 
     public static async Task RemoveRewardRole(ulong roleId, int level)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("DELETE FROM level_rewards WHERE roleid = @roleid AND level = @level");
         cmd.Parameters.AddWithValue("@roleid", (long)roleId);
         cmd.Parameters.AddWithValue("@level", level);
         await cmd.ExecuteNonQueryAsync();
-        
     }
 
 
@@ -404,12 +401,12 @@ public static class LevelUtils
         var destinationXp = destinationRank[destinationUserId].Xp;
         var newXp = sourceXp + destinationXp;
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id");
         cmd.Parameters.AddWithValue("@xp", newXp);
         cmd.Parameters.AddWithValue("@id", (long)destinationUserId);
         await cmd.ExecuteNonQueryAsync();
-        
+
 
         await using var cmd2 = db.CreateCommand("UPDATE levelingdata SET current_xp = @xp WHERE userid = @id");
         cmd2.Parameters.AddWithValue("@xp", 0);
@@ -495,7 +492,7 @@ public static class LevelUtils
         int rank = 0;
         await AddUserToDbIfNot(userid);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("SELECT userid, current_xp FROM levelingdata ORDER BY current_xp DESC");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -511,7 +508,7 @@ public static class LevelUtils
             }
         }
 
-        
+
         return rank;
     }
 
@@ -531,13 +528,12 @@ public static class LevelUtils
         var xp = rank[userId].Xp;
         var level = LevelAtXp(xp);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("UPDATE levelingdata SET current_level = @level WHERE userid = @id");
         cmd.Parameters.AddWithValue("@level", level);
         cmd.Parameters.AddWithValue("@id", (long)userId);
         await cmd.ExecuteNonQueryAsync();
-        
     }
 
     public static async Task RecalculateAllUserLevels()
@@ -573,6 +569,7 @@ public static class LevelUtils
 
                 await cmd2.ExecuteNonQueryAsync();
             }
+
             await using var cmd3 = db.CreateCommand("UPDATE levelingsettings SET lastrecalc = @timestamp");
             cmd3.Parameters.AddWithValue("@timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             await cmd3.ExecuteNonQueryAsync();
@@ -677,7 +674,7 @@ public static class LevelUtils
     public static async Task<bool> isVcLevelingEnabled()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("SELECT vc_active FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -694,14 +691,14 @@ public static class LevelUtils
             return false;
         }
 
-        
+
         return false;
     }
 
     public static async Task<bool> isMessageLevelingEnabled()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("SELECT text_active FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
@@ -719,14 +716,14 @@ public static class LevelUtils
             return false;
         }
 
-        
+
         return false;
     }
 
     public static async Task<float> GetVcXpMultiplier()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("SELECT vc_multi FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -743,14 +740,14 @@ public static class LevelUtils
             return 1;
         }
 
-        
+
         return 1;
     }
 
     public static async Task<float> GetMessageXpMultiplier()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("SELECT text_multi FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -767,14 +764,14 @@ public static class LevelUtils
             return 1;
         }
 
-        
+
         return 1;
     }
 
     public static async Task<string> GetLevelUpMessage()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("SELECT levelupmessage FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
@@ -792,14 +789,14 @@ public static class LevelUtils
             return "Congratulations {user}! You just advanced to level {level}!";
         }
 
-        
+
         return "Congratulations {user}! You just advanced to level {level}!";
     }
 
     public static async Task<string> GetLevelUpRewardMessage()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("SELECT levelupmessagereward FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
@@ -817,14 +814,14 @@ public static class LevelUtils
             return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
         }
 
-        
+
         return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
     }
 
     public static async Task<ulong> GetLevelUpChannelId()
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("SELECT levelupchannelid FROM levelingsettings WHERE guildid = @guildid");
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
@@ -842,7 +839,7 @@ public static class LevelUtils
             return 0;
         }
 
-        
+
         return 0;
     }
 
@@ -850,7 +847,7 @@ public static class LevelUtils
     {
         var rewards = new List<Reward>();
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         var cmd = db.CreateCommand("SELECT level, roleid FROM level_rewards ORDER BY level ASC");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -865,7 +862,7 @@ public static class LevelUtils
         }
 
         await reader.CloseAsync();
-        
+
         return rewards;
     }
 
@@ -874,20 +871,20 @@ public static class LevelUtils
         await AddUserToDbIfNot(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
         var pingEnabled = await IsLevelUpPingEnabled(userId);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("UPDATE levelingdata SET pingactive = @pingenabled WHERE userid = @userid");
         cmd.Parameters.AddWithValue("@pingenabled", !pingEnabled);
         cmd.Parameters.AddWithValue("@userid", (long)userId);
         await cmd.ExecuteNonQueryAsync();
-        
+
         return !pingEnabled;
     }
 
     public static async Task<bool> IsLevelUpPingEnabled(ulong userId)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("SELECT pingactive FROM levelingdata WHERE userid = @userid");
         cmd.Parameters.AddWithValue("@userid", (long)userId);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -903,7 +900,7 @@ public static class LevelUtils
             return false;
         }
 
-        
+
         return false;
     }
 
@@ -911,7 +908,7 @@ public static class LevelUtils
     {
         var overrides = new List<MultiplicatorOverrides>();
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         var cmd = db.CreateCommand("SELECT roleid, multiplicator FROM level_multiplicatoroverrideroles");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -926,7 +923,7 @@ public static class LevelUtils
         }
 
         await reader.CloseAsync();
-        
+
         return overrides;
     }
 
@@ -949,7 +946,7 @@ public static class LevelUtils
     {
         var blockedChannels = new List<ulong>();
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         var cmd = db.CreateCommand("SELECT channelid FROM level_excludedchannels");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -963,7 +960,7 @@ public static class LevelUtils
         }
 
         await reader.CloseAsync();
-        
+
         return blockedChannels;
     }
 
@@ -971,7 +968,7 @@ public static class LevelUtils
     {
         var blockedRoles = new List<ulong>();
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         var cmd = db.CreateCommand("SELECT roleid FROM level_excludedroles");
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -985,7 +982,7 @@ public static class LevelUtils
         }
 
         await reader.CloseAsync();
-        
+
         return blockedRoles;
     }
 
@@ -1031,9 +1028,10 @@ public static class LevelUtils
             await AddUserToDbIfNot(user.Id);
             var typeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
             var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var cooldowndb = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>(); 
+            var cooldowndb = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
             await using var cooldowncmd =
-                cooldowndb.CreateCommand($"SELECT {typeString} FROM levelingdata WHERE userid = @id AND {typeString} > @cooldown");
+                cooldowndb.CreateCommand(
+                    $"SELECT {typeString} FROM levelingdata WHERE userid = @id AND {typeString} > @cooldown");
             cooldowncmd.Parameters.AddWithValue("@id", (long)user.Id);
             cooldowncmd.Parameters.AddWithValue("@cooldown", now - 60);
             await using var cooldownreader = await cooldowncmd.ExecuteReaderAsync();
@@ -1076,7 +1074,7 @@ public static class LevelUtils
             var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var rewardTypeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
             var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-            
+
             await using var cmd =
                 db.CreateCommand(
                     "UPDATE levelingdata SET current_xp = @xp, current_level = @level, " + rewardTypeString +
@@ -1086,7 +1084,7 @@ public static class LevelUtils
             cmd.Parameters.AddWithValue("@id", (long)user.Id);
             cmd.Parameters.AddWithValue("@timestamp", current_timestamp);
             await cmd.ExecuteNonQueryAsync();
-            
+
             CurrentApplication.Logger.Debug("Gave " + xpToGive + " xp to " + user.Username);
             if (newLevel > currentLevel)
             {
@@ -1106,7 +1104,7 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@level", 0);
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     public static async Task AddUserToDbIfNot(ulong userid)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -1179,7 +1177,7 @@ public static class LevelUtils
     public static async Task<bool> UserHasPingEnabled(ulong userId)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd = db.CreateCommand("SELECT pingactive FROM levelingdata WHERE userid = @id");
         cmd.Parameters.AddWithValue("@id", (long)userId);
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -1192,7 +1190,7 @@ public static class LevelUtils
             }
         }
 
-        
+
         return false;
     }
 
@@ -1254,7 +1252,7 @@ public static class LevelUtils
         {
             return false;
         }
-        
+
         return false;
     }
 
@@ -1307,7 +1305,7 @@ public static class LevelUtils
     {
         await AddUserToDbIfNot(user.Id);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         var xp = XpForLevel(level);
         await using var cmd =
             db.CreateCommand("UPDATE levelingdata SET current_level = @level, current_xp = @xp WHERE userid = @id");
@@ -1315,7 +1313,7 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@id", (long)user.Id);
         cmd.Parameters.AddWithValue("@xp", xp);
         await cmd.ExecuteNonQueryAsync();
-        
+
         await RecalculateAndUpdate(user.Id);
     }
 
@@ -1327,7 +1325,7 @@ public static class LevelUtils
         var newLevel = currentLevel + level;
         var xp = XpForLevel(newLevel);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             db.CreateCommand("UPDATE levelingdata SET current_level = @level AND current_xp = @xp WHERE userid = @id");
         cmd.Parameters.AddWithValue("@level", newLevel);
@@ -1335,7 +1333,6 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@xp", xp);
         await RecalculateAndUpdate(user.Id);
         await cmd.ExecuteNonQueryAsync();
-        
     }
 
     public static async Task RemoveLevel(DiscordUser user, int level)
@@ -1353,6 +1350,5 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@xp", xp);
         await RecalculateAndUpdate(user.Id);
         await cmd.ExecuteNonQueryAsync();
-        
     }
 }

@@ -1,8 +1,6 @@
 #region
 
-using System.Threading.RateLimiting;
 using AGC_Management.Entities;
-using AGC_Management.Services;
 using Newtonsoft.Json;
 using RestSharp;
 using NpgsqlDataSource = Npgsql.NpgsqlDataSource;
@@ -235,7 +233,6 @@ public static class ToolSet
         int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
         if (rowCount > 0)
         {
-
             return true;
         }
 
@@ -253,7 +250,7 @@ public static class ToolSet
         {
             return true;
         }
-        
+
         return false;
     }
 

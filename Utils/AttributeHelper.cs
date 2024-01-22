@@ -2,7 +2,6 @@
 
 using System.Data;
 using AGC_Management.Managers;
-using AGC_Management.Services;
 using DisCatSharp.Lavalink;
 
 #endregion

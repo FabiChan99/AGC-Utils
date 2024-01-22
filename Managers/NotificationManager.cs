@@ -3,7 +3,6 @@
 using System.Text;
 using AGC_Management.Components;
 using AGC_Management.Enums;
-using AGC_Management.Services;
 
 #endregion
 
@@ -104,7 +103,7 @@ public class NotificationManager
         long cid = (long)channel_id;
         long uid = (long)user_id;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
         await using var cmd =
             con.CreateCommand("SELECT mode FROM subscriptions WHERE user_id = @uid AND channel_id = @cid");
         cmd.Parameters.AddWithValue("uid", uid);

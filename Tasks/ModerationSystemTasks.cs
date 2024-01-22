@@ -23,7 +23,6 @@ public class ModerationSystemTasks
             await RemoveWarnsOlderThan7Days(discord);
             await Task.Delay(TimeSpan.FromMinutes(5));
         }
-
     }
 
     private int GetWarnExpiringTime()

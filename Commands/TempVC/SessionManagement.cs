@@ -240,7 +240,7 @@ public sealed class SessionManagement : TempVoiceHelper
             string named = newSessionSkip ? "aktiv" : "inaktiv";
 
             var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-            
+
             await using var cmd =
                 con.CreateCommand("UPDATE tempvoicesession SET sessionskip = @sessionskip WHERE userid = @userid");
             cmd.Parameters.AddWithValue("sessionskip", newSessionSkip);

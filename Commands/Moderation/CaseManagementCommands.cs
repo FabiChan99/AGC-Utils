@@ -252,7 +252,7 @@ public sealed class CaseManagement : BaseCommandModule
             }
 
             if (await ToolSet.CheckForReason(ctx, reason)) return;
-            
+
             sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
             await using NpgsqlCommand command = con.CreateCommand(sql);
             command.Parameters.AddWithValue("@description", newreason + urls);

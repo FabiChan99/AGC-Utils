@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Text;
 using AGC_Management.Components;
 using AGC_Management.Enums;
-using AGC_Management.Services;
 using AGC_Management.Utils;
 using DisCatSharp.Interactivity.Extensions;
 
@@ -33,6 +32,7 @@ public class TicketManagerHelper
         {
             ticket_owner = reader.GetInt64(0);
         }
+
         await reader.CloseAsync();
         return ticket_owner;
     }
@@ -373,7 +373,8 @@ public class TicketManagerHelper
         claimembed.WithFooter(
             $"{interaction.User.UsernameWithDiscriminator} wird sich um dein Anliegen kümmern | {ticket_id}");
 
-        await using NpgsqlCommand cmd2 = con.CreateCommand($"UPDATE ticketcache SET claimed = True WHERE ticket_id = '{ticket_id}'");
+        await using NpgsqlCommand cmd2 =
+            con.CreateCommand($"UPDATE ticketcache SET claimed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
         await using NpgsqlCommand cmd3 =
@@ -566,7 +567,7 @@ public class TicketManagerHelper
         var current_unix_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
-        con.CreateCommand(
+            con.CreateCommand(
                 "INSERT INTO flags (description, userid, punisherid, datum, caseid) VALUES (@description, @userid, @punisherid, @datum, @caseid)");
         cmd.Parameters.AddWithValue("@description",
             $"Angehängtes Transcript aus {ticket_id} (Von User: {ticket_owner} -> {transcriptURL}  |  Dazugehörige Notiz: {notes}");

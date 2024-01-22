@@ -2,7 +2,6 @@
 
 using System.Text.RegularExpressions;
 using AGC_Management.Managers;
-using AGC_Management.Services;
 
 #endregion
 
@@ -100,7 +99,7 @@ public class SnippetManagerHelper
         var resultList = new List<(string, string)>();
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        
+
 
         await using var cmd = con.CreateCommand("SELECT snip_id, snipped_text FROM snippets");
 

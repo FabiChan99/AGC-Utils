@@ -1,14 +1,11 @@
 ﻿#region
 
-using System.Data;
-
 #endregion
 
 namespace AGC_Management.Services;
 
 public static class DatabaseService
 {
-
     public static string GetConnectionString()
     {
         var dbConfigSection = GlobalProperties.DebugMode ? "DatabaseCfgDBG" : "DatabaseCfg";
@@ -18,9 +15,7 @@ public static class DatabaseService
         var DbName = BotConfig.GetConfig()[dbConfigSection]["Database"];
         return $"Host={DbHost};Username={DbUser};Password={DbPass};Database={DbName};Maximum Pool Size=10;";
     }
-    
-    
-    
+
 
     // Read DBContent
     public static NpgsqlDataReader ExecuteQuery(string sql)
@@ -42,7 +37,7 @@ public static class DatabaseService
     {
         string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
                              $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
-        
+
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         await using NpgsqlCommand command = connection.CreateCommand(insertQuery);
@@ -77,7 +72,7 @@ public static class DatabaseService
 
         List<Dictionary<string, object>> results = new();
 
-        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>(); 
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         await using NpgsqlCommand command = connection.CreateCommand(selectQuery);
         if (whereConditions != null && whereConditions.Count > 0)
@@ -119,7 +114,7 @@ public static class DatabaseService
         }
 
         int rowsAffected;
-        
+
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         await using NpgsqlCommand command = connection.CreateCommand(deleteQuery);
@@ -141,11 +136,17 @@ public static class DatabaseService
         var dbstring = GetConnectionString();
         var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         CurrentApplication.Logger.Information("Initializing database tables...");
-        
+
         var tableCommands = new Dictionary<string, string>
         {
-            {"rankcardbackgrounds", "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"},
-            {"user_rankcardbackgrounds", "CREATE TABLE IF NOT EXISTS user_rankcardbackgrounds (userid BIGINT, bg_id INTEGER, barcolor TEXT DEFAULT NULL)"},
+            {
+                "rankcardbackgrounds",
+                "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"
+            },
+            {
+                "user_rankcardbackgrounds",
+                "CREATE TABLE IF NOT EXISTS user_rankcardbackgrounds (userid BIGINT, bg_id INTEGER, barcolor TEXT DEFAULT NULL)"
+            },
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
             {
                 "levelingdata",
@@ -197,7 +198,6 @@ public static class DatabaseService
         }
 
 
-
         CurrentApplication.Logger.Information("Database tables initialized.");
         await UpdateTables();
     }
@@ -236,7 +236,7 @@ public static class DatabaseService
                     { "text", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS text TEXT" }
                 }
             },
-            
+
             {
                 "banreasons",
                 new Dictionary<string, string>
@@ -437,7 +437,7 @@ public static class DatabaseService
                 await Task.Delay(25);
             }
         }
-        
+
         await InitLeveling();
         CurrentApplication.Logger.Information("Database tables updated.");
     }
@@ -447,7 +447,7 @@ public static class DatabaseService
     {
         ulong targetGuildId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-       
+
         await using var cmd = con.CreateCommand($"SELECT * FROM levelingsettings WHERE guildid = '{targetGuildId}'");
         await using var reader = await cmd.ExecuteReaderAsync();
         var result = await reader.ReadAsync();

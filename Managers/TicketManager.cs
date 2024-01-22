@@ -2,7 +2,6 @@
 
 using AGC_Management.Components;
 using AGC_Management.Enums;
-using AGC_Management.Services;
 using AGC_Management.Utils;
 
 #endregion
@@ -123,7 +122,8 @@ public class TicketManager
             {
                 var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
                 await using NpgsqlCommand cmd =
-                    con.CreateCommand($"INSERT INTO ticketstore (ticket_id, ticket_owner, tickettype, closed) VALUES ('{ticketid}', '{memberid}', '{ticketType.ToString().ToLower()}', False)");
+                    con.CreateCommand(
+                        $"INSERT INTO ticketstore (ticket_id, ticket_owner, tickettype, closed) VALUES ('{ticketid}', '{memberid}', '{ticketType.ToString().ToLower()}', False)");
                 await cmd.ExecuteNonQueryAsync();
 
                 ticket_channel = await interaction.Guild.CreateChannelAsync($"support-{ticket_number}",
@@ -208,9 +208,10 @@ public class TicketManager
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 = con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
+        await using NpgsqlCommand cmd2 =
+            con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
-        
+
         string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
         await using NpgsqlCommand cmd3 = con.CreateCommand(query2);
         await using NpgsqlDataReader reader2 = await cmd3.ExecuteReaderAsync();
@@ -306,9 +307,10 @@ public class TicketManager
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 = con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
+        await using NpgsqlCommand cmd2 =
+            con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
-        
+
         string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
         await using NpgsqlCommand cmd3 = con.CreateCommand(query2);
         await using NpgsqlDataReader reader2 = await cmd3.ExecuteReaderAsync();
@@ -415,7 +417,8 @@ public class TicketManager
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 = con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
+        await using NpgsqlCommand cmd2 =
+            con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
         string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";

@@ -48,7 +48,9 @@ internal class Program : BaseCommandModule
         LogEventLevel loglevel;
         try
         {
-            loglevel = bool.Parse(BotConfig.GetConfig()["MainConfig"]["VerboseLogging"]) ? LogEventLevel.Debug : LogEventLevel.Information;
+            loglevel = bool.Parse(BotConfig.GetConfig()["MainConfig"]["VerboseLogging"])
+                ? LogEventLevel.Debug
+                : LogEventLevel.Information;
         }
         catch
         {
@@ -149,9 +151,9 @@ internal class Program : BaseCommandModule
             loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(logger));
         }
 
-            
-        
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(DatabaseService.GetConnectionString()).UseLoggerFactory(loggerFactory);
+
+        var dataSourceBuilder =
+            new NpgsqlDataSourceBuilder(DatabaseService.GetConnectionString()).UseLoggerFactory(loggerFactory);
         var dataSource = dataSourceBuilder.Build();
 
         var serviceProvider = new ServiceCollection()
@@ -259,7 +261,7 @@ internal class Program : BaseCommandModule
                     int tempvcCount = 0;
                     var constring = DatabaseService.GetConnectionString();
                     var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-                    
+
                     string query = "SELECT channelid FROM tempvoice";
                     await using var cmd = con.CreateCommand(query);
                     await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();

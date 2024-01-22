@@ -42,7 +42,7 @@ namespace AGC_Management.Utils
             try
             {
                 var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-                
+
                 await using (var checkCmd = conn.CreateCommand("SELECT COUNT(*) FROM reasonmap WHERE key = @key"))
                 {
                     checkCmd.Parameters.AddWithValue("key", key);

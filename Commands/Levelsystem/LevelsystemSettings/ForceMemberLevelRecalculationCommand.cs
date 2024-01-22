@@ -16,7 +16,8 @@ public class ForceMemberLevelRecalculationCommand : ApplicationCommandsModule
     [ACRequireStaffRole]
     [ApplicationCommandRequirePermissions(Permissions.Administrator)]
     [SlashCommand("forcememberrecalc", "Erzwinge eine Neuberechnung der Level eines Nutzers")]
-    public static async Task ForceMemberLevelRecalculation(InteractionContext ctx, [Option("user", "Der Nutzer bei dem die Level neu berechnet werden sollen.")] DiscordUser user)
+    public static async Task ForceMemberLevelRecalculation(InteractionContext ctx,
+        [Option("user", "Der Nutzer bei dem die Level neu berechnet werden sollen.")] DiscordUser user)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
@@ -35,8 +36,9 @@ public class ForceMemberLevelRecalculationCommand : ApplicationCommandsModule
             var member = await ctx.Guild.GetMemberAsync(user.Id);
             await LevelUtils.UpdateLevelRoles(member);
         }
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
-            "<:success:1085333481820790944> **Erfolgreich!** Level von ``" + user.Username + "`` wurden neu berechnet!"));
 
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
+            "<:success:1085333481820790944> **Erfolgreich!** Level von ``" + user.Username +
+            "`` wurden neu berechnet!"));
     }
 }
