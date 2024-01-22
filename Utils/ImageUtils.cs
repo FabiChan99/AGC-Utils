@@ -120,6 +120,7 @@ public sealed class ImageUtils
         try
         {
             cardid = int.Parse(BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundId"]);
+            bgurl = BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundUrl"];
         }
         catch (Exception)
         {
