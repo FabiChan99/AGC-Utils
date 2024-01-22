@@ -116,6 +116,15 @@ public sealed class ImageUtils
         {
             cardid = 0;
         }
+
+        try
+        {
+            cardid = int.Parse(BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundId"]);
+        }
+        catch (Exception)
+        {
+
+        }
         if (cardid > 0)
         {
             httpclient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
