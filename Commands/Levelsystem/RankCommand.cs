@@ -68,7 +68,7 @@ public class RankCommand : ApplicationCommandsModule
         var errorMessage = "";
         try
         {
-            var imagedata = await ImageUtils.GenerateRankCard(user, level, userRank, percentage, totalxp,
+            var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage, totalxp,
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
             var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",

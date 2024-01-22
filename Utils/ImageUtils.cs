@@ -43,7 +43,7 @@ public sealed class ImageUtils
         return bmp;
     }
 
-    public static async Task<SKData> GenerateRankCard(DiscordUser user, int level, int rank, float progression, int totalxp,
+    public static async Task<SKData> GenerateRankCard(DiscordUser user, int currentxpforthislevel, int level, int rank, float progression, int totalxp,
         int xpforthisleveltocomplete)
     {
         const int cardWidth = 934;
@@ -116,11 +116,13 @@ public sealed class ImageUtils
         {
             cardid = 0;
         }
-
+        bool overridecard = false;
         try
         {
             cardid = int.Parse(BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundId"]);
             bgurl = BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundUrl"];
+            overridecard = true;
+            
         }
         catch (Exception)
         {
@@ -151,7 +153,7 @@ public sealed class ImageUtils
             IsAntialias = true,
         };
         
-        if (cardid == 0)
+        if (cardid == 0 && overridecard == false)
         {
             barcolor = SKColor.Parse("#9f00ff");
         }
@@ -215,7 +217,7 @@ public sealed class ImageUtils
         var progressBarRect = new SKRect(progressBarBackgroundRect.Left, progressBarBackgroundRect.Top, progressBarBackgroundRect.Left + (progressBarBackgroundRect.Width - 20) * progress, progressBarBackgroundRect.Bottom);
         canvas.DrawRoundRect(new SKRoundRect(progressBarRect, 10, 10), progressBarPaint);
 
-               var xpText = $"{totalXP}/{xptoCompleteCurrentLevel} XP ({Math.Round(progress * 100, 2)}%)";
+               var xpText = $"{Converter.FormatWithCommas(currentxpforthislevel)}/{xptoCompleteCurrentLevel} XP ({Math.Round(progress * 100, 2)}%)";
         var xpPaint = new SKPaint
         {
             TextSize = 25,
@@ -259,8 +261,7 @@ public sealed class ImageUtils
         };
 
         string totalXpText = $"Gesamt XP: {totalXP}";
-        float totalXpTextWidth = totalXpPaint.MeasureText(totalXpText);
-        float totalXpTextX = progressBarBackgroundRect.Left + 95;
+        float totalXpTextX = progressBarBackgroundRect.Left + 115;
         float totalXpTextY = progressBarBackgroundRect.Bottom + totalXpPaint.TextSize + 50; // Erhöhen Sie diesen Wert, um den Text weiter nach unten zu verschieben
 
         canvas.DrawText(totalXpText, totalXpTextX, totalXpTextY, totalXpPaint);
