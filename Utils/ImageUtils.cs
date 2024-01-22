@@ -264,12 +264,7 @@ public sealed class ImageUtils
             IsAntialias = true,
             Typeface = SKTypeface.FromFamilyName(font)
         };
-
-        string totalXpText = $"Gesamt XP: {totalXP}";
-        float totalXpTextX = progressBarBackgroundRect.Left + 115;
-        float totalXpTextY = progressBarBackgroundRect.Bottom + totalXpPaint.TextSize + 50; // Erhöhen Sie diesen Wert, um den Text weiter nach unten zu verschieben
-
-        canvas.DrawText(totalXpText, totalXpTextX, totalXpTextY, totalXpPaint);
+        
 
         using var image = SKImage.FromBitmap(bitmap);
         var data = image.Encode(SKEncodedImageFormat.Png, 100);
