@@ -64,6 +64,24 @@ public class RankCommand : ApplicationCommandsModule
         var xpForThisLevelUntilNow = totalxp - xpForCurrentLevel;
         var percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
         var userRank = await LevelUtils.GetUserRankAsync(user.Id);
+        bool errored = false;
+        var errorMessage = "";
+        try
+        {
+            var imagedata = await ImageUtils.GenerateRankCard(user, level, userRank, percentage, totalxp,
+                xpForThisLevel);
+            var imgstream = imagedata.AsStream();
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddFile("rank.png", imgstream));
+            return;
+        }
+        catch (Exception e)
+        {
+            CurrentApplication.Logger.Error(e, "Failed to generate rank card");
+            errorMessage = e.Message;
+            errored = true;
+        }
+        
+        
         using var bar = ImageUtils.CreateProgressBar(200, 20, percentage / 100f, $"{percentage}%");
         using var image = SKImage.FromBitmap(bar);
         await using var stream = image.Encode(SKEncodedImageFormat.Png, 100).AsStream();
@@ -76,9 +94,15 @@ public class RankCommand : ApplicationCommandsModule
                               $"**Gesamt XP:** {display_xp} XP");
         embed.WithThumbnail(user.AvatarUrl);
 
+        if (errored)
+        {
+            embed.WithFooter("Fallback Rangkarte | Fehler: " + errorMessage);
+        }
+
 
         embed.WithImageUrl("attachment://progress.png");
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed).AddFile("progress.png", stream));
     }
+    
 }

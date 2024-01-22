@@ -144,6 +144,8 @@ public static class DatabaseService
         
         var tableCommands = new Dictionary<string, string>
         {
+            {"rankcardbackgrounds", "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"},
+            {"user_rankcardbackgrounds", "CREATE TABLE IF NOT EXISTS user_rankcardbackgrounds (userid BIGINT, bg_id INTEGER, barcolor TEXT DEFAULT NULL)"},
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
             {
                 "levelingdata",
@@ -202,13 +204,30 @@ public static class DatabaseService
 
     private static async Task UpdateTables()
     {
-        var dbstring = GetConnectionString();
         var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         CurrentApplication.Logger.Information("Updating database tables...");
 
 
         var columnUpdates = new Dictionary<string, Dictionary<string, string>>
         {
+            {
+                "rankcardbackgrounds",
+                new Dictionary<string, string>
+                {
+                    { "bg_id", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_id INTEGER" },
+                    { "bg_url", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_url TEXT" },
+                    { "barcolor", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS barcolor TEXT" }
+                }
+            },
+            {
+                "user_rankcardbackgrounds",
+                new Dictionary<string, string>
+                {
+                    { "userid", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS userid BIGINT" },
+                    { "bg_id", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_id INTEGER" },
+                    { "barcolor", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS barcolor TEXT" }
+                }
+            },
             {
                 "reasonmap",
                 new Dictionary<string, string>
@@ -217,6 +236,7 @@ public static class DatabaseService
                     { "text", "ALTER TABLE reasonmap ADD COLUMN IF NOT EXISTS text TEXT" }
                 }
             },
+            
             {
                 "banreasons",
                 new Dictionary<string, string>
