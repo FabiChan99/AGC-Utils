@@ -10,17 +10,15 @@
 
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
-        <PackageReference Include="DisCatSharp" Version="10.6.2-nightly-002"/>
+        <PackageReference Include="DisCatSharp" Version="10.6.2-nightly-003" />
         <PackageReference Include="DisCatSharp.Analyzer.Roselyn" Version="6.2.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.2-nightly-002"/>
-        <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.2-nightly-002"/>
-        <PackageReference Include="DisCatSharp.Common" Version="10.6.2-nightly-002"/>
-        <PackageReference Include="DisCatSharp.Extensions.OAuth2Web" Version="3.0.1"/>
-        <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.2-nightly-002"/>
-        <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.2-nightly-002"/>
+        <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.2-nightly-003" />
+        <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.2-nightly-003" />
+        <PackageReference Include="DisCatSharp.Common" Version="10.6.2-nightly-003" />
+        <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.2-nightly-003" />
         <PackageReference Include="Discord.OAuth2.AspNetCore" Version="3.0.0"/>
         <PackageReference Include="ini-parser-new" Version="2.6.2"/>
         <PackageReference Include="KawaiiAPI.NET" Version="1.1.0"/>
