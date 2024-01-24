@@ -83,7 +83,6 @@ public sealed class ImageUtils
         var avatarstream = await response2.Content.ReadAsByteArrayAsync();
 
         var avatar = SKBitmap.Decode(avatarstream);
-        
 
 
         var avatarPaint = new SKPaint
@@ -202,10 +201,10 @@ public sealed class ImageUtils
             var guildiconstream = await response3.Content.ReadAsByteArrayAsync();
             using var guildicon = SKBitmap.Decode(guildiconstream);
             var guildiconSize = 262 * 0.25f;
-            var guildiconrect = new SKRect(cardWidth - guildiconSize - 50, 50, cardWidth - 50, guildiconSize + 50); 
+            var guildiconrect = new SKRect(cardWidth - guildiconSize - 50, 50, cardWidth - 50, guildiconSize + 50);
             using var guildiconmask = new SKPath();
 
-            guildiconmask.AddRoundRect(guildiconrect, 15, 15); 
+            guildiconmask.AddRoundRect(guildiconrect, 15, 15);
 
             canvas.Save();
             canvas.ClipPath(guildiconmask);
@@ -246,7 +245,7 @@ public sealed class ImageUtils
             Typeface = SKTypeface.FromFamilyName(font, SKFontStyleWeight.Bold, SKFontStyleWidth.Normal,
                 SKFontStyleSlant.Upright)
         };
-        
+
         var totalxpPaint = new SKPaint
         {
             Color = SKColors.White,

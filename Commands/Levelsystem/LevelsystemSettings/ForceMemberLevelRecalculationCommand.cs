@@ -17,7 +17,8 @@ public class ForceMemberLevelRecalculationCommand : ApplicationCommandsModule
     [ApplicationCommandRequirePermissions(Permissions.Administrator)]
     [SlashCommand("forcememberrecalc", "Erzwinge eine Neuberechnung der Level eines Nutzers")]
     public static async Task ForceMemberLevelRecalculation(InteractionContext ctx,
-        [Option("user", "Der Nutzer bei dem die Level neu berechnet werden sollen.")] DiscordUser user)
+        [Option("user", "Der Nutzer bei dem die Level neu berechnet werden sollen.")]
+        DiscordUser user)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
