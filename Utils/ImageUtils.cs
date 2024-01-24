@@ -83,6 +83,8 @@ public sealed class ImageUtils
         var avatarstream = await response2.Content.ReadAsByteArrayAsync();
 
         var avatar = SKBitmap.Decode(avatarstream);
+        
+
 
         var avatarPaint = new SKPaint
         {
@@ -188,6 +190,40 @@ public sealed class ImageUtils
         canvas.Restore();
 
 
+        var guildiconurl = CurrentApplication.TargetGuild.IconUrl;
+        if (!string.IsNullOrWhiteSpace(guildiconurl))
+        {
+            var response3 = await httpclient.GetAsync(guildiconurl);
+            if (!response3.IsSuccessStatusCode)
+            {
+                throw new InvalidDataException("Failed to download guild icon image");
+            }
+
+            var guildiconstream = await response3.Content.ReadAsByteArrayAsync();
+            using var guildicon = SKBitmap.Decode(guildiconstream);
+            var guildiconSize = 262 * 0.25f;
+            var guildiconrect = new SKRect(cardWidth - guildiconSize - 50, 50, cardWidth - 50, guildiconSize + 50); 
+            using var guildiconmask = new SKPath();
+
+            guildiconmask.AddRoundRect(guildiconrect, 15, 15); 
+
+            canvas.Save();
+            canvas.ClipPath(guildiconmask);
+            canvas.DrawBitmap(guildicon, guildiconrect, avatarPaint);
+            canvas.Restore();
+
+            var borderPaint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.CornflowerBlue,
+                StrokeWidth = 2,
+                IsAntialias = true
+            };
+
+            canvas.DrawRoundRect(guildiconrect, 15, 15, borderPaint); // Zeichnet eine Umrandung
+        }
+
+
         var namePaint = new SKPaint
         {
             Color = SKColors.White,
@@ -210,8 +246,18 @@ public sealed class ImageUtils
             Typeface = SKTypeface.FromFamilyName(font, SKFontStyleWeight.Bold, SKFontStyleWidth.Normal,
                 SKFontStyleSlant.Upright)
         };
+        
+        var totalxpPaint = new SKPaint
+        {
+            Color = SKColors.White,
+            TextSize = 18,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName(font, SKFontStyleWeight.Bold, SKFontStyleWidth.Normal,
+                SKFontStyleSlant.Upright)
+        };
 
-        canvas.DrawText($"Rang #{rank}   Level: {level}", 300, 110, rankLevelPaint);
+        canvas.DrawText($"Rang: #{rank}   Level: {level}", 300, 110, rankLevelPaint);
+        canvas.DrawText($"Gesamt XP: {totalXP}", 300, 230, totalxpPaint);
 
         var progressBarBackgroundPaint = new SKPaint
         {
