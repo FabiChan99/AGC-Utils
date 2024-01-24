@@ -98,14 +98,16 @@ public partial class LevelSystemSettings
             await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().WithContent(
                     "<a:loading_agc:1084157150747697203> XP werden transferiert..."));
+            var oldxp = await LevelUtils.GetXp(sourceuser.Id);
+            var destinationoldxp = await LevelUtils.GetXp(destinationuser.Id);
             await LevelUtils.TransferXp(sourceuser.Id, destinationuser.Id);
 
             var successMsg = new DiscordEmbedBuilder().WithTitle("Erfolg")
                 .WithDescription(
                     $"<:success:1085333481820790944> **Erfolgreich!** Der Transfer von ``{sourceuser.Username}`` <a:ani_arrow:1197137691347787877> ``{destinationuser.Username}`` wurde durchgeführt! \n" +
                     $"```diff\n" +
-                    $"- {sourceuser.Username}: {Converter.FormatWithCommas(await LevelUtils.GetXp(sourceuser.Id))} -> 0 XP \n" +
-                    $"+ {destinationuser.Username}: {Converter.FormatWithCommas(await LevelUtils.GetXp(destinationuser.Id))} -> {Converter.FormatWithCommas(await LevelUtils.GetXp(sourceuser.Id) + await LevelUtils.GetXp(destinationuser.Id))} XP```")
+                    $"- {sourceuser.Username}: {Converter.FormatWithCommas(oldxp)} -> 0 XP \n" +
+                    $"+ {destinationuser.Username}: {Converter.FormatWithCommas(destinationoldxp)} -> {Converter.FormatWithCommas(destinationoldxp + await LevelUtils.GetXp(destinationuser.Id))} XP```")
                 .WithColor(DiscordColor.Green).WithFooter($"{ctx.User.Username}", ctx.User.AvatarUrl);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(successMsg.Build()));
         }
