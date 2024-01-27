@@ -59,7 +59,6 @@ else
     {
         var start = (page - 1) * ItemsPerPage;
         totalItems = LevelUtils.cachedLeaderboardData.Count;
-        Console.WriteLine(totalItems);
         var count = Math.Min(ItemsPerPage, LevelUtils.cachedLeaderboardData.Count - start);
         currentPageData = LevelUtils.cachedLeaderboardData.GetRange(start, count);
     }

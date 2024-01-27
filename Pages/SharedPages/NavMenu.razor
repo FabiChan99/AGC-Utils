@@ -52,6 +52,13 @@
                     <span class="oi oi-home" aria-hidden="true"></span> Home
                 </NavLink>
             </div>
+            <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter, Team, User">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="leaderboard">
+                        <span class="oi oi-bar-chart" aria-hidden="true"></span> Leaderboard
+                    </NavLink>
+                </div>
+            </AuthorizeView>
             <AuthorizeView Roles="BotOwner, Administrator, Moderator, Supporter">
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="mitglieder">
