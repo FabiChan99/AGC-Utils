@@ -1,38 +1,49 @@
 ﻿@page "/Apply"
 @using System.ComponentModel.DataAnnotations
-@attribute [Authorize(Roles = "BotOwner")] // Temporary... just a template too... will see
+@attribute [Authorize(Roles = "BotOwner")]
 
-<h3>Bewerbung</h3>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h3 class="text-center">Bewerbung</h3>
 
-<p>
-    Hier kannst du dich für den Support oder als Eventmanager bewerben.
-    <br>
-    Bitte beachte, dass du mindestens 100 Zeichen in deiner Bewerbung schreiben musst.
-</p>
+            <p class="text-center">
+                Hier kannst du dich für den Support oder als Eventmanager bewerben.
+                <br>
+                Info: Die Bewerbung wird automatisch deinem User zugeordnet. Du musst also nicht deinen Namen angeben. Good Luck!
+            </p>
 
-<EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator/>
-    <ValidationSummary/>
+            <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
 
-    <div class="form-group">
-        <InputRadioGroup @bind-Value="model.Position" class="form-check">
-            <InputRadio class="form-check-input" Value="@("Supporter")"/>Supporter
-            <br/>
-            <InputRadio class="form-check-input" Value="@("Eventmanager")"/>Eventmanager
-        </InputRadioGroup>
+                <div class="form-group">
+                    <label class="h4 text-decoration-underline">Position</label>
+                    <br/>
+                    <InputRadioGroup @bind-Value="model.Position" class="form-check">
+                        <InputRadio class="form-check-input" Value="@("Supporter")"/>Supporter
+                        <br/>
+                        <InputRadio class="form-check-input" Value="@("Eventmanager")"/>Eventmanager
+                    </InputRadioGroup>
+                </div>
+
+                <br/>
+                <div class="form-group">
+                    <label class="h4 text-decoration-underline">Bewerbungstext</label>
+                    <InputTextArea @bind-Value="model.ApplicationText" class="form-control" rows="10"/>
+                </div>
+
+                <br/>
+                <button type="submit" class="btn btn-primary btn-block">Submit</button>
+            </EditForm>
+        </div>
     </div>
-
-    <br>
-    <div class="form-group">
-        <label>Bewerbungstext</label>
-        <InputTextArea @bind-Value="model.ApplicationText" class="form-control form-control-lg" rows="10"/>
-    </div>
-    <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</EditForm>
+</div>
 
 @code {
-
+    
+    [CustomValidation(typeof(ApplicationModel), "CheckSupportPhase")]
+    [CustomValidation(typeof(ApplicationModel), "CheckEventPhase")]
     public class ApplicationModel
     {
         [Required(ErrorMessage = "Bitte wähle eine Position aus.")]
@@ -41,15 +52,38 @@
         [Required(ErrorMessage = "Bitte gib einen Bewerbungstext ein.")]
         [MinLength(100, ErrorMessage = "Bitte gib mindestens 100 Zeichen ein.")]
         public string ApplicationText { get; set; }
+
+        public bool SupportPhaseOpen { get; set; } = true;
+        public bool EventPhaseOpen { get; set; } = false;
+
+        public static ValidationResult CheckSupportPhase(ApplicationModel model, ValidationContext context)
+        {
+            if (model.Position == "Supporter" && !model.SupportPhaseOpen)
+            {
+                return new ValidationResult("Die Bewerbungsphase für Supporter ist derzeit geschlossen. Bitte versuche es wann anders erneut. Beachte auch unsere Ankündigungen.");
+            }
+
+            return ValidationResult.Success;
+        }
+
+        public static ValidationResult CheckEventPhase(ApplicationModel model, ValidationContext context)
+        {
+            if (model.Position == "Eventmanager" && !model.EventPhaseOpen)
+            {
+                return new ValidationResult("Die Bewerbungsphase für Eventmanager ist derzeit geschlossen. Bitte versuche es wann anders erneut. Beachte auch unsere Ankündigungen.");
+            }
+
+            return ValidationResult.Success;
+        }
     }
+    
+
 
     readonly ApplicationModel model = new();
 
     private void HandleValidSubmit()
     {
-        // print the model to the console
         Console.WriteLine($"Position: {model.Position}");
         Console.WriteLine($"ApplicationText: {model.ApplicationText}");
     }
-
 }
