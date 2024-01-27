@@ -57,7 +57,7 @@ public static class LevelUtils
                 var xpForThisLevelPercent = xp / xpForThisLevel * 100;
                 percent = (int)xpForThisLevelPercent;
                     
-                leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = xp.ToString(), Level = level, ProgressInPercent = percent});
+                leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = Converter.FormatWithCommas(xp), Level = level, ProgressInPercent = percent});
             }
         }
         else
