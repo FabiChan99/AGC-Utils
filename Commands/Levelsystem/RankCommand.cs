@@ -73,8 +73,10 @@ public class RankCommand : ApplicationCommandsModule
             var imgstream = imagedata.AsStream();
             var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",
                 "Hintergrund ändern (bald verfügbar)", true, new DiscordComponentEmoji("🖼️"));
+            var button2 = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/leaderboard",
+                "Online Rangliste ansehen", false, new DiscordComponentEmoji("🏆"));
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button));
+                new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button, button2));
             return;
         }
         catch (Exception e)

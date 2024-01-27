@@ -93,8 +93,9 @@ public class LeaderboardCommand : ApplicationCommandsModule
         };
 
         embedBuilder.WithFooter("AGC Leveling System");
-
+        var button2 = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/leaderboard",
+            "Online Rangliste ansehen", false, new DiscordComponentEmoji("🏆"));
         var emb = embedBuilder.Build();
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(emb));
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(emb).AddComponents(button2));
     }
 }
