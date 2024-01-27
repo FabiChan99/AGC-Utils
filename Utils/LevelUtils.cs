@@ -420,6 +420,13 @@ public static class LevelUtils
     private static async Task RecalculateAndUpdate(ulong userId)
     {
         await RecalculateUserLevel(userId);
+        
+        // if user is not in guild, return
+        if (CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userId) == null)
+        {
+            return;
+        }
+        
         await UpdateLevelRoles(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
     }
 
