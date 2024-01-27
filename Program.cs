@@ -3,6 +3,7 @@
 using System.Reflection;
 using System.Security.Claims;
 using AGC_Management.Controller;
+using AGC_Management.Entities;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
 using AGC_Management.Utils;
@@ -33,6 +34,7 @@ public class CurrentApplication
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
     public static IServiceProvider ServiceProvider { get; set; }
+    public static List<LeaderboardData> LeaderboardData { get; set; } = new();
 }
 
 internal class Program : BaseCommandModule
@@ -237,6 +239,7 @@ internal class Program : BaseCommandModule
         _ = ExtendedModerationSystemLoop.LaunchLoops();
         _ = RecalculateRanks.LaunchLoops();
         _ = CheckVCLevellingTask.Run();
+        _ = LevelUtils.RunLeaderboardUpdate();
 
         return Task.CompletedTask;
     }

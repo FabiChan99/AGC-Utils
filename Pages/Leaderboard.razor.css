@@ -48,3 +48,27 @@
 }
 
 
+@media (max-width: 600px) {
+    .leaderboard-container {
+        padding: 10px;
+    }
+
+    .leaderboard-item {
+        font-size: 14px;
+    }
+
+    .rank-number {
+        font-size: 18px;
+    }
+
+    .pagination-lg {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+

@@ -1,47 +1,56 @@
 ﻿@page "/Leaderboard"
 @using AGC_Management.Utils
-@attribute [Authorize]
+@using AGC_Management.Entities.Web
+@using AGC_Management.Entities
+@attribute [Authorize (Roles = "BotOwner, Administrator, Moderator, Supporter, Team, User")]
 @inject IHttpContextAccessor HttpContextAccessor
 
-<div class="leaderboard-container">
-    <h3>Leaderboard</h3>
-    <div class="leaderboard">
-        @foreach (var item in leaderboardData)
-        {
-            <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
-                <div class="rank">
-                    <span class="rank-number">@item.Rank</span>
-                </div>
-                <div class="avatar">
-                    <img src="@item.Avatar" alt="@item.Username" />
-                </div>
-                <div class="username">@item.Username</div>
-                <div class="level-container">
-                    <div class="level">Level @item.Level</div>
+@if (LevelUtils.LeaderboardDataLoaded)
+{
+    <div class="leaderboard-container">
+        <h3>Leaderboard</h3>
+        <div class="leaderboard">
+            @foreach (var item in currentPageData)
+            {
+                <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
+                    <div class="rank">
+                        <span class="rank-number">@item.Rank</span>
                     </div>
-                <div class="experience">@item.Experience XP</div>
-            </div>
-        }
+                    <div class="avatar">
+                        <img src="@item.Avatar" alt="@item.Username" />
+                    </div>
+                    <div class="username">@item.Username</div>
+                    <div class="level-container">
+                        <div class="level">Level @item.Level</div>
+                    </div>
+                    <div class="experience">@item.Experience XP</div>
+                </div>
+            }
+        </div>
+        <div class="pagination-lg">
+            <div class="page-info">Seite @currentPage von @totalPages</div>
+            <button class="btn btn-primary" @onclick="PreviousPage" disabled="@IsFirstPage">Vorherige Seite</button>
+            <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <em class="alert alert-danger">Das Leaderboard wird gerade geladen. Bitte warten...</em>
+}
 
 
 
 
 @code {
     
-    private List<LeaderboardData> leaderboardData = new List<LeaderboardData>();
-    
-    public class LeaderboardData
-    {
-        public string Avatar { get; set; }
-        public ulong UserId { get; set; }
-        public string Username { get; set; }
-        public int Level { get; set; }
-        public string Experience { get; set; }
-        public int Rank { get; set; }
-        public int ProgressInPercent { get; set; }
-    }
+    private List<WebLeaderboardData> leaderboardData = new List<WebLeaderboardData>();
+    private List<WebLeaderboardData> currentPageData = new List<WebLeaderboardData>();
+    private const int ItemsPerPage = 25;
+    private int currentPage = 1;
+    private int totalItems;
+    private int totalPages => (int)Math.Ceiling((double)totalItems / ItemsPerPage);
+
     
     protected override async Task OnInitializedAsync()
     {
@@ -50,7 +59,8 @@
     
     private async Task LoadLeaderboardData()
     {
-        var leaderboard = await LevelUtils.GetLeaderboardData();
+        var leaderboard = LevelUtils._leaderboardData;
+        totalItems = leaderboard.Count;
         var tasks = leaderboard.Select(async (x, i) =>
         {
             var isOnServer = await IsUserOnServer(x.UserId);
@@ -76,32 +86,54 @@
                 username = fallbackUser.UserName;
             }
 
-            return new LeaderboardData
+            return new WebLeaderboardData
             {
                 Avatar = avatarUrl,
                 UserId = x.UserId,
                 Username = username,
                 Level = x.Level,
-                Experience = Converter.FormatWithCommas(await LevelUtils.GetUserXp(x.UserId)),
+                Experience = x.Experience,
                 Rank = i + 1,
-                ProgressInPercent = await LevelUtils.GetUserLevelPercent(x.UserId),
+                ProgressInPercent = x.ProgressInPercent,
             };
         });
 
         leaderboardData = (await Task.WhenAll(tasks)).ToList();
+        await LoadPage(currentPage);
     }
+    
+    private async Task LoadPage(int page)
+    {
+        var start = (page - 1) * ItemsPerPage;
+        var count = Math.Min(ItemsPerPage, leaderboardData.Count - start);
+        currentPageData = leaderboardData.GetRange(start, count); // Aktualisieren Sie nur die currentPageData Liste
+    }
+    private async Task NextPage()
+    {
+        if (!IsLastPage)
+        {
+            currentPage++;
+            await LoadPage(currentPage);
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (!IsFirstPage)
+        {
+            currentPage--;
+            await LoadPage(currentPage);
+        }
+    }
+    
+    private bool IsFirstPage => currentPage == 1;
+    private bool IsLastPage => currentPage * ItemsPerPage >= totalItems;
     
     private bool IsCurrentUser(ulong userId)
     {
         return userId == ToolSet.GetUserIdFromHttpContext(HttpContextAccessor.HttpContext);
     }
-    
-    public class PartialUser
-    {
-        public ulong UserId { get; set; }
-        public string UserName { get; set; }
-        public string Avatar { get; set; }
-    }
+
     
     private async Task<bool> IsUserOnServer(ulong userId)
     {

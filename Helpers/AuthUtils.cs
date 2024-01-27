@@ -184,4 +184,85 @@ public sealed class AuthUtils
         // user
         return AccessLevel.User.ToString();
     }
+
+
+    public static async Task<List<string>> RetrieveRoles(ulong id)
+    {
+        ulong userId = ulong.Parse(id.ToString());
+
+        var guild = CurrentApplication.TargetGuild;
+        DiscordMember? user = null;
+        var servercfg = BotConfig.GetConfig()["ServerConfig"];
+        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        DiscordRole? overrideRole = null;
+
+        try
+        {
+            overrideRole = guild.GetRole(ulong.Parse(servercfg["WebOverrideRoleId"]));
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+
+        try
+        {
+            user = await guild.GetMemberAsync(userId);
+        }
+        catch (NotFoundException)
+        {
+            return new List<string> { AccessLevel.NichtImServer.ToString() };
+        }
+
+        List<string> userRoles = new List<string>();
+
+        // bot owner
+        if (user.Id == GlobalProperties.BotOwnerId)
+        {
+            userRoles.Add(AccessLevel.BotOwner.ToString());
+        }
+
+        // override
+        if (overrideRole != null && user.Roles.Contains(overrideRole))
+        {
+            userRoles.Add(AccessLevel.Administrator.ToString());
+        }
+
+        // admin
+        if (user.Roles.Contains(adminRole))
+        {
+            userRoles.Add(AccessLevel.Administrator.ToString());
+        }
+
+        // mod
+        if (user.Roles.Contains(modRole))
+        {
+            userRoles.Add(AccessLevel.Moderator.ToString());
+        }
+
+        // sup
+        if (user.Roles.Contains(supRole))
+        {
+            userRoles.Add(AccessLevel.Supporter.ToString());
+        }
+
+        // staff
+        if (user.Roles.Contains(staffRole))
+        {
+            userRoles.Add(AccessLevel.Team.ToString());
+        }
+
+        // user
+        if (userRoles.Count == 0)
+        {
+            userRoles.Add(AccessLevel.User.ToString());
+        }
+
+        return userRoles;
+    }
+
 }

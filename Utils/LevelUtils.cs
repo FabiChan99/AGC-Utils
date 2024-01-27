@@ -2,6 +2,7 @@
 
 using System.Text;
 using AGC_Management.Entities;
+using AGC_Management.Entities.Web;
 using AGC_Management.Enums.LevelSystem;
 
 #endregion
@@ -12,6 +13,66 @@ public static class LevelUtils
 {
     private static readonly ulong levelguildid = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
 
+    public static List<WebLeaderboardData> _leaderboardData = new();
+    public static bool LeaderboardDataLoaded = false;
+    
+    public static async Task RunLeaderboardUpdate()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(10));
+        while (true)
+        {
+            CurrentApplication.Logger.Information("Updating leaderboard data...");
+            await RetrieveLeaderboardData();
+            LeaderboardDataLoaded = true;
+            CurrentApplication.Logger.Information("Updated leaderboard data.");
+            await Task.Delay(TimeSpan.FromMinutes(60));
+        }
+    }
+    
+    
+    
+    public static async Task RetrieveLeaderboardData()
+    {
+        _ = Task.Run(async () =>
+        {
+            var leaderboardData = new List<WebLeaderboardData>();
+            var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+
+            var cmd = db.CreateCommand(
+                "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (reader.HasRows)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var percent = 0;
+                    
+                    var userId = reader.GetInt64(0);
+                    var xp = reader.GetInt32(1);
+                    var level = reader.GetInt32(2);
+                    
+                    var xpForLevel = XpForLevel(level);
+                    var xpForNextLevel = XpForLevel(level + 1);
+                    var xpForThisLevel = xpForNextLevel - xpForLevel;
+                    var xpForThisLevelPercent = xp / xpForThisLevel * 100;
+                    percent = (int)xpForThisLevelPercent;
+                    
+                    leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = xp.ToString(), Level = level, ProgressInPercent = percent});
+                }
+            }
+            else
+            {
+                leaderboardData.Add(new WebLeaderboardData() { UserId = 0, Experience = "0", Level = 0 });
+            }
+
+            await reader.CloseAsync();
+        
+            _leaderboardData = leaderboardData;
+
+        });
+        await Task.CompletedTask;
+    }
+    
     /// <summary>
     ///     Calculates the experience points required to reach a given level.
     /// </summary>
@@ -388,33 +449,6 @@ public static class LevelUtils
     }
 
     
-    public static async Task<List<LeaderboardData>> GetLeaderboardData()
-    {
-        var leaderboardData = new List<LeaderboardData>();
-        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-
-        var cmd = db.CreateCommand(
-            "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
-        await using var reader = await cmd.ExecuteReaderAsync();
-        if (reader.HasRows)
-        {
-            while (await reader.ReadAsync())
-            {
-                var userId = reader.GetInt64(0);
-                var xp = reader.GetInt32(1);
-                var level = reader.GetInt32(2);
-                leaderboardData.Add(new LeaderboardData { UserId = (ulong)userId, XP = xp, Level = level });
-            }
-        }
-        else
-        {
-            leaderboardData.Add(new LeaderboardData { UserId = 0, XP = 0, Level = 0 });
-        }
-
-        await reader.CloseAsync();
-        return leaderboardData;
-    }
-
     /// <summary>
     ///     Transfers XP from a source user to a destination user.
     /// </summary>
