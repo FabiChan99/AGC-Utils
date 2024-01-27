@@ -14,6 +14,7 @@ public static class LevelUtils
     private static readonly ulong levelguildid = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
 
     public static List<WebLeaderboardData> _leaderboardData = new();
+    public static List<WebLeaderboardData> cachedLeaderboardData = new();
     public static bool LeaderboardDataLoaded = false;
     
     public static async Task RunLeaderboardUpdate()
@@ -23,9 +24,10 @@ public static class LevelUtils
         {
             CurrentApplication.Logger.Information("Updating leaderboard data...");
             await RetrieveLeaderboardData();
+            await LoadLeaderboardData();
             LeaderboardDataLoaded = true;
             CurrentApplication.Logger.Information("Updated leaderboard data.");
-            await Task.Delay(TimeSpan.FromMinutes(60));
+            await Task.Delay(TimeSpan.FromMinutes(15));
         }
     }
     
@@ -33,44 +35,128 @@ public static class LevelUtils
     
     public static async Task RetrieveLeaderboardData()
     {
-        _ = Task.Run(async () =>
-        {
-            var leaderboardData = new List<WebLeaderboardData>();
-            var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        var leaderboardData = new List<WebLeaderboardData>();
+        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-            var cmd = db.CreateCommand(
-                "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
-            await using var reader = await cmd.ExecuteReaderAsync();
-            if (reader.HasRows)
+        var cmd = db.CreateCommand(
+            "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
             {
-                while (await reader.ReadAsync())
-                {
-                    var percent = 0;
+                var percent = 0;
                     
-                    var userId = reader.GetInt64(0);
-                    var xp = reader.GetInt32(1);
-                    var level = reader.GetInt32(2);
+                var userId = reader.GetInt64(0);
+                var xp = reader.GetInt32(1);
+                var level = reader.GetInt32(2);
                     
-                    var xpForLevel = XpForLevel(level);
-                    var xpForNextLevel = XpForLevel(level + 1);
-                    var xpForThisLevel = xpForNextLevel - xpForLevel;
-                    var xpForThisLevelPercent = xp / xpForThisLevel * 100;
-                    percent = (int)xpForThisLevelPercent;
+                var xpForLevel = XpForLevel(level);
+                var xpForNextLevel = XpForLevel(level + 1);
+                var xpForThisLevel = xpForNextLevel - xpForLevel;
+                var xpForThisLevelPercent = xp / xpForThisLevel * 100;
+                percent = (int)xpForThisLevelPercent;
                     
-                    leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = xp.ToString(), Level = level, ProgressInPercent = percent});
-                }
+                leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = xp.ToString(), Level = level, ProgressInPercent = percent});
             }
+        }
+        else
+        {
+            leaderboardData.Add(new WebLeaderboardData() { UserId = 0, Experience = "0", Level = 0 });
+        }
+
+        await reader.CloseAsync();
+            
+        _leaderboardData = leaderboardData;
+        await Task.CompletedTask;
+    }
+    
+    
+    private static async Task<bool> IsUserOnServer(ulong userId)
+    {
+        try
+        {
+            var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
+            
+            return serverMembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
+    private static async Task<bool> IsUserInCache(ulong userId)
+    {
+        try
+        {
+            var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
+            
+            return cachedmembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
+    private static PartialUser GetFallbackUser(ulong userId)
+    {
+        return new PartialUser
+        {
+            UserId = userId,
+            UserName = userId.ToString(),
+            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
+        };
+    }
+
+    private static async Task LoadLeaderboardData()
+    {
+        var leaderboard = LevelUtils._leaderboardData;
+        var tasks = leaderboard.Select(async (x, i) =>
+        {
+            var isOnServer = await IsUserOnServer(x.UserId);
+            var isCached = await IsUserInCache(x.UserId);
+            string avatarUrl, username;
+
+            if (isOnServer)
+            {
+                var user = await CurrentApplication.DiscordClient.GetUserAsync(x.UserId);
+                avatarUrl = user.AvatarUrl;
+                username = user.Username;
+            }
+            else if (isCached)
+            {
+                var user = CurrentApplication.DiscordClient.UserCache[x.UserId];
+                avatarUrl = user.AvatarUrl;
+                username = user.Username;
+            } 
             else
             {
-                leaderboardData.Add(new WebLeaderboardData() { UserId = 0, Experience = "0", Level = 0 });
+                var fallbackUser = GetFallbackUser(x.UserId);
+                avatarUrl = fallbackUser.Avatar;
+                username = fallbackUser.UserName;
             }
 
-            await reader.CloseAsync();
-        
-            _leaderboardData = leaderboardData;
-
+            return new WebLeaderboardData
+            {
+                Avatar = avatarUrl,
+                UserId = x.UserId,
+                Username = username,
+                Level = x.Level,
+                Experience = x.Experience,
+                Rank = i + 1,
+                ProgressInPercent = x.ProgressInPercent,
+            };
         });
-        await Task.CompletedTask;
+
+        foreach (var task in tasks)
+        {
+            var result = await task;
+            cachedLeaderboardData.Add(result);
+        }
     }
     
     /// <summary>

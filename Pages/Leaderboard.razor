@@ -44,7 +44,6 @@ else
 
 @code {
     
-    private List<WebLeaderboardData> leaderboardData = new List<WebLeaderboardData>();
     private List<WebLeaderboardData> currentPageData = new List<WebLeaderboardData>();
     private const int ItemsPerPage = 25;
     private int currentPage = 1;
@@ -54,59 +53,15 @@ else
     
     protected override async Task OnInitializedAsync()
     {
-        await LoadLeaderboardData();
-    }
-    
-    private async Task LoadLeaderboardData()
-    {
-        var leaderboard = LevelUtils._leaderboardData;
-        totalItems = leaderboard.Count;
-        var tasks = leaderboard.Select(async (x, i) =>
-        {
-            var isOnServer = await IsUserOnServer(x.UserId);
-            var isCached = await IsUserInCache(x.UserId);
-            string avatarUrl, username;
-
-            if (isOnServer)
-            {
-                var user = await CurrentApplication.DiscordClient.GetUserAsync(x.UserId);
-                avatarUrl = user.AvatarUrl;
-                username = user.Username;
-            }
-            else if (isCached)
-            {
-                var user = CurrentApplication.DiscordClient.UserCache[x.UserId];
-                avatarUrl = user.AvatarUrl;
-                username = user.Username;
-            } 
-            else
-            {
-                var fallbackUser = GetFallbackUser(x.UserId);
-                avatarUrl = fallbackUser.Avatar;
-                username = fallbackUser.UserName;
-            }
-
-            return new WebLeaderboardData
-            {
-                Avatar = avatarUrl,
-                UserId = x.UserId,
-                Username = username,
-                Level = x.Level,
-                Experience = x.Experience,
-                Rank = i + 1,
-                ProgressInPercent = x.ProgressInPercent,
-            };
-        });
-
-        leaderboardData = (await Task.WhenAll(tasks)).ToList();
         await LoadPage(currentPage);
     }
-    
     private async Task LoadPage(int page)
     {
         var start = (page - 1) * ItemsPerPage;
-        var count = Math.Min(ItemsPerPage, leaderboardData.Count - start);
-        currentPageData = leaderboardData.GetRange(start, count); // Aktualisieren Sie nur die currentPageData Liste
+        totalItems = LevelUtils.cachedLeaderboardData.Count;
+        Console.WriteLine(totalItems);
+        var count = Math.Min(ItemsPerPage, LevelUtils.cachedLeaderboardData.Count - start);
+        currentPageData = LevelUtils.cachedLeaderboardData.GetRange(start, count);
     }
     private async Task NextPage()
     {
@@ -135,45 +90,6 @@ else
     }
 
     
-    private async Task<bool> IsUserOnServer(ulong userId)
-    {
-        try
-        {
-            var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
-            
-            return serverMembers.Any(member => member.Id == userId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
-            return false;
-        }
-    }
-    
-    private async Task<bool> IsUserInCache(ulong userId)
-    {
-        try
-        {
-            var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
-            
-            return cachedmembers.Any(member => member.Id == userId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
-            return false;
-        }
-    }
-    
-    private PartialUser GetFallbackUser(ulong userId)
-    {
-        return new PartialUser
-        {
-            UserId = userId,
-            UserName = userId.ToString(),
-            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
-        };
-    }
-    
+
     
 }
