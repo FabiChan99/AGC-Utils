@@ -1,5 +1,6 @@
 #region
 
+using System.Security.Claims;
 using AGC_Management.Entities;
 using Newtonsoft.Json;
 using RestSharp;
@@ -32,6 +33,13 @@ public static class ToolSet
         }
 
         return member.Username;
+    }
+    
+    public static ulong GetUserIdFromHttpContext(HttpContext context)
+    {
+        var claimsIdentity = context.User.Identity as ClaimsIdentity;
+        var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Convert.ToUInt64(userId);
     }
 
     public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)

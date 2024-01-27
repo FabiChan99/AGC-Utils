@@ -387,6 +387,33 @@ public static class LevelUtils
         await cmd.ExecuteNonQueryAsync();
     }
 
+    
+    public static async Task<List<LeaderboardData>> GetLeaderboardData()
+    {
+        var leaderboardData = new List<LeaderboardData>();
+        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+
+        var cmd = db.CreateCommand(
+            "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                var userId = reader.GetInt64(0);
+                var xp = reader.GetInt32(1);
+                var level = reader.GetInt32(2);
+                leaderboardData.Add(new LeaderboardData { UserId = (ulong)userId, XP = xp, Level = level });
+            }
+        }
+        else
+        {
+            leaderboardData.Add(new LeaderboardData { UserId = 0, XP = 0, Level = 0 });
+        }
+
+        await reader.CloseAsync();
+        return leaderboardData;
+    }
 
     /// <summary>
     ///     Transfers XP from a source user to a destination user.
@@ -620,6 +647,24 @@ public static class LevelUtils
     {
         var rank = await GetRank(userId);
         return rank[userId].Level;
+    }
+    
+    public static async Task<int> GetUserXp(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        return rank[userId].Xp;
+    }
+    
+    public static async Task<int> GetUserLevelPercent(ulong userId)
+    {
+        var rank = await GetRank(userId);
+        var xp = rank[userId].Xp;
+        var level = rank[userId].Level;
+        var xpForLevel = XpForLevel(level);
+        var xpForNextLevel = XpForLevel(level + 1);
+        var xpForThisLevel = xpForNextLevel - xpForLevel;
+        var xpForThisLevelPercent = xp / xpForThisLevel * 100;
+        return (int)xpForThisLevelPercent;
     }
 
 

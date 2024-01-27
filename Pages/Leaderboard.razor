@@ -1,0 +1,147 @@
+﻿@page "/Leaderboard"
+@using AGC_Management.Utils
+@attribute [Authorize]
+@inject IHttpContextAccessor HttpContextAccessor
+
+<div class="leaderboard-container">
+    <h3>Leaderboard</h3>
+    <div class="leaderboard">
+        @foreach (var item in leaderboardData)
+        {
+            <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
+                <div class="rank">
+                    <span class="rank-number">@item.Rank</span>
+                </div>
+                <div class="avatar">
+                    <img src="@item.Avatar" alt="@item.Username" />
+                </div>
+                <div class="username">@item.Username</div>
+                <div class="level-container">
+                    <div class="level">Level @item.Level</div>
+                    </div>
+                <div class="experience">@item.Experience XP</div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+@code {
+    
+    private List<LeaderboardData> leaderboardData = new List<LeaderboardData>();
+    
+    public class LeaderboardData
+    {
+        public string Avatar { get; set; }
+        public ulong UserId { get; set; }
+        public string Username { get; set; }
+        public int Level { get; set; }
+        public string Experience { get; set; }
+        public int Rank { get; set; }
+        public int ProgressInPercent { get; set; }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLeaderboardData();
+    }
+    
+    private async Task LoadLeaderboardData()
+    {
+        var leaderboard = await LevelUtils.GetLeaderboardData();
+        var tasks = leaderboard.Select(async (x, i) =>
+        {
+            var isOnServer = await IsUserOnServer(x.UserId);
+            var isCached = await IsUserInCache(x.UserId);
+            string avatarUrl, username;
+
+            if (isOnServer)
+            {
+                var user = await CurrentApplication.DiscordClient.GetUserAsync(x.UserId);
+                avatarUrl = user.AvatarUrl;
+                username = user.Username;
+            }
+            else if (isCached)
+            {
+                var user = CurrentApplication.DiscordClient.UserCache[x.UserId];
+                avatarUrl = user.AvatarUrl;
+                username = user.Username;
+            } 
+            else
+            {
+                var fallbackUser = GetFallbackUser(x.UserId);
+                avatarUrl = fallbackUser.Avatar;
+                username = fallbackUser.UserName;
+            }
+
+            return new LeaderboardData
+            {
+                Avatar = avatarUrl,
+                UserId = x.UserId,
+                Username = username,
+                Level = x.Level,
+                Experience = Converter.FormatWithCommas(await LevelUtils.GetUserXp(x.UserId)),
+                Rank = i + 1,
+                ProgressInPercent = await LevelUtils.GetUserLevelPercent(x.UserId),
+            };
+        });
+
+        leaderboardData = (await Task.WhenAll(tasks)).ToList();
+    }
+    
+    private bool IsCurrentUser(ulong userId)
+    {
+        return userId == ToolSet.GetUserIdFromHttpContext(HttpContextAccessor.HttpContext);
+    }
+    
+    public class PartialUser
+    {
+        public ulong UserId { get; set; }
+        public string UserName { get; set; }
+        public string Avatar { get; set; }
+    }
+    
+    private async Task<bool> IsUserOnServer(ulong userId)
+    {
+        try
+        {
+            var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
+            
+            return serverMembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
+    private async Task<bool> IsUserInCache(ulong userId)
+    {
+        try
+        {
+            var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
+            
+            return cachedmembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
+    private PartialUser GetFallbackUser(ulong userId)
+    {
+        return new PartialUser
+        {
+            UserId = userId,
+            UserName = userId.ToString(),
+            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
+        };
+    }
+    
+    
+}

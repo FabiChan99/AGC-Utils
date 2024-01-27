@@ -1,0 +1,50 @@
+﻿.leaderboard-container {
+    background-color: #2C2F33;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 1000px; /* Adjust as needed */
+    margin: auto;
+}
+
+.leaderboard h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    background-color: #23272A;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.leaderboard-item.you {
+    border: 2px solid #7289DA; /* Highlight for the current user */
+}
+
+.rank-number {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.avatar img {
+    width: 40px; /* Adjust as needed */
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.username {
+    flex-grow: 1;
+}
+
+.level,
+.experience {
+    margin-left: 10px;
+}
+
+
