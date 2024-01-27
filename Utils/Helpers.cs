@@ -18,6 +18,32 @@ public static class ToolSet
             ? CurrentApplication.TargetGuild.IconUrl
             : "favicon.png";
     }
+    
+    
+    public static async Task<bool> IsUserInCache(ulong userId)
+    {
+        try
+        {
+            var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
+            
+            return cachedmembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
+    public static PartialUser GetFallbackUser(ulong userId)
+    {
+        return new PartialUser
+        {
+            UserId = userId,
+            UserName = userId.ToString(),
+            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
+        };
+    }
 
 
     public static string GetFormattedName(DiscordMember member)

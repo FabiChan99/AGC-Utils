@@ -87,30 +87,6 @@ public static class LevelUtils
         }
     }
     
-    private static async Task<bool> IsUserInCache(ulong userId)
-    {
-        try
-        {
-            var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
-            
-            return cachedmembers.Any(member => member.Id == userId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
-            return false;
-        }
-    }
-    
-    private static PartialUser GetFallbackUser(ulong userId)
-    {
-        return new PartialUser
-        {
-            UserId = userId,
-            UserName = userId.ToString(),
-            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
-        };
-    }
 
     private static async Task LoadLeaderboardData()
     {
@@ -118,7 +94,7 @@ public static class LevelUtils
         var tasks = leaderboard.Select(async (x, i) =>
         {
             var isOnServer = await IsUserOnServer(x.UserId);
-            var isCached = await IsUserInCache(x.UserId);
+            var isCached = await ToolSet.IsUserInCache(x.UserId);
             string avatarUrl, username;
 
             if (isOnServer)
@@ -135,7 +111,7 @@ public static class LevelUtils
             } 
             else
             {
-                var fallbackUser = GetFallbackUser(x.UserId);
+                var fallbackUser = ToolSet.GetFallbackUser(x.UserId);
                 avatarUrl = fallbackUser.Avatar;
                 username = fallbackUser.UserName;
             }
