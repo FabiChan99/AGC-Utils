@@ -31,8 +31,7 @@
         }
         else
         {
-            var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}");
+            NavigationManager.NavigateTo("/401");
         }
     }
 
