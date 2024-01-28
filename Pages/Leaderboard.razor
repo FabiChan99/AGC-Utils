@@ -50,7 +50,7 @@
                         }
                     </div>
                     <div class="avatar">
-                        <img src="@item.Avatar" alt="@item.Username"/>
+                        <img loading="lazy" src="@item.Avatar" alt="@item.Username"/>
                     </div>
                     <div class="username">@item.Username</div>
                     <div class="level-container">
@@ -70,6 +70,7 @@
 }
 else
 {
+    <br>
     <em class="alert alert-danger">Das Leaderboard wird gerade geladen. Bitte warten...</em>
 }
 
