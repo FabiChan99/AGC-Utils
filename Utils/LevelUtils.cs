@@ -15,8 +15,8 @@ public static class LevelUtils
 
     public static List<WebLeaderboardData> _leaderboardData = new();
     public static List<WebLeaderboardData> cachedLeaderboardData = new();
-    public static bool LeaderboardDataLoaded = false;
-    
+    public static bool LeaderboardDataLoaded;
+
     public static async Task RunLeaderboardUpdate()
     {
         await Task.Delay(TimeSpan.FromSeconds(10));
@@ -30,9 +30,8 @@ public static class LevelUtils
             await Task.Delay(TimeSpan.FromMinutes(15));
         }
     }
-    
-    
-    
+
+
     public static async Task RetrieveLeaderboardData()
     {
         var leaderboardData = new List<WebLeaderboardData>();
@@ -46,35 +45,39 @@ public static class LevelUtils
             while (await reader.ReadAsync())
             {
                 var percent = 0;
-                    
+
                 var userId = reader.GetInt64(0);
                 var xp = reader.GetInt32(1);
                 var level = reader.GetInt32(2);
-                    
+
                 var xpForLevel = XpForLevel(level);
                 var xpForNextLevel = XpForLevel(level + 1);
                 var xpForThisLevel = xpForNextLevel - xpForLevel;
                 var xpForThisLevelPercent = xp / xpForThisLevel * 100;
-                percent = (int)xpForThisLevelPercent;
-                    
-                leaderboardData.Add(new WebLeaderboardData() { UserId = (ulong)userId, Experience = Converter.FormatWithCommas(xp), Level = level, ProgressInPercent = percent});
+                percent = xpForThisLevelPercent;
+
+                leaderboardData.Add(new WebLeaderboardData
+                {
+                    UserId = (ulong)userId, Experience = Converter.FormatWithCommas(xp), Level = level,
+                    ProgressInPercent = percent
+                });
             }
         }
         else
         {
-            leaderboardData.Add(new WebLeaderboardData() { UserId = 0, Experience = "0", Level = 0 });
+            leaderboardData.Add(new WebLeaderboardData { UserId = 0, Experience = "0", Level = 0 });
         }
 
         await reader.CloseAsync();
-            
+
         _leaderboardData = leaderboardData;
         await Task.CompletedTask;
     }
-    
+
 
     private static async Task LoadLeaderboardData()
     {
-        var leaderboard = LevelUtils._leaderboardData;
+        var leaderboard = _leaderboardData;
         var tempLeaderboardData = new HashSet<WebLeaderboardData>();
         var tasks = leaderboard.Select(async (x, i) =>
         {
@@ -93,7 +96,7 @@ public static class LevelUtils
                 var user = CurrentApplication.DiscordClient.UserCache[x.UserId];
                 avatarUrl = user.AvatarUrl;
                 username = user.Username;
-            } 
+            }
             else
             {
                 var fallbackUser = ToolSet.GetFallbackUser(x.UserId);
@@ -109,7 +112,7 @@ public static class LevelUtils
                 Level = x.Level,
                 Experience = x.Experience,
                 Rank = i + 1,
-                ProgressInPercent = x.ProgressInPercent,
+                ProgressInPercent = x.ProgressInPercent
             };
         });
 
@@ -118,12 +121,12 @@ public static class LevelUtils
             var result = await task;
             tempLeaderboardData.Add(result);
         }
-        
+
         cachedLeaderboardData = tempLeaderboardData.ToList();
-        
+
         await Task.CompletedTask;
     }
-    
+
     /// <summary>
     ///     Calculates the experience points required to reach a given level.
     /// </summary>
@@ -499,7 +502,7 @@ public static class LevelUtils
         await cmd.ExecuteNonQueryAsync();
     }
 
-    
+
     /// <summary>
     ///     Transfers XP from a source user to a destination user.
     /// </summary>
@@ -532,13 +535,13 @@ public static class LevelUtils
     private static async Task RecalculateAndUpdate(ulong userId)
     {
         await RecalculateUserLevel(userId);
-        
+
         // if user is not in guild, return
         if (CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userId) == null)
         {
             return;
         }
-        
+
         await UpdateLevelRoles(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
     }
 
@@ -733,13 +736,13 @@ public static class LevelUtils
         var rank = await GetRank(userId);
         return rank[userId].Level;
     }
-    
+
     public static async Task<int> GetUserXp(ulong userId)
     {
         var rank = await GetRank(userId);
         return rank[userId].Xp;
     }
-    
+
     public static async Task<int> GetUserLevelPercent(ulong userId)
     {
         var rank = await GetRank(userId);
@@ -749,7 +752,7 @@ public static class LevelUtils
         var xpForNextLevel = XpForLevel(level + 1);
         var xpForThisLevel = xpForNextLevel - xpForLevel;
         var xpForThisLevelPercent = xp / xpForThisLevel * 100;
-        return (int)xpForThisLevelPercent;
+        return xpForThisLevelPercent;
     }
 
 

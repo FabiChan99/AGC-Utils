@@ -264,5 +264,4 @@ public sealed class AuthUtils
 
         return userRoles;
     }
-
 }

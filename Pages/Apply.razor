@@ -41,7 +41,7 @@
 </div>
 
 @code {
-    
+
     [CustomValidation(typeof(ApplicationModel), "CheckSupportPhase")]
     [CustomValidation(typeof(ApplicationModel), "CheckEventPhase")]
     public class ApplicationModel
@@ -76,7 +76,6 @@
             return ValidationResult.Success;
         }
     }
-    
 
 
     readonly ApplicationModel model = new();
@@ -86,4 +85,5 @@
         Console.WriteLine($"Position: {model.Position}");
         Console.WriteLine($"ApplicationText: {model.ApplicationText}");
     }
+
 }

@@ -1,6 +1,5 @@
 ﻿namespace AGC_Management.Entities;
 
-    
 public class PartialUser
 {
     public ulong UserId { get; set; }

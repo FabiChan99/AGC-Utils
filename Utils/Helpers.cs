@@ -1,6 +1,5 @@
 #region
 
-using System.Globalization;
 using System.Security.Claims;
 using AGC_Management.Entities;
 using DisCatSharp.Net;
@@ -20,14 +19,14 @@ public static class ToolSet
             ? CurrentApplication.TargetGuild.IconUrl
             : "favicon.png";
     }
-    
-    
+
+
     public static async Task<bool> IsUserInCache(ulong userId)
     {
         try
         {
             var cachedmembers = CurrentApplication.DiscordClient.UserCache.Values.ToList();
-            
+
             return cachedmembers.Any(member => member.Id == userId);
         }
         catch (Exception ex)
@@ -36,14 +35,14 @@ public static class ToolSet
             return false;
         }
     }
-    
-        
+
+
     public static async Task<bool> IsUserOnServer(ulong userId)
     {
         try
         {
             var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
-            
+
             return serverMembers.Any(member => member.Id == userId);
         }
         catch (Exception ex)
@@ -52,7 +51,7 @@ public static class ToolSet
             return false;
         }
     }
-    
+
     public static PartialUser GetFallbackUser(ulong userId)
     {
         return new PartialUser
@@ -73,7 +72,6 @@ public static class ToolSet
     }
 
 
-
     public static string GetFormattedName(DiscordMember member)
     {
         if (!string.IsNullOrEmpty(member.Nickname))
@@ -88,7 +86,7 @@ public static class ToolSet
 
         return member.Username;
     }
-    
+
     public static ulong GetUserIdFromHttpContext(HttpContext context)
     {
         var claimsIdentity = context.User.Identity as ClaimsIdentity;
