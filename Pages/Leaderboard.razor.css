@@ -23,7 +23,12 @@
 }
 
 .leaderboard-item.you {
-    border: 2px solid #7289DA; /* Highlight for the current user */
+    border: 2px solid #7289DA; 
+}
+
+.leaderboard-item.selfyou {
+    border: 2px solid #99abf1;
+    margin-bottom: 30px;
 }
 
 .rank-number {

@@ -10,6 +10,25 @@
     <div class="leaderboard-container">
         <h3>Leaderboard</h3>
         <div class="leaderboard">
+            @* Add a separate card for the current user at the top of the leaderboard *@
+            @if (LevelUtils.cachedLeaderboardData.Any(item => item.UserId == ToolSet.GetUserIdFromHttpContext(HttpContextAccessor.HttpContext)))
+            {
+                var currentUser = LevelUtils.cachedLeaderboardData.First(item => item.UserId == ToolSet.GetUserIdFromHttpContext(HttpContextAccessor.HttpContext));
+                <div class="leaderboard-item selfyou">
+                    <div class="rank">
+                        <span class="rank-number">@currentUser.Rank</span>
+                    </div>
+                    <div class="avatar">
+                        <img src="@currentUser.Avatar" alt="@currentUser.Username" />
+                    </div>
+                    <div class="username">@currentUser.Username (Du)</div>
+                    <div class="level-container">
+                        <div class="level">Level @currentUser.Level</div>
+                    </div>
+                    <div class="experience">@currentUser.Experience XP</div>
+                </div>
+            }
+
             @foreach (var item in currentPageData)
             {
                 <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
