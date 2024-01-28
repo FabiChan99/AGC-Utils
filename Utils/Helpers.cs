@@ -1,5 +1,7 @@
 #region
 
+using System.Globalization;
+using System.Reflection;
 using System.Security.Claims;
 using AGC_Management.Entities;
 using DisCatSharp.Net;
@@ -36,7 +38,51 @@ public static class ToolSet
         }
     }
 
+    public static DateTime GetBuildDate(Assembly assembly)
+    {
+        const string BuildVersionMetadataPrefix = "+build";
 
+        var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (attribute?.InformationalVersion != null)
+        {
+            var value = attribute.InformationalVersion;
+            var index = value.IndexOf(BuildVersionMetadataPrefix);
+            if (index > 0)
+            {
+                value = value.Substring(index + BuildVersionMetadataPrefix.Length);
+                if (DateTime.TryParseExact(value, "yyyyMMddHHmmss", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out var result))
+                {
+                    return TimeZoneInfo.ConvertTimeToUtc(result, TimeZoneInfo.Local);
+                }
+            }
+        }
+
+        return default;
+    }
+
+    public static long GetBuildDateToUnixTime(Assembly assembly)
+    {
+        const string BuildVersionMetadataPrefix = "+build";
+
+        var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (attribute?.InformationalVersion != null)
+        {
+            var value = attribute.InformationalVersion;
+            var index = value.IndexOf(BuildVersionMetadataPrefix);
+            if (index > 0)
+            {
+                value = value.Substring(index + BuildVersionMetadataPrefix.Length);
+                if (DateTime.TryParseExact(value, "yyyyMMddHHmmss", CultureInfo.CurrentCulture,
+                        DateTimeStyles.AssumeLocal, out var result))
+                {
+                    return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(result, TimeZoneInfo.Local))
+                        .ToUnixTimeSeconds();
+                }
+            }
+        }
+
+        return default;
+    }
     public static async Task<bool> IsUserOnServer(ulong userId)
     {
         try

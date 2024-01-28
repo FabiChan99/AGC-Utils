@@ -1,6 +1,8 @@
 ﻿#region
 
 using System.Diagnostics;
+using System.Reflection;
+using AGC_Management.Utils;
 
 #endregion
 
@@ -16,15 +18,20 @@ public class StatsCommand : BaseCommandModule
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("AGC Management Bot Stats")
             .WithColor(DiscordColor.Blurple)
-            .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl) // Adds the bot's avatar as a thumbnail
+            .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl) 
             .WithFooter($"Requested by {ctx.User.Username}",
-                ctx.User.AvatarUrl) // Adds the requester's username and avatar in the footer
-            .WithTimestamp(DateTimeOffset.Now); // Adds the current time to the embed
+                ctx.User.AvatarUrl)
+            .WithTimestamp(DateTimeOffset.Now);
 
         // Calculate uptime
         var uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
-        string istring = $"Uptime: **{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s**\n";
+        var uptimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - uptime.TotalSeconds;
+        var rounduptime = Math.Round(uptimestamp, 0);
+        string istring = $"Uptime: <t:{rounduptime}:f> <t:{rounduptime}:R>\n";
 
+        var compiledate = ToolSet.GetBuildDateToUnixTime(Assembly.GetExecutingAssembly());
+        istring += $"Compile Date: <t:{compiledate}:f> <t:{compiledate}:R>\n";
+        
         var BotVersion = CurrentApplication.VersionString;
         istring += $"Bot Version: **{BotVersion}**\n";
 
@@ -45,15 +52,12 @@ public class StatsCommand : BaseCommandModule
         istring += $"Microsoft .NET Runtime: **{netruntime}**\n";
 
         // Library version
-        var libraryversion = ctx.Client.VersionString;
+        var libraryversion = ctx.Client.BotLibrary + " " + ctx.Client.VersionString;
         istring += $"Library Version: **{libraryversion}**\n";
 
         // Operating System
         var OS = Environment.OSVersion;
         istring += $"Operating System: **{OS}**\n";
-
-        var writtenin = "C#";
-        istring += $"Written in: **{writtenin}**\n";
 
         var workingdir = Environment.ProcessPath;
         istring += $"Working Directory: **{workingdir}**\n";
