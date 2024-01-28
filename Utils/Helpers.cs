@@ -37,8 +37,9 @@ public static class ToolSet
             return false;
         }
     }
-
-    public static DateTime GetBuildDate(Assembly assembly)
+    
+    
+    public static string GetBuildNumber(Assembly assembly)
     {
         const string BuildVersionMetadataPrefix = "+build";
 
@@ -49,17 +50,14 @@ public static class ToolSet
             var index = value.IndexOf(BuildVersionMetadataPrefix);
             if (index > 0)
             {
-                value = value.Substring(index + BuildVersionMetadataPrefix.Length);
-                if (DateTime.TryParseExact(value, "yyyyMMddHHmmss", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out var result))
-                {
-                    return TimeZoneInfo.ConvertTimeToUtc(result, TimeZoneInfo.Local);
-                }
+                return value.Substring(index + BuildVersionMetadataPrefix.Length);
             }
         }
 
-        return default;
+        return string.Empty;
     }
-
+    
+    
     public static long GetBuildDateToUnixTime(Assembly assembly)
     {
         const string BuildVersionMetadataPrefix = "+build";
