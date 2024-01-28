@@ -13,24 +13,24 @@
             @foreach (var item in currentPageData)
             {
                 <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
-<div class="rank">
-    @if (item.Rank > 3)
-    {
-        <span class="rank-number">@item.Rank</span>
-    }
-    @if (item.Rank == 1)
-    {
-        <img src="https://files.fabi-chan.me/resources/leaderboardassets/goldmedal.png" alt="Gold Medal" style="width:40px; height:40px;" />
-    }
-    else if (item.Rank == 2)
-    {
-        <img src="https://files.fabi-chan.me/resources/leaderboardassets/silvermedal.png" alt="Silver Medal" style="width:40px; height:40px;" />
-    }
-    else if (item.Rank == 3)
-    {
-        <img src="https://files.fabi-chan.me/resources/leaderboardassets/bronzemedal.png" alt="Bronze Medal" style="width:40px; height:40px;" />
-    }
-</div>
+                    <div class="rank">
+                        @if (item.Rank > 3)
+                        {
+                            <span class="rank-number">@item.Rank</span>
+                        }
+                        @if (item.Rank == 1)
+                        {
+                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/goldmedal.png" alt="Gold Medal" style="width:40px; height:40px;" />
+                        }
+                        else if (item.Rank == 2)
+                        {
+                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/silvermedal.png" alt="Silver Medal" style="width:40px; height:40px;" />
+                        }
+                        else if (item.Rank == 3)
+                        {
+                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/bronzemedal.png" alt="Bronze Medal" style="width:40px; height:40px;" />
+                        }
+                    </div>
                     <div class="avatar">
                         <img src="@item.Avatar" alt="@item.Username" />
                     </div>
