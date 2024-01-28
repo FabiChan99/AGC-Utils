@@ -37,6 +37,22 @@ public static class ToolSet
         }
     }
     
+        
+    public static async Task<bool> IsUserOnServer(ulong userId)
+    {
+        try
+        {
+            var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
+            
+            return serverMembers.Any(member => member.Id == userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
+            return false;
+        }
+    }
+    
     public static PartialUser GetFallbackUser(ulong userId)
     {
         return new PartialUser

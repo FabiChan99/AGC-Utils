@@ -71,22 +71,6 @@ public static class LevelUtils
         await Task.CompletedTask;
     }
     
-    
-    private static async Task<bool> IsUserOnServer(ulong userId)
-    {
-        try
-        {
-            var serverMembers = CurrentApplication.TargetGuild.Members.Values.ToList();
-            
-            return serverMembers.Any(member => member.Id == userId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Fehler beim Abrufen der Servermitglieder: " + ex.Message);
-            return false;
-        }
-    }
-    
 
     private static async Task LoadLeaderboardData()
     {
@@ -94,7 +78,7 @@ public static class LevelUtils
         var tempLeaderboardData = new HashSet<WebLeaderboardData>();
         var tasks = leaderboard.Select(async (x, i) =>
         {
-            var isOnServer = await IsUserOnServer(x.UserId);
+            var isOnServer = await ToolSet.IsUserOnServer(x.UserId);
             var isCached = await ToolSet.IsUserInCache(x.UserId);
             string avatarUrl, username;
 
