@@ -34,7 +34,6 @@ public class CurrentApplication
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
     public static IServiceProvider ServiceProvider { get; set; }
-    public static List<LeaderboardData> LeaderboardData { get; set; } = new();
 }
 
 internal class Program : BaseCommandModule
