@@ -162,16 +162,7 @@
 
     private async Task<string> GatherCachedUsersCount()
     {
-        var users = new HashSet<DiscordUser>();
-        var guilds = CurrentApplication.DiscordClient.Guilds.Values.ToList();
-        foreach (var guild in guilds)
-        {
-            var guildusers = guild.Members.Values.ToList();
-            foreach (var guilduser in guildusers)
-            {
-                users.Add(guilduser);
-            }
-        }
+        var users = CurrentApplication.DiscordClient.UserCache.Keys.ToList();
 
         return users.Count.ToString();
     }
