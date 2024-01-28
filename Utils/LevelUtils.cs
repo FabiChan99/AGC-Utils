@@ -91,6 +91,7 @@ public static class LevelUtils
     private static async Task LoadLeaderboardData()
     {
         var leaderboard = LevelUtils._leaderboardData;
+        var tempLeaderboardData = new List<WebLeaderboardData>();
         var tasks = leaderboard.Select(async (x, i) =>
         {
             var isOnServer = await IsUserOnServer(x.UserId);
@@ -131,8 +132,11 @@ public static class LevelUtils
         foreach (var task in tasks)
         {
             var result = await task;
-            cachedLeaderboardData.Add(result);
+            tempLeaderboardData.Add(result);
         }
+        
+        cachedLeaderboardData = tempLeaderboardData;
+        tempLeaderboardData.Clear();
     }
     
     /// <summary>
