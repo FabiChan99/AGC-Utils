@@ -1,7 +1,9 @@
 #region
 
+using System.Globalization;
 using System.Security.Claims;
 using AGC_Management.Entities;
+using DisCatSharp.Net;
 using Newtonsoft.Json;
 using RestSharp;
 using NpgsqlDataSource = Npgsql.NpgsqlDataSource;
@@ -41,9 +43,19 @@ public static class ToolSet
         {
             UserId = userId,
             UserName = userId.ToString(),
-            Avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
+            Avatar = GetDefaultAvatarUrlForUserId(userId)
         };
     }
+
+    public static string GetDefaultAvatarUrlForUserId(ulong userId)
+    {
+        var domainUrl = DiscordDomain.GetDomain(CoreDomain.DiscordCdn).Url;
+        var avatarIndex = (userId >> 22) % 6;
+        string avatarUrl = $"{domainUrl}{Endpoints.EMBED}{Endpoints.AVATARS}/{avatarIndex}.png?size=1024";
+
+        return avatarUrl;
+    }
+
 
 
     public static string GetFormattedName(DiscordMember member)
