@@ -881,14 +881,14 @@ public class TicketManagerHelper
 
         await reader.CloseAsync();
         await using NpgsqlCommand cmd2 =
-            new(
+            con.CreateCommand(
                 $"UPDATE ticketcache SET ticket_users = array_remove(ticket_users, '{(long)user.Id}') WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
         var channel = ticket_channel;
         var member = await interaction.Guild.GetMemberAsync(user.Id);
         try
         {
-            await channel.DeleteOverwriteAsync(member);
+            await channel.AddOverwriteAsync(member);
         }
         catch (Exception e)
         {
