@@ -886,7 +886,16 @@ public class TicketManagerHelper
         await cmd2.ExecuteNonQueryAsync();
         var channel = ticket_channel;
         var member = await interaction.Guild.GetMemberAsync(user.Id);
-        await channel.AddOverwriteAsync(member);
+        try
+        {
+            await channel.DeleteOverwriteAsync(member);
+        }
+        catch (Exception e)
+        {
+            CurrentApplication.Logger.Error(e, "Error while removing user from ticket");
+        }
+
+
         if (noautomatic)
         {
             var afteraddembed = new DiscordEmbedBuilder
@@ -896,9 +905,16 @@ public class TicketManagerHelper
                 Color = DiscordColor.Red
             };
             await interaction.Channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(afteraddembed));
-
+            string transcriptURL = "";
             var tr = await GenerateTranscript(interaction.Channel);
-            var transcriptURL = await GenerateTranscript(ticket_channel);
+            try
+            {
+                transcriptURL = await GenerateTranscript(ticket_channel);
+            }
+            catch (Exception e)
+            {
+                await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
+            }
             await SendTranscriptsToUser(member, transcriptURL, RemoveType.Removed,
                 ticket_channel.Name);
         }
