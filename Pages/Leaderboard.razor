@@ -62,7 +62,7 @@
 
         </div>
         <div class="pagination-lg">
-            <div class="page-info">Seite @currentPage von @totalPages</div>
+            <div class="page-info">Seite @currentPage von @totalPages | Letztes Cacheupdate: @LevelUtils.CacheDate</div>
             <button class="btn btn-primary" @onclick="PreviousPage" disabled="@IsFirstPage">Vorherige Seite</button>
             <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
         </div>

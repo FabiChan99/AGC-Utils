@@ -15,6 +15,7 @@ public static class LevelUtils
 
     public static List<WebLeaderboardData> _leaderboardData = new();
     public static List<WebLeaderboardData> cachedLeaderboardData = new();
+    public static string? CacheDate = "";
     public static bool LeaderboardDataLoaded;
 
     public static async Task RunLeaderboardUpdate()
@@ -26,6 +27,7 @@ public static class LevelUtils
             await RetrieveLeaderboardData();
             await LoadLeaderboardData();
             LeaderboardDataLoaded = true;
+            CacheDate = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + " " + TimeZoneInfo.Local.DisplayName;
             CurrentApplication.Logger.Information("Updated leaderboard data.");
             await Task.Delay(TimeSpan.FromMinutes(15));
         }
