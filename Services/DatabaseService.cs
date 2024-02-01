@@ -144,6 +144,10 @@ public static class DatabaseService
                 "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"
             },
             {
+                "applicationcategories",
+                "CREATE TABLE IF NOT EXISTS applicationcategories (positionname TEXT, postitionid TEXT)"
+            },
+            {
                 "user_rankcardbackgrounds",
                 "CREATE TABLE IF NOT EXISTS user_rankcardbackgrounds (userid BIGINT, bg_id INTEGER, barcolor TEXT DEFAULT NULL)"
             },
@@ -217,6 +221,14 @@ public static class DatabaseService
                     { "bg_id", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_id INTEGER" },
                     { "bg_url", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_url TEXT" },
                     { "barcolor", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS barcolor TEXT" }
+                }
+            },
+            {
+              "applicationcategories",
+                new Dictionary<string, string>
+                {
+                    { "positionname", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionname TEXT" },
+                    { "postitionid", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS postitionid TEXT" }
                 }
             },
             {
