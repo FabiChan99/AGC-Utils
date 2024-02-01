@@ -22,7 +22,6 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
         if (await ToolSet.CheckForReason(ctx, reason)) return;
-        if (await ToolSet.TicketUrlCheck(ctx, reason)) return;
         reason = reason.TrimEnd(' ');
         reason = await ReasonTemplateResolver.Resolve(reason);
         var users_to_flag = new List<DiscordUser>();
