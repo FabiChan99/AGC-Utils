@@ -27,8 +27,7 @@ public static class LevelUtils
             await RetrieveLeaderboardData();
             await LoadLeaderboardData();
             LeaderboardDataLoaded = true;
-            CacheDate = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + " " + TimeZoneInfo.Local.StandardName + " | " +
-                        "Update alle 15 Minuten"; 
+            CacheDate = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"); 
             CurrentApplication.Logger.Information("Updated leaderboard data.");
             await Task.Delay(TimeSpan.FromMinutes(15));
         }
