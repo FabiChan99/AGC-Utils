@@ -36,7 +36,7 @@ public class BotControl : BaseCommandModule
             var globals = new EvalVariables(ctx.Message, ctx.Client, ctx);
 
             var sopts = ScriptOptions.Default;
-            sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
+            sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO",
                 "System.Threading.Tasks", "DisCatSharp", "DisCatSharp.Entities", "DisCatSharp.CommandsNext",
                 "DisCatSharp.CommandsNext.Attributes", "DisCatSharp.Interactivity", "DisCatSharp.Enums",
                 "Microsoft.Extensions.Logging");
