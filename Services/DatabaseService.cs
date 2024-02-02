@@ -198,7 +198,7 @@ public static class DatabaseService
             await cmdCreate.ExecuteNonQueryAsync();
             //CurrentApplication.Logger.Debug($"Table {tableName} initialized or updated.");
             progressBar.Increment();
-            await Task.Delay(25);
+            await Task.Delay(10);
         }
 
 
@@ -446,7 +446,7 @@ public static class DatabaseService
                 await using var cmdAlter = conn.CreateCommand(alterColumnCommand);
                 await cmdAlter.ExecuteNonQueryAsync();
                 progressBar.Increment();
-                await Task.Delay(25);
+                await Task.Delay(10);
             }
         }
 
