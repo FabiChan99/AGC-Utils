@@ -18,8 +18,8 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         var m = await ctx.RespondAsync(msgb);
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemIdCache, "applymessageid", id.ToString());
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemIdCache, "applychannelid", channelId.ToString());
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid", channelId.ToString());
     }
 
 

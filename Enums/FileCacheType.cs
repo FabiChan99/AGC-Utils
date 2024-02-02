@@ -2,5 +2,5 @@
 
 public enum FileCacheType
 {
-    ApplicationSystemIdCache,
+    ApplicationSystemCache,
 }
