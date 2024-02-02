@@ -3,6 +3,7 @@
 using System.Text;
 using AGC_Management.Enums;
 using AGC_Management.Services;
+using AGC_Management.Utils;
 
 namespace AGC_Management.ApplicationSystem;
 
@@ -30,7 +31,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
         foreach (var category in categories)
         {
-            selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName, RemoveWhitespace(category.PositionId)));
+            selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName, ToolSet.RemoveWhitespace(category.PositionId)));
         }
         
         var selector = new DiscordStringSelectComponent("select_apply_category", "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
@@ -70,13 +71,6 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         public string PositionId { get; set; }
     }
     
-    
-    private static string RemoveWhitespace(string input)
-    {
-        return new string(input.ToCharArray()
-            .Where(c => !Char.IsWhiteSpace(c))
-            .ToArray());
-    }
     
     private static async Task<List<Bewerbung>> GetBewerbungsCategories()
     {

@@ -57,6 +57,12 @@ public static class ToolSet
         return string.Empty;
     }
     
+    public static string RemoveWhitespace(string input)
+    {
+        return new string(input.ToCharArray()
+            .Where(c => !Char.IsWhiteSpace(c))
+            .ToArray());
+    }
     
     public static long GetBuildDateToUnixTime(Assembly assembly)
     {
