@@ -1,0 +1,33 @@
+﻿using AGC_Management.Enums;
+using AGC_Management.Services;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.Attributes;
+using DisCatSharp.ApplicationCommands.Context;
+
+namespace AGC_Management.Commands;
+
+[ApplicationCommandRequireTeamOwner]
+[SlashCommandGroup("cache", "Cache Control", defaultMemberPermissions:(long)Permissions.Administrator)]
+public sealed class CacheControlCommands : ApplicationCommandsModule
+{
+
+    [ApplicationCommandRequireTeamOwner]
+    [SlashCommand("getcachevalue", "Gets the value of a cache key.", defaultMemberPermissions:(long)Permissions.Administrator)]
+    [Description("Gets the value of a cache key.")]
+    public static async Task GetCacheValue(InteractionContext ctx, [Option("cachefile", "The cache file to get the value from.")] FileCacheType cachefile, [Option("key", "The key to get the value for.")] string key)
+    {
+        var value = await CachingService.GetCacheValue(cachefile, key);
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(value ?? "Value not found."));
+    }
+    
+    [ApplicationCommandRequireTeamOwner]
+    [SlashCommand("setcachevalue", "Sets the value of a cache key.", defaultMemberPermissions:(long)Permissions.Administrator)]
+    [Description("Sets the value of a cache key.")]     
+    public static async Task SetCacheValue(InteractionContext ctx, [Option("cachefile", "The cache file to set the value for.")] FileCacheType cachefile, [Option("key", "The key to set the value for.")] string key, [Option("value", "The value to set.")] string value)
+    {
+        await CachingService.SetCacheValue(cachefile, key, value);
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Value set."));
+    }
+    
+    
+}

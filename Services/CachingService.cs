@@ -5,11 +5,11 @@ namespace AGC_Management.Services
 {
     public sealed class CachingService
     {
-        private static readonly string cacheDir = Path.Combine("botcache"); 
+        private static readonly string cacheDir = Path.Combine("botcache");
 
         public static async Task<string> GetCacheValue(FileCacheType cachefile, string key)
         {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString()); 
+            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
             await createCacheFile(fullPath);
             var cache = await File.ReadAllTextAsync(fullPath);
             var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache);
@@ -18,7 +18,7 @@ namespace AGC_Management.Services
 
         public static async Task SetCacheValue(FileCacheType cachefile, string key, string value)
         {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString()); 
+            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
             await createCacheFile(fullPath);
             var cache = await File.ReadAllTextAsync(fullPath);
             var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache) ?? new Dictionary<string, string>();
@@ -28,7 +28,7 @@ namespace AGC_Management.Services
 
         private static async Task createCacheFile(string fullPath)
         {
-            if (!Directory.Exists(cacheDir)) 
+            if (!Directory.Exists(cacheDir))
             {
                 Directory.CreateDirectory(cacheDir);
             }
@@ -37,7 +37,7 @@ namespace AGC_Management.Services
                 await File.WriteAllTextAsync(fullPath, "{}");
             }
         }
-        
+
         public static void ClearCompleteCache()
         {
             if (Directory.Exists(cacheDir))
@@ -45,13 +45,25 @@ namespace AGC_Management.Services
                 Directory.Delete(cacheDir, true);
             }
         }
-        
+
         public static void ClearCacheFile(FileCacheType cachefile)
         {
             string fullPath = Path.Combine(cacheDir, cachefile.ToString());
             if (File.Exists(fullPath))
             {
                 File.Delete(fullPath);
+            }
+        }
+        
+        public static void DeleteCacheObject(FileCacheType cachefile, string key)
+        {
+            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
+            if (File.Exists(fullPath))
+            {
+                var cache = File.ReadAllText(fullPath);
+                var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache);
+                cacheObject.Remove(key);
+                File.WriteAllText(fullPath, JsonConvert.SerializeObject(cacheObject));
             }
         }
     }

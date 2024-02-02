@@ -25,6 +25,28 @@ public class RequireStaffRole : CheckBaseAttribute
     }
 }
 
+public class RequireBotOwner : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        if (ctx.User.Id == GlobalProperties.BotOwnerId)
+            return true;
+        await ctx.RespondAsync("⚠️ Du musst der Botbesitzer sein, um diese Aktion auszuführen!");
+        return false;
+    }
+}
+
+public class ApplicationCommandsRequireBotOwner : CheckBaseAttribute
+{
+    public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+    {
+        if (ctx.User.Id == GlobalProperties.BotOwnerId)
+            return true;
+        return false;
+    }
+}
+
+
 public class TicketRequireStaffRole : CheckBaseAttribute
 {
     private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["TeamRoleId"]);
