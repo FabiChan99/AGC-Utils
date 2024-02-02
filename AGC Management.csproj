@@ -59,12 +59,46 @@
         <_ContentIncludedByDefault Remove="wwwroot\css\site.css"/>
         <_ContentIncludedByDefault Remove="wwwroot\favicon.png"/>
         <_ContentIncludedByDefault Remove="wwwroot\js\helpers.js"/>
+        <_ContentIncludedByDefault Remove="out\web.config" />
+        <_ContentIncludedByDefault Remove="out\AGC Management.deps.json" />
+        <_ContentIncludedByDefault Remove="out\AGC Management.runtimeconfig.json" />
+        <_ContentIncludedByDefault Remove="out\appsettings.Development.json" />
+        <_ContentIncludedByDefault Remove="out\appsettings.json" />
+        <_ContentIncludedByDefault Remove="out\global.json" />
     </ItemGroup>
 
 
     <ItemGroup>
         <AdditionalFiles Include="Pages\SharedPages\MainLayout.razor"/>
         <AdditionalFiles Include="Pages\SharedPages\NavMenu.razor"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Compile Remove="botcache\**" />
+      <Compile Remove="logs\**" />
+      <Compile Remove="out\**" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <EmbeddedResource Remove="botcache\**" />
+      <EmbeddedResource Remove="logs\**" />
+      <EmbeddedResource Remove="out\**" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Content Remove="botcache\**" />
+      <Content Remove="logs\**" />
+      <Content Remove="out\**" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <None Remove="botcache\**" />
+      <None Remove="logs\**" />
+      <None Remove="out\**" />
     </ItemGroup>
 
 </Project>
