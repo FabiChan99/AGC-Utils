@@ -404,3 +404,4 @@ src/Commands/Test/*
 /out/AGC Management.exe
 /out/payload.bin
 /src/Modules/TestCommands/TestCommands.cs
+/botcache/

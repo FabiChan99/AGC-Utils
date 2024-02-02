@@ -1,6 +1,8 @@
 
 
 using System.Text;
+using AGC_Management.Enums;
+using AGC_Management.Services;
 
 namespace AGC_Management.ApplicationSystem;
 
@@ -12,7 +14,11 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     public async Task SendPanel(CommandContext ctx)
     {
         var msgb = await BuildMessage(ctx);
-        await ctx.RespondAsync(msgb);
+        var m = await ctx.RespondAsync(msgb);
+        ulong id = m.Id;
+        ulong channelId = m.ChannelId;
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemIdCache, "applymessageid", id.ToString());
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemIdCache, "applychannelid", channelId.ToString());
     }
 
 
