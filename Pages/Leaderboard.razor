@@ -32,21 +32,22 @@
             {
                 <div class="leaderboard-item @(IsCurrentUser(item.UserId) ? "you" : "")">
                     <div class="rank">
+                        @{
+                            var medalImages = new Dictionary<int, string>
+                            {
+                                {1, "https://files.fabi-chan.me/resources/leaderboardassets/goldmedal.png"},
+                                {2, "https://files.fabi-chan.me/resources/leaderboardassets/silvermedal.png"},
+                                {3, "https://files.fabi-chan.me/resources/leaderboardassets/bronzemedal.png"}
+                            };
+                        }
+
                         @if (item.Rank > 3)
                         {
                             <span class="rank-number">@item.Rank</span>
                         }
-                        @if (item.Rank == 1)
+                        else if (medalImages.ContainsKey(item.Rank))
                         {
-                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/goldmedal.png" alt="Gold Medal" style="width:40px; height:40px;"/>
-                        }
-                        else if (item.Rank == 2)
-                        {
-                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/silvermedal.png" alt="Silver Medal" style="width:40px; height:40px;"/>
-                        }
-                        else if (item.Rank == 3)
-                        {
-                            <img src="https://files.fabi-chan.me/resources/leaderboardassets/bronzemedal.png" alt="Bronze Medal" style="width:40px; height:40px;"/>
+                            <img src="@medalImages[item.Rank]" alt="Medal" style="width:40px; height:40px;"/>
                         }
                     </div>
                     <div class="avatar">
@@ -71,7 +72,7 @@
 else
 {
     <br>
-    <em class="alert alert-danger">Das Leaderboard wird gerade geladen. Bitte warten...</em>
+    <em class="alert alert-danger">Der Leaderboard-Daten-Cache wird gerade aufgebaut. Bitte warte einen Moment.</em>
 }
 
 <br>
