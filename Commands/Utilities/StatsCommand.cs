@@ -18,7 +18,7 @@ public class StatsCommand : BaseCommandModule
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("AGC Management Bot Stats")
             .WithColor(DiscordColor.Blurple)
-            .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl) 
+            .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
             .WithFooter($"Requested by {ctx.User.Username}",
                 ctx.User.AvatarUrl)
             .WithTimestamp(DateTimeOffset.Now);
@@ -31,10 +31,10 @@ public class StatsCommand : BaseCommandModule
 
         var compiledate = ToolSet.GetBuildDateToUnixTime(Assembly.GetExecutingAssembly());
         istring += $"Compile Date: <t:{compiledate}:f> <t:{compiledate}:R>\n";
-        
+
         var buildnumber = ToolSet.GetBuildNumber(Assembly.GetExecutingAssembly());
         istring += $"Build Number: **{buildnumber}**\n";
-        
+
         // Bot version
         var BotVersion = CurrentApplication.VersionString;
         istring += $"Bot Version: **{BotVersion}**\n";

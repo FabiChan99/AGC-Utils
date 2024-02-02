@@ -1,5 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿#region
+
 using AGC_Management.Enums;
+using Newtonsoft.Json;
+
+#endregion
 
 namespace AGC_Management.Services
 {
@@ -21,7 +25,8 @@ namespace AGC_Management.Services
             string fullPath = Path.Combine(cacheDir, cachefile.ToString());
             await createCacheFile(fullPath);
             var cache = await File.ReadAllTextAsync(fullPath);
-            var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache) ?? new Dictionary<string, string>();
+            var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache) ??
+                              new Dictionary<string, string>();
             cacheObject[key] = value;
             await File.WriteAllTextAsync(fullPath, JsonConvert.SerializeObject(cacheObject));
         }
@@ -32,6 +37,7 @@ namespace AGC_Management.Services
             {
                 Directory.CreateDirectory(cacheDir);
             }
+
             if (!File.Exists(fullPath))
             {
                 await File.WriteAllTextAsync(fullPath, "{}");
@@ -54,7 +60,7 @@ namespace AGC_Management.Services
                 File.Delete(fullPath);
             }
         }
-        
+
         public static void DeleteCacheObject(FileCacheType cachefile, string key)
         {
             string fullPath = Path.Combine(cacheDir, cachefile.ToString());

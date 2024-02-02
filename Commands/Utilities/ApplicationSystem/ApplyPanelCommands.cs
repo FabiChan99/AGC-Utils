@@ -1,9 +1,11 @@
-
+#region
 
 using System.Text;
 using AGC_Management.Enums;
 using AGC_Management.Services;
 using AGC_Management.Utils;
+
+#endregion
 
 namespace AGC_Management.ApplicationSystem;
 
@@ -19,7 +21,8 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
         await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid", channelId.ToString());
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid",
+            channelId.ToString());
     }
 
 
@@ -27,19 +30,21 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         var categories = await GetBewerbungsCategories();
         var selectorlist = new List<DiscordStringSelectComponentOption>();
-        
+
 
         foreach (var category in categories)
         {
-            selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName, ToolSet.RemoveWhitespace(category.PositionId)));
+            selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName,
+                ToolSet.RemoveWhitespace(category.PositionId)));
         }
-        
-        var selector = new DiscordStringSelectComponent("select_apply_category", "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
+
+        var selector = new DiscordStringSelectComponent("select_apply_category",
+            "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
         string paneltext = "applyrequirements.txt is missing!";
-        
+
         StringBuilder embstr = new StringBuilder();
         embstr.Append(paneltext);
-        
+
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")
             .WithDescription(embstr.ToString())
@@ -48,30 +53,23 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
         DiscordMessageBuilder msgb = new DiscordMessageBuilder()
             .WithEmbed(emb);
-        
+
         if (categories.Count == 0)
         {
             return new DiscordMessageBuilder()
                 .WithContent("Es gibt keine Bewerbungspositionen!");
         }
-        
-        
+
+
         if (selectorlist.Count > 0)
         {
             msgb.AddComponents(selector);
         }
-        
+
         return msgb;
     }
 
 
-    private class Bewerbung 
-    {
-        public string PositionName { get; set; }
-        public string PositionId { get; set; }
-    }
-    
-    
     private static async Task<List<Bewerbung>> GetBewerbungsCategories()
     {
         List<Bewerbung> bewerbungen = new();
@@ -86,8 +84,14 @@ public sealed class ApplyPanelCommands : BaseCommandModule
                 PositionId = reader.GetString(1)
             });
         }
-        
+
         return bewerbungen;
     }
-}
 
+
+    private class Bewerbung
+    {
+        public string PositionName { get; set; }
+        public string PositionId { get; set; }
+    }
+}

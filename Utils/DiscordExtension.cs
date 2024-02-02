@@ -1,6 +1,5 @@
 ﻿#region
 
-using System.Reflection;
 using System.Text.RegularExpressions;
 using AGC_Management.Utils;
 using DisCatSharp.Exceptions;

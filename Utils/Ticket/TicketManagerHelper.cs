@@ -915,6 +915,7 @@ public class TicketManagerHelper
             {
                 await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, member, e);
             }
+
             await SendTranscriptsToUser(member, transcriptURL, RemoveType.Removed,
                 ticket_channel.Name);
         }

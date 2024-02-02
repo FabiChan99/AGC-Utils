@@ -37,8 +37,8 @@ public static class ToolSet
             return false;
         }
     }
-    
-    
+
+
     public static string GetBuildNumber(Assembly assembly)
     {
         const string BuildVersionMetadataPrefix = "+build";
@@ -56,14 +56,14 @@ public static class ToolSet
 
         return string.Empty;
     }
-    
+
     public static string RemoveWhitespace(string input)
     {
         return new string(input.ToCharArray()
-            .Where(c => !Char.IsWhiteSpace(c))
+            .Where(c => !char.IsWhiteSpace(c))
             .ToArray());
     }
-    
+
     public static long GetBuildDateToUnixTime(Assembly assembly)
     {
         const string BuildVersionMetadataPrefix = "+build";
@@ -87,6 +87,7 @@ public static class ToolSet
 
         return default;
     }
+
     public static async Task<bool> IsUserOnServer(ulong userId)
     {
         try

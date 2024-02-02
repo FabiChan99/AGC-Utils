@@ -224,7 +224,7 @@ public static class DatabaseService
                 }
             },
             {
-              "applicationcategories",
+                "applicationcategories",
                 new Dictionary<string, string>
                 {
                     { "positionname", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionname TEXT" },

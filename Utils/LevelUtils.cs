@@ -27,7 +27,7 @@ public static class LevelUtils
             await RetrieveLeaderboardData();
             await LoadLeaderboardData();
             LeaderboardDataLoaded = true;
-            CacheDate = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"); 
+            CacheDate = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
             CurrentApplication.Logger.Information("Updated leaderboard data.");
             await Task.Delay(TimeSpan.FromMinutes(15));
         }

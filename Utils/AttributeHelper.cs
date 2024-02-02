@@ -46,7 +46,6 @@ public class ApplicationCommandsRequireBotOwner : CheckBaseAttribute
     }
 }
 
-
 public class TicketRequireStaffRole : CheckBaseAttribute
 {
     private readonly ulong RoleId = ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["TeamRoleId"]);
