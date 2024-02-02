@@ -29,5 +29,13 @@ public sealed class CacheControlCommands : ApplicationCommandsModule
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Value set."));
     }
     
+    [ApplicationCommandRequireTeamOwner]
+    [SlashCommand("clearobjectfromcache", "Deletes a cache object.", defaultMemberPermissions:(long)Permissions.Administrator)]
+    [Description("Deletes a cache object.")]
+    public static async Task ClearObjectFromCache(InteractionContext ctx, [Option("cachefile", "The cache file to delete the object from.")] FileCacheType cachefile, [Option("key", "The key to delete.")] string key)
+    {
+        CachingService.DeleteCacheObject(cachefile, key);
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Object deleted."));
+    }
     
 }
