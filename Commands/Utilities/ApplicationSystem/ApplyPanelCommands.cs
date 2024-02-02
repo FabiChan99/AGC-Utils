@@ -11,13 +11,17 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     [Description("Sends the apply panel to the channel.")]
     public async Task SendPanel(CommandContext ctx)
     {
+        var msgb = await BuildMessage(ctx);
+        await ctx.RespondAsync(msgb);
+    }
+
+
+    private static async Task<DiscordMessageBuilder> BuildMessage(CommandContext ctx)
+    {
         var categories = await GetBewerbungsCategories();
         var selectorlist = new List<DiscordStringSelectComponentOption>();
-        if (categories.Count == 0)
-        {
-            await ctx.RespondAsync("Es sind keine Bewerbungspositionen vorhanden!");
-            return;
-        }
+        
+
         foreach (var category in categories)
         {
             selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName, RemoveWhitespace(category.PositionId)));
@@ -25,20 +29,9 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         
         var selector = new DiscordStringSelectComponent("select_apply_category", "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
         string paneltext = "applyrequirements.txt is missing!";
-        string paneltext2 = "applyrequirements2.txt is missing!";
-        if (File.Exists("applyrequirements.txt"))
-        {
-            paneltext = await File.ReadAllTextAsync("applyrequirements.txt");
-        }
-        if (File.Exists("applyrequirements2.txt"))
-        {
-            paneltext2 = await File.ReadAllTextAsync("applyrequirements2.txt");
-        }
         
         StringBuilder embstr = new StringBuilder();
         embstr.Append(paneltext);
-        embstr.Append("\n\n");
-        embstr.Append(paneltext2);
         
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")
@@ -47,10 +40,21 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             .WithFooter("AGC Bewerbungssystem", ctx.Guild.IconUrl);
 
         DiscordMessageBuilder msgb = new DiscordMessageBuilder()
-            .WithEmbed(emb)
-            .AddComponents(selector);
+            .WithEmbed(emb);
         
-        await ctx.RespondAsync(msgb);
+        if (categories.Count == 0)
+        {
+            return new DiscordMessageBuilder()
+                .WithContent("Es gibt keine Bewerbungspositionen!");
+        }
+        
+        
+        if (selectorlist.Count > 0)
+        {
+            msgb.AddComponents(selector);
+        }
+        
+        return msgb;
     }
 
 
