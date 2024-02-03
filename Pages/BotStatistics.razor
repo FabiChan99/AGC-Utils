@@ -88,16 +88,15 @@
 
 
     private readonly List<string> serverList = new();
+    
 
+    
     protected override async Task OnInitializedAsync()
     {
-        var timer = new Timer(10000);
-        timer.Elapsed += async (sender, e) => await UpdateValues();
-        timer.Start();
+
         await Task.Delay(100);
         await UpdateValues();
     }
-
     private string GetMode()
     {
 #if DEBUG
