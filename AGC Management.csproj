@@ -3,10 +3,15 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <SourceRevisionId>build$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>AGC_Management</RootNamespace>
     </PropertyGroup>
+
+    <Target Name="UpdateSourceRevisionId" BeforeTargets="BeforeBuild">
+        <PropertyGroup>
+            <SourceRevisionId>build$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
+        </PropertyGroup>
+    </Target>
 
 
     <ItemGroup>
