@@ -405,3 +405,4 @@ src/Commands/Test/*
 /out/payload.bin
 /src/Modules/TestCommands/TestCommands.cs
 /botcache/
+/applyrequirements.txt
