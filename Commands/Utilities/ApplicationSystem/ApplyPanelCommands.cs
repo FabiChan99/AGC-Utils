@@ -11,12 +11,56 @@ namespace AGC_Management.ApplicationSystem;
 
 public sealed class ApplyPanelCommands : BaseCommandModule
 {
+    private static Queue<Task> refreshQueue = new Queue<Task>();
+    private static Timer timer;
+    public ApplyPanelCommands()
+    {
+        timer = new Timer(RefreshPanelFromQueue, null, Timeout.Infinite, Timeout.Infinite);
+        var watcher = new FileSystemWatcher
+        {
+            Path = ".",
+            NotifyFilter = NotifyFilters.LastWrite,
+            Filter = "applyrequirements.txt"
+        };
+        watcher.Changed += async (sender, e) =>
+        {
+            QueueRefreshPanel();
+        };
+        watcher.EnableRaisingEvents = true;
+    }
+    
+    
+    public static void QueueRefreshPanel()
+    {
+        refreshQueue.Clear();
+        refreshQueue.Enqueue(new Task(async () => await RefreshPanel()));
+        timer.Change(2000, Timeout.Infinite);
+    }
+    
+    private static void RefreshPanelFromQueue(object state)
+    {
+        if (refreshQueue.Count > 0)
+        {
+            var task = refreshQueue.Dequeue();
+            task.Start();
+            
+            if (refreshQueue.Count > 0)
+            {
+                timer.Change(5000, Timeout.Infinite);
+            }
+            else
+            {
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+        }
+    }
+    
     [RequirePermissions(Permissions.Administrator)]
     [Command("sendapplypanel")]
     [Description("Sends the apply panel to the channel.")]
     public async Task SendPanel(CommandContext ctx)
     {
-        var msgb = await BuildMessage(ctx);
+        var msgb = await BuildMessage();
         var m = await ctx.RespondAsync(msgb);
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
@@ -26,29 +70,21 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "ispanelactive", "true");
     }
     
-    public static async Task RefreshPanel(CommandContext ctx)
+    public static async Task RefreshPanel()
     {
         var m_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid");
         var c_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid");
-        if (m_id == null || c_id == null)
+        if (string.IsNullOrEmpty(m_id) || m_id == "0" || string.IsNullOrEmpty(c_id) || c_id == "0")
         {
             return;
         }
-        if (m_id == "0" || c_id == "0")
-        {
-            return;
-        }
-        if (string.IsNullOrEmpty(m_id) || string.IsNullOrEmpty(c_id))
-        {
-            return;
-        }
-        var msgb = await BuildMessage(ctx);
-        var m = await ctx.Client.GetChannelAsync(ulong.Parse(c_id)).Result.GetMessageAsync(ulong.Parse(m_id));
+        var msgb = await BuildMessage();
+        var m = await CurrentApplication.DiscordClient.GetChannelAsync(ulong.Parse(c_id)).Result.GetMessageAsync(ulong.Parse(m_id));
         await m.ModifyAsync(msgb);
     }
 
 
-    private static async Task<DiscordMessageBuilder> BuildMessage(CommandContext ctx)
+    private static async Task<DiscordMessageBuilder> BuildMessage()
     {
         var categories = await GetBewerbungsCategories();
         var selectorlist = new List<DiscordStringSelectComponentOption>();
@@ -62,24 +98,31 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
             "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
-        string paneltext = "applyrequirements.txt is missing!";
+        string paneltext = "**applyrequirements.txt is missing!**";
 
         StringBuilder embstr = new StringBuilder();
         embstr.Append(paneltext);
+        
+        // read applyrequirements.txt
+        if (File.Exists("applyrequirements.txt"))
+        {
+            paneltext = await File.ReadAllTextAsync("applyrequirements.txt");
+            embstr.Clear();
+            embstr.Append(paneltext);
+        }
 
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")
             .WithDescription(embstr.ToString())
             .WithColor(DiscordColor.Gold)
-            .WithFooter("AGC Bewerbungssystem", ctx.Guild.IconUrl);
+            .WithFooter("AGC Bewerbungssystem", CurrentApplication.TargetGuild.IconUrl);
 
         DiscordMessageBuilder msgb = new DiscordMessageBuilder()
             .WithEmbed(emb);
 
         if (categories.Count == 0)
         {
-            return new DiscordMessageBuilder()
-                .WithContent("Es gibt keine Bewerbungspositionen!");
+            emb.WithDescription(paneltext + "\n\nEs sind keine Bewerbungspositionen verfügbar.");
         }
 
 
