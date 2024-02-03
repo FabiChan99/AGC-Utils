@@ -23,6 +23,28 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
         await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid",
             channelId.ToString());
+        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "ispanelactive", "true");
+    }
+    
+    public static async Task RefreshPanel(CommandContext ctx)
+    {
+        var m_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid");
+        var c_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid");
+        if (m_id == null || c_id == null)
+        {
+            return;
+        }
+        if (m_id == "0" || c_id == "0")
+        {
+            return;
+        }
+        if (string.IsNullOrEmpty(m_id) || string.IsNullOrEmpty(c_id))
+        {
+            return;
+        }
+        var msgb = await BuildMessage(ctx);
+        var m = await ctx.Client.GetChannelAsync(ulong.Parse(c_id)).Result.GetMessageAsync(ulong.Parse(m_id));
+        await m.ModifyAsync(msgb);
     }
 
 
