@@ -18,7 +18,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         timer = new Timer(RefreshPanelFromQueue, null, Timeout.Infinite, Timeout.Infinite);
         var watcher = new FileSystemWatcher
         {
-            Path = ".",
+            Path = "./textfiles",
             NotifyFilter = NotifyFilters.LastWrite,
             Filter = "applyrequirements.txt"
         };
@@ -108,10 +108,10 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         StringBuilder embstr = new StringBuilder();
         embstr.Append(paneltext);
         
-        // read applyrequirements.txt
-        if (File.Exists("applyrequirements.txt"))
+        var currentDir = Directory.GetCurrentDirectory();
+        if (File.Exists(currentDir+"/textfiles/applyrequirements.txt"))
         {
-            paneltext = await File.ReadAllTextAsync("applyrequirements.txt");
+            paneltext = await File.ReadAllTextAsync(currentDir+"/textfiles/applyrequirements.txt");
             embstr.Clear();
             embstr.Append(paneltext);
         }
