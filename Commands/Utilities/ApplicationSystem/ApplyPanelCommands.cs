@@ -98,7 +98,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         foreach (var category in categories)
         {
             selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName,
-                ToolSet.RemoveWhitespace(category.PositionId)));
+                ToolSet.RemoveWhitespace(category.PositionId), description:MessageFormatter.BoolToEmoji(category.IsApplicable) + " Diese Position ist " + (category.IsApplicable ? "bewerbbar" : "nicht bewerbbar")));
         }
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
@@ -144,14 +144,15 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         List<Bewerbung> bewerbungen = new();
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using var command = con.CreateCommand("SELECT positionname, positionid FROM applicationcategories");
+        await using var command = con.CreateCommand("SELECT positionname, positionid, applicable FROM applicationcategories");
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             bewerbungen.Add(new Bewerbung
             {
                 PositionName = reader.GetString(0),
-                PositionId = reader.GetString(1)
+                PositionId = reader.GetString(1),
+                IsApplicable = reader.GetBoolean(2)
             });
         }
 
@@ -163,5 +164,6 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         public string PositionName { get; set; }
         public string PositionId { get; set; }
+        public bool IsApplicable { get; set; }
     }
 }
