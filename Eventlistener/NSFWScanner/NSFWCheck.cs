@@ -56,7 +56,7 @@ public class NSFWCheck : BaseCommandModule
                 foreach (Match match in matches)
                 {
                     var url = match.Value;
-                    if (url.Contains(".png") || url.Contains(".jpg") || url.Contains(".jpeg") || url.Contains(".webp"))
+                    if (url.Contains(".png") || url.Contains(".jpg") || url.Contains(".jpeg") || url.Contains(".webp") || url.Contains(".gif"))
                     {
                         urlsFromText.Add(url);
                     }
