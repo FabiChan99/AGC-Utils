@@ -1,7 +1,9 @@
 ﻿#region
 
 using System.Text.Json;
+using AGC_Management.Enums;
 using AGC_Management.Enums.Web;
+using AGC_Management.Services;
 using DisCatSharp.Exceptions;
 
 #endregion
@@ -60,6 +62,20 @@ public sealed class AuthUtils
         if (user.Roles.Contains(adminRole))
         {
             return AccessLevel.Administrator.ToString();
+        }
+
+        try
+        {
+            var headmodroleid = ulong.Parse(await CachingService.GetCacheValue(FileCacheType.VariableCache, "headmodroleid"));
+            var headmodrole = guild.GetRole(headmodroleid);
+            if (user.Roles.Contains(headmodrole))
+            {
+                return AccessLevel.HeadModerator.ToString();
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
         // mod
@@ -161,6 +177,21 @@ public sealed class AuthUtils
         if (user.Roles.Contains(adminRole))
         {
             return AccessLevel.Administrator.ToString();
+        }
+        
+        
+        try
+        {
+            var headmodroleid = ulong.Parse(await CachingService.GetCacheValue(FileCacheType.VariableCache, "headmodroleid"));
+            var headmodrole = guild.GetRole(headmodroleid);
+            if (user.Roles.Contains(headmodrole))
+            {
+                return AccessLevel.HeadModerator.ToString();
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
         // mod

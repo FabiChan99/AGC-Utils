@@ -2,8 +2,9 @@
 
 public enum AccessLevel
 {
-    BotOwner = 7,
-    Administrator = 6,
+    BotOwner = 8,
+    Administrator = 7,
+    HeadModerator = 6,
     Moderator = 5,
     Supporter = 4,
     Team = 3,
