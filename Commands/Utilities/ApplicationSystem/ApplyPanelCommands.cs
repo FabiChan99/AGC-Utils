@@ -24,8 +24,13 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         };
         watcher.Changed += async (sender, e) =>
         {
+            Console.WriteLine("File changed");
             QueueRefreshPanel();
         };
+        watcher.Error += (sender, e) =>
+        {
+            CurrentApplication.DiscordClient.Logger.LogError(e.GetException(), "Filewatcher error");
+        }; 
         watcher.EnableRaisingEvents = true;
     }
     
