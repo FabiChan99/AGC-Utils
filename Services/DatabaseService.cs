@@ -145,7 +145,7 @@ public static class DatabaseService
             },
             {
                 "applicationcategories",
-                "CREATE TABLE IF NOT EXISTS applicationcategories (positionname TEXT, postitionid TEXT, applicable BOOLEAN DEFAULT false)"
+                "CREATE TABLE IF NOT EXISTS applicationcategories (positionname TEXT, positionid TEXT, applicable BOOLEAN DEFAULT false)"
             },
             {
                 "user_rankcardbackgrounds",
@@ -228,7 +228,7 @@ public static class DatabaseService
                 new Dictionary<string, string>
                 {
                     { "positionname", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionname TEXT" },
-                    { "postitionid", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS postitionid TEXT" },
+                    { "positionid", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionid TEXT" },
                     { "applicable", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS applicable BOOLEAN DEFAULT false" }
                 }
             },

@@ -144,7 +144,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         List<Bewerbung> bewerbungen = new();
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using var command = con.CreateCommand("SELECT positionname, postitionid FROM applicationcategories");
+        await using var command = con.CreateCommand("SELECT positionname, positionid FROM applicationcategories");
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {

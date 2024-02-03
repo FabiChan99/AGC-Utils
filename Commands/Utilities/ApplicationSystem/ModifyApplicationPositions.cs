@@ -5,11 +5,12 @@ using DisCatSharp.ApplicationCommands.Context;
 
 namespace AGC_Management.ApplicationSystem;
 
+[ApplicationCommandRequirePermissions(Permissions.Administrator)]
 [SlashCommandGroup("modifyapplicationpositions", "Modify the application positions.", defaultMemberPermissions:(long)Permissions.Administrator)]
 public sealed class ModifyApplicationPositions : ApplicationCommandsModule
 {
     [SlashCommand("add", "Add a new application position.")]
-    public async Task AddPosition(InteractionContext ctx, [Option("position", "The position to add.")] string positionName)
+    public static async Task AddPosition(InteractionContext ctx, [Option("position", "The position to add.")] string positionName)
     {
         var posId = ToolSet.RemoveWhitespace(positionName.ToLower());
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -32,7 +33,7 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
     }
 
     [SlashCommand("remove", "Remove an application position.")]
-    public async Task RemovePosition(InteractionContext ctx, [Autocomplete(typeof(ApplicationAutocompleteProvider))] [Option("position", "The position to remove.", true)] string positionId)
+    public static async Task RemovePosition(InteractionContext ctx, [Autocomplete(typeof(ApplicationAutocompleteProvider))] [Option("position", "The position to remove.", true)] string positionId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd = con.CreateCommand("DELETE FROM applicationcategories WHERE positionid = @positionid");
