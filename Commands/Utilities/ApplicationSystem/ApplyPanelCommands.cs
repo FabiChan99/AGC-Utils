@@ -103,18 +103,10 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
             "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
-        string paneltext = "**applyrequirements.txt is missing!**";
-
-        StringBuilder embstr = new StringBuilder();
-        embstr.Append(paneltext);
         
-        var currentDir = Directory.GetCurrentDirectory();
-        if (File.Exists(currentDir+"/textfiles/applyrequirements.txt"))
-        {
-            paneltext = await File.ReadAllTextAsync(currentDir+"/textfiles/applyrequirements.txt");
-            embstr.Clear();
-            embstr.Append(paneltext);
-        }
+        var dbdata = await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache, "applypaneltext");
+        var embstr = new StringBuilder();
+        var paneltext = string.IsNullOrEmpty(dbdata) ? "⚠️ Es wurde noch kein Text für das Bewerbungspanel festgelegt. ⚠️" : dbdata;
 
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Text;
 using AGC_Management.Enums;
 using Newtonsoft.Json;
 
@@ -42,6 +43,18 @@ namespace AGC_Management.Services
             com.Parameters.AddWithValue("value", NpgsqlTypes.NpgsqlDbType.Jsonb, $"\"{value}\""); // Der Wert muss als gültiger JSONB-String übergeben werden.
 
             await com.ExecuteNonQueryAsync();
+        }
+
+        public static async Task SetCacheValueAsBase64(CustomDatabaseCacheType cachefile, string key, string value)
+        { 
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+            await SetCacheValue(cachefile, key, base64);
+        }
+        
+        public static async Task<string> GetCacheValueAsBase64(CustomDatabaseCacheType cachefile, string key)
+        {
+            var base64 = await GetCacheValue(cachefile, key);
+            return Encoding.UTF8.GetString(Convert.FromBase64String(base64));
         }
 
         
