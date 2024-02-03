@@ -9,68 +9,66 @@ namespace AGC_Management.Services
 {
     public sealed class CachingService
     {
-        private static readonly string cacheDir = Path.Combine("botcache");
 
-        public static async Task<string> GetCacheValue(FileCacheType cachefile, string key)
+        public static async Task<string> GetCacheValue(CustomDatabaseCacheType cachefile, string key)
         {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
-            await createCacheFile(fullPath);
-            var cache = await File.ReadAllTextAsync(fullPath);
-            var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache);
-            return cacheObject.TryGetValue(key, out var value) ? value : null;
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var com = con.CreateCommand("SELECT content->>@key FROM cachetable WHERE cachetype = @cachetype AND content ? @key");
+            com.Parameters.AddWithValue("cachetype", cachefile.ToString());
+            com.Parameters.AddWithValue("key", key);
+            var result = await com.ExecuteScalarAsync();
+            return result?.ToString() ?? "";
         }
 
-        public static async Task SetCacheValue(FileCacheType cachefile, string key, string value)
+        public static async Task SetCacheValue(CustomDatabaseCacheType cachefile, string key, string value)
         {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
-            await createCacheFile(fullPath);
-            var cache = await File.ReadAllTextAsync(fullPath);
-            var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache) ??
-                              new Dictionary<string, string>();
-            cacheObject[key] = value;
-            await File.WriteAllTextAsync(fullPath, JsonConvert.SerializeObject(cacheObject));
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            var query = @"
+                        INSERT INTO cachetable (cachetype, content) 
+                        VALUES (@cachetype, jsonb_build_object(@key, @value::jsonb)) 
+                        ON CONFLICT (cachetype) 
+                        DO UPDATE 
+                        SET content = jsonb_set(
+                            coalesce(cachetable.content, '{}'::jsonb),
+                            array[@key],
+                            @value::jsonb,
+                            true
+                        );
+                    ";
+            await using var com = con.CreateCommand(query);
+            com.Parameters.AddWithValue("cachetype", cachefile.ToString());
+            com.Parameters.AddWithValue("key", key);
+            // Achten Sie darauf, den Wert korrekt als JSONB zu formatieren.
+            com.Parameters.AddWithValue("value", NpgsqlTypes.NpgsqlDbType.Jsonb, $"\"{value}\""); // Der Wert muss als gültiger JSONB-String übergeben werden.
+
+            await com.ExecuteNonQueryAsync();
         }
 
-        private static async Task createCacheFile(string fullPath)
-        {
-            if (!Directory.Exists(cacheDir))
-            {
-                Directory.CreateDirectory(cacheDir);
-            }
-
-            if (!File.Exists(fullPath))
-            {
-                await File.WriteAllTextAsync(fullPath, "{}");
-            }
-        }
-
+        
         public static void ClearCompleteCache()
         {
-            if (Directory.Exists(cacheDir))
-            {
-                Directory.Delete(cacheDir, true);
-            }
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            var command = con.CreateCommand("DELETE FROM cachetable");
+            command.ExecuteNonQuery();
         }
 
-        public static void ClearCacheFile(FileCacheType cachefile)
+
+        public static async Task DeleteCacheObject(CustomDatabaseCacheType cachefile, string key)
         {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
-            }
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            var query = @"
+                        UPDATE cachetable
+                        SET content = jsonb_strip_nulls(
+                            jsonb_set(content, array[@key], 'null')
+                        )
+                        WHERE cachetype = @cachetype;
+                    ";
+            await using var cmd = con.CreateCommand(query);
+            cmd.Parameters.AddWithValue("cachetype", cachefile.ToString());
+            cmd.Parameters.AddWithValue("key", key);
+    
+            await cmd.ExecuteNonQueryAsync();
         }
 
-        public static void DeleteCacheObject(FileCacheType cachefile, string key)
-        {
-            string fullPath = Path.Combine(cacheDir, cachefile.ToString());
-            if (File.Exists(fullPath))
-            {
-                var cache = File.ReadAllText(fullPath);
-                var cacheObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(cache);
-                cacheObject.Remove(key);
-                File.WriteAllText(fullPath, JsonConvert.SerializeObject(cacheObject));
-            }
-        }
     }
 }

@@ -144,6 +144,10 @@ public static class DatabaseService
                 "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"
             },
             {
+                "cachetable",
+                "CREATE TABLE IF NOT EXISTS cachetable (cachetype TEXT, content jsonb)"
+            },
+            {
                 "applicationcategories",
                 "CREATE TABLE IF NOT EXISTS applicationcategories (positionname TEXT, positionid TEXT, applicable BOOLEAN DEFAULT false)"
             },
@@ -214,6 +218,14 @@ public static class DatabaseService
 
         var columnUpdates = new Dictionary<string, Dictionary<string, string>>
         {
+
+            {
+                "cachetable",
+                new Dictionary<string, string>
+                {
+                    { "cachetype_unique", "CREATE UNIQUE INDEX IF NOT EXISTS idx_cachetable_cachetype ON cachetable (cachetype)" },
+                }
+            },
             {
                 "rankcardbackgrounds",
                 new Dictionary<string, string>

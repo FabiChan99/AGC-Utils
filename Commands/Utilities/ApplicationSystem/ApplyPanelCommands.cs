@@ -69,16 +69,16 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         var m = await ctx.RespondAsync(msgb);
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid",
+        await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
+        await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid",
             channelId.ToString());
-        await CachingService.SetCacheValue(FileCacheType.ApplicationSystemCache, "ispanelactive", "true");
+        await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "ispanelactive", "true");
     }
     
     public static async Task RefreshPanel()
     {
-        var m_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applymessageid");
-        var c_id = await CachingService.GetCacheValue(FileCacheType.ApplicationSystemCache, "applychannelid");
+        var m_id = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid");
+        var c_id = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid");
         if (string.IsNullOrEmpty(m_id) || m_id == "0" || string.IsNullOrEmpty(c_id) || c_id == "0")
         {
             return;

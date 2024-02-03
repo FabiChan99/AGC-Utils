@@ -1,6 +1,6 @@
 ﻿namespace AGC_Management.Enums;
 
-public enum FileCacheType
+public enum CustomDatabaseCacheType
 {
     ApplicationSystemCache,
     VariableCache,
