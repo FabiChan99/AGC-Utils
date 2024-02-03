@@ -1,0 +1,38 @@
+﻿@page "/konfiguration/applysystem/modifypanelmessage"
+@using AGC_Management.Services
+@using AGC_Management.Enums
+@using AGC_Management.ApplicationSystem
+
+<div class="d-flex justify-content-center">
+    <div class="form-group w-75">
+        <label for="panelmessage">Panel Message</label>
+        <textarea class="form-control" id="panelmessage" @bind="panelmessage" rows="20"></textarea>
+        
+        <button class="btn btn-primary mt-2" @onclick="savePanelMessage">Save</button>
+    </div>
+</div>
+
+@code {
+    private string panelmessage = "";
+    private string newpanelmessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dbpanelmessage = await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache, "applypaneltext");
+        if (dbpanelmessage != null)
+        {
+            panelmessage = dbpanelmessage.ToString();
+        }
+        else
+        {
+            panelmessage = "This is a message from the code behind";
+        }
+    }
+    
+    private async Task savePanelMessage()
+    {
+        await CachingService.SetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache, "applypaneltext", panelmessage);
+        ApplyPanelCommands.QueueRefreshPanel();
+        StateHasChanged();
+    }
+}

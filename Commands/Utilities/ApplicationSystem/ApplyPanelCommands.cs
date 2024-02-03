@@ -16,22 +16,6 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     public ApplyPanelCommands()
     {
         timer = new Timer(RefreshPanelFromQueue, null, Timeout.Infinite, Timeout.Infinite);
-        var watcher = new FileSystemWatcher
-        {
-            Path = "./textfiles",
-            NotifyFilter = NotifyFilters.LastWrite,
-            Filter = "applyrequirements.txt"
-        };
-        watcher.Changed += async (sender, e) =>
-        {
-            Console.WriteLine("File changed");
-            QueueRefreshPanel();
-        };
-        watcher.Error += (sender, e) =>
-        {
-            CurrentApplication.DiscordClient.Logger.LogError(e.GetException(), "Filewatcher error");
-        }; 
-        watcher.EnableRaisingEvents = true;
     }
     
     
@@ -65,8 +49,16 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     [Description("Sends the apply panel to the channel.")]
     public async Task SendPanel(CommandContext ctx)
     {
+        try
+        {
+            await ctx.Message.DeleteAsync();
+        }
+        catch (Exception e)
+        {
+            CurrentApplication.Logger.Error(e, "Failed to trigger delete message");
+        }
         var msgb = await BuildMessage();
-        var m = await ctx.RespondAsync(msgb);
+        var m = await ctx.Channel.SendMessageAsync(msgb);
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
         await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
@@ -84,8 +76,16 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             return;
         }
         var msgb = await BuildMessage();
-        var m = await CurrentApplication.DiscordClient.GetChannelAsync(ulong.Parse(c_id)).Result.GetMessageAsync(ulong.Parse(m_id));
-        await m.ModifyAsync(msgb);
+        try
+        {
+            var channel = await CurrentApplication.DiscordClient.GetChannelAsync(ulong.Parse(c_id));
+            var m = await channel.GetMessageAsync(ulong.Parse(m_id));
+            await m.ModifyAsync(msgb);
+        }
+        catch (Exception e)
+        {
+            CurrentApplication.Logger.Error(e, "Failed to refresh apply panel");
+        }
     }
 
 
@@ -107,6 +107,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         var dbdata = await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache, "applypaneltext");
         var embstr = new StringBuilder();
         var paneltext = string.IsNullOrEmpty(dbdata) ? "⚠️ Es wurde noch kein Text für das Bewerbungspanel festgelegt. ⚠️" : dbdata;
+        embstr.Append(paneltext);
 
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")
