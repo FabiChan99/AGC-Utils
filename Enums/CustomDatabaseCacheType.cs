@@ -4,4 +4,6 @@ public enum CustomDatabaseCacheType
 {
     ApplicationSystemCache,
     VariableCache,
+    RuntimeCache,
+    TempCache,
 }
