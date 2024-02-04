@@ -112,7 +112,11 @@ internal class Program : BaseCommandModule
 
         builder.Services.AddRazorPages();
         builder.Services.AddDistributedMemoryCache();
-        builder.Services.AddServerSideBlazor();
+        builder.Services.AddServerSideBlazor()
+            .AddHubOptions(options =>
+            {
+                options.MaximumReceiveMessageSize = 32 * 1024 * 100;
+            });
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<UserService>();

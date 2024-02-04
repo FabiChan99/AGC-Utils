@@ -2,70 +2,127 @@
 @using AGC_Management.Utils
 @using System.Net
 @using AGC_Management.Controller
+@using AGC_Management.Enums.LevelSystem
 @inject UserService UserService
 @inject IHttpContextAccessor httpContextAccessor
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
 
-<!-- This is the page where the user can change the color and upload a custom rankcard image and crop it with a cropper -->
 
 <div class="container">
-    <h1>Rankcard anpassen</h1>
-    <p>Wähle eine Farbe für deine Rankcard aus und lade ein Bild hoch, welches als Hintergrund für deine Rankcard verwendet wird.</p>
+    <h1>Rankcard Einstellungen</h1>
     <div class="row">
         <div class="col-md-6">
             <h2>Farbe</h2>
-            <p>Wähle eine Farbe für deine Rankcard aus.</p>
-            <input type="color" @bind="color" class="form-control" />
+            <input type="color" @onchange="ColorChanged" value="@color" />
+            <h2>Schriftart</h2>
+            <input type="text" @onchange="FontChanged" value="@font" />
+            <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 3MB)</h2>
+            <InputFile OnChange="UploadFile" />
+            <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
+            @if (hasCustomRankCardSettings)
+            {
+                <button class="btn btn-danger" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
+            }
         </div>
         <div class="col-md-6">
-            <h2>Bild</h2>
-            <p>Lade ein Bild hoch, welches als Hintergrund für deine Rankcard verwendet wird.</p>
-            <input type="file"  class="form-control" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
             <h2>Vorschau</h2>
-            <p>Hier siehst du eine Vorschau deiner Rankcard.</p>
-            <img src="@base64String" class="img-fluid" alt="Rankcard" />
+            <img src="@base64String" style="max-width: 100%; max-height: 100%;" />
         </div>
     </div>
-        <div class="row">
-            <div class="col-md-12">
-                <h2>Generieren</h2>
-                <p>Klicke auf den Button, um deine Rankcard zu generieren.</p>
-                <button class="btn btn-primary">Generieren</button>
-            </div>
-        </div>
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Speichern</h2>
-            <p>Klicke auf den Button, um deine Änderungen zu speichern.</p>
-            <button class="btn btn-primary">Speichern</button>
-        </div>
-    </div>
-
 </div>
 
-
 @code {
+    private string imageToInstall = "";
     private string base64String = "";
-    private string color = "#000000";
-    private bool cardGenerated = false;
+    private bool hasCustomRankCardSettings = false;
+    private string color = "#9f00ff";
+    private string font = "Verdana";
+    private bool hasImageChanged = false;
+    private bool hasColorChanged = false;
+    private bool hasFontChanged = false;
+
+    private async Task UploadFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null && file.Size <= 3145728 && (file.ContentType == "image/png" || file.ContentType == "image/jpg" || file.ContentType == "image/jpeg"))
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(ms);
+            imageToInstall = Convert.ToBase64String(ms.ToArray());
+            hasImageChanged = true;
+        }
+    }
     
+    void FontChanged(ChangeEventArgs e)
+    {
+        font = e.Value.ToString();
+        hasFontChanged = true;
+    }
+    
+    void ColorChanged(ChangeEventArgs e)
+    {
+        color = e.Value.ToString();
+        hasColorChanged = true;
+    }
+    
+    private async Task ResetCard()
+    {
+        var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand();
+        cmd.CommandText = @"DELETE FROM userrankcardsettings WHERE userid = @userid";
+        cmd.Parameters.AddWithValue("userid", (long)userId);
+        await cmd.ExecuteNonQueryAsync();
+        await OnInitializedAsync();
+    }
+    
+    private async Task SaveSettings()
+    {
+        var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
+        if (!string.IsNullOrWhiteSpace(imageToInstall) && hasImageChanged)
+        {
+            await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
+        }
+        if (hasColorChanged)
+        {
+            await SaveCustomRankCardSetting("barcolor", color, userId);
+        }
+        if (hasFontChanged)
+        {
+            await SaveCustomRankCardSetting("textfont", font, userId);
+        }
+
+        await OnInitializedAsync();
+    }
     
     protected override async Task OnInitializedAsync()
     {
+        await RetrieveCurrentSettings();
         await RenderPage();
     }
 
-    
-    
-    
+    private async Task SaveCustomRankCardSetting(string settingName, string value, ulong userId)
+    {
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand();
+        cmd.CommandText = $@"
+    INSERT INTO userrankcardsettings (userid, {settingName})
+    VALUES (@userid, @value)
+    ON CONFLICT (userid)
+    DO UPDATE SET {settingName} = @value";
+        cmd.Parameters.AddWithValue("value", value);
+        cmd.Parameters.AddWithValue("userid", (long)userId);
+        await cmd.ExecuteNonQueryAsync();
+    }
 
+    private async Task RenderPage()
+    {
+        base64String = await RetrieveRankCardForCurrentUser();
+        StateHasChanged();
+    }
+    
     private async Task<string> RetrieveRankCardForCurrentUser()
     {
-        cardGenerated = false;
         var context = httpContextAccessor.HttpContext;
         var currentuserid  = UserService.GetUserId(context);
         var user = await CurrentApplication.DiscordClient.GetUserAsync(ulong.Parse(currentuserid.ToString()));
@@ -84,15 +141,44 @@
         var imgstream = imagedata.AsStream();
         byte[] bytes = new byte[imgstream.Length];
         imgstream.Read(bytes, 0, (int)imgstream.Length);
-        base64String = "data:image/png;base64," + Convert.ToBase64String(bytes);
-        cardGenerated = true;
-        return base64String;
+        return "data:image/png;base64," + Convert.ToBase64String(bytes);
     }
     
-    private async Task RenderPage()
+    private async Task<string> RetrieveCurrentImageforCurrentUser()
     {
-        await RetrieveRankCardForCurrentUser();
-        StateHasChanged();
+        var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
+        var i = await ImageUtils.HasCustomRankCardSettings(userId);
+        if (i)
+        {
+            var settings = await ImageUtils.GetCustomRankCardSettings(userId);
+            // check if bg is null
+            if (settings.Background != null)
+            {
+                return settings.Background;
+            }
+            else
+            {
+                return await ImageUtils.GetFallbackBackground();
+            }
+            return settings.Background;
+        }
+        else
+        {
+            return await ImageUtils.GetFallbackBackground();
+        }
     }
     
+    private async Task RetrieveCurrentSettings()
+    {
+        bool hs = await ImageUtils.HasCustomRankCardSettings(ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString()));
+        hasCustomRankCardSettings = hs;
+        var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
+        var settings = await ImageUtils.GetCustomRankCardSettings(userId);
+        if (settings != null)
+        {
+            color = settings.HexColor ?? "#000000";
+            font = settings.Font ?? "Verdana";
+            base64String = settings.Background ?? await RetrieveCurrentImageforCurrentUser();
+        }
+    }
 }

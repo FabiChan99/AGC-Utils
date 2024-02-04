@@ -133,16 +133,14 @@ public static class DatabaseService
 
     public static async Task InitializeAndUpdateDatabaseTables()
     {
-        var dbstring = GetConnectionString();
         var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         CurrentApplication.Logger.Information("Initializing database tables...");
 
         var tableCommands = new Dictionary<string, string>
         {
             {
-                "rankcardbackgrounds",
-                "CREATE TABLE IF NOT EXISTS rankcardbackgrounds (bg_id INTEGER, bg_url TEXT, barcolor TEXT)"
-            },
+                "userrankcardsettings",
+                "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', UNIQUE (userid))"},
             {
                 "cachetable",
                 "CREATE TABLE IF NOT EXISTS cachetable (cachetype TEXT, content jsonb)"
@@ -150,10 +148,6 @@ public static class DatabaseService
             {
                 "applicationcategories",
                 "CREATE TABLE IF NOT EXISTS applicationcategories (positionname TEXT, positionid TEXT, applicable BOOLEAN DEFAULT false)"
-            },
-            {
-                "user_rankcardbackgrounds",
-                "CREATE TABLE IF NOT EXISTS user_rankcardbackgrounds (userid BIGINT, bg_id INTEGER, barcolor TEXT DEFAULT NULL)"
             },
             { "reasonmap", "CREATE TABLE IF NOT EXISTS reasonmap (key TEXT, text TEXT)" },
             {
@@ -227,30 +221,12 @@ public static class DatabaseService
                 }
             },
             {
-                "rankcardbackgrounds",
-                new Dictionary<string, string>
-                {
-                    { "bg_id", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_id INTEGER" },
-                    { "bg_url", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_url TEXT" },
-                    { "barcolor", "ALTER TABLE rankcardbackgrounds ADD COLUMN IF NOT EXISTS barcolor TEXT" }
-                }
-            },
-            {
                 "applicationcategories",
                 new Dictionary<string, string>
                 {
                     { "positionname", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionname TEXT" },
                     { "positionid", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionid TEXT" },
                     { "applicable", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS applicable BOOLEAN DEFAULT false" }
-                }
-            },
-            {
-                "user_rankcardbackgrounds",
-                new Dictionary<string, string>
-                {
-                    { "userid", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS userid BIGINT" },
-                    { "bg_id", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS bg_id INTEGER" },
-                    { "barcolor", "ALTER TABLE user_rankcardbackgrounds ADD COLUMN IF NOT EXISTS barcolor TEXT" }
                 }
             },
             {

@@ -1,5 +1,6 @@
 ﻿#region
 
+using AGC_Management.Enums.LevelSystem;
 using SkiaSharp;
 
 #endregion
@@ -51,14 +52,30 @@ public sealed class ImageUtils
         const int cardHeight = 282;
 
         string font = "Verdana";
-
+        
         try
         {
             font = BotConfig.GetConfig()["Leveling"]["RankCardFont"];
         }
         catch (Exception)
         {
+            // ignored
         }
+
+        bool hasCustomSettings = false;
+        string c_bgdata = ""; // base64 image
+        SKColor c_barcolor = SKColor.Parse("#9f00ff");
+        if (await HasCustomRankCardSettings(user.Id))
+        {
+            hasCustomSettings = true;
+            var customSettings = await GetCustomRankCardSettings(user.Id);
+            c_bgdata = customSettings.Background;
+            c_barcolor = SKColor.Parse(customSettings.HexColor);
+            font = customSettings.Font;
+        }
+        
+
+
 
 
         using var bitmap = new SKBitmap(cardWidth, cardHeight);
@@ -95,87 +112,69 @@ public sealed class ImageUtils
         {
             IsAntialias = true
         };
-
-        int cardid = 0;
-        string bgurl = "";
-        var barcolor = SKColor.Empty;
-        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using var cmd = db.CreateCommand("SELECT bg_id FROM user_rankcardbackgrounds WHERE userid = @user_id");
-        cmd.Parameters.AddWithValue("user_id", (long)user.Id);
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            cardid = reader.GetInt32(0);
-        }
-
-        // check if the id is valid in db 
-        await using var cmd2 = db.CreateCommand("SELECT bg_url, barcolor FROM rankcardbackgrounds WHERE bg_id = @id");
-        cmd2.Parameters.AddWithValue("id", cardid);
-        await using var reader2 = await cmd2.ExecuteReaderAsync();
-        while (await reader2.ReadAsync())
-        {
-            bgurl = reader2.GetString(0);
-            barcolor = SKColor.Parse(reader2.GetString(1));
-        }
-
-        if (reader2.HasRows == false)
-        {
-            cardid = 0;
-        }
-
+        var bgurl = "";
+        var default_barcolor = SKColor.Parse("#9f00ff");
         bool overridecard = false;
         try
         {
-            cardid = int.Parse(BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundId"]);
             bgurl = BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundUrl"];
             overridecard = true;
         }
         catch (Exception)
         {
         }
-
-        if (cardid > 0)
+        
+        var barcolor = default_barcolor;
+        
+        if (hasCustomSettings)
         {
-            httpclient.DefaultRequestHeaders.Add("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-            var response = await httpclient.GetAsync(bgurl);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new InvalidDataException("Failed to download background image");
-            }
-
-            var bgstream = await response.Content.ReadAsByteArrayAsync();
-            using var bg_stream = new MemoryStream(bgstream);
-            var backgroundBitmap = SKBitmap.Decode(bg_stream);
-            canvas.DrawBitmap(backgroundBitmap, new SKRect(0, 0, cardWidth, cardHeight), backgroundPaint);
+            barcolor = c_barcolor;
         }
-        else
+
+        
+        
+        
+        
+        
+        try
         {
-            // black background without image
-            canvas.Clear(SKColors.Black.WithAlpha(200));
+            if (!hasCustomSettings)
+            {
+                httpclient.DefaultRequestHeaders.Add("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                    "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                var response = await httpclient.GetAsync(bgurl);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new InvalidDataException("Failed to download background image");
+                }
+
+                var bgstream = await response.Content.ReadAsByteArrayAsync();
+                using var bg_stream = new MemoryStream(bgstream);
+                var backgroundBitmap = SKBitmap.Decode(bg_stream);
+                canvas.DrawBitmap(backgroundBitmap, new SKRect(0, 0, cardWidth, cardHeight), backgroundPaint);
+            }
+            else
+            {
+                using var bg_stream = new MemoryStream(Convert.FromBase64String(c_bgdata));
+                var backgroundBitmap = SKBitmap.Decode(bg_stream);
+                canvas.DrawBitmap(backgroundBitmap, new SKRect(0, 0, cardWidth, cardHeight), backgroundPaint);
+            
+            }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
 
         var darkenPaint = new SKPaint
         {
-            Color = new SKColor(0, 0, 0, 130),
+            Color = new SKColor(0, 0, 0, 150),
             IsAntialias = true
         };
-
-        if (cardid == 0 && overridecard == false)
-        {
-            barcolor = SKColor.Parse("#9f00ff");
-        }
-
-        if (overridecard)
-        {
-            barcolor = SKColor.Parse("#9f00ff");
-        }
-
-        if (cardid != 0)
-        {
-            canvas.DrawRoundRect(new SKRect(15, 15, cardWidth - 15, cardHeight - 15), 20, 20, darkenPaint);
-        }
+        
+        canvas.DrawRoundRect(new SKRect(15, 15, cardWidth - 15, cardHeight - 15), 20, 20, darkenPaint);
+        
 
         var avatarBitmap = avatar;
         var avatarRect = new SKRect(20, 20, 262, 262);
@@ -315,18 +314,98 @@ public sealed class ImageUtils
             canvas.DrawText(xpText, xpTextX, xpTextY, xpPaint);
         }
 
-        var totalXpPaint = new SKPaint
-        {
-            TextSize = 20,
-            TextAlign = SKTextAlign.Center,
-            Color = SKColors.White,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName(font)
-        };
-
 
         using var image = SKImage.FromBitmap(bitmap);
         var data = image.Encode(SKEncodedImageFormat.Png, 100);
         return data;
+    }
+    
+    
+    public static async Task<string> GetFallbackBackground()
+    {
+        var bgurl = "";
+        try
+        {
+            bgurl = BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundUrl"];
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        try
+        {
+            using var httpclient = new HttpClient();
+            httpclient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            var response = await httpclient.GetAsync(bgurl);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidDataException("Failed to download background image");
+            }
+
+            var bgstream = await response.Content.ReadAsByteArrayAsync();
+            return Convert.ToBase64String(bgstream);
+        }
+        catch (Exception e)
+        {
+            CurrentApplication.Logger.Error(e, "Failed to download fallback background image. Returning black background.");
+        }
+        
+        // if everything fails, return a black background
+        var bmp = new SKBitmap(934, 282);
+        using var canvas = new SKCanvas(bmp);
+        canvas.Clear(SKColors.Black);
+        var data = bmp.Encode(SKEncodedImageFormat.Png, 100);
+        var base64 = Convert.ToBase64String(data.ToArray());
+        return base64;
+    }
+    
+    
+    public static async Task<bool> HasCustomRankCardSettings(ulong UserId)
+    {
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        using var cmd = con.CreateCommand("SELECT * FROM userrankcardsettings WHERE userid = @userid");
+        cmd.Parameters.AddWithValue("userid", (long)UserId);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        return reader.HasRows;
+    }
+    
+    public static async Task<CustomRankCard> GetCustomRankCardSettings(ulong UserId)
+    {
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        using var cmd = con.CreateCommand("SELECT * FROM userrankcardsettings WHERE userid = @userid");
+        cmd.Parameters.AddWithValue("userid", (long)UserId);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (!reader.HasRows)
+        {
+            return null;
+        }
+
+        await reader.ReadAsync();
+        var bg = "";
+        try
+        {
+            bg = reader.GetString(1);
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        if (string.IsNullOrWhiteSpace(bg))
+        {
+            bg = await GetFallbackBackground();
+        }
+        
+        var card = new CustomRankCard
+        {
+            UserId = (ulong)reader.GetInt64(0),
+            Background = bg,
+            HexColor = reader.GetString(2),
+            Font = reader.GetString(3)
+        };
+        return card;
     }
 }
