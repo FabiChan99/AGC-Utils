@@ -51,7 +51,7 @@
         <discord-messages>
             <discord-embed style="max-width: 600px; background-color: #2C2F33; border-color: #23272A;">
                 <discord-embed-title slot="title" style="color: #FFFFFF;">
-                    Bewerbungssystem AGC
+                    Bewerbungs-Panel Vorschau
                 </discord-embed-title>
                 <discord-embed-description slot="description" style="color: #FFFFFF; padding: 8px 24px 8px 8px; white-space: pre-wrap; word-break: break-word;">
                     <div style="color: #FFFFFF;">@((MarkupString)panelmessagepreview)</div>
@@ -75,7 +75,7 @@
     private string panelmessagepreview = "";
     
     // add thml to redirct to the /konfiguration/applysystem/setuppanelchannel
-    private string ChannelName = $"Nicht gefunden - Initialisierung notwendig. <a href=\"/konfiguration/applysystem/setuppanelchannel\">Kanal initialisieren</a>";
+    private string ChannelName = $"Nicht gefunden - Initialisierung notwendig. || In gewünschten Kanal <strong>{CurrentApplication.BotPrefix}sendapplypanel</strong> ausführen.";
     private string ChannelUrl = "";
 
     protected override async Task OnInitializedAsync()

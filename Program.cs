@@ -34,6 +34,7 @@ public class CurrentApplication
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
     public static IServiceProvider ServiceProvider { get; set; }
+    public static string BotPrefix { get; set; }
 }
 
 internal class Program : BaseCommandModule
@@ -186,6 +187,18 @@ internal class Program : BaseCommandModule
             ShowReleaseNotesInUpdateCheck = false,
             HttpTimeout = TimeSpan.FromSeconds(40)
         });
+
+        try
+        {
+            string bprefix = "!!!";
+            bprefix = BotConfig.GetConfig()["MainConfig"]["BotPrefix"];
+            CurrentApplication.BotPrefix = bprefix;
+        }
+        catch
+        {
+            CurrentApplication.BotPrefix = "!!!";
+        }
+        
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
