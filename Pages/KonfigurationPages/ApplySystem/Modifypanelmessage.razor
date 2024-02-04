@@ -1,7 +1,9 @@
 ﻿@page "/konfiguration/applysystem/modifypanelmessage"
+@attribute [Authorize (Roles = "BotOwner, Administrator, HeadMod")]
 @using AGC_Management.Services
 @using AGC_Management.Enums
 @using AGC_Management.ApplicationSystem
+
 
 <div class="d-flex justify-content-center">
     <div class="form-group w-75">
