@@ -1,0 +1,35 @@
+﻿.config-panel {
+    background-color: #1a1919;
+    color: #e0e0e0;
+    padding: 20px;
+    border-radius: 5px;
+    margin: 20px;
+}
+
+.config-panel input[type="text"], .config-panel select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    background-color: #2a2929;
+    color: #e0e0e0;
+}
+
+.config-panel label {
+    margin-top: 20px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.config-panel button {
+    background-color: #7b00ff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.config-panel button:hover {
+    background-color: #9a00ff;
+}

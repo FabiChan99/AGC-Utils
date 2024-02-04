@@ -1,0 +1,13 @@
+﻿@page "/benutzereinstellungen/"
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
+
+<h1>Benutzereinstellungen</h1>
+
+<div class="card-group mt-5 mb-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Levelsystem Einstellungen</h5>
+            <a href="/benutzereinstellungen/levelsystem/adjustrankcard" class="btn btn-link">Rangkarte anpassen</a>
+        </div>
+    </div>
+</div>

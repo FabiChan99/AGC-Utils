@@ -1,0 +1,98 @@
+﻿@page "/benutzereinstellungen/levelsystem/adjustrankcard"
+@using AGC_Management.Utils
+@using System.Net
+@using AGC_Management.Controller
+@inject UserService UserService
+@inject IHttpContextAccessor httpContextAccessor
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
+
+<!-- This is the page where the user can change the color and upload a custom rankcard image and crop it with a cropper -->
+
+<div class="container">
+    <h1>Rankcard anpassen</h1>
+    <p>Wähle eine Farbe für deine Rankcard aus und lade ein Bild hoch, welches als Hintergrund für deine Rankcard verwendet wird.</p>
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Farbe</h2>
+            <p>Wähle eine Farbe für deine Rankcard aus.</p>
+            <input type="color" @bind="color" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <h2>Bild</h2>
+            <p>Lade ein Bild hoch, welches als Hintergrund für deine Rankcard verwendet wird.</p>
+            <input type="file"  class="form-control" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Vorschau</h2>
+            <p>Hier siehst du eine Vorschau deiner Rankcard.</p>
+            <img src="@base64String" class="img-fluid" alt="Rankcard" />
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Generieren</h2>
+                <p>Klicke auf den Button, um deine Rankcard zu generieren.</p>
+                <button class="btn btn-primary">Generieren</button>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Speichern</h2>
+            <p>Klicke auf den Button, um deine Änderungen zu speichern.</p>
+            <button class="btn btn-primary">Speichern</button>
+        </div>
+    </div>
+
+</div>
+
+
+@code {
+    private string base64String = "";
+    private string color = "#000000";
+    private bool cardGenerated = false;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await RenderPage();
+    }
+
+    
+    
+    
+
+    private async Task<string> RetrieveRankCardForCurrentUser()
+    {
+        cardGenerated = false;
+        var context = httpContextAccessor.HttpContext;
+        var currentuserid  = UserService.GetUserId(context);
+        var user = await CurrentApplication.DiscordClient.GetUserAsync(ulong.Parse(currentuserid.ToString()));
+        var rank = await LevelUtils.GetRank(user.Id);
+        var level = rank[user.Id].Level;
+        var totalxp = rank[user.Id].Xp;
+        var xpForCurrentLevel = LevelUtils.XpForLevel(level);
+        var xpForNextLevel = LevelUtils.XpForLevel(level + 1);
+        var xpForThisLevel = xpForNextLevel - xpForCurrentLevel;
+        var xpForThisLevelUntilNow = totalxp - xpForCurrentLevel;
+        var percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
+        var userRank = await LevelUtils.GetUserRankAsync(user.Id);
+        var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage,
+            totalxp,
+            xpForThisLevel);
+        var imgstream = imagedata.AsStream();
+        byte[] bytes = new byte[imgstream.Length];
+        imgstream.Read(bytes, 0, (int)imgstream.Length);
+        base64String = "data:image/png;base64," + Convert.ToBase64String(bytes);
+        cardGenerated = true;
+        return base64String;
+    }
+    
+    private async Task RenderPage()
+    {
+        await RetrieveRankCardForCurrentUser();
+        StateHasChanged();
+    }
+    
+}
