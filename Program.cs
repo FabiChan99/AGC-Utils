@@ -21,6 +21,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
+using Log = Serilog.Log;
 
 #endregion
 
