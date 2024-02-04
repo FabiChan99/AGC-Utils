@@ -15,19 +15,6 @@
         <button class="btn btn-primary mt-2 mb-2" @onclick="savePanelMessage">Speichern</button>
         <button class="btn btn-primary mt-2 mb-2" @onclick="TogglePreview">Vorschau anzeigen @if (showPreview) {<span class="badge badge-success">An</span>} else {<span class="badge badge-danger">Aus</span>}</button>
         
-        <p class="text">
-            Derzeitige Nachricht:
-            @if (ChannelUrl != "") 
-            {
-                <a href="@ChannelUrl" target="_blank">Zur konfigurierten Nachricht springen</a>
-                <br/>
-                <span> im Kanal <b>@ChannelName</b></span>
-            }
-            else 
-            {
-                <span>Nicht gefunden - Initialisierung notwendig. <a href="/konfiguration/applysystem/configureapplychannel">Kanal initialisieren</a></span>
-            }
-        </p>
     </div>
 </div>
 
@@ -74,9 +61,7 @@
     private bool showPreview = false;  
     private string panelmessagepreview = "";
     
-    // add thml to redirct to the /konfiguration/applysystem/setuppanelchannel
-    private string ChannelName = $"Nicht gefunden - Initialisierung notwendig. || In gewünschten Kanal <strong>{CurrentApplication.BotPrefix}sendapplypanel</strong> ausführen.";
-    private string ChannelUrl = "";
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,28 +75,7 @@
         {
             panelmessage = "";
         }
-        
-        var dbpanelchannel = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid");
-        if (dbpanelchannel != null)
-        {
-            try
-            {
-                ulong.TryParse(dbpanelchannel.ToString(), out ulong channelid);
-                var channel = CurrentApplication.TargetGuild.GetChannel(channelid);
-                ChannelName = channel.Name;
-                var channelmessageid = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid");
-                ChannelUrl = $"https://discord.com/channels/{CurrentApplication.TargetGuild.Id}/{channelid}";
-                if (channelmessageid != null)
-                {
-                    ChannelUrl += $"/{channelmessageid}";
-                }
-            }
-            catch (Exception e)
-            {
 
-            }
-
-        }
     }
     
     private void UpdatePreview(ChangeEventArgs e)
