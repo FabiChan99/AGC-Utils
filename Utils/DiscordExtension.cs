@@ -27,6 +27,11 @@ internal static class DiscordExtension
                 Denied = (overwrites.FirstOrDefault(x => x.Id == member.Id, null)?.Denied ?? Permissions.None) | denied
             }).ToList();
     }
+    
+    public static string NameWithRemovedRegionSuffix(this DiscordGuild guild)
+    {
+        return guild.Name.EndsWith("[DE/GER]") ? guild.Name.Replace("[DE/GER]", "") : guild.Name;
+    }
 
 
     public static string ConvertMarkdownToHtml(this string? md, bool isEmbed = false)
