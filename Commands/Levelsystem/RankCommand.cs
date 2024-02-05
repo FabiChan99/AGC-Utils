@@ -65,15 +65,21 @@ public class RankCommand : ApplicationCommandsModule
         var userRank = await LevelUtils.GetUserRankAsync(user.Id);
         bool errored = false;
         var errorMessage = "";
+
+        bool httpsEnabled = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]);
+        var dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
+        string protocol = httpsEnabled ? "https" : "http";
+        string baseurl = $"{protocol}://{dashboardUrl}";
+        
         try
         {
             var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage,
                 totalxp,
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
-            var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",
+            var button = new DiscordLinkButtonComponent($"{baseurl}/changelevelcard",
                 "Hintergrund ändern (bald verfügbar)", false, new DiscordComponentEmoji("🖼️"));
-            var button2 = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/leaderboard",
+            var button2 = new DiscordLinkButtonComponent($"{baseurl}/leaderboard",
                 "Online Rangliste ansehen", false, new DiscordComponentEmoji("🏆"));
             await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddFile("rank.png", imgstream).AddComponents(button, button2));
