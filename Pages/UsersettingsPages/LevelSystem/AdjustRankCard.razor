@@ -23,7 +23,7 @@
                 }
             </select>
 
-            <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 3MB)</h2>
+            <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</h2>
             <InputFile OnChange="UploadFile"/>
             @if (!string.IsNullOrWhiteSpace(uploadStatus))
             {
@@ -42,13 +42,21 @@
         </div>
         <div class="col-md-6">
             <h2>Vorschau</h2>
-            <img src="@base64String" style="max-width: 100%; max-height: 100%;"/>
+            @if (!string.IsNullOrWhiteSpace(base64String))
+            {
+                <img src="@base64String" alt="Rangkarte" class="img-fluid"/>
+            }
+            else
+            {
+                <h1>Vorschau wird generiert</h1>
+            }
         </div>
     </div>
 </div>
 
 @code {
     private string imageToInstall = "";
+    private bool firstRender = false;
     private string base64String = "";
     private bool hasCustomRankCardSettings;
     private string color = "#9f00ff";
@@ -69,9 +77,9 @@
             return;
         }
 
-        if (file.Size > 3145728)
+        if (file.Size > 5242880)
         {
-            errorMessage = "Die Datei ist zu groß oder hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 3MB ist.";
+            errorMessage = "Die Datei ist zu groß oder hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 5MB ist.";
             uploadStatus = "";
             return;
         }
