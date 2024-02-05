@@ -79,14 +79,14 @@
 
         if (file.Size > 5242880)
         {
-            errorMessage = "Die Datei ist zu groß oder hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 5MB ist.";
+            errorMessage = "Die Datei ist zu groß. Bitte wähle eine Datei, die kleiner als 5MB ist.";
             uploadStatus = "";
             return;
         }
 
         if ((file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg" && file.ContentType != "image/webp"))
         {
-            errorMessage = "Die Datei hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 3MB ist.";
+            errorMessage = "Die Datei hat ein ungültiges Format!";
             uploadStatus = "";
             return;
         }
@@ -94,7 +94,7 @@
         try
         {
             using var ms = new MemoryStream();
-            await file.OpenReadStream().CopyToAsync(ms);
+            await file.OpenReadStream(maxAllowedSize: 5242880).CopyToAsync(ms);
             imageToInstall = Convert.ToBase64String(ms.ToArray());
             hasImageChanged = true;
             uploadStatus = "Bild erfolgreich hochgeladen.";
@@ -102,7 +102,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Fehler beim Hochladen der Datei: {ex.Message}";
+            errorMessage = $"Fehler beim Hochladen der Datei: {ex.Message} {ex.StackTrace}";
             uploadStatus = "";
         }
     }
