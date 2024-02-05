@@ -129,7 +129,18 @@
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
         if (!string.IsNullOrWhiteSpace(imageToInstall) && hasImageChanged)
         {
+
+            bool isActivated = false;
             try
+            {
+                isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            if (isActivated)
             {
                 uploadStatus = "Bild wird moderativ geprüft...";
                 using var client = new HttpClient();
@@ -141,7 +152,6 @@
                 var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
                 var responseString = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<RootObject>(responseString);
-                // check if it has a reject reason from list
                 if (result.analysis.summary.reject_reason.Count > 0)
                 {
                     var rejectReasons = "";
@@ -158,7 +168,9 @@
                 uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
 
                 await Task.Delay(2000);
-
+            }
+            try
+            {
                 await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
 
                 uploadStatus = "Bild wurde erfolgreich gespeichert.";
