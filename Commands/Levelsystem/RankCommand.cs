@@ -78,7 +78,7 @@ public class RankCommand : ApplicationCommandsModule
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
             var button = new DiscordLinkButtonComponent($"{baseurl}/benutzereinstellungen/levelsystem/adjustrankcard",
-                "Hintergrund ändern (bald verfügbar)", false, new DiscordComponentEmoji("🖼️"));
+                "Hintergrund ändern", false, new DiscordComponentEmoji("🖼️"));
             var button2 = new DiscordLinkButtonComponent($"{baseurl}/leaderboard",
                 "Online Rangliste ansehen", false, new DiscordComponentEmoji("🏆"));
             await ctx.EditResponseAsync(
