@@ -70,9 +70,16 @@
             return;
         }
 
-        if (file.Size > 3145728 || (file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg"))
+        if (file.Size > 3145728)
         {
             errorMessage = "Die Datei ist zu groß oder hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 3MB ist.";
+            uploadStatus = "";
+            return;
+        }
+
+        if ((file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg" && file.ContentType != "image/webp"))
+        {
+            errorMessage = "Die Datei hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 3MB ist.";
             uploadStatus = "";
             return;
         }
@@ -123,7 +130,46 @@
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
         if (!string.IsNullOrWhiteSpace(imageToInstall) && hasImageChanged)
         {
-            await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
+            try
+            {
+                uploadStatus = "Bild wird moderativ geprüft...";
+                using var client = new HttpClient();
+                var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
+                client.DefaultRequestHeaders.Add("api-key", apikey);
+                client.DefaultRequestHeaders.Add("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
+                var content = new StringContent($"{{\"imageBase64\":\"{imageToInstall}\"}}", null, "application/json");
+                var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var result = System.Text.Json.JsonSerializer.Deserialize<RootObject>(responseString);
+                // check if it has a reject reason from list
+                if (result.analysis.summary.reject_reason.Count > 0)
+                {
+                    var rejectReasons = "";
+                    foreach (var reason in result.analysis.summary.reject_reason)
+                    {
+                        rejectReasons += reason.text + ", ";
+                    }
+                    errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
+                    uploadStatus = "";
+                    return;
+                }
+                else
+                {
+                    uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
+                }
+                
+                await Task.Delay(2000);
+                
+                await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
+                
+                uploadStatus = "Bild wurde erfolgreich gespeichert.";
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Fehler beim moderativen prüfen der Datei: {ex.Message}";
+                uploadStatus = "";
+            }
         }
         if (hasColorChanged)
         {
@@ -135,6 +181,30 @@
         }
 
         await OnInitializedAsync();
+    }
+    
+    
+    public class RejectReason
+    {
+        public string id { get; set; }
+        public string text { get; set; }
+    }
+
+    public class Summary
+    {
+        public string action { get; set; }
+        public double reject_prob { get; set; }
+        public List<RejectReason> reject_reason { get; set; }
+    }
+
+    public class Analysis
+    {
+        public Summary summary { get; set; }
+    }
+
+    public class RootObject
+    {
+        public Analysis analysis { get; set; }
     }
     
     protected override async Task OnInitializedAsync()

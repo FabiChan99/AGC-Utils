@@ -72,7 +72,7 @@ public class RankCommand : ApplicationCommandsModule
                 xpForThisLevel);
             var imgstream = imagedata.AsStream();
             var button = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/changelevelcard",
-                "Hintergrund ändern (bald verfügbar)", true, new DiscordComponentEmoji("🖼️"));
+                "Hintergrund ändern (bald verfügbar)", false, new DiscordComponentEmoji("🖼️"));
             var button2 = new DiscordLinkButtonComponent("https://dashboard.animegamingcafe.de/leaderboard",
                 "Online Rangliste ansehen", false, new DiscordComponentEmoji("🏆"));
             await ctx.EditResponseAsync(
