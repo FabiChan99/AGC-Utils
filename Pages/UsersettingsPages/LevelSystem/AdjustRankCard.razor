@@ -3,6 +3,8 @@
 @using System.Net
 @using AGC_Management.Controller
 @using AGC_Management.Enums.LevelSystem
+@using Microsoft.AspNetCore.Mvc.Rendering
+@inject IJSRuntime JSRuntime
 @inject UserService UserService
 @inject IHttpContextAccessor httpContextAccessor
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
@@ -15,9 +17,24 @@
             <h2>Farbe</h2>
             <input type="color" @onchange="ColorChanged" value="@color" />
             <h2>Schriftart</h2>
-            <input type="text" @onchange="FontChanged" value="@font" />
+            <select bind="@font" @onchange="FontChanged">
+                 @foreach (var fontFamily in SkiaSharp.SKFontManager.Default.GetFontFamilies().ToList())
+                 {
+                     <option value="@fontFamily.ToString()" selected="@(font == fontFamily.ToString())">@fontFamily.ToString()</option>
+                 }
+            </select>
+
             <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 3MB)</h2>
             <InputFile OnChange="UploadFile" />
+            @if (!string.IsNullOrWhiteSpace(uploadStatus))
+            {
+                <p class="text-success">@uploadStatus</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <p class="text-danger">@errorMessage</p>
+            }
+
             <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
             @if (hasCustomRankCardSettings)
             {
@@ -40,22 +57,47 @@
     private bool hasImageChanged = false;
     private bool hasColorChanged = false;
     private bool hasFontChanged = false;
+    private string uploadStatus = "";
+    private string errorMessage = "";
+
 
     private async Task UploadFile(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        if (file != null && file.Size <= 3145728 && (file.ContentType == "image/png" || file.ContentType == "image/jpg" || file.ContentType == "image/jpeg"))
+        if (file == null)
+        {
+            uploadStatus = "Keine Datei ausgewählt.";
+            return;
+        }
+
+        if (file.Size > 3145728 || (file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg"))
+        {
+            errorMessage = "Die Datei ist zu groß oder hat ein ungültiges Format. Bitte wählen Sie eine PNG, JPG oder JPEG Datei, die kleiner als 3MB ist.";
+            uploadStatus = "";
+            return;
+        }
+
+        try
         {
             using var ms = new MemoryStream();
             await file.OpenReadStream().CopyToAsync(ms);
             imageToInstall = Convert.ToBase64String(ms.ToArray());
             hasImageChanged = true;
+            uploadStatus = "Bild erfolgreich hochgeladen.";
+            errorMessage = "";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Hochladen der Datei: {ex.Message}";
+            uploadStatus = "";
         }
     }
+
     
     void FontChanged(ChangeEventArgs e)
     {
         font = e.Value.ToString();
+        Console.WriteLine(font);
         hasFontChanged = true;
     }
     

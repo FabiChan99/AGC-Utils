@@ -1,35 +1,65 @@
-﻿.config-panel {
-    background-color: #1a1919;
-    color: #e0e0e0;
-    padding: 20px;
-    border-radius: 5px;
-    margin: 20px;
-}
-
-.config-panel input[type="text"], .config-panel select {
+﻿/* Stil-Einstellungen für die Eingabeelemente und Buttons */
+input[type=color], select, input[type=text] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
-    border: none;
-    background-color: #2a2929;
-    color: #e0e0e0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
-.config-panel label {
-    margin-top: 20px;
-    margin-bottom: 5px;
-    display: block;
+input[type=file] {
+    margin: 10px 0;
 }
 
-.config-panel button {
-    background-color: #7b00ff;
-    color: #ffffff;
+button {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
     border: none;
-    padding: 10px 20px;
-    margin-top: 20px;
+    border-radius: 4px;
     cursor: pointer;
 }
 
-.config-panel button:hover {
-    background-color: #9a00ff;
+button:hover {
+    background-color: #45a049;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+    .row, .col-md-6 {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    button, input[type=color], select, input[type=text], input[type=file] {
+        width: 100%;
+    }
+}
+
+
+.text-success, .text-danger {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    color: #fff;
+}
+
+.text-success {
+    background-color: #28a745;
+    color: #fff !important;
+}
+
+.text-danger {
+    color: #fff !important;
+    background-color: #dc3545;
+}
+
+/* Vorschau-Stil */
+img {
+    border-radius: 4px;
+    margin-top: 10px;
 }
