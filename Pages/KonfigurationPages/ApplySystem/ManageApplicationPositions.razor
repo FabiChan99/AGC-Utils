@@ -1,6 +1,6 @@
 ﻿@page "/konfiguration/applysystem/manageapplicationpositions"
 @using AGC_Management.Entities
-@attribute [Authorize (Roles = "BotOwner, Administrator, HeadMod")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod")]
 <h3>ManageApplicationPositions</h3>
 
 <!-- Verwalten der Bewerbungspositionen (add, modify, remove) per button maybe?-->
@@ -36,21 +36,16 @@
 <button class="btn btn-warning">Modify Application Position</button>
 
 
-
-
-
-
 @code {
-    private List<ApplicationPosition> applicationPositions = new List<ApplicationPosition>();
-    
-    
+    private List<ApplicationPosition> applicationPositions = new();
+
+
     protected override async Task OnInitializedAsync()
     {
         await LoadApplicationPositions();
     }
-    
-    
-    
+
+
     private async Task LoadApplicationPositions()
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -59,14 +54,15 @@
         var list = new List<ApplicationPosition>();
         while (await reader.ReadAsync())
         {
-            list.Add(new ApplicationPosition()
+            list.Add(new ApplicationPosition
             {
                 PositionName = reader.GetString(0),
                 PositionId = reader.GetString(1),
                 IsApplicable = reader.GetBoolean(2)
             });
         }
+
         applicationPositions = list;
-        
     }
+
 }

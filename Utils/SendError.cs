@@ -44,7 +44,7 @@ public static class ErrorReporting
             $"Exception occured: {exception.GetType()}: {exception.Message}");
         CurrentApplication.DiscordClient.Logger.LogError($"Stacktrace: {exception.StackTrace}");
     }
-    
+
     public static async Task SendErrorToDev(DiscordClient client, Exception exception)
     {
         var botOwner = await client.GetUserAsync(GlobalProperties.BotOwnerId);
@@ -74,7 +74,7 @@ public static class ErrorReporting
         }
         catch (Exception)
         {
-            await ErrorReporting.SendErrorToDev(client, exception);
+            await SendErrorToDev(client, exception);
         }
 
         CurrentApplication.DiscordClient.Logger.LogError(

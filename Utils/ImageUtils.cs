@@ -52,7 +52,7 @@ public sealed class ImageUtils
         const int cardHeight = 282;
 
         string font = "Verdana";
-        
+
         try
         {
             font = BotConfig.GetConfig()["Leveling"]["RankCardFont"];
@@ -73,9 +73,6 @@ public sealed class ImageUtils
             c_barcolor = SKColor.Parse(customSettings.HexColor);
             font = customSettings.Font;
         }
-        
-
-
 
 
         using var bitmap = new SKBitmap(cardWidth, cardHeight);
@@ -123,19 +120,15 @@ public sealed class ImageUtils
         catch (Exception)
         {
         }
-        
+
         var barcolor = default_barcolor;
-        
+
         if (hasCustomSettings)
         {
             barcolor = c_barcolor;
         }
 
-        
-        
-        
-        
-        
+
         try
         {
             if (!hasCustomSettings)
@@ -159,7 +152,6 @@ public sealed class ImageUtils
                 using var bg_stream = new MemoryStream(Convert.FromBase64String(c_bgdata));
                 var backgroundBitmap = SKBitmap.Decode(bg_stream);
                 canvas.DrawBitmap(backgroundBitmap, new SKRect(0, 0, cardWidth, cardHeight), backgroundPaint);
-            
             }
         }
         catch (Exception e)
@@ -172,9 +164,9 @@ public sealed class ImageUtils
             Color = new SKColor(0, 0, 0, 150),
             IsAntialias = true
         };
-        
+
         canvas.DrawRoundRect(new SKRect(15, 15, cardWidth - 15, cardHeight - 15), 20, 20, darkenPaint);
-        
+
 
         var avatarBitmap = avatar;
         var avatarRect = new SKRect(20, 20, 262, 262);
@@ -319,8 +311,8 @@ public sealed class ImageUtils
         var data = image.Encode(SKEncodedImageFormat.Png, 100);
         return data;
     }
-    
-    
+
+
     public static async Task<string> GetFallbackBackground()
     {
         var bgurl = "";
@@ -350,9 +342,10 @@ public sealed class ImageUtils
         }
         catch (Exception e)
         {
-            CurrentApplication.Logger.Error(e, "Failed to download fallback background image. Returning black background.");
+            CurrentApplication.Logger.Error(e,
+                "Failed to download fallback background image. Returning black background.");
         }
-        
+
         // if everything fails, return a black background
         var bmp = new SKBitmap(934, 282);
         using var canvas = new SKCanvas(bmp);
@@ -361,8 +354,8 @@ public sealed class ImageUtils
         var base64 = Convert.ToBase64String(data.ToArray());
         return base64;
     }
-    
-    
+
+
     public static async Task<bool> HasCustomRankCardSettings(ulong UserId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -371,7 +364,7 @@ public sealed class ImageUtils
         await using var reader = await cmd.ExecuteReaderAsync();
         return reader.HasRows;
     }
-    
+
     public static async Task<CustomRankCard> GetCustomRankCardSettings(ulong UserId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -398,7 +391,7 @@ public sealed class ImageUtils
         {
             bg = await GetFallbackBackground();
         }
-        
+
         var card = new CustomRankCard
         {
             UserId = (ulong)reader.GetInt64(0),

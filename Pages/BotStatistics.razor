@@ -1,5 +1,4 @@
 ﻿@page "/bot"
-@using System.Timers
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team")]
 
 
@@ -88,15 +87,14 @@
 
 
     private readonly List<string> serverList = new();
-    
 
-    
+
     protected override async Task OnInitializedAsync()
     {
-
         await Task.Delay(100);
         await UpdateValues();
     }
+
     private string GetMode()
     {
 #if DEBUG

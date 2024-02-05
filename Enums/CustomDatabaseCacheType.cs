@@ -7,5 +7,5 @@ public enum CustomDatabaseCacheType
     GuildCache,
     ConfigCache,
     RuntimeCache,
-    TempCache,
+    TempCache
 }

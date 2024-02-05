@@ -113,10 +113,7 @@ internal class Program : BaseCommandModule
         builder.Services.AddRazorPages();
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddServerSideBlazor()
-            .AddHubOptions(options =>
-            {
-                options.MaximumReceiveMessageSize = 32 * 1024 * 100;
-            });
+            .AddHubOptions(options => { options.MaximumReceiveMessageSize = 32 * 1024 * 100; });
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<UserService>();
@@ -202,7 +199,7 @@ internal class Program : BaseCommandModule
         {
             CurrentApplication.BotPrefix = "!!!";
         }
-        
+
         discord.RegisterEventHandlers(Assembly.GetExecutingAssembly());
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {

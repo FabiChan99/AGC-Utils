@@ -11,28 +11,29 @@ namespace AGC_Management.ApplicationSystem;
 
 public sealed class ApplyPanelCommands : BaseCommandModule
 {
-    private static Queue<Task> refreshQueue = new Queue<Task>();
+    private static readonly Queue<Task> refreshQueue = new();
     private static Timer timer;
+
     public ApplyPanelCommands()
     {
         timer = new Timer(RefreshPanelFromQueue, null, Timeout.Infinite, Timeout.Infinite);
     }
-    
-    
+
+
     public static void QueueRefreshPanel()
     {
         refreshQueue.Clear();
         refreshQueue.Enqueue(new Task(async () => await RefreshPanel()));
         timer.Change(2000, Timeout.Infinite);
     }
-    
+
     private static void RefreshPanelFromQueue(object state)
     {
         if (refreshQueue.Count > 0)
         {
             var task = refreshQueue.Dequeue();
             task.Start();
-            
+
             if (refreshQueue.Count > 0)
             {
                 timer.Change(5000, Timeout.Infinite);
@@ -43,7 +44,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             }
         }
     }
-    
+
     [RequirePermissions(Permissions.Administrator)]
     [Command("sendapplypanel")]
     [Description("Sends the apply panel to the channel.")]
@@ -57,16 +58,18 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         {
             CurrentApplication.Logger.Error(e, "Failed to trigger delete message");
         }
+
         var msgb = await BuildMessage();
         var m = await ctx.Channel.SendMessageAsync(msgb);
         ulong id = m.Id;
         ulong channelId = m.ChannelId;
-        await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid", id.ToString());
+        await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid",
+            id.ToString());
         await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid",
             channelId.ToString());
         await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "ispanelactive", "true");
     }
-    
+
     public static async Task RefreshPanel()
     {
         var m_id = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid");
@@ -75,6 +78,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         {
             return;
         }
+
         var msgb = await BuildMessage();
         try
         {
@@ -98,15 +102,21 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         foreach (var category in categories)
         {
             selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName,
-                ToolSet.RemoveWhitespace(category.PositionId), description:MessageFormatter.BoolToEmoji(category.IsApplicable) + " Diese Position ist " + (category.IsApplicable ? "bewerbbar" : "nicht bewerbbar")));
+                ToolSet.RemoveWhitespace(category.PositionId),
+                MessageFormatter.BoolToEmoji(category.IsApplicable) + " Diese Position ist " +
+                (category.IsApplicable ? "bewerbbar" : "nicht bewerbbar")));
         }
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
             "Wähle die gewünschte Bewerbungsposition aus", selectorlist);
-        
-        var dbdata = await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache, "applypaneltext");
+
+        var dbdata =
+            await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache,
+                "applypaneltext");
         var embstr = new StringBuilder();
-        var paneltext = string.IsNullOrEmpty(dbdata) ? "⚠️ Es wurde noch kein Text für das Bewerbungspanel festgelegt. ⚠️" : dbdata;
+        var paneltext = string.IsNullOrEmpty(dbdata)
+            ? "⚠️ Es wurde noch kein Text für das Bewerbungspanel festgelegt. ⚠️"
+            : dbdata;
         embstr.Append(paneltext);
 
         DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
@@ -137,7 +147,8 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         List<Bewerbung> bewerbungen = new();
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using var command = con.CreateCommand("SELECT positionname, positionid, applicable FROM applicationcategories");
+        await using var command =
+            con.CreateCommand("SELECT positionname, positionid, applicable FROM applicationcategories");
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {

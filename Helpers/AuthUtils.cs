@@ -66,7 +66,8 @@ public sealed class AuthUtils
 
         try
         {
-            var headmodroleid = ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
+            var headmodroleid =
+                ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
             var headmodrole = guild.GetRole(headmodroleid);
             if (user.Roles.Contains(headmodrole))
             {
@@ -178,11 +179,12 @@ public sealed class AuthUtils
         {
             return AccessLevel.Administrator.ToString();
         }
-        
-        
+
+
         try
         {
-            var headmodroleid = ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
+            var headmodroleid =
+                ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
             var headmodrole = guild.GetRole(headmodroleid);
             if (user.Roles.Contains(headmodrole))
             {

@@ -27,9 +27,9 @@ internal static class DiscordExtension
                 Denied = (overwrites.FirstOrDefault(x => x.Id == member.Id, null)?.Denied ?? Permissions.None) | denied
             }).ToList();
     }
-    
-    
-        public static string ConvertMarkdownToHtml(this string? md, bool isEmbed = false)
+
+
+    public static string ConvertMarkdownToHtml(this string? md, bool isEmbed = false)
     {
         if (string.IsNullOrWhiteSpace(md))
             return md;
@@ -39,69 +39,60 @@ internal static class DiscordExtension
         if (isEmbed)
             md = string.Join("\n", md.Split("\n").Select(x => $"<div>{x}</div>"));
 
-        md = Regex.Replace(md, @"(?<!\\)\`([^\n`]+?)\`", (e) =>
+        md = Regex.Replace(md, @"(?<!\\)\`([^\n`]+?)\`", e =>
         {
             return $"<discord-inline-code in-embed=\"{isEmbed.ToString().ToLower()}\" >{e.Groups[1].Value
                 .Replace("*", "\\*").Replace("_", "\\_").Replace("&gt;", "\\&gt;").Replace("&lt;", "\\&lt;").Replace("~", "\\~").Replace("`", "\\`").Replace("|", "\\|").Replace(" ", "&nbsp;")}</discord-inline-code>";
         }, RegexOptions.Compiled);
-        
-        md = Regex.Replace(md, @"(?<!\\)(?:\`\`\`)(?:(\w{2,15})\n)?((?:.|\n)+?)(?:\`\`\`)", (e) =>
+
+        md = Regex.Replace(md, @"(?<!\\)(?:\`\`\`)(?:(\w{2,15})\n)?((?:.|\n)+?)(?:\`\`\`)", e =>
         {
             var lang = "";
 
             if (e.Groups[1].Success)
                 lang = e.Groups[1].Value;
 
-            return $"<discord-code-block language=\"{lang}\"><pre>{e.Groups[2].Value.Replace(" ", "&nbsp;")}</pre></discord-code-block>";
+            return
+                $"<discord-code-block language=\"{lang}\"><pre>{e.Groups[2].Value.Replace(" ", "&nbsp;")}</pre></discord-code-block>";
         }, RegexOptions.Compiled | RegexOptions.Multiline);
 
-        md = Regex.Replace(md, @"(?<!\\)\*\*([^\n*]+?)(?<!\\)\*\*", (e) =>
+        md = Regex.Replace(md, @"(?<!\\)\*\*([^\n*]+?)(?<!\\)\*\*", e =>
         {
             return $"<discord-bold>{e.Groups[1].Value
                 .Replace("*", "\\*").Replace("_", "\\_").Replace("&gt;", "\\&gt;").Replace("&lt;", "\\&lt;").Replace("~", "\\~").Replace("`", "\\`").Replace("|", "\\|")}</discord-bold>";
         }, RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)\~\~([^\n~]+?)(?<!\\)\~\~", (e) =>
-        {
-            return $"<s>{e.Groups[1].Value}</s>";
-        }, RegexOptions.Compiled);
-        
-        
-        md = Regex.Replace(md, @"(?<!\\)__([^\n~]+?)(?<!\\)__", (e) =>
-        {
-            return $"<u>{e.Groups[1].Value}</u>";
-        }, RegexOptions.Compiled);
+        md = Regex.Replace(md, @"(?<!\\)\~\~([^\n~]+?)(?<!\\)\~\~", e => { return $"<s>{e.Groups[1].Value}</s>"; },
+            RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)\|\|([^\n|]+?)(?<!\\)\|\|", (e) =>
-        {
-            return $"<discord-spoiler>{e.Groups[1].Value}</discord-spoiler>";
-        }, RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)\*([^\n*]+?)(?<!\\)\*", (e) =>
-        {
-            return $"<discord-italic>{e.Groups[1].Value}</discord-italic>";
-        }, RegexOptions.Compiled);
+        md = Regex.Replace(md, @"(?<!\\)__([^\n~]+?)(?<!\\)__", e => { return $"<u>{e.Groups[1].Value}</u>"; },
+            RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<![\\_])_([^\n_]+?)(?<!\\)_", (e) =>
-        {
-            return $"<discord-italic>{e.Groups[1].Value}</discord-italic>";
-        }, RegexOptions.Compiled);
-        
-        md = Regex.Replace(md, @"^(?<!\\)&gt; ([^\n_]+?)", (e) =>
-        {
-            return $"<discord-quote>{e.Groups[1].Value}</discord-quote>";
-        }, RegexOptions.Compiled | RegexOptions.Multiline);
+        md = Regex.Replace(md, @"(?<!\\)\|\|([^\n|]+?)(?<!\\)\|\|",
+            e => { return $"<discord-spoiler>{e.Groups[1].Value}</discord-spoiler>"; }, RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)&lt;t:(\d+?)(:(\w))?&gt;", (e) =>
-        {
-            return $"<discord-time format=\"{e.Groups[3].Value}\" timestamp=\"{e.Groups[1].Value}\"></discord-time>";
-        }, RegexOptions.Compiled);
-        
-        md = Regex.Replace(md, @"(?<!\\)&lt;/([\w -]+?):(?:\d+?)&gt;", (e) =>
-        {
-            return $"<discord-mention type=\"slash\">{e.Groups[1].Value}</discord-mention>";
-        }, RegexOptions.Compiled);
-        
+        md = Regex.Replace(md, @"(?<!\\)\*([^\n*]+?)(?<!\\)\*",
+            e => { return $"<discord-italic>{e.Groups[1].Value}</discord-italic>"; }, RegexOptions.Compiled);
+
+        md = Regex.Replace(md, @"(?<![\\_])_([^\n_]+?)(?<!\\)_",
+            e => { return $"<discord-italic>{e.Groups[1].Value}</discord-italic>"; }, RegexOptions.Compiled);
+
+        md = Regex.Replace(md, @"^(?<!\\)&gt; ([^\n_]+?)",
+            e => { return $"<discord-quote>{e.Groups[1].Value}</discord-quote>"; },
+            RegexOptions.Compiled | RegexOptions.Multiline);
+
+        md = Regex.Replace(md, @"(?<!\\)&lt;t:(\d+?)(:(\w))?&gt;",
+            e =>
+            {
+                return
+                    $"<discord-time format=\"{e.Groups[3].Value}\" timestamp=\"{e.Groups[1].Value}\"></discord-time>";
+            }, RegexOptions.Compiled);
+
+        md = Regex.Replace(md, @"(?<!\\)&lt;/([\w -]+?):(?:\d+?)&gt;",
+            e => { return $"<discord-mention type=\"slash\">{e.Groups[1].Value}</discord-mention>"; },
+            RegexOptions.Compiled);
+
         md = Regex.Replace(md, @"^(?<!\\)(\#{1,6})\s*(.+)$", match =>
         {
             var level = match.Groups[1].Value.Length;
@@ -109,32 +100,35 @@ internal static class DiscordExtension
             return $"<h{level}>{content}</h{level}>";
         }, RegexOptions.Multiline | RegexOptions.Compiled);
 
-        
-        md = Regex.Replace(md, @"(&lt;)?(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=;]*))", (e) =>
-        {
-            var url = e.Groups[2].Value;
 
-            if ((e.Groups[1]?.Success ?? false) && url.Contains("&gt;"))
-                url = url[..url.IndexOf("&gt;")];
+        md = Regex.Replace(md,
+            @"(&lt;)?(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=;]*))",
+            e =>
+            {
+                var url = e.Groups[2].Value;
 
-            return $"<a target=\"_blank\" href=\"{url}\">{url}</a>";
-        }, RegexOptions.Compiled);
+                if ((e.Groups[1]?.Success ?? false) && url.Contains("&gt;"))
+                    url = url[..url.IndexOf("&gt;")];
 
-        md = Regex.Replace(md, @"(?<!\\)&lt;@(?:!)?(\d+?)&gt;", (e) =>
+                return $"<a target=\"_blank\" href=\"{url}\">{url}</a>";
+            }, RegexOptions.Compiled);
+
+        md = Regex.Replace(md, @"(?<!\\)&lt;@(?:!)?(\d+?)&gt;", e =>
         {
             try
             {
                 var id = Convert.ToUInt64(e.Groups[1].Value);
-                return $"<discord-mention>{CurrentApplication.DiscordClient!.GetUserAsync(id).GetAwaiter().GetResult().GetFormattedUserName()}</discord-mention>";
+                return
+                    $"<discord-mention>{CurrentApplication.DiscordClient!.GetUserAsync(id).GetAwaiter().GetResult().GetFormattedUserName()}</discord-mention>";
             }
             catch (Exception)
             {
                 return $"@{e.Groups[1].Value}";
             }
         }, RegexOptions.Compiled);
-        
 
-        md = Regex.Replace(md, @"(?<!\\)&lt;#(?:!)?(\d+?)&gt;", (e) =>
+
+        md = Regex.Replace(md, @"(?<!\\)&lt;#(?:!)?(\d+?)&gt;", e =>
         {
             try
             {
@@ -161,26 +155,25 @@ internal static class DiscordExtension
             }
         }, RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)&lt;(a)?:(\w+?):(\d+?)&gt;", (e) =>
+        md = Regex.Replace(md, @"(?<!\\)&lt;(a)?:(\w+?):(\d+?)&gt;", e =>
         {
             var url = $"https://cdn.discordapp.com/emojis/{e.Groups[3].Value}.{(e.Groups[1].Success ? "gif" : "png")}";
 
             return $"<discord-custom-emoji name=\"{e.Groups[2].Value}\" url=\"{url}\"></discord-custom-emoji>";
         }, RegexOptions.Compiled);
 
-        md = Regex.Replace(md, @"(?<!\\)(?<!\&gt;)(?<!a):\w+?:", (e) =>
+        md = Regex.Replace(md, @"(?<!\\)(?<!\&gt;)(?<!a):\w+?:", e =>
         {
             if (!DiscordEmoji.TryFromName(CurrentApplication.DiscordClient, e.Value, false, out var emoji))
                 return e.Value;
-            else
-                try
-                {
-                    return $"{emoji.UnicodeEmoji}";
-                }
-                catch (Exception)
-                {
-                    return e.Value;
-                }
+            try
+            {
+                return $"{emoji.UnicodeEmoji}";
+            }
+            catch (Exception)
+            {
+                return e.Value;
+            }
         }, RegexOptions.Compiled);
 
         md = md.Replace("\\*", "*");

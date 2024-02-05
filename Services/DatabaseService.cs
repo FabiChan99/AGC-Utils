@@ -140,7 +140,8 @@ public static class DatabaseService
         {
             {
                 "userrankcardsettings",
-                "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', UNIQUE (userid))"},
+                "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', UNIQUE (userid))"
+            },
             {
                 "cachetable",
                 "CREATE TABLE IF NOT EXISTS cachetable (cachetype TEXT, content jsonb)"
@@ -212,12 +213,14 @@ public static class DatabaseService
 
         var columnUpdates = new Dictionary<string, Dictionary<string, string>>
         {
-
             {
                 "cachetable",
                 new Dictionary<string, string>
                 {
-                    { "cachetype_unique", "CREATE UNIQUE INDEX IF NOT EXISTS idx_cachetable_cachetype ON cachetable (cachetype)" },
+                    {
+                        "cachetype_unique",
+                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_cachetable_cachetype ON cachetable (cachetype)"
+                    }
                 }
             },
             {
@@ -226,7 +229,10 @@ public static class DatabaseService
                 {
                     { "positionname", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionname TEXT" },
                     { "positionid", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS positionid TEXT" },
-                    { "applicable", "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS applicable BOOLEAN DEFAULT false" }
+                    {
+                        "applicable",
+                        "ALTER TABLE applicationcategories ADD COLUMN IF NOT EXISTS applicable BOOLEAN DEFAULT false"
+                    }
                 }
             },
             {

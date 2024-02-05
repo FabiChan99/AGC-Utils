@@ -1,9 +1,8 @@
 ﻿@page "/benutzereinstellungen/levelsystem/adjustrankcard"
-@using AGC_Management.Utils
-@using System.Net
 @using AGC_Management.Controller
-@using AGC_Management.Enums.LevelSystem
-@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Text.Json
+@using AGC_Management.Utils
+@using SkiaSharp
 @inject IJSRuntime JSRuntime
 @inject UserService UserService
 @inject IHttpContextAccessor httpContextAccessor
@@ -15,17 +14,17 @@
     <div class="row">
         <div class="col-md-6">
             <h2>Farbe</h2>
-            <input type="color" @onchange="ColorChanged" value="@color" />
+            <input type="color" @onchange="ColorChanged" value="@color"/>
             <h2>Schriftart</h2>
             <select bind="@font" @onchange="FontChanged">
-                 @foreach (var fontFamily in SkiaSharp.SKFontManager.Default.GetFontFamilies().ToList())
-                 {
-                     <option value="@fontFamily.ToString()" selected="@(font == fontFamily.ToString())">@fontFamily.ToString()</option>
-                 }
+                @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
+                {
+                    <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
+                }
             </select>
 
             <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 3MB)</h2>
-            <InputFile OnChange="UploadFile" />
+            <InputFile OnChange="UploadFile"/>
             @if (!string.IsNullOrWhiteSpace(uploadStatus))
             {
                 <p class="text-success">@uploadStatus</p>
@@ -43,7 +42,7 @@
         </div>
         <div class="col-md-6">
             <h2>Vorschau</h2>
-            <img src="@base64String" style="max-width: 100%; max-height: 100%;" />
+            <img src="@base64String" style="max-width: 100%; max-height: 100%;"/>
         </div>
     </div>
 </div>
@@ -51,12 +50,12 @@
 @code {
     private string imageToInstall = "";
     private string base64String = "";
-    private bool hasCustomRankCardSettings = false;
+    private bool hasCustomRankCardSettings;
     private string color = "#9f00ff";
     private string font = "Verdana";
-    private bool hasImageChanged = false;
-    private bool hasColorChanged = false;
-    private bool hasFontChanged = false;
+    private bool hasImageChanged;
+    private bool hasColorChanged;
+    private bool hasFontChanged;
     private string uploadStatus = "";
     private string errorMessage = "";
 
@@ -100,20 +99,20 @@
         }
     }
 
-    
+
     void FontChanged(ChangeEventArgs e)
     {
         font = e.Value.ToString();
         Console.WriteLine(font);
         hasFontChanged = true;
     }
-    
+
     void ColorChanged(ChangeEventArgs e)
     {
         color = e.Value.ToString();
         hasColorChanged = true;
     }
-    
+
     private async Task ResetCard()
     {
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
@@ -124,7 +123,7 @@
         await cmd.ExecuteNonQueryAsync();
         await OnInitializedAsync();
     }
-    
+
     private async Task SaveSettings()
     {
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
@@ -141,7 +140,7 @@
                 var content = new StringContent($"{{\"imageBase64\":\"{imageToInstall}\"}}", null, "application/json");
                 var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
                 var responseString = await response.Content.ReadAsStringAsync();
-                var result = System.Text.Json.JsonSerializer.Deserialize<RootObject>(responseString);
+                var result = JsonSerializer.Deserialize<RootObject>(responseString);
                 // check if it has a reject reason from list
                 if (result.analysis.summary.reject_reason.Count > 0)
                 {
@@ -150,19 +149,18 @@
                     {
                         rejectReasons += reason.text + ", ";
                     }
+
                     errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
                     uploadStatus = "";
                     return;
                 }
-                else
-                {
-                    uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
-                }
-                
+
+                uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
+
                 await Task.Delay(2000);
-                
+
                 await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
-                
+
                 uploadStatus = "Bild wurde erfolgreich gespeichert.";
             }
             catch (Exception ex)
@@ -171,10 +169,12 @@
                 uploadStatus = "";
             }
         }
+
         if (hasColorChanged)
         {
             await SaveCustomRankCardSetting("barcolor", color, userId);
         }
+
         if (hasFontChanged)
         {
             await SaveCustomRankCardSetting("textfont", font, userId);
@@ -182,8 +182,8 @@
 
         await OnInitializedAsync();
     }
-    
-    
+
+
     public class RejectReason
     {
         public string id { get; set; }
@@ -206,7 +206,7 @@
     {
         public Analysis analysis { get; set; }
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await RetrieveCurrentSettings();
@@ -232,11 +232,11 @@
         base64String = await RetrieveRankCardForCurrentUser();
         StateHasChanged();
     }
-    
+
     private async Task<string> RetrieveRankCardForCurrentUser()
     {
         var context = httpContextAccessor.HttpContext;
-        var currentuserid  = UserService.GetUserId(context);
+        var currentuserid = UserService.GetUserId(context);
         var user = await CurrentApplication.DiscordClient.GetUserAsync(ulong.Parse(currentuserid.ToString()));
         var rank = await LevelUtils.GetRank(user.Id);
         var level = rank[user.Id].Level;
@@ -255,7 +255,7 @@
         imgstream.Read(bytes, 0, (int)imgstream.Length);
         return "data:image/png;base64," + Convert.ToBase64String(bytes);
     }
-    
+
     private async Task<string> RetrieveCurrentImageforCurrentUser()
     {
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
@@ -268,18 +268,14 @@
             {
                 return settings.Background;
             }
-            else
-            {
-                return await ImageUtils.GetFallbackBackground();
-            }
+
+            return await ImageUtils.GetFallbackBackground();
             return settings.Background;
         }
-        else
-        {
-            return await ImageUtils.GetFallbackBackground();
-        }
+
+        return await ImageUtils.GetFallbackBackground();
     }
-    
+
     private async Task RetrieveCurrentSettings()
     {
         bool hs = await ImageUtils.HasCustomRankCardSettings(ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString()));
@@ -293,4 +289,5 @@
             base64String = settings.Background ?? await RetrieveCurrentImageforCurrentUser();
         }
     }
+
 }
