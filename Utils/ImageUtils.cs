@@ -206,7 +206,7 @@ public sealed class ImageUtils
             var borderPaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
-                Color = SKColors.CornflowerBlue,
+                Color = barcolor,
                 StrokeWidth = 2,
                 IsAntialias = true
             };
@@ -315,7 +315,7 @@ public sealed class ImageUtils
 
 
     /// <summary>
-    /// Generates a rank card for web preview.
+    ///     Generates a rank card for web preview.
     /// </summary>
     /// <param name="user">The Discord user for whom the rank card is generated.</param>
     /// <param name="currentxpforthislevel">The current experience points accumulated for this level.</param>
@@ -329,15 +329,16 @@ public sealed class ImageUtils
     /// <param name="bgdata">The background data used in the rank card.</param>
     /// <param name="hexcolor">The hex color used in the rank card.</param>
     /// <returns>
-    /// A Task with the generated rank card in SKData format.
+    ///     A Task with the generated rank card in SKData format.
     /// </returns>
-    public static async Task<SKData> GenerateRankCardForWebPreview(DiscordUser user, int currentxpforthislevel, int level, int rank,
+    public static async Task<SKData> GenerateRankCardForWebPreview(DiscordUser user, int currentxpforthislevel,
+        int level, int rank,
         float progression, int totalxp,
         int xpforthisleveltocomplete, int boxalpha, string font, string bgdata, string hexcolor)
     {
         const int cardWidth = 934;
         const int cardHeight = 282;
-        
+
         if (string.IsNullOrWhiteSpace(bgdata))
         {
             // check current settings for background if it's empty use fallback
@@ -391,7 +392,7 @@ public sealed class ImageUtils
 
 
         var barcolor = default_barcolor;
-        
+
         using var bg_stream = new MemoryStream(Convert.FromBase64String(bgdata));
         var backgroundBitmap = SKBitmap.Decode(bg_stream);
         canvas.DrawBitmap(backgroundBitmap, new SKRect(0, 0, cardWidth, cardHeight), backgroundPaint);
@@ -442,7 +443,7 @@ public sealed class ImageUtils
             var borderPaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
-                Color = SKColors.CornflowerBlue,
+                Color = SKColor.Parse(hexcolor),
                 StrokeWidth = 2,
                 IsAntialias = true
             };
