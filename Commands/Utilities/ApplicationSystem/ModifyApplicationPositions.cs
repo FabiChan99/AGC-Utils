@@ -15,7 +15,8 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
 {
     [SlashCommand("add", "Add a new application position.")]
     public static async Task AddPosition(InteractionContext ctx,
-        [Option("position", "The position to add.")] string positionName)
+        [Option("position", "The position to add.")]
+        string positionName)
     {
         var posId = ToolSet.RemoveWhitespace(positionName.ToLower());
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();

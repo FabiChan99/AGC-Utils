@@ -224,14 +224,23 @@ public static class DatabaseService
                 }
             },
             {
-              "userrankcardsettings",
-              new Dictionary<string, string>
-              {
-                  { "barcolor", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS barcolor TEXT DEFAULT '#9f00ff'" },
-                  { "textfont", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS textfont TEXT DEFAULT 'Verdana'" },
-                  { "imagedata", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS imagedata TEXT" },
-                  { "boxalpha", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS boxalpha INTEGER DEFAULT 150" }
-              }
+                "userrankcardsettings",
+                new Dictionary<string, string>
+                {
+                    {
+                        "barcolor",
+                        "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS barcolor TEXT DEFAULT '#9f00ff'"
+                    },
+                    {
+                        "textfont",
+                        "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS textfont TEXT DEFAULT 'Verdana'"
+                    },
+                    { "imagedata", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS imagedata TEXT" },
+                    {
+                        "boxalpha",
+                        "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS boxalpha INTEGER DEFAULT 150"
+                    }
+                }
             },
             {
                 "applicationcategories",

@@ -70,7 +70,7 @@ public class RankCommand : ApplicationCommandsModule
         var dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
         string protocol = httpsEnabled ? "https" : "http";
         string baseurl = $"{protocol}://{dashboardUrl}";
-        
+
         try
         {
             var imagedata = await ImageUtils.GenerateRankCard(user, xpForThisLevelUntilNow, level, userRank, percentage,

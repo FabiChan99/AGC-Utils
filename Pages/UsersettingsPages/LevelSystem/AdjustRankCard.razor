@@ -15,7 +15,7 @@
                 <label for="colorPicker" class="form-label">Farbe</label>
                 <input type="color" class="form-control" id="colorPicker" @onchange="ColorChanged" value="@color"/>
             </div>
-            
+
             <div class="mb-3">
                 <label for="boxAlpha" class="form-label">Box Transparenz</label>
                 <input type="range" class="form-range" id="boxAlpha" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
@@ -88,17 +88,14 @@
     private bool hasBoxAlphaChanged;
     private string uploadStatus = "";
     private string errorMessage = "";
-    
+
     // data for preview
-    private bool hasPreviewData = false;
+    private bool hasPreviewData;
     private string previewImageData = "";
     private string previewImageToInstall = "";
     private int previewBoxAlpha = 150;
     private string previewColor = "#9f00ff";
     private string previewFont = "Verdana";
-    
-    
-    
 
 
     private async Task UploadFile(InputFileChangeEventArgs e)
@@ -109,7 +106,7 @@
             uploadStatus = "Keine Datei ausgewählt.";
             return;
         }
-        
+
         uploadStatus = "Datei wird hochgeladen... Bitte warten.";
 
         if (file.Size > 5242880)
@@ -125,12 +122,12 @@
             uploadStatus = "";
             return;
         }
+
         var old_data = imageToInstall;
         try
         {
-
             using var ms = new MemoryStream();
-            await file.OpenReadStream(maxAllowedSize: 5242880).CopyToAsync(ms);
+            await file.OpenReadStream(5242880).CopyToAsync(ms);
             imageToInstall = Convert.ToBase64String(ms.ToArray());
             hasImageChanged = true;
             uploadStatus = "Bild erfolgreich hochgeladen.";
@@ -152,7 +149,7 @@
         hasFontChanged = true;
         _ = CopySettingsToPreview();
     }
-    
+
     void BoxAlphaChanged(ChangeEventArgs e)
     {
         boxalpha = int.Parse(e.Value.ToString());
@@ -184,7 +181,6 @@
         var userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
         if (!string.IsNullOrWhiteSpace(imageToInstall) && hasImageChanged)
         {
-
             bool isActivated = false;
             try
             {
@@ -224,6 +220,7 @@
 
                 await Task.Delay(500);
             }
+
             try
             {
                 await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
@@ -246,7 +243,7 @@
         {
             await SaveCustomRankCardSetting("textfont", font, userId);
         }
-        
+
         if (hasBoxAlphaChanged)
         {
             await SaveCustomRankCardSetting("boxalpha", boxalpha, userId);
@@ -284,14 +281,14 @@
         await RetrieveCurrentSettings();
         await RenderPage();
     }
-    
+
     private async Task RenderPage()
     {
         base64String = await RetrieveRankCardForCurrentUser();
         StateHasChanged();
         await CopySettingsToPreview();
     }
-    
+
     private async Task RenderPreview()
     {
         if (hasPreviewData)
@@ -315,8 +312,6 @@
                     totalxp,
                     xpForThisLevel, previewBoxAlpha, previewFont, previewImageToInstall, previewColor);
                 imagedata = id;
-
-                
             }
             catch (Exception e)
             {
@@ -324,6 +319,7 @@
                 uploadStatus = "";
                 return;
             }
+
             var imgstream = imagedata.AsStream();
             byte[] bytes = new byte[imgstream.Length];
             imgstream.Read(bytes, 0, (int)imgstream.Length);
@@ -331,7 +327,7 @@
             StateHasChanged();
         }
     }
-    
+
     private async Task CopySettingsToPreview()
     {
         hasPreviewData = false;
@@ -356,7 +352,7 @@
         cmd.Parameters.AddWithValue("userid", (long)userId);
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     private async Task SaveCustomRankCardSetting(string settingName, int value, ulong userId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -370,7 +366,7 @@
         cmd.Parameters.AddWithValue("userid", (long)userId);
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     private async Task<string> RetrieveRankCardForCurrentUser()
     {
         var context = httpContextAccessor.HttpContext;
