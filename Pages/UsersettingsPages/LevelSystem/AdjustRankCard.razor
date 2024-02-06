@@ -7,38 +7,47 @@
 @inject IHttpContextAccessor httpContextAccessor
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
 
-
-<div class="container">
+<div class="container mt-4">
     <h1>Rankcard Einstellungen</h1>
     <div class="row">
         <div class="col-md-6">
-            <h2>Farbe</h2>
-            <input type="color" @onchange="ColorChanged" value="@color"/>
-            <h2>Box Transparenz</h2>
-            <input type="range" class="form-range" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
-            <h2>Schriftart</h2>
-            <select bind="@font" @onchange="FontChanged">
-                @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
-                {
-                    <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
-                }
-            </select>
+            <div class="mb-3">
+                <label for="colorPicker" class="form-label">Farbe</label>
+                <input type="color" class="form-control" id="colorPicker" @onchange="ColorChanged" value="@color"/>
+            </div>
+            
+            <div class="mb-3">
+                <label for="boxAlpha" class="form-label">Box Transparenz</label>
+                <input type="range" class="form-range" id="boxAlpha" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
+            </div>
 
-            <h2>Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</h2>
-            <InputFile OnChange="UploadFile"/>
-            @if (!string.IsNullOrWhiteSpace(uploadStatus))
-            {
-                <p class="text-success">@uploadStatus</p>
-            }
-            @if (!string.IsNullOrWhiteSpace(errorMessage))
-            {
-                <p class="text-danger">@errorMessage</p>
-            }
+            <div class="mb-3">
+                <label for="fontSelect" class="form-label">Schriftart</label>
+                <select class="form-select" id="fontSelect" bind="@font" @onchange="FontChanged">
+                    @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
+                    {
+                        <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="imageUpload" class="form-label">Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</label>
+                <InputFile id="imageUpload" OnChange="UploadFile"/>
+                @if (!string.IsNullOrWhiteSpace(uploadStatus))
+                {
+                    <p class="text-success">@((MarkupString)uploadStatus)</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <p class="text-danger">@((MarkupString)errorMessage)</p>
+                }
+            </div>
 
             <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
             @if (hasCustomRankCardSettings)
             {
-                <button class="btn btn-danger" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
+                <button class="btn btn-danger mt-2" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
             }
         </div>
         <div class="col-md-6">
@@ -64,6 +73,7 @@
     </div>
 </div>
 
+
 @code {
     private string imageToInstall = "";
     private bool firstRender = false;
@@ -82,6 +92,7 @@
     // data for preview
     private bool hasPreviewData = false;
     private string previewImageData = "";
+    private string previewImageToInstall = "";
     private int previewBoxAlpha = 150;
     private string previewColor = "#9f00ff";
     private string previewFont = "Verdana";
@@ -108,15 +119,16 @@
             return;
         }
 
-        if ((file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg" && file.ContentType != "image/webp"))
+        if (file.ContentType != "image/png" && file.ContentType != "image/jpg" && file.ContentType != "image/jpeg" && file.ContentType != "image/webp")
         {
             errorMessage = "Die Datei hat ein ungültiges Format!";
             uploadStatus = "";
             return;
         }
-
+        var old_data = imageToInstall;
         try
         {
+
             using var ms = new MemoryStream();
             await file.OpenReadStream(maxAllowedSize: 5242880).CopyToAsync(ms);
             imageToInstall = Convert.ToBase64String(ms.ToArray());
@@ -127,6 +139,7 @@
         }
         catch (Exception ex)
         {
+            imageToInstall = old_data;
             errorMessage = $"Fehler beim Hochladen der Datei: {ex.Message}";
             uploadStatus = "";
         }
@@ -184,7 +197,7 @@
 
             if (isActivated)
             {
-                uploadStatus = "Bild wird moderativ geprüft...";
+                uploadStatus = "Bild wird moderativ geprüft... <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>";
                 using var client = new HttpClient();
                 var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
                 client.DefaultRequestHeaders.Add("api-key", apikey);
@@ -194,7 +207,7 @@
                 var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
                 var responseString = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<RootObject>(responseString);
-                if (result.analysis.summary.reject_reason.Count > 0)
+                if (result?.analysis.summary.reject_reason.Count > 0)
                 {
                     var rejectReasons = "";
                     foreach (var reason in result.analysis.summary.reject_reason)
@@ -209,7 +222,7 @@
 
                 uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
 
-                await Task.Delay(2000);
+                await Task.Delay(500);
             }
             try
             {
@@ -295,9 +308,22 @@
             var xpForThisLevelUntilNow = totalxp - xpForCurrentLevel;
             var percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
             var userRank = await LevelUtils.GetUserRankAsync(user.Id);
-            var imagedata = await ImageUtils.GenerateRankCardForWebPreview(user, xpForThisLevelUntilNow, level, userRank, percentage,
-                totalxp,
-                xpForThisLevel, previewBoxAlpha, previewFont, previewImageData, previewColor);
+            SKData? imagedata = null;
+            try
+            {
+                var id = await ImageUtils.GenerateRankCardForWebPreview(user, xpForThisLevelUntilNow, level, userRank, percentage,
+                    totalxp,
+                    xpForThisLevel, previewBoxAlpha, previewFont, previewImageToInstall, previewColor);
+                imagedata = id;
+
+                
+            }
+            catch (Exception e)
+            {
+                errorMessage = "Fehler beim generieren der Vorschau. Diese Datei ist kein Bild oder hat ein ungültiges Format.";
+                uploadStatus = "";
+                return;
+            }
             var imgstream = imagedata.AsStream();
             byte[] bytes = new byte[imgstream.Length];
             imgstream.Read(bytes, 0, (int)imgstream.Length);
@@ -312,7 +338,7 @@
         previewBoxAlpha = boxalpha;
         previewColor = color;
         previewFont = font;
-        previewImageData = imageToInstall;
+        previewImageToInstall = imageToInstall;
         hasPreviewData = true;
         await RenderPreview();
     }

@@ -1,74 +1,50 @@
-﻿/* Stil-Einstellungen für die Eingabeelemente und Buttons */
-input[type=color], select, input[type=text] {
+﻿/* Apply some general styles to the body and container */
+
+.container {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+
+
+/* Style the color input */
+input[type="color"] {
     width: 100%;
     padding: 10px;
-    margin: 10px 0;
-    display: inline-block;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+    border-radius: 5px;
 }
 
-input[type=file] {
-    margin: 10px 0;
-}
-
-button {
+/* Style the range input */
+input[type="range"] {
     width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
-button:hover {
-    background-color: #45a049;
-}
-
-/* Responsive Design */
-@media screen and (max-width: 600px) {
-    .row, .col-md-6 {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    button, input[type=color], select, input[type=text], input[type=file] {
-        width: 100%;
-    }
-}
-
-.spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 4px solid #ffffff;
-    animation: spin 2s linear infinite;
-}
-
-.text-success, .text-danger {
+/* Style the select input */
+select {
+    width: 100%;
     padding: 10px;
-    margin: 10px 0;
-    border-radius: 4px;
-    color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.text-success {
-    background-color: #28a745;
-    color: #fff !important;
+/* Style the image previews */
+img.img-fluid {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
 }
 
-.text-danger {
-    color: #fff !important;
-    background-color: #dc3545;
+/* Style the buttons */
+button.btn {
+    width: 100%;
+    margin-top: 10px;
 }
 
-/* Vorschau-Stil */
-img {
-    border-radius: 4px;
+/* Add some margin to the top spinner */
+.spinner-border {
     margin-top: 10px;
 }
