@@ -3,7 +3,6 @@
 @using System.Text.Json
 @using AGC_Management.Utils
 @using SkiaSharp
-@inject IJSRuntime JSRuntime
 @inject UserService UserService
 @inject IHttpContextAccessor httpContextAccessor
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
@@ -15,6 +14,8 @@
         <div class="col-md-6">
             <h2>Farbe</h2>
             <input type="color" @onchange="ColorChanged" value="@color"/>
+            <h2>Box Transparenz</h2>
+            <input type="range" class="form-range" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
             <h2>Schriftart</h2>
             <select bind="@font" @onchange="FontChanged">
                 @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
@@ -42,13 +43,22 @@
         </div>
         <div class="col-md-6">
             <h2>Vorschau</h2>
+            @if (!string.IsNullOrWhiteSpace(previewImageData) && hasPreviewData)
+            {
+                <img src="@previewImageData" alt="Rangkarte" class="img-fluid"/>
+            }
+            else
+            {
+                <h1>Vorschau wird generiert <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
+            }
+            <h2>Aktuelle Karte</h2>
             @if (!string.IsNullOrWhiteSpace(base64String))
             {
                 <img src="@base64String" alt="Rangkarte" class="img-fluid"/>
             }
             else
             {
-                <h1>Vorschau wird generiert</h1>
+                <h1>Karte wird abgerufen <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
             }
         </div>
     </div>
@@ -61,11 +71,23 @@
     private bool hasCustomRankCardSettings;
     private string color = "#9f00ff";
     private string font = "Verdana";
+    private int boxalpha = 150;
     private bool hasImageChanged;
     private bool hasColorChanged;
     private bool hasFontChanged;
+    private bool hasBoxAlphaChanged;
     private string uploadStatus = "";
     private string errorMessage = "";
+    
+    // data for preview
+    private bool hasPreviewData = false;
+    private string previewImageData = "";
+    private int previewBoxAlpha = 150;
+    private string previewColor = "#9f00ff";
+    private string previewFont = "Verdana";
+    
+    
+    
 
 
     private async Task UploadFile(InputFileChangeEventArgs e)
@@ -101,6 +123,7 @@
             hasImageChanged = true;
             uploadStatus = "Bild erfolgreich hochgeladen.";
             errorMessage = "";
+            await CopySettingsToPreview();
         }
         catch (Exception ex)
         {
@@ -114,12 +137,21 @@
     {
         font = e.Value.ToString();
         hasFontChanged = true;
+        _ = CopySettingsToPreview();
+    }
+    
+    void BoxAlphaChanged(ChangeEventArgs e)
+    {
+        boxalpha = int.Parse(e.Value.ToString());
+        hasBoxAlphaChanged = true;
+        _ = CopySettingsToPreview();
     }
 
     void ColorChanged(ChangeEventArgs e)
     {
         color = e.Value.ToString();
         hasColorChanged = true;
+        _ = CopySettingsToPreview();
     }
 
     private async Task ResetCard()
@@ -131,6 +163,7 @@
         cmd.Parameters.AddWithValue("userid", (long)userId);
         await cmd.ExecuteNonQueryAsync();
         await OnInitializedAsync();
+        await CopySettingsToPreview();
     }
 
     private async Task SaveSettings()
@@ -200,6 +233,11 @@
         {
             await SaveCustomRankCardSetting("textfont", font, userId);
         }
+        
+        if (hasBoxAlphaChanged)
+        {
+            await SaveCustomRankCardSetting("boxalpha", boxalpha, userId);
+        }
 
         await OnInitializedAsync();
     }
@@ -233,6 +271,51 @@
         await RetrieveCurrentSettings();
         await RenderPage();
     }
+    
+    private async Task RenderPage()
+    {
+        base64String = await RetrieveRankCardForCurrentUser();
+        StateHasChanged();
+        await CopySettingsToPreview();
+    }
+    
+    private async Task RenderPreview()
+    {
+        if (hasPreviewData)
+        {
+            var context = httpContextAccessor.HttpContext;
+            var currentuserid = UserService.GetUserId(context);
+            var user = await CurrentApplication.DiscordClient.GetUserAsync(ulong.Parse(currentuserid.ToString()));
+            var rank = await LevelUtils.GetRank(user.Id);
+            var level = rank[user.Id].Level;
+            var totalxp = rank[user.Id].Xp;
+            var xpForCurrentLevel = LevelUtils.XpForLevel(level);
+            var xpForNextLevel = LevelUtils.XpForLevel(level + 1);
+            var xpForThisLevel = xpForNextLevel - xpForCurrentLevel;
+            var xpForThisLevelUntilNow = totalxp - xpForCurrentLevel;
+            var percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
+            var userRank = await LevelUtils.GetUserRankAsync(user.Id);
+            var imagedata = await ImageUtils.GenerateRankCardForWebPreview(user, xpForThisLevelUntilNow, level, userRank, percentage,
+                totalxp,
+                xpForThisLevel, previewBoxAlpha, previewFont, previewImageData, previewColor);
+            var imgstream = imagedata.AsStream();
+            byte[] bytes = new byte[imgstream.Length];
+            imgstream.Read(bytes, 0, (int)imgstream.Length);
+            previewImageData = "data:image/png;base64," + Convert.ToBase64String(bytes);
+            StateHasChanged();
+        }
+    }
+    
+    private async Task CopySettingsToPreview()
+    {
+        hasPreviewData = false;
+        previewBoxAlpha = boxalpha;
+        previewColor = color;
+        previewFont = font;
+        previewImageData = imageToInstall;
+        hasPreviewData = true;
+        await RenderPreview();
+    }
 
     private async Task SaveCustomRankCardSetting(string settingName, string value, ulong userId)
     {
@@ -247,13 +330,21 @@
         cmd.Parameters.AddWithValue("userid", (long)userId);
         await cmd.ExecuteNonQueryAsync();
     }
-
-    private async Task RenderPage()
+    
+    private async Task SaveCustomRankCardSetting(string settingName, int value, ulong userId)
     {
-        base64String = await RetrieveRankCardForCurrentUser();
-        StateHasChanged();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand();
+        cmd.CommandText = $@"
+    INSERT INTO userrankcardsettings (userid, {settingName})
+    VALUES (@userid, @value)
+    ON CONFLICT (userid)
+    DO UPDATE SET {settingName} = @value";
+        cmd.Parameters.AddWithValue("value", value);
+        cmd.Parameters.AddWithValue("userid", (long)userId);
+        await cmd.ExecuteNonQueryAsync();
     }
-
+    
     private async Task<string> RetrieveRankCardForCurrentUser()
     {
         var context = httpContextAccessor.HttpContext;
@@ -308,6 +399,7 @@
             color = settings.HexColor ?? "#000000";
             font = settings.Font ?? "Verdana";
             base64String = settings.Background ?? await RetrieveCurrentImageforCurrentUser();
+            boxalpha = settings.BoxOpacity ?? 100;
         }
     }
 

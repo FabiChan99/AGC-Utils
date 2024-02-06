@@ -140,7 +140,7 @@ public static class DatabaseService
         {
             {
                 "userrankcardsettings",
-                "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', UNIQUE (userid))"
+                "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
             {
                 "cachetable",
@@ -222,6 +222,16 @@ public static class DatabaseService
                         "CREATE UNIQUE INDEX IF NOT EXISTS idx_cachetable_cachetype ON cachetable (cachetype)"
                     }
                 }
+            },
+            {
+              "userrankcardsettings",
+              new Dictionary<string, string>
+              {
+                  { "barcolor", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS barcolor TEXT DEFAULT '#9f00ff'" },
+                  { "textfont", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS textfont TEXT DEFAULT 'Verdana'" },
+                  { "imagedata", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS imagedata TEXT" },
+                  { "boxalpha", "ALTER TABLE userrankcardsettings ADD COLUMN IF NOT EXISTS boxalpha INTEGER DEFAULT 150" }
+              }
             },
             {
                 "applicationcategories",

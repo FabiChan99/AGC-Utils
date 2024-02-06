@@ -40,6 +40,15 @@ button:hover {
     }
 }
 
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #ffffff;
+    animation: spin 2s linear infinite;
+}
 
 .text-success, .text-danger {
     padding: 10px;

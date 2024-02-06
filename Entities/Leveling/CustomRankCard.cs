@@ -6,4 +6,5 @@ public class CustomRankCard
     public string Background { get; set; }
     public string HexColor { get; set; }
     public string Font { get; set; }
+    public int? BoxOpacity { get; set; }
 }
