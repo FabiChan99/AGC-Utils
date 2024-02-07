@@ -446,7 +446,13 @@ internal class Program : BaseCommandModule
             e.Handled = true;
             return;
         }
-
+        
+        
+        if (e.Exception.Message == "No matching subcommands were found, and this group is not executable.")
+        {
+            e.Handled = true;
+            return;
+        }
         await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, e.Context.User, e.Exception);
 
         var embed = new DiscordEmbedBuilder

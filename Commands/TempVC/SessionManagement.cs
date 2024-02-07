@@ -265,6 +265,7 @@ public sealed class SessionManagement : TempVoiceHelper
     }
 
     [Command("read")]
+    [Aliases("show", "info")]
     [RequireDatabase]
     public async Task SessionRead(CommandContext ctx)
     {
