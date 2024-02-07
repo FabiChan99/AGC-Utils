@@ -9,6 +9,10 @@
     margin-top: -8vh;
 }
 
+.btn-link {
+    text-decoration: none!important;
+}
+
 discord-inline-code {
     background: #2c2d2f !important;
 }
