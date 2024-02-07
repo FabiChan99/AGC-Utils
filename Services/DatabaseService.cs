@@ -224,7 +224,7 @@ public static class DatabaseService
                 }
             },
             {
-                "tempvoicesession",
+                "tempvoicesession_unique",
                 new Dictionary<string, string>
                 {
                     {
