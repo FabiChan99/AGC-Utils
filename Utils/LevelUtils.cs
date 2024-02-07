@@ -1026,7 +1026,7 @@ public static class LevelUtils
     public static async Task<bool> IsLevelUpPingEnabled(ulong userId)
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-
+        await LevelUtils.AddUserToDbIfNot(userId);
         await using var cmd = db.CreateCommand("SELECT pingactive FROM levelingdata WHERE userid = @userid");
         cmd.Parameters.AddWithValue("@userid", (long)userId);
         await using var reader = await cmd.ExecuteReaderAsync();

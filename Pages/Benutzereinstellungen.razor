@@ -1,13 +1,56 @@
 ﻿@page "/benutzereinstellungen/"
+@using AGC_Management.Utils
+@using AGC_Management.Controller
+@inject UserService UserService
+@inject IHttpContextAccessor httpContextAccessor
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
 
-<h1>Benutzereinstellungen</h1>
+@if (loaded)
+{
+    <h1>Benutzereinstellungen</h1>
 
-<div class="card-group mt-5 mb-5">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Levelsystem Einstellungen</h5>
-            <a href="/benutzereinstellungen/levelsystem/adjustrankcard" class="btn btn-link">Rangkarte anpassen</a>
+    <div class="card-group mt-5 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Levelsystem Einstellungen</h5>
+                <a href="/benutzereinstellungen/levelsystem/adjustrankcard" class="btn btn-link">Rangkarte anpassen</a>
+                <button class="btn btn-link" @onclick="TogglePing">Levelup Ping umschalten @if (pingActive) { <span class="badge bg-success">Aktuell aktiv</span> } else { <span class="badge bg-danger">Aktuell inaktiv</span> }</button>
+            </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
+
+
+@code
+{
+    private bool loaded = false;
+    private bool pingActive = false;
+
+    
+    private ulong GetUserId()
+    {
+        var context = httpContextAccessor.HttpContext;
+        var currentuserid = UserService.GetUserId(context!).ToString();
+        return ulong.Parse(currentuserid!);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        pingActive = await LevelUtils.IsLevelUpPingEnabled(GetUserId());
+        loaded = true;
+    }
+    
+    private async Task TogglePing()
+    {
+        pingActive = await LevelUtils.ToggleLevelUpPing(GetUserId());
+        
+    }
+
+}
