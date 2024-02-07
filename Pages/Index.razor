@@ -10,6 +10,11 @@
 
 <h1>Willkommen! @username</h1>
 
+<AuthorizeView Roles="NichtImServer">
+    <div class="alert alert-danger" role="alert">
+        Du bist nicht im Server. Dieses Dashboard ist nur für Mitglieder des Servers verfügbar.
+    </div>
+</AuthorizeView>
 
 @if (!userService.IsAuthenticated(httpContextAccessor.HttpContext))
 {
@@ -17,6 +22,7 @@
         Nicht angemeldet! Bitte <a href="/login">anmelden</a>
     </div>
 }
+
 
 
 @code {
