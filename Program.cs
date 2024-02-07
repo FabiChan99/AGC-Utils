@@ -29,7 +29,7 @@ namespace AGC_Management;
 
 public class CurrentApplication
 {
-    public static string VersionString { get; set; } = "v2.4.2";
+    public static string VersionString { get; set; } = "v2.5.0";
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
@@ -73,7 +73,7 @@ internal class Program : BaseCommandModule
         CurrentApplication.Logger = logger;
 
 
-        logger.Information("Starting AGC Management Bot...");
+        logger.Information("Starting AGC Management Bot " + CurrentApplication.VersionString + "...");
         bool DebugMode;
         try
         {
