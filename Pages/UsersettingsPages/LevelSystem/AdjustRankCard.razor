@@ -218,7 +218,11 @@ else
                     var rejectReasons = "";
                     foreach (var reason in result.analysis.summary.reject_reason)
                     {
-                        rejectReasons += reason.text + ", ";
+                        rejectReasons += reason.text;
+                        if (reason != result.analysis.summary.reject_reason.Last())
+                        {
+                            rejectReasons += ", ";
+                        }
                     }
 
                     errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
