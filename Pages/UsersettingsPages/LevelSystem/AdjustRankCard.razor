@@ -9,7 +9,7 @@
 
 @if (loaded)
 {
-    <div class="container mt-4">
+<div class="container mt-4">
     <h1>Rankcard Einstellungen</h1>
     <div class="row">
         <div class="col-md-6">
@@ -35,7 +35,7 @@
 
             <div class="mb-3">
                 <label for="imageUpload" class="form-label">Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</label>
-                <InputFile id="imageUpload" OnChange="UploadFile"/>
+                <InputFile accept="image/*" class="form-control" id="imageUpload" OnChange="UploadFile"/>
                 @if (!string.IsNullOrWhiteSpace(uploadStatus))
                 {
                     <p class="text-success">@((MarkupString)uploadStatus)</p>
@@ -117,7 +117,7 @@ else
             return;
         }
 
-        uploadStatus = "Datei wird hochgeladen... Bitte warten.";
+        uploadStatus = "Datei wird hochgeladen... <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>";
 
         if (file.Size > 5242880)
         {
