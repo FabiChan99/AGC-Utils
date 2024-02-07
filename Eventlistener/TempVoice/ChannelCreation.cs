@@ -51,11 +51,19 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
                                 catch (Exception)
                                 {
-                                    Dictionary<string, (object value, string comparisonOperator)>
-                                        DeletewhereConditions = new()
-                                        {
-                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
-                                        };
+                                    try
+                                    {
+                                        Dictionary<string, (object value, string comparisonOperator)>
+                                            DeletewhereConditions = new()
+                                            {
+                                                { "channelid", ((long)e.Before.Channel.Id, "=") }
+                                            };
+                                    }
+                                    catch (NullReferenceException)
+                                    {
+                                        //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    }
+
 
                                     //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
                                 }
@@ -134,13 +142,18 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
                                 catch (Exception)
                                 {
-                                    Dictionary<string, (object value, string comparisonOperator)>
-                                        DeletewhereConditions = new()
-                                        {
-                                            { "channelid", ((long)e.Before.Channel.Id, "=") }
-                                        };
-
-                                    //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    try
+                                    {
+                                        Dictionary<string, (object value, string comparisonOperator)>
+                                            DeletewhereConditions = new()
+                                            {
+                                                { "channelid", ((long)e.Before.Channel.Id, "=") }
+                                            };
+                                    }
+                                    catch (NullReferenceException)
+                                    {
+                                        //await DatabaseService.DeleteDataFromTable("tempvoice", DeletewhereConditions);
+                                    }
                                 }
 
                     if ((e.After?.Channel != null && e.Before?.Channel == null) ||
