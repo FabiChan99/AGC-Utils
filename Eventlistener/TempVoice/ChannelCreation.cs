@@ -307,10 +307,6 @@ public class TempVCEventHandler : TempVoiceHelper
                                         Permissions.AccessChannels);
                                 }
                                 
-                                List<ulong> mods = channelMods.Split(new[] { ", " }, StringSplitOptions.None)
-                                    .Select(ulong.Parse).ToList();
-                                
-                                
 
                                 foreach (string user in blockeduserslist)
                                 {
