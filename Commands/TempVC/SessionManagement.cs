@@ -26,6 +26,7 @@ public sealed class SessionManagement : TempVoiceHelper
             List<long> dbChannels = await GetChannelIDFromDB(ctx);
             bool hidden = false;
             bool locked = false;
+            List<ulong> channelmods = new();
             DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
 
             if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
@@ -63,12 +64,13 @@ public sealed class SessionManagement : TempVoiceHelper
                         { "userid", ((long)ctx.User.Id, "=") }
                     };
 
-                    int rowsDeleted =
-                        await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
+                    await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
                 }
+                
+                channelmods = await RetrieveChannelMods(userChannel);
 
                 var overwrite =
-                    userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx.Guild.EveryoneRole.Id);
+                    userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx?.Guild?.EveryoneRole.Id);
                 if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
                 {
                     locked = true;
@@ -89,6 +91,7 @@ public sealed class SessionManagement : TempVoiceHelper
                 {
                     hidden = false;
                 }
+                
 
                 string blocklist = string.Empty;
                 string permitlist = string.Empty;
@@ -115,6 +118,7 @@ public sealed class SessionManagement : TempVoiceHelper
 
                 blocklist = string.Join(", ", blockedusers);
                 permitlist = string.Join(", ", permittedusers);
+                var channelmodsdata = string.Join(", ", channelmods);
                 Dictionary<string, object> data = new()
                 {
                     { "userid", (long)ctx.User.Id },
@@ -125,7 +129,8 @@ public sealed class SessionManagement : TempVoiceHelper
                     { "permitedusers", permitlist },
                     { "locked", locked },
                     { "hidden", hidden },
-                    { "sessionskip", false }
+                    { "sessionskip", false },
+                    { "channelmods", channelmodsdata }
                 };
                 await DatabaseService.InsertDataIntoTable("tempvoicesession", data);
                 await msg.ModifyAsync(
@@ -324,6 +329,7 @@ public sealed class SessionManagement : TempVoiceHelper
                     bool sessionskip = (bool)user["sessionskip"];
                     string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
                     string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
+                    string cm = string.IsNullOrEmpty(user["channelmods"].ToString()) ? "Keine" : user["channelmods"].ToString();
 
                     DiscordEmbedBuilder ebb = new()
                     {
@@ -334,6 +340,7 @@ public sealed class SessionManagement : TempVoiceHelper
                                       $"**Kanallimit:** {channellimit}\n\n" +
                                       $"**Gesperrte Benutzer:** ```{bu}```\n" +
                                       $"**Zugelassene Benutzer:** ```{pu}```\n" +
+                                      $"**Kanalmods:** ```{cm}```\n\n" +
                                       $"**Sessionskip aktiv:** {sessionskip}\n" +
                                       $"**Gesperrt:** {locked}\n" +
                                       $"**Versteckt:** {hidden}\n",

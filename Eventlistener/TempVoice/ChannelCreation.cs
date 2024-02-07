@@ -24,7 +24,7 @@ public class TempVCEventHandler : TempVoiceHelper
                 List<string> Query = new()
                 {
                     "userid", "channelname", "channelbitrate", "channellimit",
-                    "blockedusers", "permitedusers", "locked", "hidden", "sessionskip"
+                    "blockedusers", "permitedusers", "locked", "hidden", "sessionskip", "channelmods"
                 };
                 Dictionary<string, object> WhereCondiditons = new()
                 {
@@ -180,6 +180,9 @@ public class TempVCEventHandler : TempVoiceHelper
                                         : string.Empty;
                                     locked = (bool)item["locked"];
                                     hidden = (bool)item["hidden"];
+                                    channelMods = item["channelmods"] != null
+                                        ? (string)item["channelmods"]
+                                        : string.Empty;
                                     break;
                                 }
 
@@ -290,6 +293,11 @@ public class TempVCEventHandler : TempVoiceHelper
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
                                         Permissions.AccessChannels);
                                 }
+                                
+                                List<ulong> mods = channelMods.Split(new[] { ", " }, StringSplitOptions.None)
+                                    .Select(ulong.Parse).ToList();
+                                
+                                
 
                                 foreach (string user in blockeduserslist)
                                 {
@@ -327,6 +335,22 @@ public class TempVCEventHandler : TempVoiceHelper
                                         }
                                     }
                                 }
+
+                                try
+                                {
+                                    var conn = CurrentApplication.ServiceProvider
+                                        .GetRequiredService<NpgsqlDataSource>();
+                                    string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+                                    await using NpgsqlCommand command = conn.CreateCommand(sql);
+                                    command.Parameters.AddWithValue("@mods", string.Join(", ", channelMods));
+                                    command.Parameters.AddWithValue("@channelid", (long)voice.Id);
+                                    await command.ExecuteNonQueryAsync();
+                                }
+                                catch (Exception)
+                                {
+                                    // ignored, if it fails, it fails
+                                }
+
 
                                 await voice.ModifyAsync(x => x.PermissionOverwrites = overwrites);
                             }

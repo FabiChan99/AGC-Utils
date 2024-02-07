@@ -160,7 +160,7 @@ public class TempVoiceHelper : BaseCommandModule
             }
             catch (Exception)
             {
-                channelMods.Clear();
+                continue;
             }
         }
 

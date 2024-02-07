@@ -177,7 +177,7 @@ public static class DatabaseService
             },
             {
                 "tempvoicesession",
-                "CREATE TABLE IF NOT EXISTS tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN, sessionskip BOOLEAN)"
+                "CREATE TABLE IF NOT EXISTS tempvoicesession (userid BIGINT, channelname VARCHAR, channelbitrate INTEGER, channellimit INTEGER, blockedusers VARCHAR, permitedusers VARCHAR, locked BOOLEAN, hidden BOOLEAN, sessionskip BOOLEAN, channelmods VARCHAR)"
             },
             { "vorstellungscooldown", "CREATE TABLE IF NOT EXISTS vorstellungscooldown (user_id BIGINT, time BIGINT)" },
             { "warnreasons", "CREATE TABLE IF NOT EXISTS warnreasons (reason TEXT, custom_id VARCHAR)" },
@@ -220,6 +220,16 @@ public static class DatabaseService
                     {
                         "cachetype_unique",
                         "CREATE UNIQUE INDEX IF NOT EXISTS idx_cachetable_cachetype ON cachetable (cachetype)"
+                    }
+                }
+            },
+            {
+                "tempvoicesession",
+                new Dictionary<string, string>
+                {
+                    {
+                        "tempvoicesession_unique",
+                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_tempvoicesession_userid ON tempvoicesession (userid)"
                     }
                 }
             },
@@ -403,7 +413,8 @@ public static class DatabaseService
                     { "permitedusers", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS permitedusers VARCHAR" },
                     { "locked", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS locked BOOLEAN" },
                     { "hidden", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS hidden BOOLEAN" },
-                    { "sessionskip", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS sessionskip BOOLEAN" }
+                    { "sessionskip", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS sessionskip BOOLEAN" },
+                    { "channelmods", "ALTER TABLE tempvoicesession ADD COLUMN IF NOT EXISTS channelmods VARCHAR" }
                 }
             },
             {
