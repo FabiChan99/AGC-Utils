@@ -223,6 +223,7 @@ else
 
                     errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
                     uploadStatus = "";
+                    await LogRuleViolatingImageUpload(userId, rejectReasons, imageToInstall);
                     return;
                 }
 
@@ -298,6 +299,21 @@ else
         base64String = await RetrieveRankCardForCurrentUser();
         StateHasChanged();
         await CopySettingsToPreview();
+    }
+
+
+    private async Task LogRuleViolatingImageUpload(ulong userid, string reason, string imageData)
+    {
+        var userid_ = (long)userid;
+        var unixnow = DateTimeOffset.Now.ToUnixTimeSeconds();
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand();
+        cmd.CommandText = @"INSERT INTO userrankcardunallowedimagelog (userid, blockreason, imagedata, timestamp) VALUES (@userid, @reason, @imagedata, @timestamp)";
+        cmd.Parameters.AddWithValue("userid", userid_);
+        cmd.Parameters.AddWithValue("reason", reason);
+        cmd.Parameters.AddWithValue("imagedata", imageData);
+        cmd.Parameters.AddWithValue("timestamp", unixnow);
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private async Task RenderPreview()

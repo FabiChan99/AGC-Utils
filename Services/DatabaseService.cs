@@ -143,6 +143,10 @@ public static class DatabaseService
                 "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
             {
+                "userrankcardunallowedimagelog",
+                "CREATE TABLE IF NOT EXISTS userrankcardunallowedimagelog (userid BIGINT, imagedata TEXT, timestamp BIGINT,  blockreason TEXT)"
+            },
+            {
                 "cachetable",
                 "CREATE TABLE IF NOT EXISTS cachetable (cachetype TEXT, content jsonb)"
             },
