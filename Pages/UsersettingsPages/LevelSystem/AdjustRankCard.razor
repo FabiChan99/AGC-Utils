@@ -9,71 +9,71 @@
 
 @if (loaded)
 {
-<div class="container mt-4">
-    <h1>Rankcard Einstellungen</h1>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="colorPicker" class="form-label">Farbe</label>
-                <input type="color" class="form-control" id="colorPicker" @onchange="ColorChanged" value="@color"/>
-            </div>
+    <div class="container mt-4">
+        <h1>Rankcard Einstellungen</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="colorPicker" class="form-label">Farbe</label>
+                    <input type="color" class="form-control" id="colorPicker" @onchange="ColorChanged" value="@color"/>
+                </div>
 
-            <div class="mb-3">
-                <label for="boxAlpha" class="form-label">Box Transparenz</label>
-                <input type="range" class="form-range" id="boxAlpha" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
-            </div>
+                <div class="mb-3">
+                    <label for="boxAlpha" class="form-label">Box Transparenz</label>
+                    <input type="range" class="form-range" id="boxAlpha" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
+                </div>
 
-            <div class="mb-3">
-                <label for="fontSelect" class="form-label">Schriftart</label>
-                <select class="form-select" id="fontSelect" bind="@font" @onchange="FontChanged">
-                    @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
+                <div class="mb-3">
+                    <label for="fontSelect" class="form-label">Schriftart</label>
+                    <select class="form-select" id="fontSelect" bind="@font" @onchange="FontChanged">
+                        @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
+                        {
+                            <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imageUpload" class="form-label">Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</label>
+                    <InputFile accept="image/*" class="form-control" id="imageUpload" OnChange="UploadFile"/>
+                    @if (!string.IsNullOrWhiteSpace(uploadStatus))
                     {
-                        <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
+                        <p class="text-success">@((MarkupString)uploadStatus)</p>
                     }
-                </select>
-            </div>
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <p class="text-danger">@((MarkupString)errorMessage)</p>
+                    }
+                </div>
 
-            <div class="mb-3">
-                <label for="imageUpload" class="form-label">Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</label>
-                <InputFile accept="image/*" class="form-control" id="imageUpload" OnChange="UploadFile"/>
-                @if (!string.IsNullOrWhiteSpace(uploadStatus))
+                <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
+                @if (hasCustomRankCardSettings)
                 {
-                    <p class="text-success">@((MarkupString)uploadStatus)</p>
-                }
-                @if (!string.IsNullOrWhiteSpace(errorMessage))
-                {
-                    <p class="text-danger">@((MarkupString)errorMessage)</p>
+                    <button class="btn btn-danger mt-2" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
                 }
             </div>
-
-            <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
-            @if (hasCustomRankCardSettings)
-            {
-                <button class="btn btn-danger mt-2" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
-            }
-        </div>
-        <div class="col-md-6">
-            <h2>Vorschau</h2>
-            @if (!string.IsNullOrWhiteSpace(previewImageData) && hasPreviewData)
-            {
-                <img src="@previewImageData" alt="Rangkarte" class="img-fluid"/>
-            }
-            else
-            {
-                <h1>Vorschau wird generiert <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
-            }
-            <h2>Aktuelle Karte</h2>
-            @if (!string.IsNullOrWhiteSpace(base64String))
-            {
-                <img src="@base64String" alt="Rangkarte" class="img-fluid"/>
-            }
-            else
-            {
-                <h1>Karte wird abgerufen <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
-            }
+            <div class="col-md-6">
+                <h2>Vorschau</h2>
+                @if (!string.IsNullOrWhiteSpace(previewImageData) && hasPreviewData)
+                {
+                    <img src="@previewImageData" alt="Rangkarte" class="img-fluid"/>
+                }
+                else
+                {
+                    <h1>Vorschau wird generiert <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
+                }
+                <h2>Aktuelle Karte</h2>
+                @if (!string.IsNullOrWhiteSpace(base64String))
+                {
+                    <img src="@base64String" alt="Rangkarte" class="img-fluid"/>
+                }
+                else
+                {
+                    <h1>Karte wird abgerufen <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></h1>
+                }
+            </div>
         </div>
     </div>
-</div>
 }
 else
 {
@@ -84,8 +84,8 @@ else
 
 
 @code {
-    private bool loaded = false;
-    
+    private bool loaded;
+
     private string imageToInstall = "";
     private string base64String = "";
     private bool hasCustomRankCardSettings;
@@ -202,7 +202,6 @@ else
             }
 
 
-
             try
             {
                 if (isActivated)
@@ -246,6 +245,7 @@ else
                 uploadStatus = "";
                 return;
             }
+
             await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
             uploadStatus = "Bild wurde erfolgreich gespeichert.";
         }

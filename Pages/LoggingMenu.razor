@@ -1,0 +1,20 @@
+﻿@page "/logs"
+
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter")]
+
+<h1>Logging</h1>
+
+<div class="card-group mt-5 mb-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Levelsystem Logs</h5>
+            <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
+                <a href="/logs/levelsystem/badcontentlog" class="btn btn-link">Bad Content Uploads</a>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+}
