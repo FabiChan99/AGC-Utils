@@ -1,13 +1,15 @@
 ﻿@page "/Konfiguration"
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod")]
 
-<h1>Bot Konfiguration</h1>
+<h1>Administration</h1>
 
 <div class="card-group mt-5 mb-5">
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Bewerbungssystemkonfiguration</h5>
-            <a href="/konfiguration/applysystem/modifypanelmessage" class="btn btn-link">Panel Text bearbeiten</a>
+            <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                <a href="/konfiguration/applysystem/modifypanelmessage" class="btn btn-link">Panel Text bearbeiten</a>
+            </AuthorizeView>
         </div>
     </div>
 </div>
