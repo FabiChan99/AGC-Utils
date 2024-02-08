@@ -45,6 +45,6 @@ table tbody tr:nth-child(even) {
     
     table thead th {
         padding: 5px;
-        zoom: 0.8;
+        zoom: 0.7;
     }
 }

@@ -23,9 +23,9 @@
                 <tr>
                     <td title="@log.FromUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.FromUserId).GetAwaiter().GetResult()</td>
                     <td title="@log.ToUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.ToUserId).GetAwaiter().GetResult()</td>
-                    <td title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId).GetAwaiter().GetResult()</td>
+                    <td title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId, true).GetAwaiter().GetResult()</td>
                     <td class="wrap-text">@log.Amount XP</td>
-                    <td class="wrap-text">@GetDateFromUnixtime(log.UnixTime).GetAwaiter().GetResult()</td>
+                    <td class="wrap-text">@Converter.GetDateFromTimestamp((long)log.UnixTime)</td>
                 </tr>
             }
             </tbody>
@@ -77,7 +77,7 @@ else if (!hasLogs && loaded)
         StateHasChanged();
     }
     
-    private async Task<string> GetUsernameOrId(ulong userId)
+    private async Task<string> GetUsernameOrId(ulong userId, bool fetch = false)
     {
         try
         {
@@ -86,7 +86,10 @@ else if (!hasLogs && loaded)
             {
                 return CurrentApplication.DiscordClient.UserCache[userId].Username;
             }
-            return userId.ToString();
+
+            if (!fetch) return userId.ToString();
+            var user = await CurrentApplication.DiscordClient.GetUserAsync(userId);
+            return user.Username;
         }
         catch (Exception)
         {

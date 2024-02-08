@@ -75,7 +75,7 @@ public class Converter
 
     public static string GetDateFromTimestamp(long timestamp)
     {
-        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp);
+        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp).ToLocalTime();
         var formattedDate = dateTimeOffset.ToString("dd.MM.yyyy - HH:mm:ss");
         return formattedDate;
     }
