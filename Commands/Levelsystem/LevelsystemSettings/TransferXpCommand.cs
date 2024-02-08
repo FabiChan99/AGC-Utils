@@ -110,6 +110,7 @@ public partial class LevelSystemSettings
                     $"+ {destinationuser.Username}: {Converter.FormatWithCommas(destinationoldxp)} -> {Converter.FormatWithCommas(destinationoldxp + await LevelUtils.GetXp(destinationuser.Id))} XP```")
                 .WithColor(DiscordColor.Green).WithFooter($"{ctx.User.Username}", ctx.User.AvatarUrl);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(successMsg.Build()));
+            await LoggingUtils.LogXpTransfer(sourceuser.Id, destinationuser.Id, oldxp, ctx.User.Id);
         }
         else if (result.Result.Id == "transfercancel")
         {
