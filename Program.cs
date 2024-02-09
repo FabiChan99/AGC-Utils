@@ -32,7 +32,7 @@ namespace AGC_Management;
 
 public class CurrentApplication
 {
-    public static string VersionString { get; set; } = "v2.5.0";
+    public static string VersionString { get; set; } = "v2.5.1";
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
