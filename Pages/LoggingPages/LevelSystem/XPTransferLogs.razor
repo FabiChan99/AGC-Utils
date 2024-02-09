@@ -59,7 +59,7 @@ else if (!hasLogs && loaded)
     Snackbar snackbar;
     private bool loaded = false;
     private bool hasLogs = false;
-    private int itemsPerPage = 50;
+    private int itemsPerPage = 25;
     private List<XpTransferLogDatabaseItem> logs = new List<XpTransferLogDatabaseItem>();
     private List<XpTransferLogDatabaseItem> displayedLogs => logs.Skip((currentPage - 1) * itemsPerPage).Take(itemsPerPage).ToList();
 
