@@ -201,53 +201,57 @@ else
                 // ignored
             }
 
-
-            try
+            if (hasImageChanged)
             {
-                if (isActivated)
+
+                try
                 {
-                    uploadStatus = "Bild wird moderativ geprüft... <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>";
-                    using var client = new HttpClient();
-                    var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
-                    client.DefaultRequestHeaders.Add("api-key", apikey);
-                    client.DefaultRequestHeaders.Add("User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
-                    var content = new StringContent($"{{\"imageBase64\":\"{imageToInstall}\"}}", null, "application/json");
-                    var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
-                    var responseString = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<RootObject>(responseString);
-                    if (result?.analysis.summary.reject_reason.Count > 0)
+                    if ( isActivated)
                     {
-                        var rejectReasons = "";
-                        foreach (var reason in result.analysis.summary.reject_reason)
+                        uploadStatus = "Bild wird moderativ geprüft... <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>";
+                        using var client = new HttpClient();
+                        var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
+                        client.DefaultRequestHeaders.Add("api-key", apikey);
+                        client.DefaultRequestHeaders.Add("User-Agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.1000.0 Safari/537.36");
+                        var content = new StringContent($"{{\"imageBase64\":\"{imageToInstall}\"}}", null, "application/json");
+                        var response = await client.PostAsync("https://api.linklens.xyz/analyze-levelcard", content);
+                        var responseString = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<RootObject>(responseString);
+                        if (result?.analysis.summary.reject_reason.Count > 0)
                         {
-                            rejectReasons += reason.text;
-                            if (reason != result.analysis.summary.reject_reason.Last())
+                            var rejectReasons = "";
+                            foreach (var reason in result.analysis.summary.reject_reason)
                             {
-                                rejectReasons += ", ";
+                                rejectReasons += reason.text;
+                                if (reason != result.analysis.summary.reject_reason.Last())
+                                {
+                                    rejectReasons += ", ";
+                                }
                             }
+
+                            errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
+                            uploadStatus = "";
+                            await LogRuleViolatingImageUpload(userId, rejectReasons, imageToInstall);
+                            return;
                         }
 
-                        errorMessage = $"Das Bild wurde abgelehnt, da es folgende Gründe hat: {rejectReasons}";
-                        uploadStatus = "";
-                        await LogRuleViolatingImageUpload(userId, rejectReasons, imageToInstall);
-                        return;
+                        uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
+
+                        await Task.Delay(500);
                     }
-
-                    uploadStatus = "Bild wurde moderativ geprüft und ist in Ordnung. Bild wird gespeichert...";
-
-                    await Task.Delay(500);
                 }
-            }
-            catch (Exception ex)
-            {
-                errorMessage = $"Fehler beim moderativen prüfen der Datei: {ex.Message}";
-                uploadStatus = "";
-                return;
-            }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Fehler beim moderativen prüfen der Datei: {ex.Message}";
+                    uploadStatus = "";
+                    return;
+                }
 
-            await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
-            uploadStatus = "Bild wurde erfolgreich gespeichert.";
+                await SaveCustomRankCardSetting("imagedata", imageToInstall, userId);
+                uploadStatus = "Bild wurde erfolgreich gespeichert.";
+                hasImageChanged = false;
+            }
         }
 
         if (hasColorChanged)
