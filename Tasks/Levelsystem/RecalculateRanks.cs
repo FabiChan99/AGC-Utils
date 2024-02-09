@@ -10,7 +10,11 @@ public static class RecalculateRanks
 {
     public static async Task LaunchLoops()
     {
+#if DEBUG
+        CurrentApplication.Logger.Debug("In debug mode, not starting recalculate ranks task.");
+#else
         await StartRecalculateRanks();
+#endif
     }
 
     private static async Task StartRecalculateRanks()
