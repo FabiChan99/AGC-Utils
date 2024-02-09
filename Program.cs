@@ -171,7 +171,6 @@ internal class Program : BaseCommandModule
         var serviceProvider = new ServiceCollection()
             .AddLogging(lb => lb.AddSerilog())
             .AddSingleton(client)
-            .AddSingleton<LoggingService>()
             .AddSingleton(dataSource)
             .BuildServiceProvider();
         CurrentApplication.ServiceProvider = serviceProvider;
