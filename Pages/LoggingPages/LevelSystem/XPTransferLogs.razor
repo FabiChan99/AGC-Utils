@@ -21,9 +21,9 @@
             @foreach (var log in displayedLogs)
             {
                 <tr>
-                    <td title="@log.FromUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.FromUserId).GetAwaiter().GetResult()</td>
-                    <td title="@log.ToUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.ToUserId).GetAwaiter().GetResult()</td>
-                    <td title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId, true).GetAwaiter().GetResult()</td>
+                    <td @onclick="async () => await ShowToastAndCopyToClipboard(log.FromUserId.ToString())" title="@log.FromUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.FromUserId).GetAwaiter().GetResult()</td>
+                    <td @onclick="async () => await ShowToastAndCopyToClipboard(log.ToUserId.ToString())" title="@log.ToUserId.ToString()" class="wrap-text">@GetUsernameOrId(log.ToUserId).GetAwaiter().GetResult()</td>
+                    <td @onclick="async () => await ShowToastAndCopyToClipboard(log.ExecutorId.ToString())" title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId, true).GetAwaiter().GetResult()</td>
                     <td class="wrap-text">@log.Amount XP</td>
                     <td class="wrap-text">@Converter.GetDateFromTimestamp((long)log.UnixTime)</td>
                 </tr>
@@ -36,6 +36,13 @@
             <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
         </div>
     </div>
+    
+    <Snackbar @ref="snackbar" Color="SnackbarColor.Dark">
+        <SnackbarBody>
+            User ID wurde in die Zwischenablage kopiert.
+            <SnackbarAction Clicked="@(()=>snackbar.Hide())">Ok.</SnackbarAction>
+        </SnackbarBody>
+    </Snackbar>
 }
 else if (!loaded)
 {
@@ -47,8 +54,9 @@ else if (!hasLogs && loaded)
 }
 
 
+
 @code {
-    
+    Snackbar snackbar;
     private bool loaded = false;
     private bool hasLogs = false;
     private int itemsPerPage = 50;
@@ -69,6 +77,13 @@ else if (!hasLogs && loaded)
         
         loaded = true;
     }
+    
+    private async Task ShowToastAndCopyToClipboard(string userId)
+    {
+        await snackbar.Show();
+        await JSRuntime.InvokeVoidAsync("copyToClipboard", userId);
+    }
+
     
     
 

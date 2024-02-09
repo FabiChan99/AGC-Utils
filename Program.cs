@@ -6,6 +6,9 @@ using AGC_Management.Controller;
 using AGC_Management.Services;
 using AGC_Management.Tasks;
 using AGC_Management.Utils;
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Bootstrap5;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
@@ -117,6 +120,12 @@ internal class Program : BaseCommandModule
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<UserService>();
+        builder.Services.AddBlazorise(options =>
+        {
+            options.Immediate = true;
+        }).AddBootstrapProviders().AddBootstrap5Providers().AddBootstrap5Components().AddBootstrapComponents();
+        builder.Services.AddSingleton<IClassProvider, BootstrapClassProvider>(); 
+        builder.Services.AddSingleton<IStyleProvider, BootstrapStyleProvider>(); 
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
