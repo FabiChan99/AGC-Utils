@@ -200,6 +200,7 @@ public sealed class BanRequestCommand : BaseCommandModule
                         ReasonString);
                     var dm = sent ? "✅" : "❌";
                     b_users += $"{user.UsernameWithDiscriminator} | DM: {dm}\n";
+                    await LoggingUtils.LogGuildBan(user.Id, ctx.User.Id, reason);
                 }
                 catch (UnauthorizedException)
                 {

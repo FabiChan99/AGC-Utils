@@ -16,4 +16,18 @@ public static class LoggingUtils
         command.Parameters.AddWithValue("timestamp", unixnow);
         await command.ExecuteNonQueryAsync();
     }
+
+    public static async Task LogGuildBan(ulong userid, ulong moderatorid, string reason = "Kein Grund angegeben")
+    {
+        var unixnow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "INSERT INTO banlogs (userid, executorid, reason, timestamp) VALUES (@userid, @moderatorid, @reason, @timestamp)";
+        command.Parameters.AddWithValue("userid", (long)userid);
+        command.Parameters.AddWithValue("moderatorid", (long)moderatorid);
+        command.Parameters.AddWithValue("reason", reason);
+        command.Parameters.AddWithValue("timestamp", unixnow);
+        await command.ExecuteNonQueryAsync();
+    }
 }

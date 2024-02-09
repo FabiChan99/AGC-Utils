@@ -1,26 +1,30 @@
 ﻿@page "/logs"
 
-@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team")]
 
 <h1>Logging</h1>
 
-<div class="card-group mt-5 mb-5">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Levelsystem Logs</h5>
-            <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
-                <a href="/logs/levelsystem/badcontentlog" class="btn btn-link">Bad Content Uploads</a>
-            </AuthorizeView>
-            <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
-                <a href="/logs/levelsystem/xptransferlogs" class="btn btn-link">XP Transfers</a>
-            </AuthorizeView>
-            <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
-                <a href="/logs/levelsystem/leveluplogs" class="btn btn-link">Level Ups (STUB)</a>
-            </AuthorizeView>
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Levelsystem Logs</h5>
+                    <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                        <a href="/logs/levelsystem/xptransferlogs" class="btn btn-link">XP Transfers</a>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Moderation Logs</h5>
+                    <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
+                        <a href="/logs/moderation/banlogs" class="btn btn-link">Banns</a>
+                    </AuthorizeView>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-@code {
-    
-}
