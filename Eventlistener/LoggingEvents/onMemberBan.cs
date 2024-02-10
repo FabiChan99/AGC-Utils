@@ -33,7 +33,10 @@ public class onMemberBan : ApplicationCommandsModule
                 reason = "Kein Grund angegeben";
             }
             
-            if (moduser == CurrentApplication.DiscordClient.CurrentUser && reason.Contains(" | Von Moderator: ") || moduser == CurrentApplication.DiscordClient.CurrentUser && reason.Contains(" | Banrequest von Moderator: "))
+            bool prevDupe = moduser == CurrentApplication.DiscordClient.CurrentUser &&
+                                                           (reason.Contains(" | Von Moderator: ") || reason.Contains(" | Banrequest von Moderator: "));
+            
+            if (prevDupe)
             {
                 return;
             }
