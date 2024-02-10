@@ -201,10 +201,9 @@ else
 
             if (hasImageChanged)
             {
-
                 try
                 {
-                    if ( isActivated)
+                    if (isActivated)
                     {
                         uploadStatus = "Bild wird moderativ geprüft... <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>";
                         using var client = new HttpClient();

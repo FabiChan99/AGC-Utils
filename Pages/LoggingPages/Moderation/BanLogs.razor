@@ -1,6 +1,6 @@
 ﻿@page "/logs/moderation/banlogs"
 @using AGC_Management.Utils
-@attribute [Authorize (Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter")]
 @inject IJSRuntime JSRuntime
 <h3>Bann Logs</h3>
 
@@ -15,69 +15,69 @@ else if (!hasLogs && loaded)
 else
 {
     <div style="max-width: 1200px" class="dashboard-logs">
-            <table class="table table-responsive table-striped">
-                <thead>
+        <table class="table table-responsive table-striped">
+            <thead>
+            <tr>
+                <th>User</th>
+                <th>Moderator</th>
+                <th>Grund</th>
+                <th>Zeit</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var log in displayedLogs)
+            {
                 <tr>
-                    <th>User</th>
-                    <th>Moderator</th>
-                    <th>Grund</th>
-                    <th>Zeit</th>
+                    <td @onclick="async () => await ShowToastAndCopyToClipboard(log.UserId.ToString())" title="@log.UserId.ToString()" class="wrap-text">@GetUsernameOrId(log.UserId).GetAwaiter().GetResult()</td>
+                    <td @onclick="async () => await ShowToastAndCopyToClipboard(log.ExecutorId.ToString())" title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId, true).GetAwaiter().GetResult()</td>
+                    <td class="wrap-text">@log.Reason</td>
+                    <td class="wrap-text">@Converter.GetDateFromTimestamp((long)log.UnixTime)</td>
                 </tr>
-                </thead>
-                <tbody>
-                @foreach (var log in displayedLogs)
-                {
-                    <tr>
-                            <td @onclick="async () => await ShowToastAndCopyToClipboard(log.UserId.ToString())" title="@log.UserId.ToString()" class="wrap-text">@GetUsernameOrId(log.UserId, false).GetAwaiter().GetResult()</td>
-                            <td @onclick="async () => await ShowToastAndCopyToClipboard(log.ExecutorId.ToString())" title="@log.ExecutorId.ToString()" class="wrap-text">@GetUsernameOrId(log.ExecutorId, true).GetAwaiter().GetResult()</td>
-                            <td class="wrap-text">@log.Reason</td>
-                            <td class="wrap-text">@Converter.GetDateFromTimestamp((long)log.UnixTime)</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+            }
+            </tbody>
+        </table>
         <div class="pagination-lg">
             <div class="page-info">Seite @currentPage von @totalPages</div>
             <button class="btn btn-primary" @onclick="PreviousPage" disabled="@IsFirstPage">Vorherige Seite</button>
             <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
         </div>
     </div>
-        
+
     <Snackbar @ref="snackbar" Color="SnackbarColor.Dark">
         <SnackbarBody>
             User ID wurde in die Zwischenablage kopiert.
-            <SnackbarAction Clicked="@(()=>snackbar.Hide())">Ok.</SnackbarAction>
+            <SnackbarAction Clicked="@(() => snackbar.Hide())">Ok.</SnackbarAction>
         </SnackbarBody>
     </Snackbar>
 }
 
 @code {
     private Snackbar snackbar;
-    private bool loaded = false;
-    private bool hasLogs = false;
-    private int itemsPerPage = 25;
-    private List<BanLogDatabaseItem> logs = new List<BanLogDatabaseItem>();
+    private bool loaded;
+    private bool hasLogs;
+    private readonly int itemsPerPage = 25;
+    private List<BanLogDatabaseItem> logs = new();
     private List<BanLogDatabaseItem> displayedLogs => logs.Skip((currentPage - 1) * itemsPerPage).Take(itemsPerPage).ToList();
 
     private bool IsFirstPage => currentPage == 1;
     private bool IsLastPage => currentPage * itemsPerPage >= totalItems;
-    
+
     private int currentPage = 1;
     private int totalItems;
     private int totalPages => (int)Math.Ceiling((double)totalItems / itemsPerPage);
-    
+
     protected override async Task OnInitializedAsync()
     {
         await LoadLogs();
         totalItems = logs.Count;
-        
+
         loaded = true;
     }
-    
+
     private async Task LoadLogs()
     {
         logs = new List<BanLogDatabaseItem>();
-        
+
         // Load logs from database
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = connection.CreateCommand();
@@ -89,8 +89,8 @@ else
             var executorId = reader.GetInt64(1);
             var reason = reader.GetString(2);
             var timestamp = reader.GetInt64(3);
-            
-            
+
+
             logs.Add(new BanLogDatabaseItem
             {
                 UserId = (ulong)toUserId,
@@ -99,19 +99,18 @@ else
                 UnixTime = (ulong)timestamp
             });
         }
-        
+
         hasLogs = logs.Count > 0;
-       
     }
-    
-    
+
+
     private async Task ShowToastAndCopyToClipboard(string userId)
     {
         await snackbar.Show();
         await JSRuntime.InvokeVoidAsync("copyToClipboard", userId);
     }
 
-    
+
     private async Task<string> GetUsernameOrId(ulong userId, bool fetch = false)
     {
         try
@@ -129,16 +128,16 @@ else
             {
                 return user.Username;
             }
+
             return user.UsernameWithDiscriminator;
         }
         catch (Exception)
         {
             return userId.ToString();
         }
-
     }
-    
-    
+
+
     private void PreviousPage()
     {
         if (currentPage > 1)
@@ -154,10 +153,10 @@ else
             currentPage++;
         }
     }
-    
-    
+
+
     // entities
-    
+
     private class BanLogDatabaseItem
     {
         public ulong UserId { get; set; }
@@ -165,4 +164,5 @@ else
         public string Reason { get; set; } = "Kein Grund angegeben";
         public ulong UnixTime { get; set; }
     }
+
 }

@@ -160,7 +160,6 @@ public class TempVoiceHelper : BaseCommandModule
             }
             catch (Exception)
             {
-                continue;
             }
         }
 

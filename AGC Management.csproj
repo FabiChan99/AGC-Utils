@@ -16,10 +16,10 @@
 
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
-        <PackageReference Include="Blazorise" Version="1.4.2" />
-        <PackageReference Include="Blazorise.Bootstrap" Version="1.4.2" />
-        <PackageReference Include="Blazorise.Bootstrap5" Version="1.4.2" />
-        <PackageReference Include="Blazorise.Snackbar" Version="1.4.2" />
+        <PackageReference Include="Blazorise" Version="1.4.2"/>
+        <PackageReference Include="Blazorise.Bootstrap" Version="1.4.2"/>
+        <PackageReference Include="Blazorise.Bootstrap5" Version="1.4.2"/>
+        <PackageReference Include="Blazorise.Snackbar" Version="1.4.2"/>
         <PackageReference Include="DisCatSharp" Version="10.6.2-nightly-003"/>
         <PackageReference Include="DisCatSharp.Analyzer.Roselyn" Version="6.2.2">
             <PrivateAssets>all</PrivateAssets>

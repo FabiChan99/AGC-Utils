@@ -120,12 +120,10 @@ internal class Program : BaseCommandModule
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<UserService>();
-        builder.Services.AddBlazorise(options =>
-        {
-            options.Immediate = true;
-        }).AddBootstrapProviders().AddBootstrap5Providers().AddBootstrap5Components().AddBootstrapComponents();
-        builder.Services.AddSingleton<IClassProvider, BootstrapClassProvider>(); 
-        builder.Services.AddSingleton<IStyleProvider, BootstrapStyleProvider>(); 
+        builder.Services.AddBlazorise(options => { options.Immediate = true; }).AddBootstrapProviders()
+            .AddBootstrap5Providers().AddBootstrap5Components().AddBootstrapComponents();
+        builder.Services.AddSingleton<IClassProvider, BootstrapClassProvider>();
+        builder.Services.AddSingleton<IStyleProvider, BootstrapStyleProvider>();
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -454,13 +452,14 @@ internal class Program : BaseCommandModule
             e.Handled = true;
             return;
         }
-        
-        
+
+
         if (e.Exception.Message == "No matching subcommands were found, and this group is not executable.")
         {
             e.Handled = true;
             return;
         }
+
         await ErrorReporting.SendErrorToDev(CurrentApplication.DiscordClient, e.Context.User, e.Exception);
 
         var embed = new DiscordEmbedBuilder

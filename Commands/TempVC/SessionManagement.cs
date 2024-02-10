@@ -66,7 +66,7 @@ public sealed class SessionManagement : TempVoiceHelper
 
                     await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
                 }
-                
+
                 channelmods = await RetrieveChannelMods(userChannel);
 
                 var overwrite =
@@ -91,7 +91,7 @@ public sealed class SessionManagement : TempVoiceHelper
                 {
                     hidden = false;
                 }
-                
+
 
                 string blocklist = string.Empty;
                 string permitlist = string.Empty;
@@ -330,7 +330,9 @@ public sealed class SessionManagement : TempVoiceHelper
                     bool sessionskip = (bool)user["sessionskip"];
                     string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
                     string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
-                    string cm = string.IsNullOrEmpty(user["channelmods"].ToString()) ? "Keine" : user["channelmods"].ToString();
+                    string cm = string.IsNullOrEmpty(user["channelmods"].ToString())
+                        ? "Keine"
+                        : user["channelmods"].ToString();
 
                     DiscordEmbedBuilder ebb = new()
                     {

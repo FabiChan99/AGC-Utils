@@ -1,5 +1,9 @@
-﻿using AGC_Management.Utils;
+﻿#region
+
+using AGC_Management.Utils;
 using DisCatSharp.ApplicationCommands;
+
+#endregion
 
 namespace AGC_Management.Eventlistener.LoggingEvents;
 
@@ -13,23 +17,26 @@ public class onMemberBan : ApplicationCommandsModule
         {
             return Task.CompletedTask;
         }
+
         if (args.Guild != CurrentApplication.TargetGuild)
         {
             return Task.CompletedTask;
         }
+
         if (args.AuditLogEntry.ActionType != AuditLogActionType.Ban)
         {
             return Task.CompletedTask;
         }
+
         _ = Task.Run(async () =>
         {
             var auditLogEntry = args.AuditLogEntry as DiscordAuditLogBanEntry;
-            
+
             if (auditLogEntry == null)
             {
                 return;
             }
-            
+
             var targetuser = auditLogEntry.Target as DiscordUser;
             var moduser = auditLogEntry.UserResponsible;
             var reason = auditLogEntry.Reason;
@@ -37,15 +44,15 @@ public class onMemberBan : ApplicationCommandsModule
             {
                 reason = "Kein Grund angegeben";
             }
-            
+
             bool prevDupe = moduser == CurrentApplication.DiscordClient.CurrentUser &&
-                                                           (reason.Contains(" | Von Moderator: ") || reason.Contains(" | Banrequest von Moderator: "));
-            
+                            (reason.Contains(" | Von Moderator: ") || reason.Contains(" | Banrequest von Moderator: "));
+
             if (prevDupe)
             {
                 return;
             }
-            
+
             await LoggingUtils.LogGuildBan(targetuser.Id, moduser.Id, reason);
         });
         return Task.CompletedTask;

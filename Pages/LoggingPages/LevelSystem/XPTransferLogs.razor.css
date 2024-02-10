@@ -8,7 +8,7 @@
 .dashboard-logs {
     max-width: 1000px;
     margin: 0 auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 table {
@@ -42,7 +42,7 @@ table tbody tr:nth-child(even) {
     .dashboard-logs {
         padding: 10px;
     }
-    
+
     table thead th {
         padding: 5px;
         zoom: 0.7;

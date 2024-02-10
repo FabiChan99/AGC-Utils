@@ -1,6 +1,6 @@
 ﻿@page "/logs/levelsystem/xptransferlogs"
 @using AGC_Management.Utils
-@attribute [Authorize (Roles="BotOwner, Administrator, HeadMod")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod")]
 @inject IJSRuntime JSRuntime
 <h3>XP Transfer Logs</h3>
 
@@ -36,11 +36,11 @@
             <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
         </div>
     </div>
-    
+
     <Snackbar @ref="snackbar" Color="SnackbarColor.Dark">
         <SnackbarBody>
             User ID wurde in die Zwischenablage kopiert.
-            <SnackbarAction Clicked="@(()=>snackbar.Hide())">Ok.</SnackbarAction>
+            <SnackbarAction Clicked="@(() => snackbar.Hide())">Ok.</SnackbarAction>
         </SnackbarBody>
     </Snackbar>
 }
@@ -54,18 +54,17 @@ else if (!hasLogs && loaded)
 }
 
 
-
 @code {
     Snackbar snackbar;
-    private bool loaded = false;
-    private bool hasLogs = false;
-    private int itemsPerPage = 25;
-    private List<XpTransferLogDatabaseItem> logs = new List<XpTransferLogDatabaseItem>();
+    private bool loaded;
+    private bool hasLogs;
+    private readonly int itemsPerPage = 25;
+    private List<XpTransferLogDatabaseItem> logs = new();
     private List<XpTransferLogDatabaseItem> displayedLogs => logs.Skip((currentPage - 1) * itemsPerPage).Take(itemsPerPage).ToList();
 
     private bool IsFirstPage => currentPage == 1;
     private bool IsLastPage => currentPage * itemsPerPage >= totalItems;
-    
+
     private int currentPage = 1;
     private int totalItems;
     private int totalPages => (int)Math.Ceiling((double)totalItems / itemsPerPage);
@@ -74,24 +73,22 @@ else if (!hasLogs && loaded)
     {
         await LoadLogs();
         totalItems = logs.Count;
-        
+
         loaded = true;
     }
-    
+
     private async Task ShowToastAndCopyToClipboard(string userId)
     {
         await snackbar.Show();
         await JSRuntime.InvokeVoidAsync("copyToClipboard", userId);
     }
 
-    
-    
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         StateHasChanged();
     }
-    
+
     private async Task<string> GetUsernameOrId(ulong userId, bool fetch = false)
     {
         try
@@ -110,19 +107,18 @@ else if (!hasLogs && loaded)
         {
             return userId.ToString();
         }
-
     }
-    
+
     private async Task<string> GetDateFromUnixtime(ulong unixTime)
     {
-        var date = DateTimeOffset.FromUnixTimeSeconds((long) unixTime);
+        var date = DateTimeOffset.FromUnixTimeSeconds((long)unixTime);
         return date.ToString("dd.MM.yyyy HH:mm:ss");
     }
-    
+
     private async Task LoadLogs()
     {
         logs = new List<XpTransferLogDatabaseItem>();
-        
+
         // Load logs from database
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = connection.CreateCommand();
@@ -135,23 +131,22 @@ else if (!hasLogs && loaded)
             var executorId = reader.GetInt64(2);
             var amount = reader.GetInt32(3);
             var timestamp = reader.GetInt64(4);
-            
-            
+
+
             logs.Add(new XpTransferLogDatabaseItem
             {
-                FromUserId = (ulong) fromUserId,
-                ToUserId = (ulong) toUserId,
-                ExecutorId = (ulong) executorId,
+                FromUserId = (ulong)fromUserId,
+                ToUserId = (ulong)toUserId,
+                ExecutorId = (ulong)executorId,
                 Amount = amount,
-                UnixTime = (ulong) timestamp
+                UnixTime = (ulong)timestamp
             });
         }
-        
+
         hasLogs = logs.Count > 0;
-       
     }
 
-    
+
     private void PreviousPage()
     {
         if (currentPage > 1)
@@ -167,10 +162,10 @@ else if (!hasLogs && loaded)
             currentPage++;
         }
     }
-    
+
 
     // Entities
-    
+
     private class XpTransferLogDatabaseItem
     {
         public ulong FromUserId { get; set; }
@@ -179,5 +174,5 @@ else if (!hasLogs && loaded)
         public int Amount { get; set; }
         public ulong UnixTime { get; set; }
     }
-    
+
 }

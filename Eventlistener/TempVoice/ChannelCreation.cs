@@ -306,7 +306,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
                                         Permissions.AccessChannels);
                                 }
-                                
+
 
                                 foreach (string user in blockeduserslist)
                                 {
@@ -349,7 +349,8 @@ public class TempVCEventHandler : TempVoiceHelper
                                 {
                                     var conn = CurrentApplication.ServiceProvider
                                         .GetRequiredService<NpgsqlDataSource>();
-                                    string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+                                    string sql =
+                                        "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
                                     await using NpgsqlCommand command = conn.CreateCommand(sql);
                                     command.Parameters.AddWithValue("@mods", string.Join(", ", channelMods));
                                     command.Parameters.AddWithValue("@channelid", (long)voice.Id);
