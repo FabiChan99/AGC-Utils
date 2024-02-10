@@ -25,6 +25,11 @@ public class onMemberBan : ApplicationCommandsModule
         {
             var auditLogEntry = args.AuditLogEntry as DiscordAuditLogBanEntry;
             
+            if (auditLogEntry == null)
+            {
+                return;
+            }
+            
             var targetuser = auditLogEntry.Target as DiscordUser;
             var moduser = auditLogEntry.UserResponsible;
             var reason = auditLogEntry.Reason;
