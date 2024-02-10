@@ -23,8 +23,6 @@ public class onMemberBan : ApplicationCommandsModule
         }
         _ = Task.Run(async () =>
         {
-            Console.WriteLine("Ban detected");
-            
             var auditLogEntry = args.AuditLogEntry as DiscordAuditLogBanEntry;
             
             var targetuser = auditLogEntry.Target as DiscordUser;
@@ -35,7 +33,7 @@ public class onMemberBan : ApplicationCommandsModule
                 reason = "Kein Grund angegeben";
             }
             
-            if (moduser == CurrentApplication.DiscordClient.CurrentUser && reason.Contains(" | Von Moderator: "))
+            if (moduser == CurrentApplication.DiscordClient.CurrentUser && reason.Contains(" | Von Moderator: ") || moduser == CurrentApplication.DiscordClient.CurrentUser && reason.Contains(" | Banrequest von Moderator: "))
             {
                 return;
             }
