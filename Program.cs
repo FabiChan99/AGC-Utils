@@ -32,7 +32,7 @@ namespace AGC_Management;
 
 public class CurrentApplication
 {
-    public static string VersionString { get; set; } = "v2.5.1";
+    public static string VersionString { get; set; } = "v2.5.2";
     public static DiscordClient DiscordClient { get; set; }
     public static DiscordGuild TargetGuild { get; set; }
     public static ILogger Logger { get; set; }
@@ -140,6 +140,53 @@ internal class Program : BaseCommandModule
             {
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
+                options.Events.OnSignedIn = (context)=>
+                {
+                    var httpContext = context.HttpContext;
+                    
+                    var ip = "Nicht ermittelbar";
+                    var ua = "Nicht ermittelbar";
+                    var uid = "Nicht ermittelbar";
+                    try
+                    {
+                        var userid_c = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier).ToString();
+                        uid = userid_c;
+                    }
+                    catch
+                    {
+                        uid = context.Principal.Identity.Name;
+                    }
+                    finally
+                    {
+                        if (string.IsNullOrEmpty(uid))
+                        {
+                            uid = "Nicht ermittelbar";
+                        }   
+                    }
+
+
+                    if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
+                    {
+                        ip = header.ToString();
+                    }
+                    else
+                    {
+                        ip = httpContext.Connection.RemoteIpAddress?.ToString();
+                        if (string.IsNullOrEmpty(ip))
+                        {
+                            ip = "Nicht ermittelbar";
+                        }
+                    }
+                    
+                    if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2))
+                    {
+                        ua = header2.ToString();
+                    }
+                    
+                    LoggingUtils.LogWebOAuthDiscordLogin(uid, ip, ua).GetAwaiter().GetResult();
+                    
+                    return Task.CompletedTask;
+                };
             })
             .AddDiscord(x =>
             {
@@ -148,6 +195,8 @@ internal class Program : BaseCommandModule
                 x.Scope.Add("guilds");
                 x.AccessDeniedPath = "/OAuthError";
                 x.SaveTokens = true;
+                x.ClaimActions.MapCustomJson(ClaimTypes.NameIdentifier,
+                    element => { return AuthUtils.RetrieveId(element).Result; });
                 x.ClaimActions.MapCustomJson(ClaimTypes.Role,
                     element => { return AuthUtils.RetrieveRole(element).Result; });
                 x.ClaimActions.MapCustomJson("FullQualifiedDiscordName",

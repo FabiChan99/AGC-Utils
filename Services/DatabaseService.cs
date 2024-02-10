@@ -151,6 +151,10 @@ public static class DatabaseService
                 "CREATE TABLE IF NOT EXISTS banlogs (userid BIGINT, executorid BIGINT, reason TEXT, timestamp BIGINT)"
             },
             {
+                "dashboardlogins",
+                "CREATE TABLE IF NOT EXISTS dashboardlogins (userid TEXT, useragent TEXT, ip TEXT, timestamp BIGINT)"
+            },
+            {
                 "userrankcardunallowedimagelog",
                 "CREATE TABLE IF NOT EXISTS userrankcardunallowedimagelog (userid BIGINT, imagedata TEXT, timestamp BIGINT,  blockreason TEXT)"
             },

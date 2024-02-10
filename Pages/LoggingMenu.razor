@@ -26,5 +26,18 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Bot Logs</h5>
+                    <AuthorizeView Roles="BotOwner, Administrator">
+                        <a href="/logs/botlogs/errorlogs" class="btn btn-link"> Fehler</a>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="BotOwner, Administrator">
+                        <a href="/logs/botlogs/webuilogins" class="btn btn-link"> WebUI Logins</a>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

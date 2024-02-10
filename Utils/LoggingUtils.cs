@@ -30,4 +30,19 @@ public static class LoggingUtils
         command.Parameters.AddWithValue("timestamp", unixnow);
         await command.ExecuteNonQueryAsync();
     }
+    
+    public static async Task LogWebOAuthDiscordLogin(string useridentifier, string ip, string useragent)
+    {
+        var unixnow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "INSERT INTO dashboardlogins (userid, useragent, ip, timestamp) VALUES (@userid, @useragent, @ip, @timestamp)";
+        command.Parameters.AddWithValue("userid", useridentifier);
+        command.Parameters.AddWithValue("useragent", useragent);
+        command.Parameters.AddWithValue("ip", ip);
+        command.Parameters.AddWithValue("timestamp", unixnow);
+        await command.ExecuteNonQueryAsync();
+    }
+    
 }
