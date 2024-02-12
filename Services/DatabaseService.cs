@@ -142,6 +142,17 @@ public static class DatabaseService
                 "userrankcardsettings",
                 "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
+            
+            {
+                "pollsystem",
+                "CREATE TABLE IF NOT EXISTS pollsystem (id TEXT, name TEXT, text TEXT, channelid BIGINT, messageid BIGINT, isexpiring BOOLEAN DEFAULT false, expirydate BIGINT DEFAULT 0, isanonymous BOOLEAN DEFAULT false, ismultiplechoice BOOLEAN DEFAULT false, creatorid BIGINT, options JSONB)"
+            },
+            
+            {
+                "pollvotes",
+                "CREATE TABLE IF NOT EXISTS pollvotes (pollid TEXT, optionindex INTEGER, userid BIGINT)"
+            },
+            
             {
                 "xptransferlogs",
                 "CREATE TABLE IF NOT EXISTS xptransferlogs (sourceuserid BIGINT, destinationuserid BIGINT, executorid BIGINT, amount INTEGER, timestamp BIGINT)"

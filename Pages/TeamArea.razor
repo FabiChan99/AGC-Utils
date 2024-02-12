@@ -1,0 +1,19 @@
+﻿@page "/teamarea"
+@attribute [Authorize (Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team")]
+
+<h3>Teambereich</h3>
+
+
+<div class="card-group mt-5 mb-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Pollsystem <span><i class="fas fa-poll"></i></span></h5>
+            <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
+                <a href="/teamarea/pollsystem/createpoll" class="btn btn-link">Umfrage erstellen</a>
+            </AuthorizeView>
+            <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
+                <a href="/teamarea/pollsystem/managepolls" class="btn btn-link">Umfragen verwalten</a>
+            </AuthorizeView>
+        </div>
+    </div>
+</div> 

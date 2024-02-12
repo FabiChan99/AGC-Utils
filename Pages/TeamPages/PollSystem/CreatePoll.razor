@@ -1,0 +1,217 @@
+﻿@page "/teamarea/pollsystem/createpoll"
+@using AGC_Management.Enums.PollSystem
+@using System.Text.Json
+@using AGC_Management.Controller
+@using AGC_Management.Utils
+@using NpgsqlTypes
+@inject UserService UserService
+@inject IHttpContextAccessor httpContextAccessor
+@using ValidationSummary = Microsoft.AspNetCore.Components.Forms.ValidationSummary
+
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter")]
+<h3>Umfrage erstellen</h3>
+
+<div class="container">
+    <EditForm Model="pollItem" OnValidSubmit="HandleValidSubmit" class="container">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name der Umfrage:</label>
+                    <InputText id="name" @bind-Value="pollItem.Name" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="text" class="form-label">Text der Umfrage:</label>
+                    <InputTextArea id="text" @bind-Value="pollItem.Text" class="form-control" />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="channel" class="form-label">Channel:</label>
+                    <InputSelect id="channel" @bind-Value="pollItem.ChannelId" class="form-select">
+                        @foreach (var channel in channels)
+                        {
+                            <option value="@channel.Id">@channel.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label for="isMultipleChoice" class="form-label">Mehrfachauswahl erlauben?</label>
+                    <InputCheckbox id="isMultipleChoice" @bind-Value="pollItem.isMultiChoice" class="form-check-input" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="isExpiring" class="form-label">Läuft die Umfrage ab?</label>
+                    <InputCheckbox id="isExpiring" @bind-Value="pollItem.isExpiring" @onchange="ShowTimeOption" class="form-check-input" />
+                </div>
+                @if (pollItem.isExpiring)
+                {
+                    <div class="mb-3">
+                        <label for="expiryDate" class="form-label">Ablaufdatum (falls zutreffend):</label>
+                        <InputDate id="expiryDate" @bind-Value="pollItem.ExpiryDate" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiryTime" class="form-label">Ablaufzeit (falls zutreffend):</label>
+                        <TimeInput type="time" id="expiryTime" @bind-Value="pollItem.ExpiryTime" class="form-control" />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label for="options" class="form-label">Optionen:</label>
+                    @foreach (var option in pollItem.Options)
+                    {
+                        <p>
+                            <InputText @bind-Value="option.Name" class="form-control" />
+                        </p>
+                    }
+                </div>
+                <button type="button" @onclick="AddOption" class="btn btn-primary mb-1">Option hinzufügen</button>
+                <button type="button" @onclick="RemoveOption" class="btn btn-danger mb-1">Option entfernen</button>
+                <button type="submit" class="btn btn-success mb-1">Umfrage erstellen</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private PollItem pollItem = new PollItem();
+    private ulong userId;
+    private HashSet<DiscordChannel> channels = new HashSet<DiscordChannel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        HashSet <DiscordChannel> _channels = new();
+        foreach (var ch in CurrentApplication.TargetGuild.Channels.Values)
+        {
+            if (ch.Type == ChannelType.Text)
+            {
+                _channels.Add(ch);
+            }
+        }
+        channels = _channels;
+        userId = ulong.Parse(UserService.GetUserId(httpContextAccessor.HttpContext).ToString());
+        pollItem.CreatorId = userId;
+        pollItem.Options = new List<PollOption> { new PollOption {  } };
+        StateHasChanged();
+    }
+
+    private string GenerateId()
+    {
+        return Guid.NewGuid().ToString();
+    }
+
+    private void ShowTimeOption()
+    {
+        pollItem.isExpiring = !pollItem.isExpiring;
+    }
+
+    private void AddOption()
+    {
+        if (pollItem.Options.Count < 18)
+        {
+            pollItem.Options.Add(new PollOption { });
+        }
+    }
+
+    private void RemoveOption()
+    {
+        if (pollItem.Options.Count > 1)
+        {
+            pollItem.Options.RemoveAt(pollItem.Options.Count - 1);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var pollid = GenerateId();
+        pollItem.Options = AssignIdsToOptions(pollid);
+        long expiryUnix = 0;
+        if (pollItem.isExpiring)
+        {
+            expiryUnix = DateAndTimeToUnix(pollItem.ExpiryDate, pollItem.ExpiryTime);
+        }
+        else
+        {
+            expiryUnix = 0;
+        }
+        var channelid = pollItem.ChannelId;
+        var Channel = CurrentApplication.TargetGuild.GetChannel(channelid);
+        pollItem.Id = pollid;
+        // gen msg
+        var embed = new DiscordEmbedBuilder()
+            .WithTitle(pollItem.Name)
+            .WithDescription(pollItem.Text)
+            .WithColor(DiscordColor.Gold);
+        if (pollItem.isExpiring)
+        {
+            embed.WithFooter($"Diese Umfrage läuft bis zum {pollItem.ExpiryDate.Day:00}.{pollItem.ExpiryDate.Month:00}.{pollItem.ExpiryDate.Year} um {pollItem.ExpiryTime} Uhr.");
+        }
+        else
+        {
+            embed.WithFooter("Diese Umfrage läuft bis sie vom Ersteller beendet wird.");
+        }
+        var msg = await Channel.SendMessageAsync(embed: embed);
+        // gen reactions
+        var d = 1;
+        foreach (var option in pollItem.Options)
+        {
+            await msg.CreateReactionAsync(DiscordEmoji.FromName(CurrentApplication.DiscordClient, ":regional_indicator_" + (char)(d + 96) + ":"));
+            d++;
+        }
+        await msg.CreateReactionAsync(DiscordEmoji.FromName(CurrentApplication.DiscordClient, ":x:"));
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var command = con.CreateCommand();
+        command.CommandText = "INSERT INTO pollsystem (id, name, text, creatorid, channelid, ismultiplechoice, isexpiring, expirydate, messageid, options) VALUES (@id, @name, @text, @creatorid, @channelid, @ismultiplechoice, @isexpiring, @expirydate, @messageid, @options)";
+        command.Parameters.AddWithValue("id", pollItem.Id);
+        command.Parameters.AddWithValue("name", pollItem.Name);
+        command.Parameters.AddWithValue("text", pollItem.Text);
+        command.Parameters.AddWithValue("creatorid", (long)pollItem.CreatorId);
+        command.Parameters.AddWithValue("channelid", (long)pollItem.ChannelId);
+        command.Parameters.AddWithValue("messageid", (long)pollItem.MessageId);
+        command.Parameters.AddWithValue("ismultiplechoice", pollItem.isMultiChoice);
+        command.Parameters.AddWithValue("isexpiring", pollItem.isExpiring);
+        command.Parameters.AddWithValue("expirydate", DateAndTimeToUnix(pollItem.ExpiryDate, pollItem.ExpiryTime));
+        command.Parameters.AddWithValue("options", NpgsqlDbType.Jsonb, JsonSerializer.Serialize(pollItem.Options));
+        await command.ExecuteNonQueryAsync();
+    }
+    
+    
+    
+    
+ 
+    
+    
+    private long DateAndTimeToUnix(DateTime date, TimeOnly time)
+    {
+        long r = 0;
+        try
+        {
+            DateTime dt = new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second, DateTimeKind.Utc).ToLocalTime();
+            r = ((DateTimeOffset)dt).ToUnixTimeSeconds();
+        }
+        catch (Exception)
+        {
+            //
+        }
+        return r;
+    }
+    
+    private List<PollOption> AssignIdsToOptions(string pollid)
+    {
+        List<PollOption> options = new List<PollOption>();
+        var i = 1;
+        foreach (var option in pollItem.Options)
+        {
+            option.PollId = pollid;
+            option.Index = i;
+            option.Id = Guid.NewGuid().ToString();
+            options.Add(option);
+            i++;
+        }
+        return options;
+    }
+    
+}
