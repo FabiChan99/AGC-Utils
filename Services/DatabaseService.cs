@@ -147,6 +147,10 @@ public static class DatabaseService
                 "pollsystem",
                 "CREATE TABLE IF NOT EXISTS pollsystem (id TEXT, name TEXT, text TEXT, channelid BIGINT, messageid BIGINT, isexpiring BOOLEAN DEFAULT false, expirydate BIGINT DEFAULT 0, isanonymous BOOLEAN DEFAULT false, ismultiplechoice BOOLEAN DEFAULT false, creatorid BIGINT, options JSONB)"
             },
+            {
+                "cmdexec",
+                "CREATE TABLE IF NOT EXISTS cmdexec (commandname TEXT, commandcontent TEXT, userid BIGINT , timestamp BIGINT)"
+            },
             
             {
                 "pollvotes",

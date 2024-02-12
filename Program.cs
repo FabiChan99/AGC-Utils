@@ -266,6 +266,7 @@ internal class Program : BaseCommandModule
             EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
+        commands.CommandExecuted += LogCommandExecution;
 
         discord.UseInteractivity(new InteractivityConfiguration
         {
@@ -276,6 +277,7 @@ internal class Program : BaseCommandModule
         {
             ServiceProvider = serviceProvider, DebugStartup = true, EnableDefaultHelp = false
         });
+        appCommands.SlashCommandExecuted += LogCommandExecution;
         appCommands.SlashCommandErrored += Discord_SlashCommandErrored;
         appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
 
@@ -460,6 +462,40 @@ internal class Program : BaseCommandModule
         sender.Logger.LogError($"Stacktrace: {e.Exception.GetType()}: {e.Exception.StackTrace}");
         await ErrorReporting.SendErrorToDev(sender, sender.CurrentUser, e.Exception);
     }
+    
+    private static Task LogCommandExecution(CommandsNextExtension client, CommandExecutionEventArgs args)
+    {
+        _ = Task.Run(async () =>
+        {
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var com = con.CreateCommand(
+                "INSERT INTO cmdexec (commandname, commandcontent, userid, timestamp) VALUES (@commandname, @commandcontent, @userid, @timestamp)");
+            com.Parameters.AddWithValue("commandname", args.Command.Name);
+            com.Parameters.AddWithValue("commandcontent", args.Context.Message.Content);
+            com.Parameters.AddWithValue("userid", (long)args.Context.User.Id);
+            com.Parameters.AddWithValue("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds());
+            await com.ExecuteNonQueryAsync();
+        });
+        return Task.CompletedTask;
+    }
+
+    private static Task LogCommandExecution(ApplicationCommandsExtension client, SlashCommandExecutedEventArgs args)
+    {
+        _ = Task.Run(async () =>
+        {
+            var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var com = con.CreateCommand(
+                "INSERT INTO cmdexec (commandname, commandcontent, userid, timestamp) VALUES (@commandname, @commandcontent, @userid, @timestamp)");
+            com.Parameters.AddWithValue("commandname", args.Context);
+            com.Parameters.AddWithValue("commandcontent", "NULL (Slash Command)");
+            com.Parameters.AddWithValue("userid", (long)args.Context.User.Id);
+            com.Parameters.AddWithValue("timestamp", DateTimeOffset.Now.ToUnixTimeMilliseconds());
+            await com.ExecuteNonQueryAsync();
+        });
+        return Task.CompletedTask;
+    }
+    
+    
 
     private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
