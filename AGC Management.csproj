@@ -76,8 +76,6 @@
         <_ContentIncludedByDefault Remove="out\appsettings.Development.json"/>
         <_ContentIncludedByDefault Remove="out\appsettings.json"/>
         <_ContentIncludedByDefault Remove="out\global.json"/>
-        <_ContentIncludedByDefault Remove="Dependencies\Xorog.UniversalExtensions\obj\project.assets.json"/>
-        <_ContentIncludedByDefault Remove="Dependencies\Xorog.UniversalExtensions\obj\Xorog.UniversalExtensions.csproj.nuget.dgspec.json"/>
     </ItemGroup>
 
 
