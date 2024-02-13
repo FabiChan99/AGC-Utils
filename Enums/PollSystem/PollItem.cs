@@ -18,6 +18,7 @@ public class PollItem
     public bool isExpiring { get; set; } = false;
     public DateTime ExpiryDate { get; set; } = DateTime.Now;
     public TimeOnly ExpiryTime { get; set; } = new(23, 59, 59);
+    public bool NotifyCreatorOnExpiry { get; set; } = false;
 
     public bool isAnonymous { get; set; } = false;
     public bool isMultiChoice { get; set; } = false;

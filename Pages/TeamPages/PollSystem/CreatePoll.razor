@@ -42,7 +42,7 @@
                     <label for="isMultipleChoice" class="form-label">Mehrfachauswahl erlauben?</label>
                     <InputCheckbox id="isMultipleChoice" @bind-Value="pollItem.isMultiChoice" class="form-check-input" />
                 </div>
-
+                
                 <div class="mb-3">
                     <label for="isExpiring" class="form-label">Läuft die Umfrage ab?</label>
                     <InputCheckbox id="isExpiring" @bind-Value="pollItem.isExpiring" @onchange="ShowTimeOption" class="form-check-input" />
@@ -57,6 +57,12 @@
                         <label for="expiryTime" class="form-label">Ablaufzeit (falls zutreffend):</label>
                         <TimeInput type="time" id="expiryTime" @bind-Value="pollItem.ExpiryTime" class="form-control" />
                     </div>
+                    
+                    <div class="mb-3">
+                        <label for="NotifyCreatorOnEnd" class="form-label">Ersteller benachrichtigen, wenn Umfrage endet?</label>
+                        <InputCheckbox id="NotifyCreatorOnEnd" @bind-Value="pollItem.NotifyCreatorOnExpiry" class="form-check-input" />
+                    </div>
+
                 }
 
                 <div class="mb-3">
@@ -164,7 +170,7 @@
         await msg.CreateReactionAsync(DiscordEmoji.FromName(CurrentApplication.DiscordClient, ":x:"));
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = con.CreateCommand();
-        command.CommandText = "INSERT INTO pollsystem (id, name, text, creatorid, channelid, ismultiplechoice, isexpiring, expirydate, messageid, options) VALUES (@id, @name, @text, @creatorid, @channelid, @ismultiplechoice, @isexpiring, @expirydate, @messageid, @options)";
+        command.CommandText = "INSERT INTO pollsystem (id, name, text, creatorid, channelid, ismultiplechoice, isexpiring, expirydate, messageid, dmcreatoronfinish, options) VALUES (@id, @name, @text, @creatorid, @channelid, @ismultiplechoice, @isexpiring, @expirydate, @messageid, @dmcreatoronfinish, @options)";
         command.Parameters.AddWithValue("id", pollItem.Id);
         command.Parameters.AddWithValue("name", pollItem.Name);
         command.Parameters.AddWithValue("text", pollItem.Text);
@@ -174,6 +180,7 @@
         command.Parameters.AddWithValue("ismultiplechoice", pollItem.isMultiChoice);
         command.Parameters.AddWithValue("isexpiring", pollItem.isExpiring);
         command.Parameters.AddWithValue("expirydate", DateAndTimeToUnix(pollItem.ExpiryDate, pollItem.ExpiryTime));
+        command.Parameters.AddWithValue("dmcreatoronfinish", pollItem.NotifyCreatorOnExpiry);
         command.Parameters.AddWithValue("options", NpgsqlDbType.Jsonb, JsonSerializer.Serialize(pollItem.Options));
         await command.ExecuteNonQueryAsync();
     }
