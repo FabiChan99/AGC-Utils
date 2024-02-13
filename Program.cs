@@ -620,9 +620,6 @@ internal class Program : BaseCommandModule
         }
 
         app.UseStaticFiles();
-
-        app.UseStaticFiles();
-
         app.UseRouting();
         app.Use((ctx, next) =>
         {
@@ -633,11 +630,13 @@ internal class Program : BaseCommandModule
 
 
         app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseCookiePolicy(new CookiePolicyOptions
         {
-            MinimumSameSitePolicy = SameSiteMode.Lax
+            MinimumSameSitePolicy = SameSiteMode.Lax,
         });
+        app.UseMiddleware<RoleRefreshMiddleware>();
         app.MapBlazorHub();
         app.MapDefaultControllerRoute();
         app.MapFallbackToPage("/_Host");

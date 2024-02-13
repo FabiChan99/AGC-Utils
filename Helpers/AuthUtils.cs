@@ -33,9 +33,17 @@ public sealed class AuthUtils
         DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try
         {
-            user = await guild.GetMemberAsync(userId);
+            user = CurrentApplication.TargetGuild.Members.Values.First(x => x.Id == userId);
+            if (user == null)
+            {
+                return AccessLevel.NichtImServer.ToString();
+            }
         }
         catch (NotFoundException)
+        {
+            return AccessLevel.NichtImServer.ToString();
+        }
+        catch (InvalidOperationException)
         {
             return AccessLevel.NichtImServer.ToString();
         }
@@ -155,9 +163,17 @@ public sealed class AuthUtils
         DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try
         {
-            user = await guild.GetMemberAsync(userId);
+            user = CurrentApplication.TargetGuild.Members.Values.First(x => x.Id == userId);
+            if (user == null)
+            {
+                return AccessLevel.NichtImServer.ToString();
+            }
         }
         catch (NotFoundException)
+        {
+            return AccessLevel.NichtImServer.ToString();
+        }
+        catch (InvalidOperationException)
         {
             return AccessLevel.NichtImServer.ToString();
         }
