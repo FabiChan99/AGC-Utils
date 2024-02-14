@@ -26,6 +26,8 @@ namespace AGC_Management.Controller
             {
                 returnUrl = "/";
             }
+            
+            returnUrl = Uri.UnescapeDataString(returnUrl);
 
 
             return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
