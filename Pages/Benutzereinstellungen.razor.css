@@ -1,15 +1,12 @@
 ﻿.card {
+    width: 100%;
     color: #e0e0e0;
-    background-color: #1a1919;
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 3px 20px rgba(230, 230, 250, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.btn-link {
-    color: #ffffff;
+.btn-primary-glass {
     margin-top: 10px;
-    margin-right: 10px;
-    text-decoration: none !important;
-}
-
-.btn {
-    background-color: #7b00ff;
 }

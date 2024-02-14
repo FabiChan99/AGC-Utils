@@ -19,23 +19,23 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="boxAlpha" class="form-label">Box Transparenz</label>
+                    <label for="boxAlpha" class="form-label">Box Transparenz</label><br>
                     <input type="range" class="form-range" id="boxAlpha" min="0" max="255" @onchange="BoxAlphaChanged" value="@boxalpha"/> @boxalpha / 255
                 </div>
 
                 <div class="mb-3">
                     <label for="fontSelect" class="form-label">Schriftart</label>
-                    <select class="form-select" id="fontSelect" bind="@font" @onchange="FontChanged">
+                    <select style="backdrop-filter: none; color: #FFFFFF; background-color:rgba(255, 255, 255, 0.3)" class="form-select" id="fontSelect" bind="@font" @onchange="FontChanged">
                         @foreach (var fontFamily in SKFontManager.Default.GetFontFamilies().ToList())
                         {
-                            <option value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
+                            <option style="color: #000000; backdrop-filter: blur(2px) ;background: rgba(255, 255, 255, 0.3)" value="@fontFamily" selected="@(font == fontFamily)">@fontFamily</option>
                         }
                     </select>
                 </div>
 
                 <div class="mb-3">
                     <label for="imageUpload" class="form-label">Hintergrundbild (Empfohlen: 930x280) (Max: 5MB)</label>
-                    <InputFile accept="image/*" class="form-control" id="imageUpload" OnChange="UploadFile"/>
+                    <InputFile placeholder="Bild" accept="image/*" class="form-control" style="color:white; background: rgba(255, 255, 255, 0.3)" id="imageUpload" OnChange="UploadFile"/>
                     @if (!string.IsNullOrWhiteSpace(uploadStatus))
                     {
                         <p class="text-success">@((MarkupString)uploadStatus)</p>
@@ -46,10 +46,10 @@
                     }
                 </div>
 
-                <button class="btn btn-primary" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
+                <button class="btn btn-primary-glass" @onclick="async () => await SaveSettings()">Speichern und Anwenden</button>
                 @if (hasCustomRankCardSettings)
                 {
-                    <button class="btn btn-danger mt-2" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
+                    <button class="btn btn-danger-glass mt-2" @onclick="async () => await ResetCard()">Rangkarte zurücksetzen</button>
                 }
             </div>
             <div class="col-md-6">

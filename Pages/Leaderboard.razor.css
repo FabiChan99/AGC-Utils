@@ -1,10 +1,11 @@
 ﻿.leaderboard-container {
-    background-color: #2C2F33;
-    color: white;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 20px;
     border-radius: 10px;
     width: 100%;
-    max-width: 1000px; /* Adjust as needed */
+    max-width: 1000px;
     margin: auto;
 }
 
@@ -16,7 +17,9 @@
 .leaderboard-item {
     display: flex;
     align-items: center;
-    background-color: #23272A;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 5px;

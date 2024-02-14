@@ -115,6 +115,7 @@
 
     <ItemGroup>
       <Folder Include="Components\Web\" />
+      <Folder Include="wwwroot\img\" />
     </ItemGroup>
 
 </Project>

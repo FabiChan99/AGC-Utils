@@ -64,15 +64,14 @@
         </div>
         <div class="pagination-lg">
             <div class="page-info">Seite @currentPage von @totalPages | Letztes Cacheupdate: @LevelUtils.CacheDate</div>
-            <button class="btn btn-primary" @onclick="PreviousPage" disabled="@IsFirstPage">Vorherige Seite</button>
-            <button class="btn btn-primary" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
+            <button class="btn btn-primary-glass" @onclick="PreviousPage" disabled="@IsFirstPage">Vorherige Seite</button>
+            <button class="btn btn-primary-glass" @onclick="NextPage" disabled="@IsLastPage">Nächste Seite</button>
         </div>
     </div>
 }
 else
 {
-    <br>
-    <em class="alert alert-danger">Der Leaderboard-Daten-Cache wird gerade aufgebaut. Bitte warte einen Moment.</em>
+    <p class="alert alert-danger-glass">Der Leaderboard-Daten-Cache wird gerade aufgebaut. Bitte warte einen Moment.</p>
 }
 
 <br>
