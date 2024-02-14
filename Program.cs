@@ -143,49 +143,8 @@ internal class Program : BaseCommandModule
                 options.LogoutPath = "/logout";
                 options.Events.OnSignedIn = (context)=>
                 {
-                    var httpContext = context.HttpContext;
-                    
-                    var ip = "Nicht ermittelbar";
-                    var ua = "Nicht ermittelbar";
-                    var uid = "Nicht ermittelbar";
-                    try
-                    {
-                        var userid_c = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier).ToString();
-                        uid = userid_c;
-                    }
-                    catch
-                    {
-                        uid = context.Principal.Identity.Name;
-                    }
-                    finally
-                    {
-                        if (string.IsNullOrEmpty(uid))
-                        {
-                            uid = "Nicht ermittelbar";
-                        }   
-                    }
+                    LoggingUtils.LogLogin(context);
 
-
-                    if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
-                    {
-                        ip = header.ToString();
-                    }
-                    else
-                    {
-                        ip = httpContext.Connection.RemoteIpAddress?.ToString();
-                        if (string.IsNullOrEmpty(ip))
-                        {
-                            ip = "Nicht ermittelbar";
-                        }
-                    }
-                    
-                    if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2))
-                    {
-                        ua = header2.ToString();
-                    }
-                    
-                    LoggingUtils.LogWebOAuthDiscordLogin(uid, ip, ua).GetAwaiter().GetResult();
-                    
                     return Task.CompletedTask;
                 };
             })
@@ -294,6 +253,8 @@ internal class Program : BaseCommandModule
         _ = RunAspAsync(builder.Build());
         await Task.Delay(-1);
     }
+
+
 
     private static Task StartTasks(DiscordClient discord)
     {

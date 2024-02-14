@@ -1,4 +1,7 @@
-﻿namespace AGC_Management.Utils;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+namespace AGC_Management.Utils;
 
 public static class LoggingUtils
 {
@@ -29,6 +32,52 @@ public static class LoggingUtils
         command.Parameters.AddWithValue("reason", reason);
         command.Parameters.AddWithValue("timestamp", unixnow);
         await command.ExecuteNonQueryAsync();
+    }
+    
+    public static void LogLogin(CookieSignedInContext context)
+    {
+        var httpContext = context.HttpContext;
+                    
+        var ip = "Nicht ermittelbar";
+        var ua = "Nicht ermittelbar";
+        var uid = "Nicht ermittelbar";
+        try
+        {
+            var userid_c = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier).ToString();
+            uid = userid_c;
+        }
+        catch
+        {
+            uid = context.Principal.Identity.Name;
+        }
+        finally
+        {
+            if (string.IsNullOrEmpty(uid))
+            {
+                uid = "Nicht ermittelbar";
+            }   
+        }
+
+
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
+        {
+            ip = header.ToString();
+        }
+        else
+        {
+            ip = httpContext.Connection.RemoteIpAddress?.ToString();
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = "Nicht ermittelbar";
+            }
+        }
+                    
+        if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2))
+        {
+            ua = header2.ToString();
+        }
+                    
+        LogWebOAuthDiscordLogin(uid, ip, ua).GetAwaiter().GetResult();
     }
     
     public static async Task LogWebOAuthDiscordLogin(string useridentifier, string ip, string useragent)
