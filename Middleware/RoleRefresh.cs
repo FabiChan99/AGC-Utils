@@ -1,5 +1,9 @@
-﻿using System.Security.Claims;
+﻿#region
+
+using System.Security.Claims;
 using AGC_Management.Utils;
+
+#endregion
 
 public class RoleRefreshMiddleware
 {

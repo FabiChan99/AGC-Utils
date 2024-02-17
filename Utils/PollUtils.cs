@@ -2,7 +2,6 @@
 
 public static class PollUtils
 {
-    
     private static async Task<string> GetPollIdByMessageId(ulong messageId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -14,9 +13,10 @@ public static class PollUtils
         {
             return reader.GetString(0);
         }
+
         return "NOT_FOUND";
     }
-    
+
     public static int MapLetterToPollOptionIndex(string letter)
     {
         return letter.ToUpper() switch
@@ -42,7 +42,7 @@ public static class PollUtils
             _ => -1
         };
     }
-    
+
     public static string MapPollOptionIndexToLetter(int index)
     {
         var ib = index switch
@@ -70,8 +70,8 @@ public static class PollUtils
 
         return ib.ToLower();
     }
-    
-    
+
+
     public static async Task AddVote(ulong messageId, ulong VoterId, int optionIndex)
     {
         var pollId = await GetPollIdByMessageId(messageId);
@@ -79,15 +79,17 @@ public static class PollUtils
         {
             return;
         }
+
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = con.CreateCommand();
-        command.CommandText = "INSERT INTO pollvotes (pollid, optionindex, userid) VALUES (@pollid, @optionindex, @userid)";
+        command.CommandText =
+            "INSERT INTO pollvotes (pollid, optionindex, userid) VALUES (@pollid, @optionindex, @userid)";
         command.Parameters.AddWithValue("pollid", pollId);
         command.Parameters.AddWithValue("optionindex", optionIndex);
         command.Parameters.AddWithValue("userid", (long)VoterId);
         await command.ExecuteNonQueryAsync();
     }
-    
+
     public static async Task RemoveVote(ulong messageId, ulong VoterId, int optionIndex)
     {
         var pollId = await GetPollIdByMessageId(messageId);
@@ -95,9 +97,11 @@ public static class PollUtils
         {
             return;
         }
+
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = con.CreateCommand();
-        command.CommandText = "DELETE FROM pollvotes WHERE pollid = @pollid , optionindex = @optionindex, userid = @userid";
+        command.CommandText =
+            "DELETE FROM pollvotes WHERE pollid = @pollid , optionindex = @optionindex, userid = @userid";
         command.Parameters.AddWithValue("pollid", pollId);
         command.Parameters.AddWithValue("optionindex", optionIndex);
         command.Parameters.AddWithValue("userid", (long)VoterId);

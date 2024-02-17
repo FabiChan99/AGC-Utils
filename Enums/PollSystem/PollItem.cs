@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿#region
+
+using System.ComponentModel.DataAnnotations;
+
+#endregion
 
 namespace AGC_Management.Enums.PollSystem;
 
@@ -11,8 +15,10 @@ public class PollItem
 
     [Required(ErrorMessage = "Der Text der Umfrage ist erforderlich.")]
     public string Text { get; set; }
+
     [Required(ErrorMessage = "Der Kanal der Umfrage ist erforderlich.")]
     public ulong ChannelId { get; set; }
+
     public ulong MessageId { get; set; }
 
     public bool isExpiring { get; set; } = false;

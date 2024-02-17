@@ -32,7 +32,7 @@
         else
         {
             var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            NavigationManager.NavigateTo($"/401?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+            NavigationManager.NavigateTo($"/401?returnUrl={Uri.EscapeDataString(returnUrl)}", true);
         }
     }
 

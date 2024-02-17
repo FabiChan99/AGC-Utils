@@ -26,7 +26,7 @@ namespace AGC_Management.Controller
             {
                 returnUrl = "/";
             }
-            
+
             returnUrl = Uri.UnescapeDataString(returnUrl);
 
 

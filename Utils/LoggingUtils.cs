@@ -1,5 +1,9 @@
-﻿using System.Security.Claims;
+﻿#region
+
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+
+#endregion
 
 namespace AGC_Management.Utils;
 
@@ -33,17 +37,17 @@ public static class LoggingUtils
         command.Parameters.AddWithValue("timestamp", unixnow);
         await command.ExecuteNonQueryAsync();
     }
-    
+
     public static void LogLogin(CookieSignedInContext context)
     {
         var httpContext = context.HttpContext;
-                    
+
         var ip = "Nicht ermittelbar";
         var ua = "Nicht ermittelbar";
         var uid = "Nicht ermittelbar";
         try
         {
-            var userid_c = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier).ToString();
+            var userid_c = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
             uid = userid_c;
         }
         catch
@@ -55,7 +59,7 @@ public static class LoggingUtils
             if (string.IsNullOrEmpty(uid))
             {
                 uid = "Nicht ermittelbar";
-            }   
+            }
         }
 
 
@@ -71,15 +75,15 @@ public static class LoggingUtils
                 ip = "Nicht ermittelbar";
             }
         }
-                    
+
         if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2))
         {
             ua = header2.ToString();
         }
-                    
+
         LogWebOAuthDiscordLogin(uid, ip, ua).GetAwaiter().GetResult();
     }
-    
+
     public static async Task LogWebOAuthDiscordLogin(string useridentifier, string ip, string useragent)
     {
         var unixnow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -93,5 +97,4 @@ public static class LoggingUtils
         command.Parameters.AddWithValue("timestamp", unixnow);
         await command.ExecuteNonQueryAsync();
     }
-    
 }

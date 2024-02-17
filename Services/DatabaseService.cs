@@ -142,7 +142,7 @@ public static class DatabaseService
                 "userrankcardsettings",
                 "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
-            
+
             {
                 "pollsystem",
                 "CREATE TABLE IF NOT EXISTS pollsystem (id TEXT, name TEXT, text TEXT, channelid BIGINT, messageid BIGINT, isexpiring BOOLEAN DEFAULT false, expirydate BIGINT DEFAULT 0, dmcreatoronfinish BOOLEAN DEFAULT false, isanonymous BOOLEAN DEFAULT false, ismultiplechoice BOOLEAN DEFAULT false, creatorid BIGINT, options JSONB)"
@@ -151,12 +151,12 @@ public static class DatabaseService
                 "cmdexec",
                 "CREATE TABLE IF NOT EXISTS cmdexec (commandname TEXT, commandcontent TEXT, userid BIGINT , timestamp BIGINT)"
             },
-            
+
             {
                 "pollvotes",
                 "CREATE TABLE IF NOT EXISTS pollvotes (pollid TEXT, optionindex INTEGER, userid BIGINT)"
             },
-            
+
             {
                 "xptransferlogs",
                 "CREATE TABLE IF NOT EXISTS xptransferlogs (sourceuserid BIGINT, destinationuserid BIGINT, executorid BIGINT, amount INTEGER, timestamp BIGINT)"
@@ -263,11 +263,22 @@ public static class DatabaseService
                     { "text", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS text TEXT" },
                     { "channelid", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS channelid BIGINT" },
                     { "messageid", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS messageid BIGINT" },
-                    { "isexpiring", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS isexpiring BOOLEAN DEFAULT false" },
+                    {
+                        "isexpiring", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS isexpiring BOOLEAN DEFAULT false"
+                    },
                     { "expirydate", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS expirydate BIGINT DEFAULT 0" },
-                    { "dmcreatoronfinish", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS dmcreatoronfinish BOOLEAN DEFAULT false" },
-                    { "isanonymous", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS isanonymous BOOLEAN DEFAULT false" },
-                    { "ismultiplechoice", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS ismultiplechoice BOOLEAN DEFAULT false" },
+                    {
+                        "dmcreatoronfinish",
+                        "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS dmcreatoronfinish BOOLEAN DEFAULT false"
+                    },
+                    {
+                        "isanonymous",
+                        "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS isanonymous BOOLEAN DEFAULT false"
+                    },
+                    {
+                        "ismultiplechoice",
+                        "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS ismultiplechoice BOOLEAN DEFAULT false"
+                    },
                     { "creatorid", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS creatorid BIGINT" },
                     { "options", "ALTER TABLE pollsystem ADD COLUMN IF NOT EXISTS options JSONB" }
                 }

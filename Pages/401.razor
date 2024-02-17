@@ -7,19 +7,21 @@
 <button type="button" @onclick="StartOAuthLogin" class="btn btn-primary-glass"><i class="bi bi-discord"></i> Login mit Discord</button>
 
 @code {
+
     private void StartOAuthLogin()
     {
         var scheme = NavigationManager.Uri.StartsWith("https") ? "https" : "http";
         var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        
+
         if (returnUrl.Contains("401?returnUrl="))
         {
-            returnUrl = returnUrl.Split(new string[] {"401?returnUrl="}, StringSplitOptions.None).LastOrDefault();
+            returnUrl = returnUrl.Split(new[] { "401?returnUrl=" }, StringSplitOptions.None).LastOrDefault();
         }
+
         returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
         var dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
         var oauthLoginUrl = $"{scheme}://{dashboardUrl}/login?returnUrl=/{Uri.EscapeDataString(returnUrl)}";
-        NavigationManager.NavigateTo(oauthLoginUrl, forceLoad: true);
+        NavigationManager.NavigateTo(oauthLoginUrl, true);
     }
-}
 
+}

@@ -131,11 +131,11 @@ public sealed class AuthUtils
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).GlobalName;
     }
 
-    
+
     public static async Task<string> RetrieveId(JsonElement userClaims)
     {
         string userId_ = userClaims.GetProperty("id").ToString();
-        return userId_.ToString();
+        return userId_;
     }
 
     public static async Task<string> RetrieveRole(JsonElement userClaims)

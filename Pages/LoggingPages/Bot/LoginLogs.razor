@@ -30,7 +30,8 @@ else
             {
                 <tr>
                     <td class="wrap-text" @onclick="() => ShowToastAndCopyToClipboard(log.UserIdentifier)">
-                                                   @GetUsernameOrId(log.UserIdentifier, false).GetAwaiter().GetResult()</td>
+                        @GetUsernameOrId(log.UserIdentifier).GetAwaiter().GetResult()
+                    </td>
                     <td class="wrap-text">@log.IpAddress</td>
                     <td class="wrap-text">@log.UserAgent</td>
                     <td class="wrap-text">@Converter.GetDateFromTimestamp(log.UnixTime)</td>
@@ -52,7 +53,7 @@ else
         </SnackbarBody>
     </Snackbar>
 }
-    
+
 @code {
     private Snackbar snackbar;
     private bool loaded;
@@ -78,7 +79,7 @@ else
 
     private async Task LoadLogs()
     {
-        logs = new();
+        logs = new List<LoginLogDatabaseItem>();
 
         // Load logs from database
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -92,6 +93,7 @@ else
             {
                 ipdata = ipdata.Split(",")[0];
             }
+
             var log = new LoginLogDatabaseItem
             {
                 UserIdentifier = reader.GetString(0),
@@ -100,7 +102,6 @@ else
                 UnixTime = reader.GetInt64(3)
             };
             logs.Add(log);
-            
         }
 
         hasLogs = logs.Count > 0;
@@ -122,6 +123,7 @@ else
             {
                 return UserIdentifier;
             }
+
             var isCached = await ToolSet.IsUserInCache(userId);
             if (isCached)
             {
@@ -171,4 +173,5 @@ else
         public string IpAddress { get; set; }
         public long UnixTime { get; set; }
     }
+
 }

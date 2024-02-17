@@ -141,7 +141,7 @@ internal class Program : BaseCommandModule
             {
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
-                options.Events.OnSignedIn = (context)=>
+                options.Events.OnSignedIn = context =>
                 {
                     LoggingUtils.LogLogin(context);
 
@@ -253,7 +253,6 @@ internal class Program : BaseCommandModule
         _ = RunAspAsync(builder.Build());
         await Task.Delay(-1);
     }
-
 
 
     private static Task StartTasks(DiscordClient discord)
@@ -423,7 +422,7 @@ internal class Program : BaseCommandModule
         sender.Logger.LogError($"Stacktrace: {e.Exception.GetType()}: {e.Exception.StackTrace}");
         await ErrorReporting.SendErrorToDev(sender, sender.CurrentUser, e.Exception);
     }
-    
+
     private static Task LogCommandExecution(CommandsNextExtension client, CommandExecutionEventArgs args)
     {
         _ = Task.Run(async () =>
@@ -455,8 +454,7 @@ internal class Program : BaseCommandModule
         });
         return Task.CompletedTask;
     }
-    
-    
+
 
     private static async Task Commands_CommandErrored(CommandsNextExtension cn, CommandErrorEventArgs e)
     {
@@ -595,7 +593,7 @@ internal class Program : BaseCommandModule
 
         app.UseCookiePolicy(new CookiePolicyOptions
         {
-            MinimumSameSitePolicy = SameSiteMode.Lax,
+            MinimumSameSitePolicy = SameSiteMode.Lax
         });
         app.UseMiddleware<RoleRefreshMiddleware>();
         app.MapBlazorHub();
