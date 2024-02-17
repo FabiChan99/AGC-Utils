@@ -323,16 +323,15 @@ public sealed class SessionManagement : TempVoiceHelper
                     }
 
                     var caseid = ToolSet.GenerateCaseID();
-                    string blockedusers = user["blockedusers"].ToString();
-                    string permitedusers = user["permitedusers"].ToString();
+                    string blockedusers = IdToMention(user["blockedusers"].ToString());
+                    string permitedusers = IdToMention(user["permitedusers"].ToString());
+                    string channelmods = IdToMention(user["channelmods"].ToString());
                     string locked = user["locked"].ToString();
                     string hidden = user["hidden"].ToString();
                     bool sessionskip = (bool)user["sessionskip"];
-                    string pu = string.IsNullOrEmpty(permitedusers) ? "Keine" : permitedusers;
-                    string bu = string.IsNullOrEmpty(blockedusers) ? "Keine" : blockedusers;
-                    string cm = string.IsNullOrEmpty(user["channelmods"].ToString())
-                        ? "Keine"
-                        : user["channelmods"].ToString();
+                    string pu = permitedusers;
+                    string bu = blockedusers;
+                    string cm = channelmods;
 
                     DiscordEmbedBuilder ebb = new()
                     {
@@ -341,9 +340,9 @@ public sealed class SessionManagement : TempVoiceHelper
                         Description = $"**Kanalname:** {channelname}\n" +
                                       $"**Kanalbitrate:** {channelbitrate} kbps\n" +
                                       $"**Kanallimit:** {channellimit}\n\n" +
-                                      $"**Gesperrte Benutzer:** ```{bu}```\n" +
-                                      $"**Zugelassene Benutzer:** ```{pu}```\n" +
-                                      $"**Kanalmods:** ```{cm}```\n\n" +
+                                      $"**Gesperrte Benutzer:** \n{bu}\n\n" +
+                                      $"**Zugelassene Benutzer:** \n{pu}\n\n" +
+                                      $"**Kanalmods:** \n{cm}\n\n\n" +
                                       $"**Sessionskip aktiv:** {sessionskip}\n" +
                                       $"**Gesperrt:** {locked}\n" +
                                       $"**Versteckt:** {hidden}\n",
@@ -384,4 +383,19 @@ public sealed class SessionManagement : TempVoiceHelper
             }
         });
     }
+    
+    private string IdToMention(string ids)
+    {
+        if (string.IsNullOrEmpty(ids)) return "Keine";
+
+        string[] idArray = ids.Split(",");
+        for (int i = 0; i < idArray.Length; i++)
+        {
+            idArray[i] = $"<@{idArray[i].Trim()}>";
+        }
+
+        return string.Join(", ", idArray);
+    }
+
+
 }
