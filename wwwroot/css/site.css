@@ -1,5 +1,9 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+@font-face {
+    
+}
+
 root {
     text-decoration: none !important;
 }
@@ -9,7 +13,7 @@ a:link {
 }
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: "Inter" ,'Helvetica Neue', Helvetica, Arial, sans-serif!important;
     background: url("../img/bg5.jpg") black no-repeat center center fixed;
     background-size: cover;
     color: #e0e0e0;
@@ -17,13 +21,11 @@ html, body {
 }
 
 tbody, td, table, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #e0e0e0;
     text-decoration: none !important;
 }
 
 thead {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #1b1b1b;
     color: #e0e0e0;
 }
