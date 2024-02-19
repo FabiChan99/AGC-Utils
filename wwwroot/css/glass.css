@@ -238,10 +238,10 @@
 }
 
 .glassy-input:focus {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(20, 20, 20, 0.25);
     border-radius: 15px;
     color: white;
-    box-shadow: 0 5px 20px rgba(159, 255, 245, 0.15);
+    box-shadow: 0 5px 20px rgba(94, 255, 241, 0.39);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.25);
