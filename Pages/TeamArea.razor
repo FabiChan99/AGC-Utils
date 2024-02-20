@@ -20,4 +20,25 @@
             </div>
         </div>
     </div>
+    <div class="col-12 mb-4">
+        <div class="glass-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    Bewerbungsmanagement
+                    <span>
+                        <i class="bi bi-journals"></i>
+                    </span>
+                </h5>
+                <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                    <a href="/konfiguration/applysystem/viewapplications" class="btn btn-primary-glass">Bewerbungen ansehen</a>
+                </AuthorizeView>
+                <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                    <a href="/konfiguration/applysystem/modifypanelmessage" class="btn btn-primary-glass">Bewerbungspanel Text bearbeiten</a>
+                </AuthorizeView>
+                <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                    <a href="/konfiguration/applysystem/modifypositions" class="btn btn-primary-glass">Bewerbungspositionen bearbeiten</a>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
 </div>
