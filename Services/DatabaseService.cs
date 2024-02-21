@@ -142,6 +142,15 @@ public static class DatabaseService
                 "userrankcardsettings",
                 "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
+            
+            {
+                "metrics_messages",
+                "CREATE TABLE IF NOT EXISTS metrics_messages (userid BIGINT, messageid BIGINT, channelid BIGINT, timestamp BIGINT, isbot BOOLEAN DEFAULT false)"
+            },
+            {
+                "idx_metrics_messages_userid",
+                "CREATE INDEX IF NOT EXISTS idx_metrics_messages_userid ON metrics_messages (userid)"
+            },
 
             {
                 "pollsystem",
