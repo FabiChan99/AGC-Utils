@@ -115,7 +115,7 @@
 
     <ItemGroup>
         <Folder Include="Components\Web\"/>
-        <Folder Include="Pages\ApplyPages\" />
+        <Folder Include="Utils\Attributes\" />
     </ItemGroup>
 
 </Project>
