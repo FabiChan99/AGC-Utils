@@ -24,7 +24,6 @@ public static class GetVoiceMetrics
             try
             {
                 var s = await CachingService.GetCacheValue(CustomDatabaseCacheType.ConfigCache, "lastvcmetricsgather");
-                Console.WriteLine(s);
                 lastrecals = long.Parse(s);
             }
             catch
