@@ -42,6 +42,7 @@ public static class CheckVCLevellingTask
                                 {
                                     continue;
                                 }
+                                
 
                                 if (member.VoiceState?.IsSelfMuted == true ||
                                     member.VoiceState?.IsSelfDeafened == true ||

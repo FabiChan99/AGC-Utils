@@ -148,6 +148,30 @@ public static class DatabaseService
                 "CREATE TABLE IF NOT EXISTS metrics_messages (userid BIGINT, messageid BIGINT, channelid BIGINT, timestamp BIGINT, isbot BOOLEAN DEFAULT false)"
             },
             {
+                "metrics_voice",
+                "CREATE TABLE IF NOT EXISTS metrics_voice (userid BIGINT, channelid BIGINT, timestamp BIGINT, isbot BOOLEAN DEFAULT false, voicestate INTEGER DEFAULT 0)"
+            },
+            {
+                "metrics_activity",
+                "CREATE TABLE IF NOT EXISTS metrics_activity (userid BIGINT, activityname TEXT, activityid BIGINT, timestamp BIGINT)"
+            },
+            {
+                "metrics_activitymap",
+                "CREATE TABLE IF NOT EXISTS metrics_activitymap (activityname TEXT, activityid BIGINT)"
+            },
+            {
+                "idx_metrics_activitymap_userid",
+                "CREATE INDEX IF NOT EXISTS idx_metrics_activitymap_activityid ON metrics_activitymap (activityid)"
+            },
+            {
+                "idx_metrics_activity_userid",
+                "CREATE INDEX IF NOT EXISTS idx_metrics_activity_userid ON metrics_activity (userid)"
+            },
+            {
+                "idx_metrics_voice_userid",
+                "CREATE INDEX IF NOT EXISTS idx_metrics_voice_userid ON metrics_voice (userid)"
+            },
+            {
                 "idx_metrics_messages_userid",
                 "CREATE INDEX IF NOT EXISTS idx_metrics_messages_userid ON metrics_messages (userid)"
             },

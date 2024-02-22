@@ -270,6 +270,7 @@ internal class Program : BaseCommandModule
         _ = ExtendedModerationSystemLoop.LaunchLoops();
         _ = RecalculateRanks.LaunchLoops();
         _ = CheckVCLevellingTask.Run();
+        _ = GetVoiceMetrics.LaunchLoops();
         _ = LevelUtils.RunLeaderboardUpdate();
 
         return Task.CompletedTask;
