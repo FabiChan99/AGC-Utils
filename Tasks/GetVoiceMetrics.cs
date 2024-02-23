@@ -61,6 +61,11 @@ public static class GetVoiceMetrics
                                 continue;
                             }
                             
+                            if (vcm.IsBot)
+                            {
+                                continue;
+                            }
+                            
 
                             
 
@@ -75,14 +80,12 @@ public static class GetVoiceMetrics
                             var channelid = channel.Id;
                             var voicestateint = (int)state;
                             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                            bool isbot = vcm.IsBot;
 
                             await using var cmd = db.CreateCommand(
-                                "INSERT INTO metrics_voice (userid, channelid, timestamp, isbot, voicestate) VALUES (@userid, @channelid, @timestamp, @isbot ,@voicestateint)");
+                                "INSERT INTO metrics_voice (userid, channelid, timestamp, voicestate) VALUES (@userid, @channelid, @timestamp, @isbot ,@voicestateint)");
                             cmd.Parameters.AddWithValue("userid", (long)userid);
                             cmd.Parameters.AddWithValue("channelid", (long)channelid);
                             cmd.Parameters.AddWithValue("timestamp", timestamp);
-                            cmd.Parameters.AddWithValue("isbot", isbot);
                             cmd.Parameters.AddWithValue("voicestateint", voicestateint);
                             await cmd.ExecuteNonQueryAsync();
                                 

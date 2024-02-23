@@ -142,14 +142,13 @@ public static class DatabaseService
                 "userrankcardsettings",
                 "CREATE TABLE IF NOT EXISTS userrankcardsettings (userid BIGINT, imagedata TEXT, barcolor TEXT DEFAULT '#9f00ff', textfont TEXT DEFAULT 'Verdana', boxalpha INTEGER DEFAULT 150, UNIQUE (userid))"
             },
-            
             {
                 "metrics_messages",
-                "CREATE TABLE IF NOT EXISTS metrics_messages (userid BIGINT, messageid BIGINT, channelid BIGINT, timestamp BIGINT, isbot BOOLEAN DEFAULT false)"
+                "CREATE TABLE IF NOT EXISTS metrics_messages (userid BIGINT, messageid BIGINT, channelid BIGINT, timestamp BIGINT)"
             },
             {
                 "metrics_voice",
-                "CREATE TABLE IF NOT EXISTS metrics_voice (userid BIGINT, channelid BIGINT, timestamp BIGINT, isbot BOOLEAN DEFAULT false, voicestate INTEGER DEFAULT 0)"
+                "CREATE TABLE IF NOT EXISTS metrics_voice (userid BIGINT, channelid BIGINT, timestamp BIGINT, voicestate INTEGER DEFAULT 0)"
             },
             {
                 "metrics_activity",
