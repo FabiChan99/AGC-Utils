@@ -1,8 +1,15 @@
-﻿namespace AGC_Management.Entities;
+﻿using AGC_Management.Utils;
+
+namespace AGC_Management.Entities;
+
 
 public class Application
 {
-    public ulong UserId { get; set; }
-    public string BewerbungsText { get; set; }
-    public string Position { get; set; }
+    public string BewerbungsId { get; set; } = ToolSet.GenerateCaseID();
+    public long UserId { get; set; }
+    public string PositionName { get; set; }
+    public int Status { get; set; } = 0;
+    public long Timestamp { get; set; }
+    public string Bewerbungstext { get; set; } = "";
+    public List<long> SeenBy { get; set; } = new();
 }

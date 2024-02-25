@@ -14,10 +14,17 @@
 }
 
 .glass-effect-bg {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.2)!important;
+    backdrop-filter: blur(10px)!important;
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
+}
+
+.glass-effect-bg li {
+    background: rgba(255, 255, 255, 0.2)!important;
+    backdrop-filter: blur(10px)!important;
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
 }
 
 .glass-effect {
@@ -228,13 +235,13 @@
 }
 
 .glassy-input {
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 15px;
-    color: white;
-    box-shadow: 0 5px 20px rgba(159, 255, 245, 0.15);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.25)!important;
+    border-radius: 15px!important;
+    color: white!important;
+    box-shadow: 0 5px 20px rgba(159, 255, 245, 0.15)!important;
+    backdrop-filter: blur(15px)!important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25)!important;
 }
 
 .glassy-input:focus {
@@ -271,6 +278,12 @@
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(40, 167, 69, 0.25);
+}
+
+.btn-success-glass:hover {
+    color: white;
+    background: rgba(40, 167, 69, 0.47);
+    border: 1px solid rgba(40, 167, 69, 0.35);
 }
 
 .btn-danger-glass {

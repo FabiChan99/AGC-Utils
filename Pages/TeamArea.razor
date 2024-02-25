@@ -30,7 +30,10 @@
                     </span>
                 </h5>
                 <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
-                    <a href="/konfiguration/applysystem/viewapplications" class="btn btn-primary-glass mt-2 mb-2">Bewerbungen ansehen</a>
+                    <a href="/teamarea/applysystem/viewapplications" class="btn btn-primary-glass mt-2 mb-2">Bewerbungen ansehen (Team allgemein)</a>
+                </AuthorizeView>
+                <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                    <a href="/teamarea/applysystem/vieweventapplications" class="btn btn-primary-glass mt-2 mb-2">Bewerbungen ansehen (Eventteam, nur Eventmanager)</a>
                 </AuthorizeView>
                 <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
                     <a href="/konfiguration/applysystem/modifypanelmessage" class="btn btn-primary-glass mt-2 mb-2">Bewerbungspanel Text bearbeiten</a>

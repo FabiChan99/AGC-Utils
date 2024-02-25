@@ -1,7 +1,8 @@
-﻿@page "/teamarea/applysystem/viewapplications"
+﻿@page "/teamarea/applysystem/vieweventapplications"
 @using AGC_Management.Entities
 @using AGC_Management.Utils
 @attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod")]
+
 
 
 <div class="search-bar-centered">
@@ -43,7 +44,7 @@
             <div class="glass-card mb-3">
                 <ul class="list-group @getcssfromstatus(application.Status) list-group-flush">
                     <li class="list-group-item">
-                        <a href="teamarea/applysystem/viewapplication/@application.BewerbungsId">
+                        <a href="teamarea/applysystem/vieweventapplication/@application.BewerbungsId">
                             <h5 class="mb-1">Username: @ToolSet.GetFormattedName((ulong)application.UserId)</h5>
                             <p class="mb-1">NutzerID: @application.UserId</p>
                             <p class="mb-1">Bewerbungsposition: @application.PositionName</p>
@@ -104,9 +105,9 @@
         {
             0 => "Ungelesen",
             1 => "Gelesen",
-            2 => "Abgelehnt",
-            3 => "Vorgemerkt",
-            4 => "Angenommen",
+            2 => "Vorgemerkt",
+            3 => "Angenommen",
+            4 => "Abgelehnt",
             _ => "Ungelesen"
         };
     }
@@ -151,7 +152,7 @@
     {
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = db.CreateCommand();
-        command.CommandText = "SELECT bewerbungsid, userid, positionname, status, timestamp, bewerbungstext, seenby FROM bewerbungen ORDER BY timestamp DESC";
+        command.CommandText = "SELECT bewerbungsid, userid, positionname, status, timestamp, bewerbungstext, seenby FROM bewerbungen WHERE positionname = 'Eventmanager' ORDER BY timestamp DESC";
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {

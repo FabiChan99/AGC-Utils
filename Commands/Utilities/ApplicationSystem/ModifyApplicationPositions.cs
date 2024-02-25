@@ -70,6 +70,23 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
         [Autocomplete(typeof(ApplicationAutocompleteProvider))] [Option("position", "The position to modify.", true)]
         string positionId, [Option("status", "The status to set.")] bool status)
     {
+        bool applicability = status;
+        string posId = ToolSet.RemoveWhitespace(positionId.ToLower());
+        var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var cmd = con.CreateCommand("UPDATE applicationcategories SET applicable = @bewerbbar WHERE positionid = @positionid");
+        cmd.Parameters.AddWithValue("bewerbbar", (bool)applicability);
+        cmd.Parameters.AddWithValue("positionid", posId);
+        var e = await cmd.ExecuteNonQueryAsync();
+        if (e == 0)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("Position not found!"));
+            return;
+        }
+
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().WithContent($"Position ist nun {(applicability ? "bewerbbar" : "nicht mehr bewerbbar")}!"));
+        ApplyPanelCommands.QueueRefreshPanel();
     }
 
 
