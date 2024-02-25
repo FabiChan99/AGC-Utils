@@ -82,7 +82,7 @@ public static class GetVoiceMetrics
                             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                             await using var cmd = db.CreateCommand(
-                                "INSERT INTO metrics_voice (userid, channelid, timestamp, voicestate) VALUES (@userid, @channelid, @timestamp, @isbot ,@voicestateint)");
+                                "INSERT INTO metrics_voice (userid, channelid, timestamp, voicestate) VALUES (@userid, @channelid, @timestamp ,@voicestateint)");
                             cmd.Parameters.AddWithValue("userid", (long)userid);
                             cmd.Parameters.AddWithValue("channelid", (long)channelid);
                             cmd.Parameters.AddWithValue("timestamp", timestamp);
