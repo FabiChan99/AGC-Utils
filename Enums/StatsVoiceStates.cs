@@ -4,5 +4,5 @@ public enum StatsVoiceStates
 {
     Unmuted = 0,
     Muted = 1,
-    Deafened = 2,
+    Deafened = 2
 }

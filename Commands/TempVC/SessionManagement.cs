@@ -383,7 +383,7 @@ public sealed class SessionManagement : TempVoiceHelper
             }
         });
     }
-    
+
     private string IdToMention(string ids)
     {
         if (string.IsNullOrEmpty(ids)) return "Keine";
@@ -396,6 +396,4 @@ public sealed class SessionManagement : TempVoiceHelper
 
         return string.Join(", ", idArray);
     }
-
-
 }

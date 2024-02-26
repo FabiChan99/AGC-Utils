@@ -3,6 +3,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using AGC_Management.Entities;
 using DisCatSharp.Net;
 using Newtonsoft.Json;
@@ -21,26 +22,26 @@ public static class ToolSet
             ? CurrentApplication.TargetGuild.IconUrl
             : "favicon.png";
     }
-    
+
     public static string GettextfromBase64(string base64)
     {
         var data = Convert.FromBase64String(base64);
-        return System.Text.Encoding.UTF8.GetString(data);
+        return Encoding.UTF8.GetString(data);
     }
-    
+
     public static string GetFormattedTimeFromUnix(long unixTime)
     {
         var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTime);
         return dateTimeOffset.ToString("dd.MM.yyyy HH:mm:ss");
     }
-    
-    
+
+
     public static string GetFormattedTimeFromUnixAndRespectTimeZone(long unixTime)
     {
         var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTime);
-        return TimeZoneInfo.ConvertTimeFromUtc(dateTimeOffset.DateTime, TimeZoneInfo.Local).ToString("dd.MM.yyyy HH:mm:ss");
+        return TimeZoneInfo.ConvertTimeFromUtc(dateTimeOffset.DateTime, TimeZoneInfo.Local)
+            .ToString("dd.MM.yyyy HH:mm:ss");
     }
-    
 
 
     public static async Task<bool> IsUserInCache(ulong userId)
@@ -57,8 +58,6 @@ public static class ToolSet
             return false;
         }
     }
-    
-    
 
 
     public static string GetBuildNumber(Assembly assembly)
@@ -144,26 +143,26 @@ public static class ToolSet
         return avatarUrl;
     }
 
-        public static string GetFormattedName(ulong userid)
+    public static string GetFormattedName(ulong userid)
+    {
+        var member = CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userid);
+        if (member != null)
         {
-            var member = CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userid);
-            if (member != null)
+            if (!string.IsNullOrEmpty(member.Nickname))
             {
-                if (!string.IsNullOrEmpty(member.Nickname))
-                {
-                    return $"{member.Username} ({member.Nickname})";
-                }
-
-                if (!string.IsNullOrEmpty(member.DisplayName))
-                {
-                    return $"{member.Username} ({member.DisplayName})";
-                }
-
-                return member.Username;
+                return $"{member.Username} ({member.Nickname})";
             }
 
-            return userid.ToString();
+            if (!string.IsNullOrEmpty(member.DisplayName))
+            {
+                return $"{member.Username} ({member.DisplayName})";
+            }
+
+            return member.Username;
         }
+
+        return userid.ToString();
+    }
 
     public static string GetFormattedName(DiscordMember member)
     {

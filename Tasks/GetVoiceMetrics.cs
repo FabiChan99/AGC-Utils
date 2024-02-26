@@ -2,7 +2,6 @@
 
 using AGC_Management.Enums;
 using AGC_Management.Services;
-using AGC_Management.Utils;
 
 #endregion
 
@@ -33,7 +32,7 @@ public static class GetVoiceMetrics
 
             var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var difference = now - lastrecals;
-            
+
             if (difference >= 60)
             {
                 if (CurrentApplication.TargetGuild == null) // check init
@@ -41,7 +40,7 @@ public static class GetVoiceMetrics
                     await Task.Delay(TimeSpan.FromSeconds(5));
                     continue;
                 }
-                
+
 
                 var guild = CurrentApplication.TargetGuild;
                 var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -54,83 +53,78 @@ public static class GetVoiceMetrics
                         {
                             var vcmembers = channel.Users;
 
-                        foreach (var vcm in vcmembers)
-                        {
-                            if (vcm == null)
+                            foreach (var vcm in vcmembers)
                             {
-                                continue;
+                                if (vcm == null)
+                                {
+                                    continue;
+                                }
+
+                                if (vcm.IsBot)
+                                {
+                                    continue;
+                                }
+
+
+                                var voicestate = vcm?.VoiceState;
+                                if (voicestate == null)
+                                {
+                                    continue;
+                                }
+
+                                var state = Statemapper(voicestate);
+                                var userid = vcm.Id;
+                                var channelid = channel.Id;
+                                var voicestateint = (int)state;
+                                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                                await using var cmd = db.CreateCommand(
+                                    "INSERT INTO metrics_voice (userid, channelid, timestamp, voicestate) VALUES (@userid, @channelid, @timestamp ,@voicestateint)");
+                                cmd.Parameters.AddWithValue("userid", (long)userid);
+                                cmd.Parameters.AddWithValue("channelid", (long)channelid);
+                                cmd.Parameters.AddWithValue("timestamp", timestamp);
+                                cmd.Parameters.AddWithValue("voicestateint", voicestateint);
+                                await cmd.ExecuteNonQueryAsync();
                             }
-                            
-                            if (vcm.IsBot)
-                            {
-                                continue;
-                            }
-                            
-
-                            
-
-                            var voicestate = vcm?.VoiceState;
-                            if (voicestate == null)
-                            {
-                                continue;
-                            }
-
-                            var state = Statemapper(voicestate);
-                            var userid = vcm.Id;
-                            var channelid = channel.Id;
-                            var voicestateint = (int)state;
-                            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-                            await using var cmd = db.CreateCommand(
-                                "INSERT INTO metrics_voice (userid, channelid, timestamp, voicestate) VALUES (@userid, @channelid, @timestamp ,@voicestateint)");
-                            cmd.Parameters.AddWithValue("userid", (long)userid);
-                            cmd.Parameters.AddWithValue("channelid", (long)channelid);
-                            cmd.Parameters.AddWithValue("timestamp", timestamp);
-                            cmd.Parameters.AddWithValue("voicestateint", voicestateint);
-                            await cmd.ExecuteNonQueryAsync();
-                                
-                            }   
-
                         }
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
                     }
-
-
-
                 }
             }
-            await CachingService.SetCacheValue(CustomDatabaseCacheType.ConfigCache, "lastvcmetricsgather", now.ToString());
+
+            await CachingService.SetCacheValue(CustomDatabaseCacheType.ConfigCache, "lastvcmetricsgather",
+                now.ToString());
 
             await Task.Delay(TimeSpan.FromSeconds(60));
         }
     }
-    
-    
+
+
     private static StatsVoiceStates Statemapper(DiscordVoiceState state)
     {
         if (state.IsSelfMuted)
         {
             return StatsVoiceStates.Muted;
         }
-        
+
         if (state.IsSelfDeafened)
         {
             return StatsVoiceStates.Deafened;
         }
-        
+
         if (state.IsServerMuted)
         {
             return StatsVoiceStates.Muted;
         }
-        
+
         if (state.IsServerDeafened)
         {
             return StatsVoiceStates.Deafened;
         }
-        
+
         return StatsVoiceStates.Unmuted;
     }
 }

@@ -7,26 +7,26 @@
 
 <script type="module" src="https://unpkg.com/@@aitsys/discord-components-core"></script>
 
-    <div class="d-flex justify-content-center">
-        <div class="form-group w-75">
-            <h1>Bewerbungs-Panel Nachricht bearbeiten</h1>
-            <textarea class="form-control glassy-input" id="panelmessage" @bind="panelmessage" @oninput="UpdatePreview" rows="20"></textarea>
-    
-            <button class="btn btn-primary-glass mt-2 mb-2" @onclick="savePanelMessage">Speichern</button>
-            <button class="btn btn-primary-glass mt-2 mb-2" @onclick="TogglePreview">
-                Vorschau anzeigen
-                @if (showPreview)
-                {
-                    <span class="badge badge-success-glass">An</span>
-                }
-                else
-                {
-                    <span class="badge badge-danger-glass">Aus</span>
-                }
-            </button>
-    
-        </div>
+<div class="d-flex justify-content-center">
+    <div class="form-group w-75">
+        <h1>Bewerbungs-Panel Nachricht bearbeiten</h1>
+        <textarea class="form-control glassy-input" id="panelmessage" @bind="panelmessage" @oninput="UpdatePreview" rows="20"></textarea>
+
+        <button class="btn btn-primary-glass mt-2 mb-2" @onclick="savePanelMessage">Speichern</button>
+        <button class="btn btn-primary-glass mt-2 mb-2" @onclick="TogglePreview">
+            Vorschau anzeigen
+            @if (showPreview)
+            {
+                <span class="badge badge-success-glass">An</span>
+            }
+            else
+            {
+                <span class="badge badge-danger-glass">Aus</span>
+            }
+        </button>
+
     </div>
+</div>
 
 <div class="alert alert-info-glass mt-4 justify-content-center" role="alert">
     <h4 class="alert-heading">Hinweis</h4>

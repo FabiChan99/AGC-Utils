@@ -14,17 +14,17 @@
 }
 
 .glass-effect-bg {
-    background: rgba(255, 255, 255, 0.2)!important;
-    backdrop-filter: blur(10px)!important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .glass-effect-bg li {
-    background: rgba(255, 255, 255, 0.2)!important;
-    backdrop-filter: blur(10px)!important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .glass-effect {
@@ -235,13 +235,13 @@
 }
 
 .glassy-input {
-    background: rgba(0, 0, 0, 0.25)!important;
-    border-radius: 15px!important;
-    color: white!important;
-    box-shadow: 0 5px 20px rgba(159, 255, 245, 0.15)!important;
-    backdrop-filter: blur(15px)!important;
+    background: rgba(0, 0, 0, 0.25) !important;
+    border-radius: 15px !important;
+    color: white !important;
+    box-shadow: 0 5px 20px rgba(159, 255, 245, 0.15) !important;
+    backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25)!important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
 .glassy-input:focus {
@@ -255,19 +255,19 @@
 }
 
 .btn-primary-glass {
-    background: rgba(51, 148, 255, 0.1)!important;
-    border-radius: 15px!important;
-    color: white!important;
-    box-shadow: 0 5px 20px rgba(51, 148, 255, 0.15)!important;
-    backdrop-filter: blur(15px)!important;
-    -webkit-backdrop-filter: blur(15px)!important;
-    border: 1px solid rgba(51, 148, 255, 0.25)!important;
+    background: rgba(51, 148, 255, 0.1) !important;
+    border-radius: 15px !important;
+    color: white !important;
+    box-shadow: 0 5px 20px rgba(51, 148, 255, 0.15) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(51, 148, 255, 0.25) !important;
 }
 
 .btn-primary-glass:hover {
-    color: white!important;
-    background: rgba(51, 148, 255, 0.5)!important;
-    border: 1px solid rgba(0, 123, 255, 0.35)!important;
+    color: white !important;
+    background: rgba(51, 148, 255, 0.5) !important;
+    border: 1px solid rgba(0, 123, 255, 0.35) !important;
 }
 
 .btn-success-glass {

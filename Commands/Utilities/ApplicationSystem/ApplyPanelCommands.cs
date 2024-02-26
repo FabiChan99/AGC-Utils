@@ -108,7 +108,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
         }
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
-            "Wähle die gewünschte Bewerbungsposition aus", selectorlist, customId:"applypanelselector");
+            "Wähle die gewünschte Bewerbungsposition aus", selectorlist, "applypanelselector");
 
         var dbdata =
             await CachingService.GetCacheValueAsBase64(CustomDatabaseCacheType.ApplicationSystemCache,

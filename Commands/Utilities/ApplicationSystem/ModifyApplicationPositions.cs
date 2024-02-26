@@ -73,8 +73,10 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
         bool applicability = status;
         string posId = ToolSet.RemoveWhitespace(positionId.ToLower());
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using var cmd = con.CreateCommand("UPDATE applicationcategories SET applicable = @bewerbbar WHERE positionid = @positionid");
-        cmd.Parameters.AddWithValue("bewerbbar", (bool)applicability);
+        await using var cmd =
+            con.CreateCommand(
+                "UPDATE applicationcategories SET applicable = @bewerbbar WHERE positionid = @positionid");
+        cmd.Parameters.AddWithValue("bewerbbar", applicability);
         cmd.Parameters.AddWithValue("positionid", posId);
         var e = await cmd.ExecuteNonQueryAsync();
         if (e == 0)
@@ -85,7 +87,8 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
         }
 
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent($"Position ist nun {(applicability ? "bewerbbar" : "nicht mehr bewerbbar")}!"));
+            new DiscordInteractionResponseBuilder().WithContent(
+                $"Position ist nun {(applicability ? "bewerbbar" : "nicht mehr bewerbbar")}!"));
         ApplyPanelCommands.QueueRefreshPanel();
     }
 

@@ -1,7 +1,7 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 @font-face {
-    
+
 }
 
 root {
@@ -13,7 +13,7 @@ a:link {
 }
 
 html, body {
-    font-family: "Inter" ,'Helvetica Neue', Helvetica, Arial, sans-serif!important;
+    font-family: "Inter", 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     background: url("../img/bg8.webp") black no-repeat center center fixed;
     background-size: cover;
     color: #e0e0e0;
@@ -95,17 +95,17 @@ thead {
     min-width: 0;
     word-wrap: break-word;
     background-clip: border-box;
-    border: 1px solid rgba(0,0,0,.125)!important;
-    border-radius: .25rem!important;
-    background-color: rgba(255, 255, 255, 0.1)!important;
-    box-shadow: 0 3px 20px rgba(230, 230, 250, 0.1)!important;
-    backdrop-filter: blur(8px)!important;
+    border: 1px solid rgba(0, 0, 0, .125) !important;
+    border-radius: .25rem !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 3px 20px rgba(230, 230, 250, 0.1) !important;
+    backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px);
 }
 
 .glass-card li {
     color: #ffffff !important;
-    background-color: rgba(0, 0, 0, 0.1)!important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
     -webkit-backdrop-filter: blur(8px);
 }
 

@@ -1,7 +1,10 @@
-﻿using AGC_Management.Utils;
+﻿#region
+
+using AGC_Management.Utils;
+
+#endregion
 
 namespace AGC_Management.Entities;
-
 
 public class Application
 {
