@@ -4,10 +4,10 @@ using DisCatSharp.ApplicationCommands;
 namespace AGC_Management.Eventlistener;
 
 [EventHandler]
-public class OnApplyComponentInteraction : BaseCommandModule
+public sealed class OnApplyComponentInteraction : BaseCommandModule
 {
     [Event]
-    public async Task ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
+    public Task ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
     {
         _ = Task.Run(async () =>
             {
