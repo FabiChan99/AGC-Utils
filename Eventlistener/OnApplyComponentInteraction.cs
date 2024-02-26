@@ -76,7 +76,7 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                 
             }
         );
-        
+        return Task.CompletedTask;
     }
     
     
