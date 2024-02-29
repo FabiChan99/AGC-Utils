@@ -63,39 +63,6 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
             }
         );
 
-        _ = Task.Run(async () =>
-            {
-                var cid = args.Interaction.Data.CustomId;
-                if (!cid.StartsWith("bewerben_")) return;
-                var why = args.Interaction.Data.Components[0].Value;
-                var randomid = new Random();
-                var ncid = randomid.Next(100000, 999999).ToString();
-                var embed = new DiscordEmbedBuilder();
-                var str = new StringBuilder();
-                str.AppendLine(why);
-                var str_as_base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(str.ToString()));
-                var position = cid.Split("_")[1];
-                embed.WithTitle("Bewerbung");
-                embed.WithDescription("Deine Bewerbung wurde erfolgreich abgeschickt!");
-                embed.WithColor(DiscordColor.Gold);
-
-                var unixnow = DateTimeOffset.Now.ToUnixTimeSeconds();
-
-                //                 "CREATE TABLE IF NOT EXISTS bewerbungen (bewerbungsid TEXT, userid BIGINT, positionname TEXT, status INTEGER DEFAULT 0, timestamp BIGINT, bewerbungstext TEXT, seenby BIGINT[] DEFAULT '{}')"
-
-                var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-                await using var command =
-                    db.CreateCommand(
-                        "INSERT INTO bewerbungen (bewerbungsid, userid, positionname, status, timestamp, bewerbungstext) VALUES (@bewerbungsid, @userid, @positionname, @status, @timestamp, @bewerbungstext)");
-                command.Parameters.AddWithValue("bewerbungsid", $"{position}_{ncid}");
-                command.Parameters.AddWithValue("userid", (long)args.User.Id);
-                command.Parameters.AddWithValue("positionname", position);
-                command.Parameters.AddWithValue("status", 0);
-                command.Parameters.AddWithValue("timestamp", unixnow);
-                command.Parameters.AddWithValue("bewerbungstext", str_as_base64);
-                await command.ExecuteNonQueryAsync();
-            }
-        );
         return Task.CompletedTask;
     }
     
