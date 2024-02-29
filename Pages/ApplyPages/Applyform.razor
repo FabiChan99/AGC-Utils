@@ -23,9 +23,13 @@ else if (stage == 0)
 else if (stage == 2)
 {
     <h5>Viel Glück!</h5>
+    @if (fewChars && Bewerbungstext.Length < MinBewerbungstextLength)
+    {
+        <p class="alert alert-warning-glass">Der Bewerbungstext muss mindestens @MinBewerbungstextLength Zeichen lang sein. Aktuell sind es @Bewerbungstext.Length Zeichen.</p>
+    }
     <div class="d-flex justify-content-center mt-4">
         <div class="form-group w-75">
-            <textarea class="form-control glassy-input" id="Bewerbungstext" rows="30" @bind="Bewerbungstext"></textarea>
+            <textarea class="form-control glassy-input" id="Bewerbungstext" rows="25" @bind="Bewerbungstext"></textarea>
 
             <button class="btn btn-primary-glass mt-2 mb-2" @onclick="SubmitApplication">Bewerbung abschicken</button>
 
@@ -43,20 +47,22 @@ else
 
 
 @code {
-    
+
     [Parameter] public string positionid { get; set; }
     private int stage = 0;
     private bool posfound = false;
     private bool loaded = false;
     private string PositionName = "Not Found";
-    
+    private const int MinBewerbungstextLength = 100;
+    private bool fewChars = false;
+
     private string Bewerbungstext = "";
-    
+
     private ApplicationPosition? position;
-    
-    
-    
-    
+
+
+
+
     override protected async Task OnInitializedAsync()
     {
         await LoadRequestedPosition();
@@ -66,9 +72,15 @@ else
             PositionName = position.PositionName;
         }
     }
-    
+
     private async Task SubmitApplication()
     {
+        fewChars = Bewerbungstext.Length < MinBewerbungstextLength;
+        if (fewChars)
+        {
+            return;
+        }
+
         // CREATE TABLE IF NOT EXISTS bewerbungen (bewerbungsid TEXT, userid BIGINT, positionname TEXT, status INTEGER DEFAULT 0, timestamp BIGINT, bewerbungstext TEXT, seenby BIGINT[] DEFAULT '{}')
         var base64text = Convert.ToBase64String(Encoding.UTF8.GetBytes(Bewerbungstext));
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -82,8 +94,8 @@ else
         await command.ExecuteNonQueryAsync();
         stage = 3;
     }
-    
-    
+
+
     private async Task LoadRequestedPosition()
     {
         var positionid = this.positionid;
@@ -105,8 +117,9 @@ else
             {
                 stage = 1;
             }
+
             posfound = true;
-            
+
         }
         else
         {
@@ -114,6 +127,4 @@ else
             posfound = false;
         }
     }
-    
-    
 }
