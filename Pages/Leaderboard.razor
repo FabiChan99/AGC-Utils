@@ -1,7 +1,7 @@
 ﻿@page "/Leaderboard"
 @using AGC_Management.Entities.Web
 @using AGC_Management.Utils
-@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, HeadEventmanager, Team, User")]
 @inject IHttpContextAccessor HttpContextAccessor
 
 @if (LevelUtils.LeaderboardDataLoaded)

@@ -230,6 +230,12 @@ public sealed class AuthUtils
             return AccessLevel.Supporter.ToString();
         }
 
+        var eventmanagerRole = guild.Roles.Values.FirstOrDefault(x => x.Name.ToLower().Contains("head event manager"));
+        if (eventmanagerRole != null && user.Roles.Contains(eventmanagerRole))
+        {
+            return AccessLevel.HeadEventmanager.ToString();
+        }
+
         // staff
         if (user.Roles.Contains(staffRole))
         {

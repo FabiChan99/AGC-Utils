@@ -131,6 +131,7 @@ internal class Program : BaseCommandModule
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
         });
+        
         builder.Services.AddAuthentication(opt =>
             {
                 opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -162,7 +163,6 @@ internal class Program : BaseCommandModule
                 x.ClaimActions.MapCustomJson("FullQualifiedDiscordName",
                     element => { return AuthUtils.RetrieveName(element).Result; });
             });
-        builder.Services.AddAuthorization();
 
         ILoggerFactory loggerFactory = null;
         if (loglevel == LogEventLevel.Debug)
