@@ -19,7 +19,6 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                 if (cid != "applypanelselector") return;
                 var randomid = new Random();
                 var ncid = randomid.Next(100000, 999999).ToString();
-                DiscordInteractionModalBuilder modal = new();
                 var pos = $"{values[0].Substring(0, 1).ToUpper()}{values[0].Substring(1)}";
                 var applicable = await isApplicable(pos.ToLower());
                 Console.WriteLine(applicable);
@@ -33,16 +32,34 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                         new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
                     return;
                 }
+                bool useHttps;
+                try
+                {
+                    useHttps = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]);
+                }
+                catch
+                {
+                    useHttps = false;
+                }
 
-                modal.WithTitle("Bewerbung für ");
-                modal.CustomId = cid;
-                modal.AddTextComponent(new DiscordTextComponent(TextComponentStyle.Paragraph,
-                    label: "Bewerbungstext", minLength: 200, maxLength: 4000, required: true,
-                    placeholder: "Geb hier deinen Bewerbungstext ein"));
-                modal.CustomId = "bewerben_" + $"{pos}";
-
-
-                await args.Interaction.CreateInteractionModalResponseAsync(modal);
+                string dashboardUrl;
+                try
+                {
+                    dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
+                }
+                catch
+                {
+                    dashboardUrl = "localhost";
+                }
+                
+                var url = $"{(useHttps ? "https" : "http")}://{dashboardUrl}/apply/{pos.ToLower()}";
+                var _embed = new DiscordEmbedBuilder();
+                _embed.WithTitle("Bewerbung");
+                _embed.WithDescription($"[Klicke hier um dich für die Position ``{pos}`` zu bewerben]({url})");
+                _embed.WithColor(DiscordColor.Green);
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AddEmbed(_embed).AsEphemeral());
+                
             }
         );
 
@@ -81,7 +98,7 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
         );
         return Task.CompletedTask;
     }
-
+    
 
     private static async Task<bool> isApplicable(string Position)
     {

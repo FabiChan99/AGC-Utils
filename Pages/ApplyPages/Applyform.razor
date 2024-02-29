@@ -1,0 +1,119 @@
+﻿@page "/apply/{positionid}"
+@using AGC_Management.Entities
+@using AGC_Management.Controller
+@using System.Text
+@inject IHttpContextAccessor HttpContextAccessor
+@inject UserService UserService
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, Team, User")]
+<h3>Bewerbungsformular: @PositionName</h3>
+
+
+@if (!loaded)
+{
+    <p>Loading...</p>
+}
+else if (stage == 1)
+{
+<p class="alert alert-danger-glass mt-1">Diese Position ist aktuell nicht bewerbbar</p>
+}
+else if (stage == 0)
+{
+    <p class="alert alert-danger-glass">Position nicht gefunden</p>
+}
+else if (stage == 2)
+{
+    <h5>Viel Glück!</h5>
+    <div class="d-flex justify-content-center mt-4">
+        <div class="form-group w-75">
+            <textarea class="form-control glassy-input" id="Bewerbungstext" rows="30" @bind="Bewerbungstext"></textarea>
+
+            <button class="btn btn-primary-glass mt-2 mb-2" @onclick="SubmitApplication">Bewerbung abschicken</button>
+
+        </div>
+    </div>
+}
+else if (stage == 3)
+{
+    <p class="alert alert-success-glass">Bewerbung erfolgreich abgeschickt</p>
+}
+else
+{
+    <p>Unknown error</p>
+}
+
+
+@code {
+    
+    [Parameter] public string positionid { get; set; }
+    private int stage = 0;
+    private bool posfound = false;
+    private bool loaded = false;
+    private string PositionName = "Not Found";
+    
+    private string Bewerbungstext = "";
+    
+    private ApplicationPosition? position;
+    
+    
+    
+    
+    override protected async Task OnInitializedAsync()
+    {
+        await LoadRequestedPosition();
+        loaded = true;
+        if (posfound && position != null)
+        {
+            PositionName = position.PositionName;
+        }
+    }
+    
+    private async Task SubmitApplication()
+    {
+        // CREATE TABLE IF NOT EXISTS bewerbungen (bewerbungsid TEXT, userid BIGINT, positionname TEXT, status INTEGER DEFAULT 0, timestamp BIGINT, bewerbungstext TEXT, seenby BIGINT[] DEFAULT '{}')
+        var base64text = Convert.ToBase64String(Encoding.UTF8.GetBytes(Bewerbungstext));
+        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var command = db.CreateCommand();
+        command.CommandText = "INSERT INTO bewerbungen (bewerbungsid, userid, positionname, timestamp, bewerbungstext) VALUES (@bewerbungsid, @userid, @positionname, @timestamp, @bewerbungstext)";
+        command.Parameters.AddWithValue("bewerbungsid", Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("userid", long.Parse(UserService.GetUserId(HttpContextAccessor.HttpContext).ToString()));
+        command.Parameters.AddWithValue("positionname", PositionName);
+        command.Parameters.AddWithValue("timestamp", DateTimeOffset.Now.ToUnixTimeSeconds());
+        command.Parameters.AddWithValue("bewerbungstext", base64text);
+        await command.ExecuteNonQueryAsync();
+        stage = 3;
+    }
+    
+    
+    private async Task LoadRequestedPosition()
+    {
+        var positionid = this.positionid;
+        var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
+        await using var command = db.CreateCommand();
+        command.CommandText = "SELECT * FROM applicationcategories WHERE positionid = @id";
+        command.Parameters.AddWithValue("id", positionid);
+        await using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            position = new ApplicationPosition()
+            {
+                PositionName = reader.GetString(0),
+                PositionId = reader.GetString(1),
+                IsApplicable = reader.GetBoolean(2),
+            };
+            stage = 2;
+            if (!position.IsApplicable)
+            {
+                stage = 1;
+            }
+            posfound = true;
+            
+        }
+        else
+        {
+            stage = 0;
+            posfound = false;
+        }
+    }
+    
+    
+}
