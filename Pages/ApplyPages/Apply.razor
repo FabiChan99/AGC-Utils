@@ -14,7 +14,7 @@
                 <th>Position</th>
 
                 <th>Bewerbbar?</th>
-                                <th>Bewerben</th>
+                <th>Bewerben</th>
             </tr>
             </thead>
             <tbody>
@@ -27,13 +27,14 @@
                         <span class="@GetBoolCSSClass(position.IsApplicable)">@BoolToString(position.IsApplicable)</span>
                     </td>                    
                     <td>
-                     <button class="btn btn-primary-glass" onclick="window.location.href='/apply/@position.PositionId'">Bewerben</button>
-                 </td>
+                        <button class="btn btn-primary-glass" onclick="window.location.href='/apply/@position.PositionId'">Bewerben</button>
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
+    <div class="mt-3">Bitte beachte die Bewerbungsanforderungen auf dem Server</div>
 </div>
 </div>
 
