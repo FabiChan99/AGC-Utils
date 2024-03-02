@@ -156,6 +156,7 @@ internal class Program : BaseCommandModule
                 x.Scope.Add("guilds");
                 x.AccessDeniedPath = "/OAuthError";
                 x.SaveTokens = true;
+                x.Prompt = DiscordOptions.PromptTypes.None;
                 x.ClaimActions.MapCustomJson(ClaimTypes.NameIdentifier,
                     element => { return AuthUtils.RetrieveId(element).Result; });
                 x.ClaimActions.MapCustomJson(ClaimTypes.Role,
