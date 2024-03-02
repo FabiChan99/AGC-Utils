@@ -74,8 +74,7 @@ public sealed class AuthUtils
 
         try
         {
-            var headmodroleid =
-                ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
+            ulong headmodroleid = 817732206876688387;
             var headmodrole = guild.GetRole(headmodroleid);
             if (user.Roles.Contains(headmodrole))
             {
@@ -211,8 +210,7 @@ public sealed class AuthUtils
 
         try
         {
-            var headmodroleid =
-                ulong.Parse(await CachingService.GetCacheValue(CustomDatabaseCacheType.GuildCache, "headmodroleid"));
+            ulong headmodroleid = 817732206876688387;
             var headmodrole = guild.GetRole(headmodroleid);
             if (user.Roles.Contains(headmodrole))
             {
