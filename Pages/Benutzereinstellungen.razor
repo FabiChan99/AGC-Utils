@@ -3,7 +3,7 @@
 @using AGC_Management.Utils
 @inject UserService UserService
 @inject IHttpContextAccessor httpContextAccessor
-@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, HeadEventmanager, Team, User")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadModerator, Moderator, Supporter, HeadEventmanager, Team, User")]
 
 @if (loaded)
 {

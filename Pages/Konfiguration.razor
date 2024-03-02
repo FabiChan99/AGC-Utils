@@ -1,5 +1,5 @@
 ﻿@page "/Konfiguration"
-@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadModerator")]
 
 <h1>Administration</h1>
 
@@ -11,7 +11,7 @@
             <div class="glass-card">
                 <div class="card-body">
                     <h5 class="card-title">Bewerbungssystemkonfiguration</h5>
-                    <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                    <AuthorizeView Roles="BotOwner, Administrator, HeadModerator">
                         <a href="/konfiguration/applysystem/modifypanelmessage" class="btn btn-primary-glass">Panel Text bearbeiten</a>
                     </AuthorizeView>
                 </div>

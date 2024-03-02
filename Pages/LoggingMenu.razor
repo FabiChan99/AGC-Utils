@@ -1,6 +1,6 @@
 ﻿@page "/logs"
 
-@attribute [Authorize(Roles = "BotOwner, Administrator, HeadMod, Moderator, Supporter, HeadEventmanager, Team")]
+@attribute [Authorize(Roles = "BotOwner, Administrator, HeadModerator, Moderator, Supporter, HeadEventmanager, Team")]
 
 <h1>Logging</h1>
 
@@ -22,7 +22,7 @@
         <div class="glass-card">
             <div class="card-body">
                 <h5 class="card-title">Levelsystem Logs</h5>
-                <AuthorizeView Roles="BotOwner, Administrator, HeadMod">
+                <AuthorizeView Roles="BotOwner, Administrator, HeadModerator">
                     <a href="/logs/levelsystem/xptransferlogs" class="btn btn-primary-glass">XP Transfers</a>
                 </AuthorizeView>
             </div>
@@ -32,7 +32,7 @@
         <div class="glass-card">
             <div class="card-body">
                 <h5 class="card-title">Moderation Logs</h5>
-                <AuthorizeView Roles="BotOwner, Administrator, HeadMod, Moderator, Supporter">
+                <AuthorizeView Roles="BotOwner, Administrator, HeadModerator, Moderator, Supporter">
                     <a href="/logs/moderation/banlogs" class="btn btn-primary-glass">Banns</a>
                 </AuthorizeView>
             </div>
