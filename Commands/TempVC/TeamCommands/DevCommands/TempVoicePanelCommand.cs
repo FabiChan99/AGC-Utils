@@ -63,7 +63,7 @@ public sealed class TempVoicePanel : TempVoiceHelper
             Description =
                 $"Hier kannst du die Einstellungen deines Temporären Kanals verändern. \nDu kannst auch Commands in <#{BotConfig.GetConfig()["TempVC"]["CommandChannel_ID"]}> verwenden.",
             Color = BotConfig.GetEmbedColor(),
-            ImageUrl = "https://cdn.discordapp.com/attachments/764921088689438771/1115554368574476288/panel.png"
+            ImageUrl = "https://files.fabi-chan.me/resources/agc/tempvoice/%C3%BCbersicht.png"
         };
         DiscordMessageBuilder dmb = new DiscordMessageBuilder().AddComponents(rowComponents).AddEmbed(eb.Build());
         var msg = await ctx.Channel.SendMessageAsync(dmb);
