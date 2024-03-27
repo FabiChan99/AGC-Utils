@@ -23,7 +23,7 @@ public sealed class UserInfoCommand : BaseCommandModule
         DiscordMember member = null;
         try
         {
-            member = await ctx.Guild.GetMemberAsync(user.Id);
+            member = await ctx.Guild.GetMemberAsync(user.Id, true);
             isMember = true;
         }
         catch (NotFoundException)
