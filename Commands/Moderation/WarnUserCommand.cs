@@ -79,7 +79,7 @@ public sealed class WarnUserCommand : BaseCommandModule
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
             var loadingEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle("Varwarnung wird bearbeitet")
+                .WithTitle("Verwarnung wird bearbeitet")
                 .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                 .WithDescription("Die Verwarnung wird bearbeitet. Bitte warten...")
                 .WithColor(DiscordColor.Yellow);

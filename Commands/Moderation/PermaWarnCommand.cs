@@ -79,7 +79,7 @@ public sealed class PermaWarnCommand : BaseCommandModule
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
             var loadingEmbedBuilder = new DiscordEmbedBuilder()
-                .WithTitle("Permanente Varwarnung wird bearbeitet")
+                .WithTitle("Permanente Verwarnung wird bearbeitet")
                 .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                 .WithDescription("Die Permanente Verwarnung wird bearbeitet. Bitte warten...")
                 .WithColor(DiscordColor.Yellow);
