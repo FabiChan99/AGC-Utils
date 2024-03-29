@@ -39,6 +39,7 @@ public static class ErrorReporting
         catch (Exception)
         {
         }
+        SentrySdk.CaptureException(exception);
 
         CurrentApplication.DiscordClient.Logger.LogError(
             $"Exception occured: {exception.GetType()}: {exception.Message}");
@@ -76,6 +77,7 @@ public static class ErrorReporting
         {
             await SendErrorToDev(client, exception);
         }
+        SentrySdk.CaptureException(exception);
 
         CurrentApplication.DiscordClient.Logger.LogError(
             $"Exception occured: {exception.GetType()}: {exception.Message}");

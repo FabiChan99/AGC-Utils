@@ -20,6 +20,7 @@ using Discord.OAuth2;
 using KawaiiAPI.NET;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Sentry;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -50,6 +51,14 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
+        SentrySdk.Init(o =>
+        {
+            o.Dsn = BotConfig.GetConfig()["MainConfig"]["SentryDSN"];
+            o.Debug = true;
+            o.AutoSessionTracking = true;
+            o.IsGlobalModeEnabled = true;
+            o.EnableTracing = true;
+        });
         LogEventLevel loglevel;
         try
         {
@@ -102,6 +111,7 @@ internal class Program : BaseCommandModule
             }
             catch
             {
+                SentrySdk.CaptureMessage("Discord API Token could not be loaded.");
                 logger.Fatal(
                     "Der Discord API Token konnte nicht geladen werden.");
                 logger.Fatal("Drücke eine beliebige Taste um das Programm zu beenden.");
