@@ -283,7 +283,8 @@ public class TicketManagerHelper
                 .WithDescription(
                     $"Hey! Danke fürs öffnen eines Report-Tickets. Ein Teammitglied wird sich gleich um dein Anliegen kümmern. Bitte teile uns in der Zeit alle nötigen Infos mit.\n" +
                     $"1. Um wen geht es (User-ID oder User-Name)\n" +
-                    $"2. Was ist vorgefallen (Bitte versuche die Situation so ausführlich wie möglich zu beschreiben) {GenerateAdditionalNotes()}");
+                    $"2. Was ist vorgefallen (Bitte versuche die Situation so ausführlich wie möglich zu beschreiben)\n " +
+                    $"3. Hast du eventuelle Beweise? {GenerateAdditionalNotes()}");
             await ticket_channel.SendMessageAsync(eb);
         }
         else if (ticketType == TicketType.Support)
