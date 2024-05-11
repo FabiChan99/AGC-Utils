@@ -23,8 +23,21 @@ public class AutoModAlert : BaseCommandModule
                 return;
             }
             var embed = new DiscordEmbedBuilder();
+            embed.AddField(new DiscordEmbedField("channel", args.Channel.Mention));
+
+            foreach (var field in args.Message.Embeds[0].Fields)
+            {
+                if (field.Name is "rule_name" or "decision_id" or "channel_id")
+                {
+                    continue;
+                }
+                embed.AddField(field);
+            }
+            
+            
+            
             embed.WithTitle("AutoMod Alert");
-            embed.WithDescription($"AutoMod Alert: {args.Message.Content}");
+            embed.WithFooter("Author: " + args.Author.Username + $" {args.Author.Id}");
             embed.WithColor(DiscordColor.Red);
             var channel = await client.GetChannelAsync(ulong.Parse(AutoModAlertChannelId));
             await channel.SendMessageAsync(embed: embed);
