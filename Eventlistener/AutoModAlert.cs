@@ -1,27 +1,37 @@
-﻿namespace AGC_Management.Eventlistener
+﻿
+namespace AGC_Management.Eventlistener
 {
     [EventHandler]
     public class AutoModAlert : BaseCommandModule
     {
-        private static readonly Queue<Func<Task>> sendQueue = new();
+        private static readonly Queue<Task> sendQueue = new();
         private static Timer timer;
 
-        String AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
-        String AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
-        Boolean AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
+        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
+        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
+        private readonly bool AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
 
         public AutoModAlert()
         {
             timer = new Timer(SendAlertFromQueue, null, Timeout.Infinite, Timeout.Infinite);
         }
 
+        public static void QueueSendAlert(Task alertTask)
+        {
+            sendQueue.Enqueue(alertTask);
+            if (sendQueue.Count == 1)
+            {
+                timer.Change(0, Timeout.Infinite);
+            }
+        }
+
         private static void SendAlertFromQueue(object state)
         {
             if (sendQueue.Count > 0)
             {
-                var taskFunc = sendQueue.Dequeue();
-                var task = taskFunc();
-                
+                var task = sendQueue.Dequeue();
+                task.Start();
+
                 task.ContinueWith(_ =>
                 {
                     if (sendQueue.Count > 0)
@@ -44,10 +54,9 @@
                 return Task.CompletedTask;
             }
 
-            sendQueue.Enqueue(async () =>
+            var alertTask = new Task(async () =>
             {
                 var embed = new DiscordEmbedBuilder();
-                embed.AddField(new DiscordEmbedField("channel", args.Channel.Mention));
 
                 foreach (var field in args.Message.Embeds[0].Fields)
                 {
@@ -57,18 +66,22 @@
                     }
                     embed.AddField(field);
                 }
+                
+                if (args.Message.Embeds[0].Fields.Any(x => x.Name == "channel_id"))
+                {
+                    var channelId = args.Message.Embeds[0].Fields.First(x => x.Name == "channel_id").Value;
+                    embed.AddField(new DiscordEmbedField("Channel", $"<#{channelId}>"));
+                }
 
                 embed.WithTitle("AutoMod Alert");
-                embed.WithFooter("Author: " + args.Author.Username + $" {args.Author.Id}");
+                embed.WithFooter($"Author: {args.Author.Username} {args.Author.Id}");
                 embed.WithColor(DiscordColor.Red);
+
                 var channel = await client.GetChannelAsync(ulong.Parse(AutoModAlertChannelId));
                 await channel.SendMessageAsync(embed: embed);
             });
 
-            if (sendQueue.Count == 1)
-            {
-                timer.Change(0, Timeout.Infinite);
-            }
+            QueueSendAlert(alertTask);
 
             return Task.CompletedTask;
         }
