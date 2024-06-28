@@ -1,16 +1,30 @@
-﻿
-namespace AGC_Management.Eventlistener
+﻿namespace AGC_Management.Eventlistener
 {
     [EventHandler]
     public class AutoModAlert : BaseCommandModule
     {
-        private static readonly Queue<Task> sendQueue = new();
-        private static Timer timer;
+        private static readonly List<Task> sendQueue = new();
+        private static Timer? timer;
+        private static readonly object queueLock = new();
 
-        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
-        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
-        private readonly bool AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
-
+        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"] ?? "0";
+        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"] ?? "0";
+        private readonly bool AutoModAlertActive = ParseOrFalse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"], out var result) && result;
+        
+        private static bool ParseOrFalse(string value, out bool result)
+        {
+            try
+            {
+                result = bool.Parse(value);
+                return true;
+            }
+            catch
+            {
+                result = false;
+                return false;
+            }
+        }
+        
         public AutoModAlert()
         {
             timer = new Timer(SendAlertFromQueue, null, Timeout.Infinite, Timeout.Infinite);
@@ -18,31 +32,45 @@ namespace AGC_Management.Eventlistener
 
         public static void QueueSendAlert(Task alertTask)
         {
-            sendQueue.Enqueue(alertTask);
-            if (sendQueue.Count == 1)
+            lock (queueLock)
             {
-                timer.Change(0, Timeout.Infinite);
+                sendQueue.Add(alertTask);
+                if (sendQueue.Count == 1)
+                {
+                    timer.Change(0, Timeout.Infinite);
+                }
             }
         }
 
-        private static void SendAlertFromQueue(object state)
+        private static async void SendAlertFromQueue(object state)
         {
-            if (sendQueue.Count > 0)
+            List<Task> tasksToExecute;
+            lock (queueLock)
             {
-                var task = sendQueue.Dequeue();
-                task.Start();
+                tasksToExecute = new List<Task>(sendQueue);
+                sendQueue.Clear();
+            }
 
-                task.ContinueWith(_ =>
+            if (tasksToExecute.Count > 0)
+            {
+                foreach (var task in tasksToExecute)
                 {
-                    if (sendQueue.Count > 0)
-                    {
-                        timer.Change(5000, Timeout.Infinite);
-                    }
-                    else
-                    {
-                        timer.Change(Timeout.Infinite, Timeout.Infinite);
-                    }
-                });
+                    task.Start();
+                }
+
+                await Task.WhenAll(tasksToExecute);
+            }
+
+            lock (queueLock)
+            {
+                if (sendQueue.Count > 0)
+                {
+                    timer.Change(10000, Timeout.Infinite);
+                }
+                else
+                {
+                    timer.Change(Timeout.Infinite, Timeout.Infinite);
+                }
             }
         }
 
@@ -66,7 +94,7 @@ namespace AGC_Management.Eventlistener
                     }
                     embed.AddField(field);
                 }
-                
+
                 if (args.Message.Embeds[0].Fields.Any(x => x.Name == "channel_id"))
                 {
                     var channelId = args.Message.Embeds[0].Fields.First(x => x.Name == "channel_id").Value;
