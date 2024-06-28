@@ -3,28 +3,14 @@
     [EventHandler]
     public class AutoModAlert : BaseCommandModule
     {
-        private static readonly List<Task> sendQueue = new();
-        private static Timer? timer;
+        private static readonly Queue<Task> sendQueue = new();
+        private static Timer timer;
         private static readonly object queueLock = new();
 
-        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"] ?? "0";
-        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"] ?? "0";
-        private readonly bool AutoModAlertActive = ParseOrFalse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"], out var result) && result;
-        
-        private static bool ParseOrFalse(string value, out bool result)
-        {
-            try
-            {
-                result = bool.Parse(value);
-                return true;
-            }
-            catch
-            {
-                result = false;
-                return false;
-            }
-        }
-        
+        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
+        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
+        private readonly bool AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
+
         public AutoModAlert()
         {
             timer = new Timer(SendAlertFromQueue, null, Timeout.Infinite, Timeout.Infinite);
@@ -34,7 +20,7 @@
         {
             lock (queueLock)
             {
-                sendQueue.Add(alertTask);
+                sendQueue.Enqueue(alertTask);
                 if (sendQueue.Count == 1)
                 {
                     timer.Change(0, Timeout.Infinite);
@@ -42,35 +28,67 @@
             }
         }
 
-        private static async void SendAlertFromQueue(object state)
+        private static void SendAlertFromQueue(object state)
         {
-            List<Task> tasksToExecute;
+            Task[] tasksToExecute;
+
             lock (queueLock)
             {
-                tasksToExecute = new List<Task>(sendQueue);
+                tasksToExecute = sendQueue.ToArray();
                 sendQueue.Clear();
             }
 
-            if (tasksToExecute.Count > 0)
+            if (tasksToExecute.Length > 0)
             {
-                foreach (var task in tasksToExecute)
+                var combinedTask = new Task(async () =>
                 {
-                    task.Start();
-                }
+                    var client = tasksToExecute.First().AsyncState as DiscordClient;
+                    var embed = new DiscordEmbedBuilder().WithTitle("AutoMod Alert").WithColor(DiscordColor.Red);
 
-                await Task.WhenAll(tasksToExecute);
-            }
+                    foreach (var task in tasksToExecute)
+                    {
+                        var messageTask = task as Task<MessageCreateEventArgs>;
+                        if (messageTask != null)
+                        {
+                            var args = await messageTask;
+                            foreach (var field in args.Message.Embeds[0].Fields)
+                            {
+                                if (field.Name is "rule_name" or "decision_id" or "channel_id")
+                                {
+                                    continue;
+                                }
+                                embed.AddField(field);
+                            }
 
-            lock (queueLock)
-            {
-                if (sendQueue.Count > 0)
+                            if (args.Message.Embeds[0].Fields.Any(x => x.Name == "channel_id"))
+                            {
+                                var channelId = args.Message.Embeds[0].Fields.First(x => x.Name == "channel_id").Value;
+                                embed.AddField(new DiscordEmbedField("Channel", $"<#{channelId}>"));
+                            }
+
+                            embed.WithFooter($"Author: {args.Author.Username} {args.Author.Id}");
+                        }
+                    }
+
+                    var channel = await client.GetChannelAsync(ulong.Parse(AutoModAlertChannelId));
+                    await channel.SendMessageAsync(embed: embed);
+                });
+
+                combinedTask.Start();
+                combinedTask.ContinueWith(_ =>
                 {
-                    timer.Change(10000, Timeout.Infinite);
-                }
-                else
-                {
-                    timer.Change(Timeout.Infinite, Timeout.Infinite);
-                }
+                    lock (queueLock)
+                    {
+                        if (sendQueue.Count > 0)
+                        {
+                            timer.Change(10000, Timeout.Infinite);
+                        }
+                        else
+                        {
+                            timer.Change(Timeout.Infinite, Timeout.Infinite);
+                        }
+                    }
+                });
             }
         }
 
@@ -82,32 +100,10 @@
                 return Task.CompletedTask;
             }
 
-            var alertTask = new Task(async () =>
+            var alertTask = new Task<MessageCreateEventArgs>(() => args)
             {
-                var embed = new DiscordEmbedBuilder();
-
-                foreach (var field in args.Message.Embeds[0].Fields)
-                {
-                    if (field.Name is "rule_name" or "decision_id" or "channel_id")
-                    {
-                        continue;
-                    }
-                    embed.AddField(field);
-                }
-
-                if (args.Message.Embeds[0].Fields.Any(x => x.Name == "channel_id"))
-                {
-                    var channelId = args.Message.Embeds[0].Fields.First(x => x.Name == "channel_id").Value;
-                    embed.AddField(new DiscordEmbedField("Channel", $"<#{channelId}>"));
-                }
-
-                embed.WithTitle("AutoMod Alert");
-                embed.WithFooter($"Author: {args.Author.Username} {args.Author.Id}");
-                embed.WithColor(DiscordColor.Red);
-
-                var channel = await client.GetChannelAsync(ulong.Parse(AutoModAlertChannelId));
-                await channel.SendMessageAsync(embed: embed);
-            });
+                AsyncState = client
+            };
 
             QueueSendAlert(alertTask);
 
