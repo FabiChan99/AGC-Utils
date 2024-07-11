@@ -71,7 +71,7 @@ public class StatsCommand : BaseCommandModule
         istring += $"CPU Cores: **{cpu}**\n";
 
         // Bot owner details
-        DiscordUser botowner = ctx.Client.CurrentApplication.Owners.First();
+        DiscordUser botowner = ctx.Client.CurrentApplication.Owner;
         istring += $"Bot Owner: **{botowner.UsernameWithDiscriminator}** ``{botowner.Id}``\n";
 
         embed.WithDescription(istring);
