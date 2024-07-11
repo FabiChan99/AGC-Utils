@@ -415,18 +415,9 @@ public static class ToolSet
             return 0;
         }
 
-        if (hasClosedPendingTicket)
-        {
-            return 0;
-        }
-
-        return DaysToSeconds(7);
+        return hasClosedPendingTicket ? 0 : 7;
     }
     
-    private static int DaysToSeconds(int days)
-    {
-        return days * 86400;
-    }
 
     public static async Task SendWarnAsChannel(CommandContext ctx, DiscordUser user, DiscordEmbed uembed, string caseid)
     {
