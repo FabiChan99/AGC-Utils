@@ -6,12 +6,24 @@
         private static readonly Queue<Task> sendQueue = new();
         private static Timer timer;
 
-        private readonly string AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
-        private readonly string AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
-        private readonly bool AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
+        private readonly string AutoModAlertChannelId = 0.ToString();
+        private readonly string AutoModChannelId = 0.ToString();
+        private readonly bool AutoModAlertActive = false;
 
         public AutoModAlert()
         {
+            try
+            {
+                AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
+                AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
+                AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
+                AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
+            }
+            catch
+            {
+                CurrentApplication.Logger.Error("Failed to load AutoModNotify config");
+            }
+
             timer = new Timer(SendAlertFromQueue, null, Timeout.Infinite, Timeout.Infinite);
         }
 
