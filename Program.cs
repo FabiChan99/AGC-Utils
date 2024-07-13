@@ -52,14 +52,6 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
-        SentrySdk.Init(o =>
-        {
-            o.Dsn = BotConfig.GetConfig()["MainConfig"]["SentryDSN"];
-            o.Debug = true;
-            o.AutoSessionTracking = true;
-            o.IsGlobalModeEnabled = true;
-            o.EnableTracing = true;
-        });
         LogEventLevel loglevel;
         try
         {
@@ -95,6 +87,18 @@ internal class Program : BaseCommandModule
         catch
         {
             DebugMode = false;
+        }
+
+        if (!DebugMode)
+        {
+            SentrySdk.Init(o =>
+            {
+                o.Dsn = BotConfig.GetConfig()["MainConfig"]["SentryDSN"];
+                o.Debug = true;
+                o.AutoSessionTracking = true;
+                o.IsGlobalModeEnabled = true;
+                o.EnableTracing = true;
+            });
         }
 
         string DcApiToken = "";
@@ -282,6 +286,7 @@ internal class Program : BaseCommandModule
         _ = CheckVCLevellingTask.Run();
         _ = GetVoiceMetrics.LaunchLoops();
         _ = LevelUtils.RunLeaderboardUpdate();
+        _ = TicketSearchTools.LoadTicketsIntoCache();
 
         return Task.CompletedTask;
     }
