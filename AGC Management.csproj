@@ -22,15 +22,15 @@
         <PackageReference Include="Blazorise.Bootstrap5" Version="1.5.3" />
         <PackageReference Include="Blazorise.Components" Version="1.5.3" />
         <PackageReference Include="Blazorise.Snackbar" Version="1.5.3" />
-        <PackageReference Include="DisCatSharp" Version="10.6.5-nightly-004" />
+        <PackageReference Include="DisCatSharp" Version="10.6.5-nightly-006" />
         <PackageReference Include="DisCatSharp.Analyzer.Roselyn" Version="6.2.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.5-nightly-004" />
-        <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.5-nightly-004" />
-        <PackageReference Include="DisCatSharp.Common" Version="10.6.5-nightly-004" />
-        <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.5-nightly-004" />
+        <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.6.5-nightly-006" />
+        <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.5-nightly-006" />
+        <PackageReference Include="DisCatSharp.Common" Version="10.6.5-nightly-006" />
+        <PackageReference Include="DisCatSharp.Interactivity" Version="10.6.5-nightly-006" />
         <PackageReference Include="Discord.OAuth2.AspNetCore" Version="3.0.0" />
         <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
         <PackageReference Include="ini-parser-new" Version="2.6.2" />
@@ -39,19 +39,19 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.9.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.10.0" />
         <PackageReference Include="Npgsql" Version="8.0.3" />
-        <PackageReference Include="RestSharp" Version="111.2.0" />
-        <PackageReference Include="Sentry" Version="4.8.1" />
+        <PackageReference Include="RestSharp" Version="111.4.0" />
+        <PackageReference Include="Sentry" Version="4.9.0" />
         <PackageReference Include="Serilog" Version="4.0.0" />
-        <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
+        <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
-        <PackageReference Include="Serilog.Formatting.Compact" Version="2.0.0" />
+        <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
         <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-        <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
         <PackageReference Include="SkiaSharp" Version="2.88.8" />
     </ItemGroup>
