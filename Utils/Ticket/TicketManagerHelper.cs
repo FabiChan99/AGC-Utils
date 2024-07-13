@@ -1159,6 +1159,8 @@ public class TicketManagerHelper
 
         await process.WaitForExitAsync();
         var baselink = $"https://ticketsystem.animegamingcafe.de/transcripts/" + $"{tick}-{id}.html";
+        
+        _ = TicketSearchTools.LoadSingleTicketIntoCache($"{tick}-{id}.html");
 
         return baselink;
     }
