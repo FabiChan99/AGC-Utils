@@ -239,11 +239,12 @@ internal class Program : BaseCommandModule
             EnableDefaultHelp = bool.Parse(BotConfig.GetConfig()["MainConfig"]["EnableBuiltInHelp"] ?? "false")
         });
         discord.ClientErrored += Discord_ClientErrored;
+        discord.ComponentInteractionCreated += Client_ComponentInteractionCreatedAsync;
         commands.CommandExecuted += LogCommandExecution;
 
         discord.UseInteractivity(new InteractivityConfiguration
         {
-            Timeout = TimeSpan.FromMinutes(2)
+            Timeout = TimeSpan.FromMinutes(2),
         });
         commands.RegisterCommands(Assembly.GetExecutingAssembly());
         var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration
@@ -266,6 +267,21 @@ internal class Program : BaseCommandModule
             await discord.GetGuildAsync(ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]));
         _ = RunAspAsync(builder.Build());
         await Task.Delay(-1);
+    }
+    
+    private static async Task Client_ComponentInteractionCreatedAsync(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+    {
+        if (e.Id == "pgb-skip-left" || e.Id == "pgb-skip-right" || e.Id == "pgb-right" || e.Id == "pgb-left" || e.Id == "pgb-stop" || e.Id == "leftskip" || e.Id == "rightskip" || e.Id == "stop" || e.Id == "left" || e.Id == "right")
+        {
+            try
+            {
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            }
+            catch (Exception ex)
+            {
+                CurrentApplication.Logger.Error(ex, "Error while deferring");
+            }
+        }
     }
 
 
