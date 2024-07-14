@@ -15,8 +15,8 @@
             try
             {
                 AutoModAlertActive = bool.Parse(BotConfig.GetConfig()["AutoModNotify"]["AutoModAlertActive"]);
-                AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
-                AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
+                AutoModChannelId = BotConfig.GetConfig()["AutoModNotify"]["AutoModChannelId"];
+                AutoModAlertChannelId = BotConfig.GetConfig()["AutoModNotify"]["AlertChannelId"];
             }
             catch (Exception e)
             {
