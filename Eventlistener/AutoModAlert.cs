@@ -4,7 +4,7 @@
     public class AutoModAlert : BaseCommandModule
     {
         private static readonly Queue<Task> sendQueue = new();
-        private static Timer timer;
+        private static Timer? timer;
 
         private string AutoModAlertChannelId = 0.ToString();
         private string AutoModChannelId = 0.ToString();
