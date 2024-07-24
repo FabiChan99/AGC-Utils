@@ -1079,7 +1079,7 @@ public class TicketManagerHelper
         var id = GenerateTicketID(5);
         psi.FileName = "DiscordChatExporter.Cli.exe";
         psi.Arguments =
-            $"export -t \"{BotToken}\" -c {ticket_channel.Id} --media --reuse-media --media-dir data\\tickets\\transcripts\\Assets -o tickets\\transcripts\\{tick}-{id}.html";
+            $"export -t \"{BotToken}\" -c {ticket_channel.Id} --media --reuse-media --media-dir data\\tickets\\transcripts\\Assets -o data\\tickets\\transcripts\\{tick}-{id}.html";
         psi.RedirectStandardOutput = true;
         var process = new Process();
         process.StartInfo = psi;
