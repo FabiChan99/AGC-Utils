@@ -186,32 +186,6 @@ public static class ToolSet
         return Convert.ToUInt64(userId);
     }
 
-    public static async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
-    {
-        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        string apiurl = "https://catbox.moe/user/api.php";
-        var client = new RestClient(apiurl);
-        string urls = "";
-
-        foreach (DiscordAttachment att in imgAttachments)
-        {
-            var bytesImage = await new HttpClient().GetByteArrayAsync(att.Url.Split('?')[0]);
-            //using var stream = new MemoryStream(bytesImage);
-
-            var request = new RestRequest(apiurl, Method.Post);
-            request.AddParameter("reqtype", "fileupload");
-            request.AddHeader("Content-Type", "multipart/form-data");
-            request.AddFile("fileToUpload", bytesImage, att.Filename);
-
-
-            var response = await client.ExecuteAsync(request);
-            urls += $" {response.Content}";
-        }
-
-        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        return urls;
-    }
-
 
     public static async Task<List<BannSystemWarn>?> GetBannsystemWarns(DiscordUser user)
     {

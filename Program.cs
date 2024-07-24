@@ -21,6 +21,7 @@ using Discord.OAuth2;
 using KawaiiAPI.NET;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Win32.SafeHandles;
 using Sentry;
 using Serilog;
 using Serilog.Core;
@@ -40,6 +41,7 @@ public class CurrentApplication
     public static ILogger Logger { get; set; }
     public static IServiceProvider ServiceProvider { get; set; }
     public static string BotPrefix { get; set; }
+    public static HttpClient HttpClient { get; set; }
 }
 
 internal class Program : BaseCommandModule
@@ -52,6 +54,10 @@ internal class Program : BaseCommandModule
 
     private static async Task MainAsync()
     {
+        CurrentApplication.HttpClient = new HttpClient();
+        CurrentApplication.HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                                                                              "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        
         LogEventLevel loglevel;
         try
         {

@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 using DisCatSharp.Interactivity.Extensions;
@@ -54,7 +55,17 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         string urls = "";
         if (imgAttachments.Count > 0)
         {
-            urls = await ToolSet.UploadToCatBox(ctx, imgAttachments);
+            urls = " ";
+            foreach (var attachment in imgAttachments)
+            {
+                var __caseid = ToolSet.GenerateCaseID();
+                var rndm = new Random();
+                var rnd = rndm.Next(1000, 9999);
+                var imageBytes = await CurrentApplication.HttpClient.GetByteArrayAsync(attachment.Url);
+                var fileName = $"{__caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                imageBytes = null;
+            }
         }
 
         var busers_formatted = string.Join("\n", users_to_flag.Select(buser => buser.UsernameWithDiscriminator));

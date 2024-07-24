@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 using DisCatSharp.Interactivity.Extensions;
@@ -125,17 +126,44 @@ public sealed class MultiWarnCommand : BaseCommandModule
                 var user = await ctx.Client.GetUserAsync(id);
                 if (user != null) users_to_warn_obj.Add(user);
             }
+            string urls = "";
+            
+            var att = ctx.Message.Attachments;
+
+            if (att.Count > 0)
+            {
+                var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                var imgAttachments = att
+                    .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
+                    .ToList();
+
+                if (imgAttachments.Count > 0)
+                {
+                    urls += " ";
+                    foreach (var attachment in imgAttachments)
+                    {
+                        var rndm = new Random();
+                        var rnd = rndm.Next(1000, 9999);
+                        var imageBytes = await new HttpClient().GetByteArrayAsync(attachment.Url);
+                        var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                        urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                    }
+                }
+            }
 
             foreach (var user in users_to_warn_obj)
             {
                 var caseid_ = ToolSet.GenerateCaseID();
                 caseid_ = $"{caseid}-{caseid_}";
+                
+                
+                
                 Dictionary<string, object> data = new()
                 {
                     { "userid", (long)user.Id },
                     { "punisherid", (long)ctx.User.Id },
                     { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-                    { "description", reason },
+                    { "description", reason + urls },
                     { "caseid", caseid_ },
                     { "perma", false }
                 };
@@ -214,7 +242,7 @@ public sealed class MultiWarnCommand : BaseCommandModule
             }
 
             string e_string = $"Der MultiWarn wurde erfolgreich abgeschlossen.\n" +
-                              $"__Grund:__ ```{reason}```\n" +
+                              $"__Grund:__ ```{reason + urls}```\n" +
                               $"__Gewarnte User:__\n" +
                               $"```{for_str}```";
             DiscordColor ec = DiscordColor.Green;

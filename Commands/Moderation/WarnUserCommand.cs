@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 using DisCatSharp.Interactivity.Extensions;
@@ -77,6 +78,29 @@ public sealed class WarnUserCommand : BaseCommandModule
         if (interaction.Result.Id == $"warn_accept_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            
+            var att = ctx.Message.Attachments;
+            string urls = "";
+            if (att.Count > 0)
+            {
+                var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                var imgAttachments = att
+                    .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
+                    .ToList();
+
+                if (imgAttachments.Count > 0)
+                {
+                    urls += " ";
+                    foreach (var attachment in imgAttachments)
+                    {
+                        var rndm = new Random();
+                        var rnd = rndm.Next(1000, 9999);
+                        var imageBytes = await new HttpClient().GetByteArrayAsync(attachment.Url);
+                        var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                        urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                    }
+                }
+            }
 
             var loadingEmbedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Verwarnung wird bearbeitet")
@@ -94,7 +118,7 @@ public sealed class WarnUserCommand : BaseCommandModule
                 { "userid", (long)user.Id },
                 { "punisherid", (long)ctx.User.Id },
                 { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-                { "description", reason },
+                { "description", reason + urls},
                 { "caseid", caseid },
                 { "perma", false }
             };
@@ -173,7 +197,7 @@ public sealed class WarnUserCommand : BaseCommandModule
             var sembed = new DiscordEmbedBuilder()
                 .WithTitle("Nutzer verwarnt")
                 .WithDescription(
-                    $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
+                    $"Der Nutzer {user.UsernameWithDiscriminator} `{user.Id}` wurde verwarnt!\n Grund: ```{reason + urls}```Der User hat nun __{warncount} Verwarnung(en)__. \nUser benachrichtigt: {dmsent} \nSekundäre ausgeführte Aktion: **{uAction}** \nID des Warns: ``{caseid}``")
                 .WithColor(BotConfig.GetEmbedColor())
                 .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                 .Build();

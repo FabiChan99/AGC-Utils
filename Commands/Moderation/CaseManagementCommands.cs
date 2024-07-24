@@ -2,6 +2,7 @@
 
 using System.Net.Http.Headers;
 using AGC_Management.Attributes;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 
@@ -12,34 +13,6 @@ namespace AGC_Management.Commands.Moderation;
 [Group("case")]
 public sealed class CaseManagement : BaseCommandModule
 {
-    private async Task<string> UploadToCatBox(CommandContext ctx, List<DiscordAttachment> imgAttachments)
-    {
-        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        var httpClient = new HttpClient();
-        string urls = "";
-
-        foreach (DiscordAttachment att in imgAttachments)
-        {
-            var bytesImage = await httpClient.GetByteArrayAsync(att.Url);
-            using var stream = new MemoryStream(bytesImage);
-
-            using var content = new MultipartFormDataContent();
-            var fileContent = new StreamContent(stream);
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-            content.Add(fileContent, "fileToUpload", att.Filename);
-
-
-            content.Add(new StringContent("fileupload"), "reqtype");
-
-            var response = await httpClient.PostAsync("https://catbox.moe/user/api.php", content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            urls += $" {responseString}";
-        }
-
-        await ctx.Message.DeleteOwnReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 1084157150747697203));
-        return urls;
-    }
-
     [Command("info")]
     [RequireDatabase]
     [RequireStaffRole]
@@ -245,10 +218,18 @@ public sealed class CaseManagement : BaseCommandModule
             var imgAttachments = ctx.Message.Attachments
                 .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
                 .ToList();
-            string urls = "";
+            string urls = ""; 
             if (imgAttachments.Count > 0)
             {
-                urls = await UploadToCatBox(ctx, imgAttachments);
+                foreach (var attachment in imgAttachments)
+                {
+                    var rndm = new Random();
+                    var rnd = rndm.Next(1000, 9999);
+                    var imageBytes = await CurrentApplication.HttpClient.GetByteArrayAsync(attachment.Url);
+                    var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                    urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                    imageBytes = null;
+                }
             }
 
             if (await ToolSet.CheckForReason(ctx, reason)) return;

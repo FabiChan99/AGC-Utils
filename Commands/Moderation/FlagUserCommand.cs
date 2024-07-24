@@ -1,6 +1,7 @@
 ﻿#region
 
 using AGC_Management.Attributes;
+using AGC_Management.Providers;
 using AGC_Management.Services;
 using AGC_Management.Utils;
 
@@ -28,7 +29,15 @@ public sealed class FlagUserCommand : BaseCommandModule
         string urls = "";
         if (imgAttachments.Count > 0)
         {
-            urls = await ToolSet.UploadToCatBox(ctx, imgAttachments);
+            urls = " ";
+            foreach (var attachment in imgAttachments)
+            {
+                var rndm = new Random();
+                var rnd = rndm.Next(1000, 9999);
+                var imageBytes = await new HttpClient().GetByteArrayAsync(attachment.Url);
+                var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+            }
         }
 
 
