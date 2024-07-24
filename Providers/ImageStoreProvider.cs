@@ -3,27 +3,28 @@
 public enum ImageStoreType
 {
     Flag,
-    Warn
+    Warn,
+    ImageUpload
 }
 
 public static class ImageStoreProvider
 {
     public static string GetFlagImageStorePath()
     {
-        return BotConfig.GetConfig()["FlagImageStore"]["FlagImagePath"];
+        return BotConfig.GetConfig()["ImageStore"]["FlagImagePath"];
     }
     
     public static string GetWarnImageStorePath()
     {
-        return BotConfig.GetConfig()["FlagImageStore"]["WarnImagePath"];
+        return BotConfig.GetConfig()["ImageStore"]["WarnImagePath"];
     }
 
     public static string GetImageStoreDomain()
     {
-        return BotConfig.GetConfig()["FlagImageStore"]["Domain"];
+        return BotConfig.GetConfig()["ImageStore"]["Domain"];
     }
     
-    private static string GetImageStorePath(ImageStoreType type)
+    private static string GetImageStoreFolder(ImageStoreType type)
     {
         return type switch
         {
@@ -34,14 +35,23 @@ public static class ImageStoreProvider
     }
 
 
-    public static string SaveImage(string fileName, byte[] image, ImageStoreType storeType)
+    public static string SaveModerativeImage(string fileName, byte[] image, ImageStoreType storeType)
     {
-        var path = GetImageStorePath(storeType);
+        var path = GetImageStoreFolder(storeType);
         var domain = GetImageStoreDomain();
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         var fullPath = Path.Combine(path, fileName);
+        
+        // determine if foldername is flag_images or warn_images
+        var foldername = storeType switch
+        {
+            ImageStoreType.Flag => "flag",
+            ImageStoreType.Warn => "warn",
+            _ => throw new ArgumentOutOfRangeException(nameof(storeType), storeType, null)
+        };
+        
         var prefix = "https://";
         File.WriteAllBytes(fullPath, image);
-        return $"{prefix}{domain}/{fileName}";
+        return $"{prefix}{domain}/{foldername}/{fileName}";
     }
 }

@@ -63,7 +63,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
                 var rnd = rndm.Next(1000, 9999);
                 var imageBytes = await CurrentApplication.HttpClient.GetByteArrayAsync(attachment.Url);
                 var fileName = $"{__caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
-                urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes, ImageStoreType.Flag)}";
+                urls += $"\n{ImageStoreProvider.SaveModerativeImage(fileName, imageBytes, ImageStoreType.Flag)}";
                 imageBytes = null;
             }
         }
