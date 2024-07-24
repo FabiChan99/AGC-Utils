@@ -26,7 +26,7 @@ public sealed class FlagUserCommand : BaseCommandModule
         var imgAttachments = ctx.Message.Attachments
             .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
             .ToList();
-        string urls = "";
+        var urls = "";
         if (imgAttachments.Count > 0)
         {
             urls = " ";
@@ -61,7 +61,7 @@ public sealed class FlagUserCommand : BaseCommandModule
         {
             { "userid", (long)user.Id }
         };
-        List<Dictionary<string, object>> results =
+        var results =
             await DatabaseService.SelectDataFromTable("flags", selectedFlags, whereConditions);
         foreach (var result in results) flaglist.Add(result);
 

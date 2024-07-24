@@ -23,14 +23,12 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
         await using var cmd = con.CreateCommand("SELECT positionid FROM applicationcategories");
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
-        {
             if (reader.GetString(0) == posId)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().WithContent("Position already exists!"));
                 return;
             }
-        }
 
         await using var cmd2 =
             con.CreateCommand(
@@ -70,8 +68,8 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
         [Autocomplete(typeof(ApplicationAutocompleteProvider))] [Option("position", "The position to modify.", true)]
         string positionId, [Option("status", "The status to set.")] bool status)
     {
-        bool applicability = status;
-        string posId = ToolSet.RemoveWhitespace(positionId.ToLower());
+        var applicability = status;
+        var posId = ToolSet.RemoveWhitespace(positionId.ToLower());
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
             con.CreateCommand(
@@ -104,9 +102,7 @@ public sealed class ModifyApplicationPositions : ApplicationCommandsModule
             await using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
-            {
                 options.Add(new DiscordApplicationCommandAutocompleteChoice(reader.GetString(0), reader.GetString(1)));
-            }
 
             return await Task.FromResult(options.AsEnumerable());
         }

@@ -37,14 +37,10 @@ public class UserReportMessage : ApplicationCommandsModule
         var isEventler = false;
 
         foreach (var r in member.Roles)
-        {
             if (r.Name.ToLower().Contains("event manager"))
-            {
                 isEventler = true;
-            }
-        }
 
-        if (member.Roles.Contains(role) && (guild.Id != serverIdToSkip && isEventler))
+        if (member.Roles.Contains(role) && guild.Id != serverIdToSkip && isEventler)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
@@ -73,10 +69,7 @@ public class UserReportMessage : ApplicationCommandsModule
         var interactivity = ctx.Client.GetInteractivity();
         var result = await interactivity.WaitForModalAsync(cid, TimeSpan.FromMinutes(5));
 
-        if (result.TimedOut)
-        {
-            return;
-        }
+        if (result.TimedOut) return;
 
 
         var message = ctx.TargetMessage;
@@ -91,9 +84,7 @@ public class UserReportMessage : ApplicationCommandsModule
         var messagecontent = message.Content;
 
         if (string.IsNullOrWhiteSpace(messagecontent))
-        {
             messagecontent = "Kein Textinhalt. Möglicherweise ein Bild oder Sticker oder ähnliches.";
-        }
 
         var targetMessageLink = message.JumpLink.ToString();
         var targetmessagebutton = new DiscordLinkButtonComponent(targetMessageLink, "Zur gemeldeten Nachricht");

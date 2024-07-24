@@ -15,18 +15,19 @@ public sealed class VoiceKickCommand : TempVoiceHelper
     {
         _ = Task.Run(async () =>
             {
-                List<long> dbChannels = await GetChannelIDFromDB(ctx);
-                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+                var dbChannels = await GetChannelIDFromDB(ctx);
+                var userChannel = ctx.Member?.VoiceState?.Channel;
+                var isMod = await IsChannelMod(userChannel, ctx.Member);
 
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+                if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+                if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) ||
+                    (userChannel != null && isMod))
                 {
                     var kicklist = new List<ulong>();
                     List<ulong> ids = new();
@@ -38,32 +39,20 @@ public sealed class VoiceKickCommand : TempVoiceHelper
                     var currentmods = await RetrieveChannelMods(userChannel);
                     var channelownerid = await GetChannelOwnerID(ctx);
                     var owner = await ctx.Client.GetUserAsync((ulong)channelownerid);
-                    foreach (ulong id in ids)
-                    {
+                    foreach (var id in ids)
                         try
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
-                            if (user.Roles.Contains(staffrole))
-                            {
-                                continue;
-                            }
+                            if (user.Roles.Contains(staffrole)) continue;
 
-                            List<ulong> mods = await RetrieveChannelMods(userChannel);
-                            if (id == ctx.User.Id || mods.Contains(id))
-                            {
-                                continue;
-                            }
+                            var mods = await RetrieveChannelMods(userChannel);
+                            if (id == ctx.User.Id || mods.Contains(id)) continue;
 
-                            if (id == owner.Id)
-                            {
-                                continue;
-                            }
+                            if (id == owner.Id) continue;
 
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
-                            {
                                 await user.DisconnectFromVoiceAsync();
-                            }
 
                             kicklist.Add(user.Id);
                             try
@@ -77,7 +66,6 @@ public sealed class VoiceKickCommand : TempVoiceHelper
                         catch (NotFoundException)
                         {
                         }
-                    }
 
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
                     try
@@ -88,8 +76,8 @@ public sealed class VoiceKickCommand : TempVoiceHelper
                     {
                     }
 
-                    int successCount = kicklist.Count;
-                    string endstring =
+                    var successCount = kicklist.Count;
+                    var endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **gekickt**!";
 
                     await msg.ModifyAsync(endstring);

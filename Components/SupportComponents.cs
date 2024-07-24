@@ -16,14 +16,12 @@ public class SupportComponents
             "category_text"
         };
 
-        List<Dictionary<string, object>> query =
+        var query =
             await DatabaseService.SelectDataFromTable("ticketcategories", columns, null);
         Dictionary<string, string> categories = new();
 
         foreach (var category in query)
-        {
             categories.Add(category["custom_id"].ToString(), category["category_text"].ToString());
-        }
 
         return categories;
     }

@@ -12,22 +12,16 @@ public class DateKickEventhandler : BaseCommandModule
     {
         _ = Task.Run(async () =>
         {
-            if (eventArgs.Guild?.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
-            {
-                return;
-            }
+            if (eventArgs.Guild?.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) return;
 
             var member = eventArgs.Member;
-            DateTime createdate = member.CreationTimestamp.Date;
-            int age = (DateTime.Now - createdate).Days;
-            bool isDateKickActive = false;
+            var createdate = member.CreationTimestamp.Date;
+            var age = (DateTime.Now - createdate).Days;
+            var isDateKickActive = false;
             isDateKickActive = bool.Parse(BotConfig.GetConfig()["AntiRaid"]["DateKickActive"]);
-            if (!isDateKickActive)
-            {
-                return;
-            }
+            if (!isDateKickActive) return;
 
-            int minAge = int.Parse(BotConfig.GetConfig()["AntiRaid"]["DateKickDays"]);
+            var minAge = int.Parse(BotConfig.GetConfig()["AntiRaid"]["DateKickDays"]);
             if (age < minAge)
             {
                 await DateKickUtils.NotifyUser(member, minAge);

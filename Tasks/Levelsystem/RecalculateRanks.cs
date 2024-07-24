@@ -32,10 +32,7 @@ public static class RecalculateRanks
             var currenttimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var difference = currenttimestamp - lastrecalc;
 
-            if (difference >= 43200)
-            {
-                await LevelUtils.RecalculateAllUserLevels();
-            }
+            if (difference >= 43200) await LevelUtils.RecalculateAllUserLevels();
 
             await Task.Delay(TimeSpan.FromHours(2));
         }

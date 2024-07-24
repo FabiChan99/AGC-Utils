@@ -17,10 +17,7 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
     [RequireDatabase]
     public async Task VoiceInfo(CommandContext ctx, DiscordChannel channel = null)
     {
-        if (channel == null)
-        {
-            channel = ctx.Member?.VoiceState?.Channel;
-        }
+        if (channel == null) channel = ctx.Member?.VoiceState?.Channel;
 
         var userchannel = (long?)channel?.Id;
         var db_channels = await GetAllChannelIDsFromDB();
@@ -40,81 +37,54 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
 
         if (db_channels.Contains((long)userchannel) && userchannel != null)
         {
-            long? channelownerid = await GetChannelOwnerID(channel);
+            var channelownerid = await GetChannelOwnerID(channel);
             var channellimit = channel.UserLimit;
-            DiscordMember channelowner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
-            string channelname = channel.Name;
+            var channelowner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
+            var channelname = channel.Name;
             var channel_timestamp = channel.CreationTimestamp;
             var channel_created = channel_timestamp.UtcDateTime;
             var rendered_channel_timestamp = channel_created.Timestamp();
-            DiscordRole default_role = ctx.Guild.EveryoneRole;
+            var default_role = ctx.Guild.EveryoneRole;
             var yesemote = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
             var noemote = DiscordEmoji.FromName(ctx.Client, ":x:");
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
-            bool locked = false;
-            bool hidden = false;
+            var locked = false;
+            var hidden = false;
             var overwrite =
                 channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
-            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
-            {
-                locked = true;
-            }
+            if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied) locked = true;
 
             if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
-            {
                 locked = false;
-            }
 
-            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
-            {
-                hidden = true;
-            }
+            if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied) hidden = true;
 
             if (overwrite == null ||
                 overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
-            {
                 hidden = false;
-            }
 
             var hiddenemote = hidden ? yesemote : noemote;
             var lockedemote = locked ? yesemote : noemote;
 
 
-            string climit = (channellimit == 0) ? "∞" : channellimit.ToString();
+            var climit = channellimit == 0 ? "∞" : channellimit.ToString();
 
-            string lreach = "";
+            var lreach = "";
 
-            string soundboardac = "";
+            var soundboardac = "";
             var sbstate = GetSoundboardState(channel);
             if (sbstate)
-            {
                 soundboardac = yesemote;
-            }
-            else if (!sbstate)
-            {
-                soundboardac = noemote;
-            }
+            else if (!sbstate) soundboardac = noemote;
 
 
-            if (channellimit == channel.Users.Count && channellimit != 0)
-            {
-                lreach = yesemote;
-            }
+            if (channellimit == channel.Users.Count && channellimit != 0) lreach = yesemote;
 
-            if (channellimit < channel.Users.Count && channellimit != 0)
-            {
-                lreach = yesemote;
-            }
+            if (channellimit < channel.Users.Count && channellimit != 0) lreach = yesemote;
 
-            if (channellimit > channel.Users.Count)
-            {
-                lreach = noemote;
-            }
+            if (channellimit > channel.Users.Count) lreach = noemote;
 
-            if (channellimit == 0)
-            {
-                lreach = "Kein Limit gesetzt";
-            }
+            if (channellimit == 0) lreach = "Kein Limit gesetzt";
 
             List<string> Query = new()
             {
@@ -127,10 +97,7 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
 
             string sessionemote = noemote;
             var usersession = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
-            if (usersession.Count > 0)
-            {
-                sessionemote = yesemote;
-            }
+            if (usersession.Count > 0) sessionemote = yesemote;
 
             var ebb = new DiscordEmbedBuilder()
                 .WithDescription(
@@ -161,7 +128,7 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
                 .WithEmbed(ebb).AddComponents(buttons);
             var omb = new DiscordMessageBuilder()
                 .WithEmbed(ebb);
-            DiscordMessage msg = await ctx.RespondAsync(mb);
+            var msg = await ctx.RespondAsync(mb);
             var interactivity = ctx.Client.GetInteractivity();
             var results = await interactivity.WaitForButtonAsync(msg, channelowner, TimeSpan.FromMinutes(3));
             if (results.TimedOut)
@@ -172,8 +139,8 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
 
             if (results.Result.Id == $"get_vcinfo_{caseid}")
             {
-                string blocklist = string.Empty;
-                string permitlist = string.Empty;
+                var blocklist = string.Empty;
+                var permitlist = string.Empty;
                 var buserow = channel.PermissionOverwrites
                     .Where(x => x.Type == OverwriteType.Member)
                     .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
@@ -197,15 +164,9 @@ public sealed class ChannelInfoCommand : TempVoiceHelper
                     permitlist += $"{member.UsernameWithDiscriminator} {member.Mention} ``({member.Id})``\n";
                 }
 
-                if (buserow.Count == 0)
-                {
-                    blocklist = "Keine User blockiert";
-                }
+                if (buserow.Count == 0) blocklist = "Keine User blockiert";
 
-                if (puserow.Count == 0)
-                {
-                    permitlist = "Keine User zugelassen";
-                }
+                if (puserow.Count == 0) permitlist = "Keine User zugelassen";
 
                 var emb = new DiscordEmbedBuilder().WithDescription("__Zugelassene User:__\n" +
                                                                     $"{permitlist}\n\n" +

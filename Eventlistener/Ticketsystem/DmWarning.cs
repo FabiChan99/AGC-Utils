@@ -14,7 +14,7 @@ public class DmWarning : BaseCommandModule
             {
                 if (args.Channel.Type == ChannelType.Private && !args.Message.Author.IsBot)
                 {
-                    string supportlink = BotConfig.GetConfig()["TicketConfig"]["SupportLink"];
+                    var supportlink = BotConfig.GetConfig()["TicketConfig"]["SupportLink"];
                     List<DiscordLinkButtonComponent> supportbutton = new(1)
                     {
                         new DiscordLinkButtonComponent(supportlink, "Zum Support")

@@ -19,10 +19,7 @@ public sealed class WarnUserCommand : BaseCommandModule
     [RequireTeamCat]
     public async Task WarnUser(CommandContext ctx, DiscordUser user, [RemainingText] string? reason)
     {
-        if (reason == null)
-        {
-            reason = await ModerationHelper.WarnReasonSelector(ctx);
-        }
+        if (reason == null) reason = await ModerationHelper.WarnReasonSelector(ctx);
 
         if (await ToolSet.CheckForReason(ctx, reason)) return;
         if (await ToolSet.TicketUrlCheck(ctx, reason)) return;
@@ -78,9 +75,9 @@ public sealed class WarnUserCommand : BaseCommandModule
         if (interaction.Result.Id == $"warn_accept_{caseid}")
         {
             await interaction.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            
+
             var att = ctx.Message.Attachments;
-            string urls = "";
+            var urls = "";
             if (att.Count > 0)
             {
                 var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
@@ -118,7 +115,7 @@ public sealed class WarnUserCommand : BaseCommandModule
                 { "userid", (long)user.Id },
                 { "punisherid", (long)ctx.User.Id },
                 { "datum", DateTimeOffset.Now.ToUnixTimeSeconds() },
-                { "description", reason + urls},
+                { "description", reason + urls },
                 { "caseid", caseid },
                 { "perma", false }
             };
@@ -134,7 +131,7 @@ public sealed class WarnUserCommand : BaseCommandModule
                 { "userid", (long)user.Id }
             };
 
-            List<Dictionary<string, object>> results =
+            var results =
                 await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
             foreach (var result in results) warnlist.Add(result);
 
@@ -142,9 +139,9 @@ public sealed class WarnUserCommand : BaseCommandModule
             var warncount = warnlist.Count + 1;
 
             await DatabaseService.InsertDataIntoTable("warns", data);
-            DiscordEmbed uembed =
+            var uembed =
                 await ModerationHelper.GenerateWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
-            string reasonString =
+            var reasonString =
                 $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
             bool sent;
             try
@@ -157,13 +154,10 @@ public sealed class WarnUserCommand : BaseCommandModule
                 sent = false;
             }
 
-            if (!sent)
-            {
-                await ToolSet.SendWarnAsChannel(ctx, user, uembed, caseid);
-            }
+            if (!sent) await ToolSet.SendWarnAsChannel(ctx, user, uembed, caseid);
 
             var dmsent = sent ? "✅" : "⚠️";
-            string uAction = "Keine";
+            var uAction = "Keine";
 
             var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
 

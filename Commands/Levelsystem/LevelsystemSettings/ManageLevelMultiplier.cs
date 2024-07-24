@@ -22,31 +22,23 @@ public partial class LevelSystemSettings
         float _multiplier;
 
         if (multiplier != MultiplicatorItem.Disabled)
-        {
             _multiplier = LevelUtils.GetFloatFromMultiplicatorItem(multiplier);
-        }
         else
-        {
             _multiplier = 0;
-        }
 
         // set multiplier (if disabled, type_active = false)
         await LevelUtils.SetMultiplier(levelType, _multiplier);
 
 
         if (multiplier != MultiplicatorItem.Disabled)
-        {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .WithContent(
                         $"<:success:1085333481820790944> **Erfolgreich!** Der Multiplier für ``{levelType}`` wurde auf ``{LevelUtils.GetFloatFromMultiplicatorItem(multiplier)}`` gesetzt!"));
-        }
         else
-        {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .WithContent(
                         $"<:success:1085333481820790944> **Erfolgreich!** Leveling für ``{levelType}`` wurde deaktiviert!"));
-        }
     }
 }

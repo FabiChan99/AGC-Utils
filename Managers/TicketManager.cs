@@ -13,13 +13,13 @@ public class TicketManager
     public static async Task<DiscordChannel?> OpenTicket(CommandContext context, TicketType ticketType,
         TicketCreator ticketCreator, DiscordMember discordMember)
     {
-        long memberid = (long)discordMember.Id;
-        long guildid = (long)context.Guild.Id;
-        string ticketid = TicketManagerHelper.GenerateTicketID();
-        bool existing_ticket = await TicketManagerHelper.CheckForOpenTicket(memberid);
+        var memberid = (long)discordMember.Id;
+        var guildid = (long)context.Guild.Id;
+        var ticketid = TicketManagerHelper.GenerateTicketID();
+        var existing_ticket = await TicketManagerHelper.CheckForOpenTicket(memberid);
         if (existing_ticket)
         {
-            long tchannelId = await TicketManagerHelper.GetOpenTicketChannel(memberid);
+            var tchannelId = await TicketManagerHelper.GetOpenTicketChannel(memberid);
             var tbutton = new DiscordLinkButtonComponent("https://discord.com/channels/" + guildid + "/" + tchannelId,
                 "Zum Ticket");
             var eb = new DiscordEmbedBuilder
@@ -34,12 +34,12 @@ public class TicketManager
             return null;
         }
 
-        DiscordChannel Ticket_category =
+        var Ticket_category =
             context.Guild.GetChannel(ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"]));
         DiscordChannel? ticket_channel = null;
-        int ticket_number = await TicketManagerHelper.GetPreviousTicketCount(ticketType) + 1;
+        var ticket_number = await TicketManagerHelper.GetPreviousTicketCount(ticketType) + 1;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        await using NpgsqlCommand cmd =
+        await using var cmd =
             con.CreateCommand(
                 $"INSERT INTO ticketstore (ticket_id, ticket_owner, tickettype, closed) VALUES ('{ticketid}', '{memberid}', '{ticketType.ToString().ToLower()}', False)");
         await cmd.ExecuteNonQueryAsync();
@@ -48,7 +48,7 @@ public class TicketManager
             Ticket_category,
             $"Ticket erstellt von {context.User.UsernameWithDiscriminator} zu {discordMember.UsernameWithDiscriminator}");
 
-        await using NpgsqlCommand cmd2 =
+        await using var cmd2 =
             con.CreateCommand(
                 $"INSERT INTO ticketcache (ticket_id, ticket_owner, tchannel_id, claimed) VALUES ('{ticketid}', '{memberid}', '{ticket_channel.Id}', False)");
         await cmd2.ExecuteNonQueryAsync();
@@ -64,13 +64,13 @@ public class TicketManager
     {
         if (ticketCreator == TicketCreator.User)
         {
-            long memberid = (long)interaction.User.Id;
-            long guildid = (long)interaction.Guild.Id;
-            string ticketid = TicketManagerHelper.GenerateTicketID();
-            bool existing_ticket = await TicketManagerHelper.CheckForOpenTicket(memberid);
+            var memberid = (long)interaction.User.Id;
+            var guildid = (long)interaction.Guild.Id;
+            var ticketid = TicketManagerHelper.GenerateTicketID();
+            var existing_ticket = await TicketManagerHelper.CheckForOpenTicket(memberid);
             if (existing_ticket)
             {
-                long tchannelId = await TicketManagerHelper.GetOpenTicketChannel(memberid);
+                var tchannelId = await TicketManagerHelper.GetOpenTicketChannel(memberid);
                 var tbutton = new DiscordLinkButtonComponent(
                     "https://discord.com/channels/" + guildid + "/" + tchannelId,
                     "Zum Ticket");
@@ -94,14 +94,14 @@ public class TicketManager
             };
             await interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(cre_emb).AsEphemeral());
-            int ticket_number = await TicketManagerHelper.GetPreviousTicketCount(ticketType) + 1;
-            DiscordChannel Ticket_category =
+            var ticket_number = await TicketManagerHelper.GetPreviousTicketCount(ticketType) + 1;
+            var Ticket_category =
                 interaction.Guild.GetChannel(ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"]));
             DiscordChannel? ticket_channel = null;
             if (ticketType == TicketType.Report)
             {
                 var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-                await using NpgsqlCommand cmd =
+                await using var cmd =
                     con.CreateCommand(
                         $"INSERT INTO ticketstore (ticket_id, ticket_owner, tickettype, closed) VALUES ('{ticketid}', '{memberid}', '{ticketType.ToString().ToLower()}', False)");
                 await cmd.ExecuteNonQueryAsync();
@@ -109,7 +109,7 @@ public class TicketManager
                 ticket_channel = await interaction.Guild.CreateChannelAsync($"report-{ticket_number}", ChannelType.Text,
                     Ticket_category, $"Ticket erstellt von {interaction.User.UsernameWithDiscriminator}");
 
-                await using NpgsqlCommand cmd2 =
+                await using var cmd2 =
                     con.CreateCommand(
                         $"INSERT INTO ticketcache (ticket_id, ticket_owner, tchannel_id, claimed) VALUES ('{ticketid}', '{memberid}', '{ticket_channel.Id}', False)");
                 await cmd2.ExecuteNonQueryAsync();
@@ -121,7 +121,7 @@ public class TicketManager
             else if (ticketType == TicketType.Support)
             {
                 var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-                await using NpgsqlCommand cmd =
+                await using var cmd =
                     con.CreateCommand(
                         $"INSERT INTO ticketstore (ticket_id, ticket_owner, tickettype, closed) VALUES ('{ticketid}', '{memberid}', '{ticketType.ToString().ToLower()}', False)");
                 await cmd.ExecuteNonQueryAsync();
@@ -130,7 +130,7 @@ public class TicketManager
                     ChannelType.Text,
                     Ticket_category, $"Ticket erstellt von {interaction.User.UsernameWithDiscriminator}");
 
-                await using NpgsqlCommand cmd2 =
+                await using var cmd2 =
                     con.CreateCommand(
                         $"INSERT INTO ticketcache (ticket_id, ticket_owner, tchannel_id, claimed) VALUES ('{ticketid}', '{memberid}', '{ticket_channel.Id}', False)");
                 await cmd2.ExecuteNonQueryAsync();
@@ -191,35 +191,32 @@ public class TicketManager
             Color = DiscordColor.Green
         };
 
-        string transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
+        var transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
         await TicketManagerHelper.InsertTransscriptIntoDB(ticket_channel, TranscriptType.User, transcriptURL);
 
         await msg.ModifyAsync(eb1.Build());
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = con.CreateCommand(query);
-        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-        string ticket_id = "";
-        while (reader.Read())
-        {
-            ticket_id = reader.GetString(0);
-        }
+        var query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd = con.CreateCommand(query);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var ticket_id = "";
+        while (reader.Read()) ticket_id = reader.GetString(0);
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 =
+        await using var cmd2 =
             con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
-        string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd3 = con.CreateCommand(query2);
-        await using NpgsqlDataReader reader2 = await cmd3.ExecuteReaderAsync();
+        var query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd3 = con.CreateCommand(query2);
+        await using var reader2 = await cmd3.ExecuteReaderAsync();
         List<List<long>> ticket_usersList = new();
 
         while (reader2.Read())
         {
-            long[] ticketUsersArray = (long[])reader2.GetValue(0);
+            var ticketUsersArray = (long[])reader2.GetValue(0);
             List<long> ticket_users = new(ticketUsersArray);
             ticket_usersList.Add(ticket_users);
         }
@@ -244,13 +241,11 @@ public class TicketManager
         await ctx.Channel.SendMessageAsync(mb);
 
         foreach (var users in ticket_usersList)
+        foreach (var user in users)
         {
-            foreach (var user in users)
-            {
-                var member = await ctx.Guild.GetMemberAsync((ulong)user);
-                await TicketManagerHelper.RemoveUserFromTicket(ctx, ticket_channel, member);
-                await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
-            }
+            var member = await ctx.Guild.GetMemberAsync((ulong)user);
+            await TicketManagerHelper.RemoveUserFromTicket(ctx, ticket_channel, member);
+            await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
         }
     }
 
@@ -290,35 +285,32 @@ public class TicketManager
             Color = DiscordColor.Green
         };
 
-        string transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
+        var transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
         await TicketManagerHelper.InsertTransscriptIntoDB(ticket_channel, TranscriptType.User, transcriptURL);
 
         await msg.ModifyAsync(eb1.Build());
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = con.CreateCommand(query);
-        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-        string ticket_id = "";
-        while (reader.Read())
-        {
-            ticket_id = reader.GetString(0);
-        }
+        var query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd = con.CreateCommand(query);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var ticket_id = "";
+        while (reader.Read()) ticket_id = reader.GetString(0);
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 =
+        await using var cmd2 =
             con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
-        string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd3 = con.CreateCommand(query2);
-        await using NpgsqlDataReader reader2 = await cmd3.ExecuteReaderAsync();
+        var query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd3 = con.CreateCommand(query2);
+        await using var reader2 = await cmd3.ExecuteReaderAsync();
         List<List<long>> ticket_usersList = new();
 
         while (reader2.Read())
         {
-            long[] ticketUsersArray = (long[])reader2.GetValue(0);
+            var ticketUsersArray = (long[])reader2.GetValue(0);
             List<long> ticket_users = new(ticketUsersArray);
             ticket_usersList.Add(ticket_users);
         }
@@ -346,13 +338,11 @@ public class TicketManager
         await ticket_channel.SendMessageAsync(mb);
 
         foreach (var users in ticket_usersList)
+        foreach (var user in users)
         {
-            foreach (var user in users)
-            {
-                var member = await client.GetUserAsync((ulong)user);
-                await TicketManagerHelper.RemoveUserFromTicket(ticket_channel, member, client);
-                //await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
-            }
+            var member = await client.GetUserAsync((ulong)user);
+            await TicketManagerHelper.RemoveUserFromTicket(ticket_channel, member, client);
+            //await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
         }
     }
 
@@ -373,7 +363,7 @@ public class TicketManager
         var umb = new DiscordMessageBuilder();
         umb.WithContent(message.Content);
         umb.WithEmbed(message.Embeds[0]);
-        List<DiscordButtonComponent> components = TicketComponents.GetClosedTicketActionRow();
+        var components = TicketComponents.GetClosedTicketActionRow();
         List<DiscordActionRowComponent> row = new()
         {
             new DiscordActionRowComponent(components)
@@ -392,7 +382,7 @@ public class TicketManager
             Description = "Transcript wird gespeichert....",
             Color = DiscordColor.Yellow
         };
-        DiscordMessage msg = await interaction.Channel.SendMessageAsync(eb1.Build());
+        var msg = await interaction.Channel.SendMessageAsync(eb1.Build());
 
         eb1 = new DiscordEmbedBuilder
         {
@@ -400,35 +390,32 @@ public class TicketManager
             Color = DiscordColor.Green
         };
 
-        string transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
+        var transcriptURL = await TicketManagerHelper.GenerateTranscript(ticket_channel);
         await TicketManagerHelper.InsertTransscriptIntoDB(ticket_channel, TranscriptType.User, transcriptURL);
 
         await msg.ModifyAsync(eb1.Build());
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        string query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd = con.CreateCommand(query);
-        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-        string ticket_id = "";
-        while (reader.Read())
-        {
-            ticket_id = reader.GetString(0);
-        }
+        var query = $"SELECT ticket_id FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd = con.CreateCommand(query);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        var ticket_id = "";
+        while (reader.Read()) ticket_id = reader.GetString(0);
 
         await reader.CloseAsync();
 
-        await using NpgsqlCommand cmd2 =
+        await using var cmd2 =
             con.CreateCommand($"UPDATE ticketstore SET closed = True WHERE ticket_id = '{ticket_id}'");
         await cmd2.ExecuteNonQueryAsync();
 
-        string query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
-        await using NpgsqlCommand cmd3 = con.CreateCommand(query2);
-        await using NpgsqlDataReader reader2 = await cmd3.ExecuteReaderAsync();
+        var query2 = $"SELECT ticket_users FROM ticketcache where tchannel_id = '{(long)ticket_channel.Id}'";
+        await using var cmd3 = con.CreateCommand(query2);
+        await using var reader2 = await cmd3.ExecuteReaderAsync();
         List<List<long>> ticket_usersList = new();
 
         while (reader2.Read())
         {
-            long[] ticketUsersArray = (long[])reader2.GetValue(0);
+            var ticketUsersArray = (long[])reader2.GetValue(0);
             List<long> ticket_users = new(ticketUsersArray);
             ticket_usersList.Add(ticket_users);
         }
@@ -440,7 +427,7 @@ public class TicketManager
 
         DiscordButtonComponent del_ticketbutton =
             new(ButtonStyle.Danger, "ticket_delete", "Ticket löschen ❌");
-        DiscordEmbed teb = new DiscordEmbedBuilder
+        var teb = new DiscordEmbedBuilder
         {
             Title = "Ticket geschlossen",
             Description =
@@ -456,13 +443,11 @@ public class TicketManager
         await interaction.Channel.SendMessageAsync(mb);
 
         foreach (var users in ticket_usersList)
+        foreach (var user in users)
         {
-            foreach (var user in users)
-            {
-                var member = await interaction.Guild.GetMemberAsync((ulong)user);
-                await TicketManagerHelper.RemoveUserFromTicket(interaction.Interaction, ticket_channel, member);
-                await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
-            }
+            var member = await interaction.Guild.GetMemberAsync((ulong)user);
+            await TicketManagerHelper.RemoveUserFromTicket(interaction.Interaction, ticket_channel, member);
+            await TicketManagerHelper.SendTranscriptsToUser(member, transcriptURL, RemoveType.Closed, tname);
         }
     }
 }

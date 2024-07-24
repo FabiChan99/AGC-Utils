@@ -35,12 +35,12 @@ public static class DatabaseService
 
     public static async Task InsertDataIntoTable(string tableName, Dictionary<string, object> columnValuePairs)
     {
-        string insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
-                             $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
+        var insertQuery = $"INSERT INTO {tableName} ({string.Join(", ", columnValuePairs.Keys)}) " +
+                          $"VALUES ({string.Join(", ", columnValuePairs.Keys.Select(k => $"@{k}"))})";
 
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-        await using NpgsqlCommand command = connection.CreateCommand(insertQuery);
+        await using var command = connection.CreateCommand(insertQuery);
         foreach (var kvp in columnValuePairs)
         {
             NpgsqlParameter parameter = new($"@{kvp.Key}", kvp.Value);
@@ -60,13 +60,13 @@ public static class DatabaseService
         }
         else
         {
-            string columnNames = string.Join(", ", columns.Select(c => $"\"{c}\""));
+            var columnNames = string.Join(", ", columns.Select(c => $"\"{c}\""));
             selectQuery = $"SELECT {columnNames} FROM \"{tableName}\"";
         }
 
         if (whereConditions != null && whereConditions.Count > 0)
         {
-            string whereClause = string.Join(" AND ", whereConditions.Select(c => $"\"{c.Key}\" = @{c.Key}"));
+            var whereClause = string.Join(" AND ", whereConditions.Select(c => $"\"{c.Key}\" = @{c.Key}"));
             selectQuery += $" WHERE {whereClause}";
         }
 
@@ -74,7 +74,7 @@ public static class DatabaseService
 
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-        await using NpgsqlCommand command = connection.CreateCommand(selectQuery);
+        await using var command = connection.CreateCommand(selectQuery);
         if (whereConditions != null && whereConditions.Count > 0)
             foreach (var condition in whereConditions)
             {
@@ -82,15 +82,15 @@ public static class DatabaseService
                 command.Parameters.Add(parameter);
             }
 
-        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
+        await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             Dictionary<string, object> row = new();
 
-            for (int i = 0; i < reader.FieldCount; i++)
+            for (var i = 0; i < reader.FieldCount; i++)
             {
-                string columnName = reader.GetName(i);
-                object columnValue = reader.GetValue(i);
+                var columnName = reader.GetName(i);
+                var columnValue = reader.GetValue(i);
 
                 row[columnName] = columnValue;
             }
@@ -104,11 +104,11 @@ public static class DatabaseService
     public static async Task<int> DeleteDataFromTable(string tableName,
         Dictionary<string, (object value, string comparisonOperator)> whereConditions, string logicalOperator = "AND")
     {
-        string deleteQuery = $"DELETE FROM \"{tableName}\"";
+        var deleteQuery = $"DELETE FROM \"{tableName}\"";
 
         if (whereConditions != null && whereConditions.Count > 0)
         {
-            string whereClause = string.Join($" {logicalOperator} ",
+            var whereClause = string.Join($" {logicalOperator} ",
                 whereConditions.Select(c => $"\"{c.Key}\" {c.Value.comparisonOperator} @{c.Key}"));
             deleteQuery += $" WHERE {whereClause}";
         }
@@ -117,7 +117,7 @@ public static class DatabaseService
 
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
-        await using NpgsqlCommand command = connection.CreateCommand(deleteQuery);
+        await using var command = connection.CreateCommand(deleteQuery);
         if (whereConditions != null && whereConditions.Count > 0)
             foreach (var condition in whereConditions)
             {
@@ -546,12 +546,8 @@ public static class DatabaseService
 
         var commandCount = 0;
         foreach (var tableKvp in columnUpdates)
-        {
-            foreach (var columnKvp in tableKvp.Value)
-            {
-                commandCount++;
-            }
-        }
+        foreach (var columnKvp in tableKvp.Value)
+            commandCount++;
 
         var progressBar = new ConsoleProgressBar(commandCount);
 
@@ -578,7 +574,7 @@ public static class DatabaseService
 
     private static async Task InitLeveling()
     {
-        ulong targetGuildId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
+        var targetGuildId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]);
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         await using var cmd = con.CreateCommand($"SELECT * FROM levelingsettings WHERE guildid = '{targetGuildId}'");

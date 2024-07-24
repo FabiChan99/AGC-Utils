@@ -16,26 +16,14 @@ public class NSFWCheck : BaseCommandModule
     {
         _ = Task.Run(async () =>
         {
-            if (args.Channel.Type == ChannelType.Private || args.Message.Author.IsBot)
-            {
-                return;
-            }
+            if (args.Channel.Type == ChannelType.Private || args.Message.Author.IsBot) return;
 
-            if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
-            {
-                return;
-            }
+            if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) return;
 
-            bool isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
-            if (!isActivated)
-            {
-                return;
-            }
+            var isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
+            if (!isActivated) return;
 
-            if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
-            {
-                return;
-            }
+            if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305) return;
 
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
@@ -58,9 +46,7 @@ public class NSFWCheck : BaseCommandModule
                     var url = match.Value;
                     if (url.Contains(".png") || url.Contains(".jpg") || url.Contains(".jpeg") ||
                         url.Contains(".webp") || url.Contains(".gif"))
-                    {
                         urlsFromText.Add(url);
-                    }
                 }
 
                 urls.AddRange(urlsFromText);
@@ -76,7 +62,7 @@ public class NSFWCheck : BaseCommandModule
 
                 if (isNSFW)
                 {
-                    ulong AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
+                    var AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
                     var c = args.Guild.GetChannel(AlertChannel);
                     var e = GetReportMessage(args.Message, args.Author);
                     await c.SendMessageAsync(e);
@@ -92,16 +78,10 @@ public class NSFWCheck : BaseCommandModule
     {
         _ = Task.Run(async () =>
         {
-            bool isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
-            if (!isActivated)
-            {
-                return;
-            }
+            var isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
+            if (!isActivated) return;
 
-            if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
-            {
-                return;
-            }
+            if (args.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) return;
 
 
             using var _httpClient = new HttpClient();
@@ -113,9 +93,7 @@ public class NSFWCheck : BaseCommandModule
             var avatarUrl = args.Member.AvatarUrl;
             if (!avatarUrl.Contains(".png") || !avatarUrl.Contains(".jpg") || !avatarUrl.Contains(".jpeg") ||
                 !avatarUrl.Contains(".webp"))
-            {
                 return;
-            }
 
             var content = new StringContent($"{{\"imageUrl\":\"{args.Member.AvatarUrl}\"}}", null, "application/json");
             var response = await _httpClient.PostAsync("https://api.linklens.xyz/analyze", content);
@@ -125,7 +103,7 @@ public class NSFWCheck : BaseCommandModule
 
             if (isNSFW)
             {
-                ulong AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
+                var AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
                 var c = args.Guild.GetChannel(AlertChannel);
                 var e = GetReportAvatarOnJoin(args.Member);
                 await c.SendMessageAsync(e);
@@ -139,17 +117,11 @@ public class NSFWCheck : BaseCommandModule
     {
         _ = Task.Run(async () =>
         {
-            bool isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
-            if (!isActivated)
-            {
-                return;
-            }
+            var isActivated = bool.Parse(BotConfig.GetConfig()["LinkLens"]["Active"]);
+            if (!isActivated) return;
 
 
-            if (_args.Guild.Id != GlobalProperties.AGCGuild.Id)
-            {
-                return;
-            }
+            if (_args.Guild.Id != GlobalProperties.AGCGuild.Id) return;
 
             using var _httpClient = new HttpClient();
             var apikey = BotConfig.GetConfig()["LinkLens"]["API-KEY"];
@@ -164,7 +136,7 @@ public class NSFWCheck : BaseCommandModule
             var isNSFW = bool.Parse(json["is_nsfw"].ToString());
             if (isNSFW)
             {
-                ulong AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
+                var AlertChannel = ulong.Parse(BotConfig.GetConfig()["LinkLens"]["AlertChannel"]);
                 var c = GlobalProperties.AGCGuild.GetChannel(AlertChannel);
                 var e = GetReportAvatarOnMemberUpdate(_args.Member);
                 await c.SendMessageAsync(e);

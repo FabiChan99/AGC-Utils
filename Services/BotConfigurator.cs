@@ -44,12 +44,12 @@ public static class BotConfig
 
     public static DiscordColor GetEmbedColor()
     {
-        string fallbackColor = "000000";
+        var fallbackColor = "000000";
         string colorString;
 
         try
         {
-            string colorConfig = GetConfig()["EmbedConfig"]["DefaultEmbedColor"];
+            var colorConfig = GetConfig()["EmbedConfig"]["DefaultEmbedColor"];
             if (colorConfig.StartsWith("#")) colorConfig = colorConfig.Remove(0, 1);
 
             if (string.IsNullOrEmpty(colorConfig) || !HexCheck.IsHexColor(colorConfig))

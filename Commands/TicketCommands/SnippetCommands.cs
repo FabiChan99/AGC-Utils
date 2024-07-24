@@ -22,8 +22,8 @@ public class SnippetManagerCommands : BaseCommandModule
     [TicketRequireStaffRole]
     public async Task SnippetManager(CommandContext ctx)
     {
-        string prefix = ctx.Prefix;
-        DiscordEmbed eb = new DiscordEmbedBuilder().WithTitle("Snippet Manager")
+        var prefix = ctx.Prefix;
+        var eb = new DiscordEmbedBuilder().WithTitle("Snippet Manager")
             .WithDescription("Verwaltung der Snippets")
             .WithColor(DiscordColor.Red)
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl)
@@ -80,19 +80,15 @@ public class SnippetManagerCommands : BaseCommandModule
 
         await using var cmd = con.CreateCommand("DELETE FROM snippets WHERE snip_id = @name");
         cmd.Parameters.AddWithValue("name", name);
-        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+        var rowsAffected = await cmd.ExecuteNonQueryAsync();
         var eb = new DiscordEmbedBuilder();
 
         if (rowsAffected > 0)
-        {
             eb.WithDescription($"Snippet `{name}` wurde erfolgreich entfernt!")
                 .WithColor(DiscordColor.Green);
-        }
         else
-        {
             eb.WithDescription($"Snippet `{name}` existiert nicht!")
                 .WithColor(DiscordColor.Red);
-        }
 
         eb.WithFooter("AGC Support-System", ctx.Guild.IconUrl);
         await ctx.RespondAsync(eb.Build());
@@ -114,7 +110,7 @@ public class SnippetManagerCommands : BaseCommandModule
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl)
             .WithColor(DiscordColor.Gold);
 
-        bool snippetFound = false;
+        var snippetFound = false;
         StringBuilder sb = new();
 
         while (await reader.ReadAsync())
@@ -153,7 +149,7 @@ public class SnippetManagerCommands : BaseCommandModule
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl);
         if (await reader.ReadAsync())
         {
-            string snipped_text = reader.GetString(0);
+            var snipped_text = reader.GetString(0);
             snipped_text = SnippetManagerHelper.FormatStringWithVariables(snipped_text);
             eb.WithDescription(snipped_text);
         }
@@ -180,7 +176,7 @@ public class SnippetManagerCommands : BaseCommandModule
             .WithColor(DiscordColor.Gold)
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl);
 
-        bool snippetFound = false;
+        var snippetFound = false;
 
         foreach (var word in words)
         {

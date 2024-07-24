@@ -20,10 +20,7 @@ public class RankCommand : ApplicationCommandsModule
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
                 "<a:loading_agc:1084157150747697203> Rang wird geladen..."));
-        if (user == null)
-        {
-            user = ctx.User;
-        }
+        if (user == null) user = ctx.User;
 
         if (user.IsBot)
         {
@@ -63,13 +60,13 @@ public class RankCommand : ApplicationCommandsModule
         var xpForThisLevelUntilNow = totalxp - xpForCurrentLevel;
         var percentage = (int)(xpForThisLevelUntilNow / (float)xpForThisLevel * 100);
         var userRank = await LevelUtils.GetUserRankAsync(user.Id);
-        bool errored = false;
+        var errored = false;
         var errorMessage = "";
 
-        bool httpsEnabled = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]);
+        var httpsEnabled = bool.Parse(BotConfig.GetConfig()["WebUI"]["UseHttps"]);
         var dashboardUrl = BotConfig.GetConfig()["WebUI"]["DashboardURL"];
-        string protocol = httpsEnabled ? "https" : "http";
-        string baseurl = $"{protocol}://{dashboardUrl}";
+        var protocol = httpsEnabled ? "https" : "http";
+        var baseurl = $"{protocol}://{dashboardUrl}";
 
         try
         {
@@ -105,10 +102,7 @@ public class RankCommand : ApplicationCommandsModule
                               $"**Gesamt XP:** {display_xp} XP");
         embed.WithThumbnail(user.AvatarUrl);
 
-        if (errored)
-        {
-            embed.WithFooter("Fallback Rangkarte | Fehler: " + errorMessage);
-        }
+        if (errored) embed.WithFooter("Fallback Rangkarte | Fehler: " + errorMessage);
 
 
         embed.WithImageUrl("attachment://progress.png");

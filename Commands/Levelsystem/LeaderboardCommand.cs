@@ -20,10 +20,7 @@ public class LeaderboardCommand : ApplicationCommandsModule
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().WithContent(
                 "<a:loading_agc:1084157150747697203> Leaderboard wird geladen..."));
-        if (user == null)
-        {
-            user = ctx.User;
-        }
+        if (user == null) user = ctx.User;
 
         if (user.IsBot)
         {
@@ -38,49 +35,40 @@ public class LeaderboardCommand : ApplicationCommandsModule
 
         var descriptionBuilder = new StringBuilder();
 
-        for (int i = 0; i < 5; i++)
-        {
+        for (var i = 0; i < 5; i++)
             if (i < leaderboardData.Count)
             {
                 var user_ = leaderboardData[i];
                 var user__ = await ctx.Client.GetUserAsync(user_.UserId);
                 var Uname = user__.GetFormattedUserName();
-                string lineText =
+                var lineText =
                     $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
                 if (user.Id == user_.UserId)
-                {
                     lineText =
                         $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
-                }
 
                 descriptionBuilder.AppendLine(lineText);
             }
-        }
 
         descriptionBuilder.AppendLine("..................");
 
 
-        int startRange = Math.Max(userRank - 5, 5);
-        int endRange = Math.Min(userRank + 5, leaderboardData.Count);
+        var startRange = Math.Max(userRank - 5, 5);
+        var endRange = Math.Min(userRank + 5, leaderboardData.Count);
 
-        if (userRank <= 5)
-        {
-            startRange = 5;
-        }
+        if (userRank <= 5) startRange = 5;
 
 
-        for (int i = startRange; i < endRange; i++)
+        for (var i = startRange; i < endRange; i++)
         {
             var user_ = leaderboardData[i];
             var user__ = await ctx.Client.GetUserAsync(user_.UserId);
             var Uname = user__.GetFormattedUserName();
-            string lineText =
+            var lineText =
                 $"**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}";
             if (user.Id == user_.UserId)
-            {
                 lineText =
                     $"__**#{i + 1} - {Uname}** - {Converter.FormatWithCommas(user_.XP)} XP / Level {user_.Level}__"; // Underline for invoking user
-            }
 
             descriptionBuilder.AppendLine(lineText);
         }

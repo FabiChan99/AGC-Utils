@@ -119,15 +119,16 @@ public sealed class MultiWarnCommand : BaseCommandModule
                 .WithEmbed(loadingEmbed).AddComponents(disbtn)
                 .WithReply(ctx.Message.Id);
             await message.ModifyAsync(loadingMessage);
-            string for_str = "";
+            var for_str = "";
             List<DiscordUser> users_to_warn_obj = new();
             foreach (var id in setids)
             {
                 var user = await ctx.Client.GetUserAsync(id);
                 if (user != null) users_to_warn_obj.Add(user);
             }
-            string urls = "";
-            
+
+            var urls = "";
+
             var att = ctx.Message.Attachments;
 
             if (att.Count > 0)
@@ -155,9 +156,8 @@ public sealed class MultiWarnCommand : BaseCommandModule
             {
                 var caseid_ = ToolSet.GenerateCaseID();
                 caseid_ = $"{caseid}-{caseid_}";
-                
-                
-                
+
+
                 Dictionary<string, object> data = new()
                 {
                     { "userid", (long)user.Id },
@@ -180,14 +180,14 @@ public sealed class MultiWarnCommand : BaseCommandModule
                 };
 
 
-                List<Dictionary<string, object>> results =
+                var results =
                     await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
                 foreach (var lresult in results) warnlist.Add(lresult);
                 var warncount = warnlist.Count;
 
-                DiscordEmbed uembed =
+                var uembed =
                     await ModerationHelper.GenerateWarnEmbed(ctx, user, ctx.User, warncount, caseid, true, reason);
-                string reasonString =
+                var reasonString =
                     $"{warncount}. Verwarnung: {reason} | By Moderator: {ctx.User.UsernameWithDiscriminator} | Datum: {DateTime.Now:dd.MM.yyyy - HH:mm}";
                 bool sent;
                 try
@@ -200,13 +200,10 @@ public sealed class MultiWarnCommand : BaseCommandModule
                     sent = false;
                 }
 
-                if (!sent)
-                {
-                    await ToolSet.SendWarnAsChannel(ctx, user, uembed, caseid);
-                }
+                if (!sent) await ToolSet.SendWarnAsChannel(ctx, user, uembed, caseid);
 
                 var dmsent = sent ? "✅" : "⚠️";
-                string uAction = "Keine";
+                var uAction = "Keine";
                 var (warnsToKick, warnsToBan) = await ModerationHelper.GetWarnKickValues();
                 var (KickEnabled, BanEnabled) = await ModerationHelper.UserActioningEnabled();
 
@@ -236,16 +233,16 @@ public sealed class MultiWarnCommand : BaseCommandModule
                     {
                     }
 
-                string stringtoadd =
+                var stringtoadd =
                     $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {warncount} Warn(s) | DM: {dmsent} | Sek. Aktion: {uAction}\n\n";
                 for_str += stringtoadd;
             }
 
-            string e_string = $"Der MultiWarn wurde erfolgreich abgeschlossen.\n" +
-                              $"__Grund:__ ```{reason + urls}```\n" +
-                              $"__Gewarnte User:__\n" +
-                              $"```{for_str}```";
-            DiscordColor ec = DiscordColor.Green;
+            var e_string = $"Der MultiWarn wurde erfolgreich abgeschlossen.\n" +
+                           $"__Grund:__ ```{reason + urls}```\n" +
+                           $"__Gewarnte User:__\n" +
+                           $"```{for_str}```";
+            var ec = DiscordColor.Green;
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("MultiWarn abgeschlossen")
                 .WithDescription(e_string)

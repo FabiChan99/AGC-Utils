@@ -262,18 +262,13 @@ internal static class DiscordExtension
         var invites = new List<string>();
 
         foreach (Match match in matches)
-        {
             if (match.Groups["code"].Success)
             {
                 var code = match.Groups["code"].Value;
                 var invite = await client.GetInviteByCodeAsync(code);
 
-                if (invite != null)
-                {
-                    invites.Add(invite.ToString());
-                }
+                if (invite != null) invites.Add(invite.ToString());
             }
-        }
 
         return invites;
     }
@@ -284,14 +279,12 @@ internal static class DiscordExtension
         var invites = new List<string>();
 
         foreach (Match match in matches)
-        {
             if (match.Groups["code"].Success)
             {
                 var code = match.Groups["code"].Value;
                 var inviteLink = $"https://discord.gg/{code}";
                 invites.Add(inviteLink);
             }
-        }
 
         return invites;
     }

@@ -47,7 +47,6 @@ public class Converter
         List<ulong> ids = new();
         var parts = users.Split(' ');
         foreach (var part in parts)
-        {
             if (part.StartsWith("<@") && part.EndsWith(">"))
             {
                 var idString = part.Substring(2, part.Length - 3);
@@ -60,7 +59,6 @@ public class Converter
             {
                 ids.Add(id);
             }
-        }
 
         ids = ids.ToHashSet().ToList();
         return ids;
@@ -69,13 +67,13 @@ public class Converter
     public static DateTime ConvertUnixTimestamp(long unixTimestamp)
     {
         DateTime unixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-        DateTime timestamp = unixEpoch.AddSeconds(unixTimestamp).ToLocalTime();
+        var timestamp = unixEpoch.AddSeconds(unixTimestamp).ToLocalTime();
         return timestamp;
     }
 
     public static string GetDateFromTimestamp(long timestamp)
     {
-        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp).ToLocalTime();
+        var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(timestamp).ToLocalTime();
         var formattedDate = dateTimeOffset.ToString("dd.MM.yyyy - HH:mm:ss");
         return formattedDate;
     }

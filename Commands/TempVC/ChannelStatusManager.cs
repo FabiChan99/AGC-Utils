@@ -26,21 +26,21 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
             }
 
             var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-            bool isMod = await IsChannelMod(userChannel, ctx.Member);
+            var dbChannels = await GetChannelIDFromDB(ctx);
+            var userChannel = ctx.Member?.VoiceState?.Channel;
+            var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+            if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
             {
                 await NoChannel(ctx);
                 return;
             }
 
-            if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+            if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
             {
                 var msg = await ctx.RespondAsync(
                     "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel-Status zu setzen...");
-                DiscordChannel channel = userChannel;
+                var channel = userChannel;
                 long? timestampdata = 0;
                 List<string> Query = new()
                 {
@@ -54,7 +54,6 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
                 // look if it is NULL
                 foreach (var data in dbtimestampdata)
-                {
                     try
                     {
                         timestampdata = (long?)data["statuslastedited"];
@@ -63,7 +62,6 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     {
                         timestampdata = null;
                     }
-                }
 
                 if (timestampdata is null)
                 {
@@ -72,12 +70,12 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     return;
                 }
 
-                long? edittimestamp = timestampdata;
-                long? math = current_timestamp - edittimestamp;
+                var edittimestamp = timestampdata;
+                var math = current_timestamp - edittimestamp;
 
                 if (math < 60)
                 {
-                    long? calc = edittimestamp + 60;
+                    var calc = edittimestamp + 60;
                     await msg.ModifyAsync(
                         $"<:attention:1085333468688433232> **Fehler!** Der Channelstatus wurde in der letzten Minute schon einmal geändert. Bitte warte noch etwas. Erneut umbenennen kannst du den Channelstatus <t:{calc}:R>.");
                     return;
@@ -98,12 +96,12 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                 await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
                 {
                     await conn.OpenAsync();
-                    string sql = "UPDATE tempvoice SET statuslastedited = @timestamp WHERE channelid = @channelid";
+                    var sql = "UPDATE tempvoice SET statuslastedited = @timestamp WHERE channelid = @channelid";
                     await using (NpgsqlCommand command = new(sql, conn))
                     {
                         command.Parameters.AddWithValue("@timestamp", current_timestamp);
                         command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                        int affected = await command.ExecuteNonQueryAsync();
+                        var affected = await command.ExecuteNonQueryAsync();
                     }
                 }
 
@@ -119,21 +117,21 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
         _ = Task.Run(async () =>
         {
             var current_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-            bool isMod = await IsChannelMod(userChannel, ctx.Member);
+            var dbChannels = await GetChannelIDFromDB(ctx);
+            var userChannel = ctx.Member?.VoiceState?.Channel;
+            var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-            if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+            if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
             {
                 await NoChannel(ctx);
                 return;
             }
 
-            if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+            if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
             {
                 var msg = await ctx.RespondAsync(
                     "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel-Status zu entfernen...");
-                DiscordChannel channel = userChannel;
+                var channel = userChannel;
                 long? timestampdata = 0;
                 List<string> Query = new()
                 {
@@ -147,7 +145,6 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
                 // look if it is NULL
                 foreach (var data in dbtimestampdata)
-                {
                     try
                     {
                         timestampdata = (long?)data["statuslastedited"];
@@ -156,7 +153,6 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     {
                         timestampdata = null;
                     }
-                }
 
                 if (timestampdata is null)
                 {
@@ -172,12 +168,12 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                     return;
                 }
 
-                long? edittimestamp = timestampdata;
-                long? math = current_timestamp - edittimestamp;
+                var edittimestamp = timestampdata;
+                var math = current_timestamp - edittimestamp;
 
                 if (math < 60)
                 {
-                    long? calc = edittimestamp + 60;
+                    var calc = edittimestamp + 60;
                     await msg.ModifyAsync(
                         $"<:attention:1085333468688433232> **Fehler!** Der Channelstatus wurde in der letzten Minute schon einmal verändert. Bitte warte noch etwas. Ratelimited bis <t:{calc}:R>.");
                     return;
@@ -188,12 +184,12 @@ public sealed class ChannelStatusCommands : TempVoiceHelper
                 await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
                 {
                     await conn.OpenAsync();
-                    string sql = "UPDATE tempvoice SET statuslastedited = @timestamp WHERE channelid = @channelid";
+                    var sql = "UPDATE tempvoice SET statuslastedited = @timestamp WHERE channelid = @channelid";
                     await using (NpgsqlCommand command = new(sql, conn))
                     {
                         command.Parameters.AddWithValue("@timestamp", current_timestamp);
                         command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                        int affected = await command.ExecuteNonQueryAsync();
+                        var affected = await command.ExecuteNonQueryAsync();
                     }
                 }
 

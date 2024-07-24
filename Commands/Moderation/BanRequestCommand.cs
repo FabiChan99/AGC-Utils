@@ -17,10 +17,7 @@ public sealed class BanRequestCommand : BaseCommandModule
     [RequireStaffRole]
     public async Task BanRequest(CommandContext ctx, DiscordUser user, [RemainingText] string reason)
     {
-        if (reason == null)
-        {
-            reason = await ModerationHelper.BanReasonSelector(ctx);
-        }
+        if (reason == null) reason = await ModerationHelper.BanReasonSelector(ctx);
 
         if (await ToolSet.CheckForReason(ctx, reason)) return;
         if (await ToolSet.TicketUrlCheck(ctx, reason)) return;

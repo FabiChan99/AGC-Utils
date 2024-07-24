@@ -14,7 +14,7 @@ public class SupportPanel : BaseCommandModule
     [RequireGuildOwner]
     public async Task InitSupportPanel(CommandContext ctx)
     {
-        DiscordEmbed embed = new DiscordEmbedBuilder().WithTitle("AGC Support-System").WithDescription("""
+        var embed = new DiscordEmbedBuilder().WithTitle("AGC Support-System").WithDescription("""
                 __Benötigst du Hilfe oder Support? Mach ein Ticket auf.__
 
                 > Wann sollte ich ein Ticket öffnen?
@@ -54,10 +54,8 @@ public class SupportPanelListener : SupportPanel
 
                 var sup_cats = await SupportComponents.GetSupportCategories();
                 foreach (var cat in sup_cats)
-                {
                     buttons.Add(new DiscordButtonComponent(ButtonStyle.Primary, label: $"{cat.Value}",
                         customId: $"ticket_open_{cat.Key}"));
-                }
 
                 DiscordEmbed embed = new DiscordEmbedBuilder()
                     .WithTitle("Wähle eine Supportkategorie aus")
@@ -76,13 +74,9 @@ public class SupportPanelListener : SupportPanel
 
             // handle ticket opening
             if (e.Interaction.Data.CustomId == "ticket_open_report")
-            {
                 await TicketManager.OpenTicket(e.Interaction, TicketType.Report, client, TicketCreator.User);
-            }
             else if (e.Interaction.Data.CustomId == "ticket_open_support")
-            {
                 await TicketManager.OpenTicket(e.Interaction, TicketType.Support, client, TicketCreator.User);
-            }
 
             return Task.CompletedTask;
         });

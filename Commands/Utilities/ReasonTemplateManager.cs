@@ -15,22 +15,19 @@ public class ReasonTemplateManager : BaseCommandModule
     [RequireStaffRole]
     public async Task ReasonTemplateManager_Help(CommandContext ctx)
     {
-        Dictionary<string, string> templates = await ReasonTemplateResolver.GetReplacements();
-        DiscordEmbedBuilder eb = new DiscordEmbedBuilder()
+        var templates = await ReasonTemplateResolver.GetReplacements();
+        var eb = new DiscordEmbedBuilder()
             .WithTitle("Template Manager")
             .WithColor(DiscordColor.Red)
             .WithFooter("AGC Support-System", ctx.Guild.IconUrl);
-        int i = 0;
+        var i = 0;
         foreach (var (key, value) in templates)
         {
             eb.AddField(new DiscordEmbedField("-" + key, value, true));
             i++;
         }
 
-        if (i == 0)
-        {
-            eb.WithDescription("__Keine Templates vorhanden.__");
-        }
+        if (i == 0) eb.WithDescription("__Keine Templates vorhanden.__");
 
         await ctx.RespondAsync(eb);
     }
@@ -39,29 +36,21 @@ public class ReasonTemplateManager : BaseCommandModule
     [RequireStaffRole]
     public async Task AddTemplate(CommandContext ctx, string key, [RemainingText] string text)
     {
-        bool success = await ReasonTemplateResolver.AddReplacement(key, text);
+        var success = await ReasonTemplateResolver.AddReplacement(key, text);
         if (success)
-        {
             await ctx.RespondAsync($"Template `{key}` hinzugefügt.");
-        }
         else
-        {
             await ctx.RespondAsync($"Template `{key}` existiert bereits.");
-        }
     }
 
     [Command("remove")]
     [RequireStaffRole]
     public async Task RemoveTemplate(CommandContext ctx, string key)
     {
-        bool success = await ReasonTemplateResolver.RemoveReplacement(key);
+        var success = await ReasonTemplateResolver.RemoveReplacement(key);
         if (success)
-        {
             await ctx.RespondAsync($"Template `{key}` entfernt.");
-        }
         else
-        {
             await ctx.RespondAsync($"Template `{key}` existiert nicht.");
-        }
     }
 }

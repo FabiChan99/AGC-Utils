@@ -14,22 +14,22 @@ public sealed class LockChannelCommand : TempVoiceHelper
     //[RequireVoiceChannel]
     public async Task VoiceLock(CommandContext ctx)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+        var dbChannels = await GetChannelIDFromDB(ctx);
+        var userChannel = ctx.Member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel zu sperren...");
-            DiscordRole default_role = ctx.Guild.EveryoneRole;
-            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var default_role = ctx.Guild.EveryoneRole;
+            var channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
             {

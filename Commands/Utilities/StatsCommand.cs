@@ -27,7 +27,7 @@ public class StatsCommand : BaseCommandModule
         var uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
         var uptimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - uptime.TotalSeconds;
         var rounduptime = Math.Round(uptimestamp, 0);
-        string istring = $"Uptime: <t:{rounduptime}:f> <t:{rounduptime}:R>\n";
+        var istring = $"Uptime: <t:{rounduptime}:f> <t:{rounduptime}:R>\n";
 
         var compiledate = ToolSet.GetBuildDateToUnixTime(Assembly.GetExecutingAssembly());
         istring += $"Compile Date: <t:{compiledate}:f> <t:{compiledate}:R>\n";
@@ -71,7 +71,7 @@ public class StatsCommand : BaseCommandModule
         istring += $"CPU Cores: **{cpu}**\n";
 
         // Bot owner details
-        DiscordUser botowner = ctx.Client.CurrentApplication.Owner;
+        var botowner = ctx.Client.CurrentApplication.Owner;
         istring += $"Bot Owner: **{botowner.UsernameWithDiscriminator}** ``{botowner.Id}``\n";
 
         embed.WithDescription(istring);

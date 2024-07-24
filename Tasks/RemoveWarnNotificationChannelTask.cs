@@ -25,10 +25,7 @@ public sealed class ExtendedModerationSystemLoop
                 var channel_age = DateTimeOffset.Now - channel.CreationTimestamp;
                 if (channel_age.TotalHours > 24)
                 {
-                    if (!channel.Name.StartsWith("warn-"))
-                    {
-                        continue;
-                    }
+                    if (!channel.Name.StartsWith("warn-")) continue;
 
                     if (channel.Name.StartsWith("warn-"))
                     {

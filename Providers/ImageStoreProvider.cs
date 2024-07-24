@@ -6,21 +6,18 @@ public static class ImageStoreProvider
     {
         return BotConfig.GetConfig()["FlagImageStore"]["Path"];
     }
-    
+
     public static string GetImageStoreDomain()
     {
         return BotConfig.GetConfig()["FlagImageStore"]["Domain"];
     }
-    
-    
+
+
     public static string SaveImage(string fileName, byte[] image)
     {
         var path = GetImageStorePath();
         var domain = GetImageStoreDomain();
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         var fullPath = Path.Combine(path, fileName);
         var prefix = "https://";
         File.WriteAllBytes(fullPath, image);

@@ -13,22 +13,22 @@ public sealed class UnhideChannelCommand : TempVoiceHelper
     [RequireDatabase]
     public async Task VoiceUnhide(CommandContext ctx)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+        var dbChannels = await GetChannelIDFromDB(ctx);
+        var userChannel = ctx.Member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(ctx);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel sichtbar zu machen...");
-            DiscordRole default_role = ctx.Guild.EveryoneRole;
-            DiscordChannel channel = ctx.Member.VoiceState.Channel;
+            var default_role = ctx.Guild.EveryoneRole;
+            var channel = ctx.Member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
             {

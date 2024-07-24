@@ -1,9 +1,7 @@
 ﻿#region
 
 using System.Text.Json;
-using AGC_Management.Enums;
 using AGC_Management.Enums.Web;
-using AGC_Management.Services;
 using DisCatSharp.Exceptions;
 
 #endregion
@@ -17,7 +15,7 @@ public sealed class AuthUtils
         var guild = CurrentApplication.TargetGuild;
         DiscordMember? user = null;
         var servercfg = BotConfig.GetConfig()["ServerConfig"];
-        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        var adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
         DiscordRole? overrideRole = null;
         try
         {
@@ -28,16 +26,13 @@ public sealed class AuthUtils
             // ignored
         }
 
-        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
-        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
-        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+        var supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        var modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        var staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try
         {
             user = CurrentApplication.TargetGuild.Members.Values.First(x => x.Id == userId);
-            if (user == null)
-            {
-                return AccessLevel.NichtImServer.ToString();
-            }
+            if (user == null) return AccessLevel.NichtImServer.ToString();
         }
         catch (NotFoundException)
         {
@@ -50,10 +45,7 @@ public sealed class AuthUtils
 
         try
         {
-            if (overrideRole != null && user.Roles.Contains(overrideRole))
-            {
-                return AccessLevel.Administrator.ToString();
-            }
+            if (overrideRole != null && user.Roles.Contains(overrideRole)) return AccessLevel.Administrator.ToString();
         }
         catch (Exception)
         {
@@ -61,25 +53,16 @@ public sealed class AuthUtils
         }
 
         // bot owner
-        if (user.Id == GlobalProperties.BotOwnerId)
-        {
-            return AccessLevel.BotOwner.ToString();
-        }
+        if (user.Id == GlobalProperties.BotOwnerId) return AccessLevel.BotOwner.ToString();
 
         // admin
-        if (user.Roles.Contains(adminRole))
-        {
-            return AccessLevel.Administrator.ToString();
-        }
+        if (user.Roles.Contains(adminRole)) return AccessLevel.Administrator.ToString();
 
         try
         {
             ulong headmodroleid = 817732206876688387;
             var headmodrole = guild.GetRole(headmodroleid);
-            if (user.Roles.Contains(headmodrole))
-            {
-                return AccessLevel.HeadModerator.ToString();
-            }
+            if (user.Roles.Contains(headmodrole)) return AccessLevel.HeadModerator.ToString();
         }
         catch (Exception)
         {
@@ -87,28 +70,17 @@ public sealed class AuthUtils
         }
 
         // mod
-        if (user.Roles.Contains(modRole))
-        {
-            return AccessLevel.Moderator.ToString();
-        }
+        if (user.Roles.Contains(modRole)) return AccessLevel.Moderator.ToString();
 
         // sup
-        if (user.Roles.Contains(supRole))
-        {
-            return AccessLevel.Supporter.ToString();
-        }
-        
+        if (user.Roles.Contains(supRole)) return AccessLevel.Supporter.ToString();
+
         var eventmanagerRole = guild.Roles.Values.FirstOrDefault(x => x.Id.Equals(1157337266960732232));
         if (eventmanagerRole != null && user.Roles.Contains(eventmanagerRole))
-        {
             return AccessLevel.HeadEventmanager.ToString();
-        }
 
         // staff
-        if (user.Roles.Contains(staffRole))
-        {
-            return AccessLevel.Team.ToString();
-        }
+        if (user.Roles.Contains(staffRole)) return AccessLevel.Team.ToString();
 
         // user
         return AccessLevel.User.ToString();
@@ -117,8 +89,8 @@ public sealed class AuthUtils
 
     public static async Task<string> RetrieveName(JsonElement userClaims)
     {
-        string userId_ = userClaims.GetProperty("id").ToString();
-        ulong userId = ulong.Parse(userId_);
+        var userId_ = userClaims.GetProperty("id").ToString();
+        var userId = ulong.Parse(userId_);
 
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).UsernameWithDiscriminator;
     }
@@ -130,8 +102,8 @@ public sealed class AuthUtils
 
     public static async Task<string?> RetrieveDisplayName(JsonElement userClaims)
     {
-        string userId_ = userClaims.GetProperty("id").ToString();
-        ulong userId = ulong.Parse(userId_);
+        var userId_ = userClaims.GetProperty("id").ToString();
+        var userId = ulong.Parse(userId_);
 
         return (await CurrentApplication.DiscordClient.GetUserAsync(userId)).GlobalName;
     }
@@ -139,21 +111,21 @@ public sealed class AuthUtils
 
     public static async Task<string> RetrieveId(JsonElement userClaims)
     {
-        string userId_ = userClaims.GetProperty("id").ToString();
+        var userId_ = userClaims.GetProperty("id").ToString();
         return userId_;
     }
 
     public static async Task<string> RetrieveRole(JsonElement userClaims)
     {
-        string userId_ = userClaims.GetProperty("id").ToString();
-        ulong userId = ulong.Parse(userId_);
+        var userId_ = userClaims.GetProperty("id").ToString();
+        var userId = ulong.Parse(userId_);
 
 
         var guild = CurrentApplication.TargetGuild;
         DiscordMember? user = null;
         var servercfg = BotConfig.GetConfig()["ServerConfig"];
-        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
-        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        var adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        var supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
         DiscordRole? overrideRole = null;
         try
         {
@@ -164,15 +136,12 @@ public sealed class AuthUtils
             // ignored
         }
 
-        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
-        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+        var modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        var staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
         try
         {
             user = CurrentApplication.TargetGuild.Members.Values.First(x => x.Id == userId);
-            if (user == null)
-            {
-                return AccessLevel.NichtImServer.ToString();
-            }
+            if (user == null) return AccessLevel.NichtImServer.ToString();
         }
         catch (NotFoundException)
         {
@@ -185,10 +154,7 @@ public sealed class AuthUtils
 
         try
         {
-            if (overrideRole != null && user.Roles.Contains(overrideRole))
-            {
-                return AccessLevel.Administrator.ToString();
-            }
+            if (overrideRole != null && user.Roles.Contains(overrideRole)) return AccessLevel.Administrator.ToString();
         }
         catch (Exception)
         {
@@ -196,26 +162,17 @@ public sealed class AuthUtils
         }
 
         // bot owner
-        if (user.Id == GlobalProperties.BotOwnerId)
-        {
-            return AccessLevel.BotOwner.ToString();
-        }
+        if (user.Id == GlobalProperties.BotOwnerId) return AccessLevel.BotOwner.ToString();
 
         // admin
-        if (user.Roles.Contains(adminRole))
-        {
-            return AccessLevel.Administrator.ToString();
-        }
+        if (user.Roles.Contains(adminRole)) return AccessLevel.Administrator.ToString();
 
 
         try
         {
             ulong headmodroleid = 817732206876688387;
             var headmodrole = guild.GetRole(headmodroleid);
-            if (user.Roles.Contains(headmodrole))
-            {
-                return AccessLevel.HeadModerator.ToString();
-            }
+            if (user.Roles.Contains(headmodrole)) return AccessLevel.HeadModerator.ToString();
         }
         catch (Exception)
         {
@@ -223,28 +180,17 @@ public sealed class AuthUtils
         }
 
         // mod
-        if (user.Roles.Contains(modRole))
-        {
-            return AccessLevel.Moderator.ToString();
-        }
+        if (user.Roles.Contains(modRole)) return AccessLevel.Moderator.ToString();
 
         // sup
-        if (user.Roles.Contains(supRole))
-        {
-            return AccessLevel.Supporter.ToString();
-        }
+        if (user.Roles.Contains(supRole)) return AccessLevel.Supporter.ToString();
 
         var eventmanagerRole = guild.Roles.Values.FirstOrDefault(x => x.Id.Equals(1157337266960732232));
         if (eventmanagerRole != null && user.Roles.Contains(eventmanagerRole))
-        {
             return AccessLevel.HeadEventmanager.ToString();
-        }
 
         // staff
-        if (user.Roles.Contains(staffRole))
-        {
-            return AccessLevel.Team.ToString();
-        }
+        if (user.Roles.Contains(staffRole)) return AccessLevel.Team.ToString();
 
         // user
         return AccessLevel.User.ToString();
@@ -253,13 +199,13 @@ public sealed class AuthUtils
 
     public static async Task<List<string>> RetrieveRoles(ulong id)
     {
-        ulong userId = ulong.Parse(id.ToString());
+        var userId = ulong.Parse(id.ToString());
 
         var guild = CurrentApplication.TargetGuild;
         DiscordMember? user = null;
         var servercfg = BotConfig.GetConfig()["ServerConfig"];
-        DiscordRole adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
-        DiscordRole supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
+        var adminRole = guild.GetRole(ulong.Parse(servercfg["AdminRoleId"]));
+        var supRole = guild.GetRole(ulong.Parse(servercfg["SupportRoleId"]));
         DiscordRole? overrideRole = null;
 
         try
@@ -271,8 +217,8 @@ public sealed class AuthUtils
             // ignored
         }
 
-        DiscordRole modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
-        DiscordRole staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
+        var modRole = guild.GetRole(ulong.Parse(servercfg["ModRoleId"]));
+        var staffRole = guild.GetRole(ulong.Parse(servercfg["StaffRoleId"]));
 
         try
         {
@@ -283,49 +229,29 @@ public sealed class AuthUtils
             return new List<string> { AccessLevel.NichtImServer.ToString() };
         }
 
-        List<string> userRoles = new List<string>();
+        var userRoles = new List<string>();
 
         // bot owner
-        if (user.Id == GlobalProperties.BotOwnerId)
-        {
-            userRoles.Add(AccessLevel.BotOwner.ToString());
-        }
+        if (user.Id == GlobalProperties.BotOwnerId) userRoles.Add(AccessLevel.BotOwner.ToString());
 
         // override
         if (overrideRole != null && user.Roles.Contains(overrideRole))
-        {
             userRoles.Add(AccessLevel.Administrator.ToString());
-        }
 
         // admin
-        if (user.Roles.Contains(adminRole))
-        {
-            userRoles.Add(AccessLevel.Administrator.ToString());
-        }
+        if (user.Roles.Contains(adminRole)) userRoles.Add(AccessLevel.Administrator.ToString());
 
         // mod
-        if (user.Roles.Contains(modRole))
-        {
-            userRoles.Add(AccessLevel.Moderator.ToString());
-        }
+        if (user.Roles.Contains(modRole)) userRoles.Add(AccessLevel.Moderator.ToString());
 
         // sup
-        if (user.Roles.Contains(supRole))
-        {
-            userRoles.Add(AccessLevel.Supporter.ToString());
-        }
+        if (user.Roles.Contains(supRole)) userRoles.Add(AccessLevel.Supporter.ToString());
 
         // staff
-        if (user.Roles.Contains(staffRole))
-        {
-            userRoles.Add(AccessLevel.Team.ToString());
-        }
+        if (user.Roles.Contains(staffRole)) userRoles.Add(AccessLevel.Team.ToString());
 
         // user
-        if (userRoles.Count == 0)
-        {
-            userRoles.Add(AccessLevel.User.ToString());
-        }
+        if (userRoles.Count == 0) userRoles.Add(AccessLevel.User.ToString());
 
         return userRoles;
     }

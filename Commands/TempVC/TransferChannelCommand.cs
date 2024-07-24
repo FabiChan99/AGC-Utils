@@ -26,9 +26,9 @@ public sealed class TransferChannelCommand : TempVoiceHelper
             return;
         }
 
-        DiscordUser owner = await ctx.Client.GetUserAsync((ulong)channelownerid);
+        var owner = await ctx.Client.GetUserAsync((ulong)channelownerid);
         var conv_to_member = await ctx.Guild.GetMemberAsync(owner.Id);
-        DiscordMember mowner = conv_to_member;
+        var mowner = conv_to_member;
         var orig_owner = mowner;
         var new_owner = member;
         if (!my_channels.Contains((long)userchannel))
@@ -43,12 +43,12 @@ public sealed class TransferChannelCommand : TempVoiceHelper
             userchannelobj.Users.Contains(new_owner))
         {
             var conn = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-            string sql = "UPDATE tempvoice SET ownerid = @userid WHERE channelid = @channelid";
-            await using (NpgsqlCommand command = conn.CreateCommand(sql))
+            var sql = "UPDATE tempvoice SET ownerid = @userid WHERE channelid = @channelid";
+            await using (var command = conn.CreateCommand(sql))
             {
                 command.Parameters.AddWithValue("@userid", (long)new_owner.Id);
                 command.Parameters.AddWithValue("@channelid", (long)userchannel);
-                int affected = await command.ExecuteNonQueryAsync();
+                var affected = await command.ExecuteNonQueryAsync();
             }
 
             var overwrites = userchannelobj.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();

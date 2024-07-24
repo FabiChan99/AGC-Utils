@@ -9,13 +9,11 @@ public class MessageFormatter
         var formattedMessage = message.Replace("{usermention}", user.Mention);
         formattedMessage = formattedMessage.Replace("{username}", user.Username);
         if (isWithReward)
-        {
             if (role != null)
             {
                 formattedMessage = formattedMessage.Replace("{rolemention}", role.Mention);
                 formattedMessage = formattedMessage.Replace("{rolename}", role.Name);
             }
-        }
 
         formattedMessage = formattedMessage.Replace("{level}", level.ToString());
 

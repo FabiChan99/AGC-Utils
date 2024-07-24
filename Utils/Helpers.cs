@@ -7,7 +7,6 @@ using System.Text;
 using AGC_Management.Entities;
 using DisCatSharp.Net;
 using Newtonsoft.Json;
-using RestSharp;
 using NpgsqlDataSource = Npgsql.NpgsqlDataSource;
 
 #endregion
@@ -69,10 +68,7 @@ public static class ToolSet
         {
             var value = attribute.InformationalVersion;
             var index = value.IndexOf(BuildVersionMetadataPrefix);
-            if (index > 0)
-            {
-                return value.Substring(index + BuildVersionMetadataPrefix.Length);
-            }
+            if (index > 0) return value.Substring(index + BuildVersionMetadataPrefix.Length);
         }
 
         return string.Empty;
@@ -99,10 +95,8 @@ public static class ToolSet
                 value = value.Substring(index + BuildVersionMetadataPrefix.Length);
                 if (DateTime.TryParseExact(value, "yyyyMMddHHmmss", CultureInfo.CurrentCulture,
                         DateTimeStyles.AssumeLocal, out var result))
-                {
                     return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(result, TimeZoneInfo.Local))
                         .ToUnixTimeSeconds();
-                }
             }
         }
 
@@ -138,7 +132,7 @@ public static class ToolSet
     {
         var domainUrl = DiscordDomain.GetDomain(CoreDomain.DiscordCdn).Url;
         var avatarIndex = (userId >> 22) % 6;
-        string avatarUrl = $"{domainUrl}{Endpoints.EMBED}{Endpoints.AVATARS}/{avatarIndex}.png?size=1024";
+        var avatarUrl = $"{domainUrl}{Endpoints.EMBED}{Endpoints.AVATARS}/{avatarIndex}.png?size=1024";
 
         return avatarUrl;
     }
@@ -148,15 +142,9 @@ public static class ToolSet
         var member = CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userid);
         if (member != null)
         {
-            if (!string.IsNullOrEmpty(member.Nickname))
-            {
-                return $"{member.Username} ({member.Nickname})";
-            }
+            if (!string.IsNullOrEmpty(member.Nickname)) return $"{member.Username} ({member.Nickname})";
 
-            if (!string.IsNullOrEmpty(member.DisplayName))
-            {
-                return $"{member.Username} ({member.DisplayName})";
-            }
+            if (!string.IsNullOrEmpty(member.DisplayName)) return $"{member.Username} ({member.DisplayName})";
 
             return member.Username;
         }
@@ -166,15 +154,9 @@ public static class ToolSet
 
     public static string GetFormattedName(DiscordMember member)
     {
-        if (!string.IsNullOrEmpty(member.Nickname))
-        {
-            return $"{member.Username} ({member.Nickname})";
-        }
+        if (!string.IsNullOrEmpty(member.Nickname)) return $"{member.Username} ({member.Nickname})";
 
-        if (!string.IsNullOrEmpty(member.DisplayName))
-        {
-            return $"{member.Username} ({member.DisplayName})";
-        }
+        if (!string.IsNullOrEmpty(member.DisplayName)) return $"{member.Username} ({member.DisplayName})";
 
         return member.Username;
     }
@@ -190,20 +172,20 @@ public static class ToolSet
     public static async Task<List<BannSystemWarn>?> GetBannsystemWarns(DiscordUser user)
     {
         using HttpClient client = new();
-        string apiKey = GlobalProperties.DebugMode
+        var apiKey = GlobalProperties.DebugMode
             ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
             : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
-        string apiUrl = GlobalProperties.DebugMode
+        var apiUrl = GlobalProperties.DebugMode
             ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
             : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
-        HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+        var response = await client.GetAsync($"{apiUrl}{user.Id}");
         if (response.IsSuccessStatusCode)
         {
-            string json = await response.Content.ReadAsStringAsync();
-            UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-            List<BannSystemWarn> data = apiResponse.warns;
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
+            var data = apiResponse.warns;
             return data;
         }
 
@@ -213,20 +195,20 @@ public static class ToolSet
     public static async Task<List<BannSystemReport?>?> GetBannsystemReports(DiscordUser user)
     {
         using HttpClient client = new();
-        string apiKey = GlobalProperties.DebugMode
+        var apiKey = GlobalProperties.DebugMode
             ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_Key"]
             : BotConfig.GetConfig()["ModHQConfig"]["API_Key"];
-        string apiUrl = GlobalProperties.DebugMode
+        var apiUrl = GlobalProperties.DebugMode
             ? BotConfig.GetConfig()["ModHQConfigDBG"]["API_URL"]
             : BotConfig.GetConfig()["ModHQConfig"]["API_URL"];
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", apiKey);
-        HttpResponseMessage response = await client.GetAsync($"{apiUrl}{user.Id}");
+        var response = await client.GetAsync($"{apiUrl}{user.Id}");
         if (response.IsSuccessStatusCode)
         {
-            string json = await response.Content.ReadAsStringAsync();
-            UserInfoApiResponse apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
-            List<BannSystemReport> data = apiResponse.reports;
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<UserInfoApiResponse>(json);
+            var data = apiResponse.reports;
             return data;
         }
 
@@ -334,10 +316,8 @@ public static class ToolSet
     {
         targetOverwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder());
         foreach (var overwrite in overwrites)
-        {
             targetOverwrites =
                 targetOverwrites.Merge(overwrite.Type, overwrite.Target, overwrite.Allowed, overwrite.Denied);
-        }
 
         var newOverwrites = targetOverwrites.ToList();
         return newOverwrites;
@@ -354,13 +334,10 @@ public static class ToolSet
     public static async Task<bool> UserHasClosedPendingTicket(ulong UserId)
     {
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_owner = '{(long)UserId}'";
-        await using NpgsqlCommand cmd = con.CreateCommand(query);
-        int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
-        if (rowCount > 0)
-        {
-            return true;
-        }
+        var query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_owner = '{(long)UserId}'";
+        await using var cmd = con.CreateCommand(query);
+        var rowCount = Convert.ToInt32(cmd.ExecuteScalar());
+        if (rowCount > 0) return true;
 
 
         return false;
@@ -369,33 +346,27 @@ public static class ToolSet
     public static async Task<bool> UserHasOpenTicket(ulong UserId)
     {
         var connection = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-        string query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_users @> ARRAY[{(long)UserId}::bigint]";
-        await using NpgsqlCommand cmd = connection.CreateCommand(query);
-        int rowCount = Convert.ToInt32(cmd.ExecuteScalar());
-        if (rowCount > 0)
-        {
-            return true;
-        }
+        var query = $"SELECT COUNT(*) FROM ticketcache WHERE ticket_users @> ARRAY[{(long)UserId}::bigint]";
+        await using var cmd = connection.CreateCommand(query);
+        var rowCount = Convert.ToInt32(cmd.ExecuteScalar());
+        if (rowCount > 0) return true;
 
         return false;
     }
 
     public static async Task<int> GenerateBannDeleteMessageDays(ulong UserId)
     {
-        bool hasOpenTicket = await UserHasOpenTicket(UserId);
-        bool hasClosedPendingTicket = await UserHasClosedPendingTicket(UserId);
-        if (hasOpenTicket)
-        {
-            return 0;
-        }
+        var hasOpenTicket = await UserHasOpenTicket(UserId);
+        var hasClosedPendingTicket = await UserHasClosedPendingTicket(UserId);
+        if (hasOpenTicket) return 0;
 
         return hasClosedPendingTicket ? 0 : 7;
     }
-    
+
 
     public static async Task SendWarnAsChannel(CommandContext ctx, DiscordUser user, DiscordEmbed uembed, string caseid)
     {
-        DiscordEmbed userembed = uembed;
+        var userembed = uembed;
         var catid = BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"];
         var wchannel = await ctx.Guild.CreateChannelAsync($"warn-{caseid}",
             ChannelType.Text, ctx.Guild.GetChannel(Convert.ToUInt64(catid)), user.Id.ToString());

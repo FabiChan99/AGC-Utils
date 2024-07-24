@@ -54,9 +54,9 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<bool> NoChannel(CommandContext ctx)
     {
-        string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
-                              $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
-                              $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
+        var errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
+                           $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
+                           $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
 
         await ctx.RespondAsync(errorMessage);
         return true;
@@ -64,9 +64,9 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<bool> NoChannel(DiscordInteraction interaction)
     {
-        string errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
-                              $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
-                              $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
+        var errorMessage = $"<:attention:1085333468688433232> **Fehler!** " +
+                           $"Du besitzt keinen eigenen Kanal oder der Kanal gehört dir nicht. " +
+                           $"Wenn du keinen Kanal hast, kannst du einen unter <#{GetVCConfig("Creation_Channel_ID")}> erstellen.";
         DiscordInteractionResponseBuilder ib = new()
         {
             IsEphemeral = true
@@ -80,18 +80,12 @@ public class TempVoiceHelper : BaseCommandModule
     {
         if (member.IsMigrated)
         {
-            if ("" == member.Nickname)
-            {
-                return $"{member.Nickname} ({member.Username})";
-            }
+            if ("" == member.Nickname) return $"{member.Nickname} ({member.Username})";
 
             return $"{member.DisplayName} ({member.Username})";
         }
 
-        if ("" == member.Nickname)
-        {
-            return $"{member.Nickname} ({member.UsernameWithDiscriminator})";
-        }
+        if ("" == member.Nickname) return $"{member.Nickname} ({member.UsernameWithDiscriminator})";
 
         return $"{member.UsernameWithDiscriminator}";
     }
@@ -103,10 +97,7 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task<bool> IsChannelMod(DiscordChannel? channel, DiscordUser user)
     {
-        if (channel == null)
-        {
-            return false;
-        }
+        if (channel == null) return false;
 
         List<string> Query = new()
         {
@@ -116,16 +107,12 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "channelid", (long)channel.Id }
         };
-        List<Dictionary<string, object>> QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
+        var QueryResult = await DatabaseService.SelectDataFromTable("tempvoice",
             Query, QueryConditions);
-        bool isMod = false;
+        var isMod = false;
         foreach (var result in QueryResult)
-        {
             if (result["channelmods"].ToString().Contains(user.Id.ToString()))
-            {
                 isMod = true;
-            }
-        }
 
         return isMod;
     }
@@ -140,39 +127,30 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "channelid", (long)channel.Id }
         };
-        List<Dictionary<string, object>> QueryResult =
+        var QueryResult =
             await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
 
         List<ulong> channelMods = new();
         foreach (var result in QueryResult)
-        {
             try
             {
-                string[] mods = result["channelmods"].ToString()
+                var mods = result["channelmods"].ToString()
                     .Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var mod in mods)
-                {
-                    if (ulong.TryParse(mod, out ulong parsedMod))
-                    {
+                    if (ulong.TryParse(mod, out var parsedMod))
                         channelMods.Add(parsedMod);
-                    }
-                }
             }
             catch (Exception)
             {
             }
-        }
 
         return channelMods;
     }
 
     protected static async Task<bool> ChannelHasMods(DiscordChannel channel)
     {
-        List<ulong> channelMods = await RetrieveChannelMods(channel);
-        if (channelMods.Count > 0)
-        {
-            return true;
-        }
+        var channelMods = await RetrieveChannelMods(channel);
+        if (channelMods.Count > 0) return true;
 
         return false;
     }
@@ -182,12 +160,12 @@ public class TempVoiceHelper : BaseCommandModule
         await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
         {
             await conn.OpenAsync();
-            string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+            var sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
             await using (NpgsqlCommand command = new(sql, conn))
             {
                 command.Parameters.AddWithValue("@mods", string.Empty);
                 command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                int affected = await command.ExecuteNonQueryAsync();
+                var affected = await command.ExecuteNonQueryAsync();
             }
         }
     }
@@ -197,12 +175,12 @@ public class TempVoiceHelper : BaseCommandModule
         await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
         {
             await conn.OpenAsync();
-            string sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
+            var sql = "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
             await using (NpgsqlCommand command = new(sql, conn))
             {
                 command.Parameters.AddWithValue("@mods", string.Join(", ", channelMods));
                 command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                int affected = await command.ExecuteNonQueryAsync();
+                var affected = await command.ExecuteNonQueryAsync();
             }
         }
     }
@@ -220,7 +198,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "ownerid", (long)interaction.User.Id }
         };
-        List<Dictionary<string, object>> QueryResult =
+        var QueryResult =
             await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
@@ -245,7 +223,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             { "ownerid", (long)ctx.User.Id }
         };
-        List<Dictionary<string, object>> QueryResult =
+        var QueryResult =
             await DatabaseService.SelectDataFromTable("tempvoice", Query, QueryConditions);
         foreach (var result in QueryResult)
         {
@@ -265,7 +243,7 @@ public class TempVoiceHelper : BaseCommandModule
         {
             "channelid"
         };
-        List<Dictionary<string, object>> QueryResult =
+        var QueryResult =
             await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
         foreach (var result in QueryResult)
         {
@@ -292,17 +270,15 @@ public class TempVoiceHelper : BaseCommandModule
                 { "channelid", (long)ctx.Member.VoiceState?.Channel.Id }
             };
 
-            List<Dictionary<string, object>> queryResult =
+            var queryResult =
                 await DatabaseService.SelectDataFromTable("tempvoice", query, queryConditions);
 
             foreach (var result in queryResult)
-            {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
+                if (result.TryGetValue("ownerid", out var ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break;
                 }
-            }
         }
         catch
         {
@@ -327,17 +303,15 @@ public class TempVoiceHelper : BaseCommandModule
                 { "channelid", (long)user.VoiceState?.Channel.Id }
             };
 
-            List<Dictionary<string, object>> queryResult =
+            var queryResult =
                 await DatabaseService.SelectDataFromTable("tempvoice", query, queryConditions);
 
             foreach (var result in queryResult)
-            {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
+                if (result.TryGetValue("ownerid", out var ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break;
                 }
-            }
         }
         catch
         {
@@ -357,24 +331,22 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 "ownerid"
             };
-            DiscordGuild discordGuild = interaction.Guild;
-            DiscordMember discordMember = await discordGuild.GetMemberAsync(interaction.User.Id);
+            var discordGuild = interaction.Guild;
+            var discordMember = await discordGuild.GetMemberAsync(interaction.User.Id);
             Dictionary<string, object> queryConditions = new()
             {
                 { "channelid", (long)discordMember.VoiceState?.Channel.Id }
             };
 
-            List<Dictionary<string, object>> queryResult =
+            var queryResult =
                 await DatabaseService.SelectDataFromTable("tempvoice", query, queryConditions);
 
             foreach (var result in queryResult)
-            {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
+                if (result.TryGetValue("ownerid", out var ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break;
                 }
-            }
         }
         catch
         {
@@ -399,17 +371,15 @@ public class TempVoiceHelper : BaseCommandModule
                 { "channelid", (long)channel.Id }
             };
 
-            List<Dictionary<string, object>> queryResult =
+            var queryResult =
                 await DatabaseService.SelectDataFromTable("tempvoice", query, queryConditions);
 
             foreach (var result in queryResult)
-            {
-                if (result.TryGetValue("ownerid", out object ownerIdValue) && ownerIdValue is long ownerId)
+                if (result.TryGetValue("ownerid", out var ownerIdValue) && ownerIdValue is long ownerId)
                 {
                     channelownerid = ownerId;
                     break;
                 }
-            }
         }
         catch
         {
@@ -421,10 +391,7 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static bool SelfCheck(CommandContext ctx, DiscordMember member)
     {
-        if (ctx.User.Id == member.Id)
-        {
-            return true;
-        }
+        if (ctx.User.Id == member.Id) return true;
 
         return false;
     }
@@ -436,10 +403,10 @@ public class TempVoiceHelper : BaseCommandModule
         {
             "channelid"
         };
-        List<Dictionary<string, object>> result = await DatabaseService.SelectDataFromTable("tempvoice", query, null);
+        var result = await DatabaseService.SelectDataFromTable("tempvoice", query, null);
         foreach (var item in result)
         {
-            long ChannelId = (long)item["channelid"];
+            var ChannelId = (long)item["channelid"];
             list.Add(ChannelId);
         }
 
@@ -448,21 +415,21 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelLockChannel(DiscordInteraction interaction)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordRole default_role = interaction.Guild.EveryoneRole;
-            DiscordChannel channel = member.VoiceState.Channel;
+            var default_role = interaction.Guild.EveryoneRole;
+            var channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
             {
@@ -490,21 +457,21 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelUnlockChannel(DiscordInteraction interaction)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordRole default_role = interaction.Guild.EveryoneRole;
-            DiscordChannel channel = member.VoiceState.Channel;
+            var default_role = interaction.Guild.EveryoneRole;
+            var channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
             {
@@ -533,21 +500,21 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelHideChannel(DiscordInteraction interaction)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordRole default_role = interaction.Guild.EveryoneRole;
-            DiscordChannel channel = member.VoiceState.Channel;
+            var default_role = interaction.Guild.EveryoneRole;
+            var channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
             {
@@ -575,21 +542,21 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelUnhideChannel(DiscordInteraction interaction)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordRole default_role = interaction.Guild.EveryoneRole;
-            DiscordChannel channel = member.VoiceState.Channel;
+            var default_role = interaction.Guild.EveryoneRole;
+            var channel = member.VoiceState.Channel;
             var overwrite = channel.PermissionOverwrites.FirstOrDefault(o => o.Id == default_role.Id);
             if (overwrite == null || overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
             {
@@ -618,18 +585,18 @@ public class TempVoiceHelper : BaseCommandModule
     protected static async Task PanelChannelRename(DiscordInteraction interaction, DiscordClient client)
     {
         var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var caseid = ToolSet.GenerateCaseID();
             var idstring = $"RenameModal-{caseid}";
@@ -640,10 +607,7 @@ public class TempVoiceHelper : BaseCommandModule
             await interaction.CreateInteractionModalResponseAsync(modal);
             var interactivity = client.GetInteractivity();
             var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
-            if (result.TimedOut)
-            {
-                return;
-            }
+            if (result.TimedOut) return;
 
             var name = result.Result.Interaction.Data.Components[0].Value;
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -658,16 +622,13 @@ public class TempVoiceHelper : BaseCommandModule
                 { "channelid", (long)channel.Id }
             };
             var dbtimestampdata = await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
-            foreach (var data in dbtimestampdata)
-            {
-                timestampdata = (long)data["lastedited"];
-            }
+            foreach (var data in dbtimestampdata) timestampdata = (long)data["lastedited"];
 
-            long edit_timestamp = timestampdata;
-            long math = current_timestamp - edit_timestamp;
+            var edit_timestamp = timestampdata;
+            var math = current_timestamp - edit_timestamp;
             if (math < 300)
             {
-                long calc = edit_timestamp + 300;
+                var calc = edit_timestamp + 300;
                 var build = new DiscordFollowupMessageBuilder();
                 build.WithContent(
                     $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
@@ -676,12 +637,12 @@ public class TempVoiceHelper : BaseCommandModule
                 return;
             }
 
-            string oldname = channel.Name;
+            var oldname = channel.Name;
             await channel.ModifyAsync(x => x.Name = name);
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
-                string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
+                var sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
                 await using (NpgsqlCommand command = new(sql, conn))
                 {
                     command.Parameters.AddWithValue("@timestamp", current_timestamp);
@@ -699,18 +660,18 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelChannelLimit(DiscordInteraction interaction, DiscordClient client)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var caseid = ToolSet.GenerateCaseID();
             var idstring = $"LimitModal-{caseid}";
@@ -722,14 +683,11 @@ public class TempVoiceHelper : BaseCommandModule
             await interaction.CreateInteractionModalResponseAsync(modal);
             var interactivity = client.GetInteractivity();
             var result = await interactivity.WaitForModalAsync(idstring, TimeSpan.FromMinutes(1));
-            if (result.TimedOut)
-            {
-                return;
-            }
+            if (result.TimedOut) return;
 
             var limit = result.Result.Interaction.Data.Components[0].Value;
             await result.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            int climit = 0;
+            var climit = 0;
             try
             {
                 climit = int.Parse(limit);
@@ -779,8 +737,8 @@ public class TempVoiceHelper : BaseCommandModule
     {
         var db_channels = await GetAllChannelIDsFromDB();
         var my_db_channels = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
         if (userChannel == null || !my_db_channels.Contains((long)userChannel?.Id))
         {
             await NoChannel(interaction);
@@ -789,7 +747,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (!db_channels.Contains((long)userChannel?.Id))
         {
-            string errorMessage =
+            var errorMessage =
                 "<:attention:1085333468688433232> Du musst in einem TempVoice Kanal sein um Mitglieder einladen zu können!";
             DiscordInteractionResponseBuilder ib = new()
             {
@@ -816,9 +774,9 @@ public class TempVoiceHelper : BaseCommandModule
     protected static async Task PanelChannelInviteCallback(DiscordInteraction interaction, DiscordClient sender)
     {
         var userid = interaction.Data.Values[0];
-        DiscordMember user = await interaction.Guild.GetMemberAsync(ulong.Parse(userid));
-        DiscordMember executor = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        bool send = false;
+        var user = await interaction.Guild.GetMemberAsync(ulong.Parse(userid));
+        var executor = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var send = false;
         if (user == interaction.User)
         {
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -854,7 +812,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         try
         {
-            DiscordEmbedBuilder eb = new DiscordEmbedBuilder()
+            var eb = new DiscordEmbedBuilder()
                 .WithDescription(
                     $"Du wurdest von {interaction.User.Mention} eingeladen <#{interaction.Guild.GetMemberAsync(interaction.User.Id).Result.VoiceState?.Channel.Id}> beizutreten.")
                 .WithColor(BotConfig.GetEmbedColor());
@@ -868,7 +826,7 @@ public class TempVoiceHelper : BaseCommandModule
 
         if (send)
         {
-            DiscordRole role = interaction.Guild.EveryoneRole;
+            var role = interaction.Guild.EveryoneRole;
             var overwrites = executor.VoiceState?.Channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
             overwrites.Merge(user, Permissions.AccessChannels | Permissions.UseVoice,
@@ -897,8 +855,8 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
         if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
         {
             await NoChannel(interaction);
@@ -908,14 +866,14 @@ public class TempVoiceHelper : BaseCommandModule
         if (userChannel != null && db_channel.Contains((long)userChannel?.Id))
         {
             var caseid = ToolSet.GenerateCaseID();
-            DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+            var channel = interaction.Guild.GetChannel(userChannel.Id);
             List<DiscordButtonComponent> buttons = new(2)
             {
                 new DiscordButtonComponent(ButtonStyle.Success, $"chdel_accept_{caseid}", "Ja"),
                 new DiscordButtonComponent(ButtonStyle.Danger, $"chdel_deny_{caseid}", "Nein")
             };
             var interactivity = client.GetInteractivity();
-            string errorMessage =
+            var errorMessage =
                 "<:attention:1085333468688433232> Möchtest du deinen Kanal wirklich löschen?";
             DiscordInteractionResponseBuilder ib = new()
             {
@@ -951,13 +909,11 @@ public class TempVoiceHelper : BaseCommandModule
             }
 
             if (result.Result.Id == $"chdel_deny_{caseid}")
-            {
                 await interaction.EditOriginalResponseAsync(
                     new DiscordWebhookBuilder
                     {
                         Content = "<:attention:1085333468688433232> Vorgang abgebrochen."
                     });
-            }
         }
     }
 
@@ -965,17 +921,17 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var channel = interaction.Guild.GetChannel(userChannel.Id);
             var interactivity = client.GetInteractivity();
@@ -984,7 +940,7 @@ public class TempVoiceHelper : BaseCommandModule
                 new DiscordUserSelectComponent("Wähle zuzulassende Mitglieder aus.", "permit_selector",
                     1, 8)
             };
-            string message =
+            var message =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
 
             if (interaction.Guild.Id == 750365461945778209)
@@ -1038,19 +994,19 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+            var channel = interaction.Guild.GetChannel(userChannel.Id);
 
             var u = e.Values.ToList();
             var users = e.Values.Select(x => ulong.Parse(x));
@@ -1058,15 +1014,11 @@ public class TempVoiceHelper : BaseCommandModule
             List<ulong> idlist = new();
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
-            foreach (ulong id in users)
-            {
+            foreach (var id in users)
                 try
                 {
                     idlist.Add(id);
-                    if (id == interaction.User.Id)
-                    {
-                        continue;
-                    }
+                    if (id == interaction.User.Id) continue;
 
                     var user = await interaction.Guild.GetMemberAsync(id);
 
@@ -1081,7 +1033,6 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     // ignored
                 }
-            }
 
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -1098,27 +1049,22 @@ public class TempVoiceHelper : BaseCommandModule
         InteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        bool ch_locked = false;
+        var ch_locked = false;
         var overwrite = userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == interaction.Guild.EveryoneRole.Id);
         if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
-        {
             ch_locked = false;
-        }
 
-        if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
-        {
-            ch_locked = true;
-        }
+        if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied) ch_locked = true;
 
         if (!ch_locked)
         {
@@ -1132,10 +1078,10 @@ public class TempVoiceHelper : BaseCommandModule
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            bool role_permitted = false;
-            Dictionary<ulong, string> lvlroles = levelroles;
+            var role_permitted = false;
+            var lvlroles = levelroles;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -1175,8 +1121,8 @@ public class TempVoiceHelper : BaseCommandModule
 
             foreach (var kvp in lvlroles)
             {
-                ulong roleId = kvp.Key;
-                string id = kvp.Value;
+                var roleId = kvp.Key;
+                var id = kvp.Value;
                 options.Add(new DiscordStringSelectComponentOption(id, roleId.ToString()));
             }
 
@@ -1197,17 +1143,17 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var channel = userChannel;
             var sel_role = e.Values.ToList();
@@ -1230,17 +1176,17 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var channel = userChannel;
             List<ulong> permited_users = new();
@@ -1250,25 +1196,20 @@ public class TempVoiceHelper : BaseCommandModule
                 .Where(x => x.Type == OverwriteType.Member)
                 .Select(x => x.Id)
                 .ToList();
-            foreach (ulong userid in puserow)
-            {
+            foreach (var userid in puserow)
                 if (userid != interaction.User.Id)
                 {
                     var channelowner = await GetChannelOwnerID(userChannel);
-                    if (channelowner == (long)userid)
-                    {
-                        continue;
-                    }
+                    if (channelowner == (long)userid) continue;
 
                     permited_users.Add(userid);
                 }
-            }
 
             var allowed_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();
-            bool role_permitted = false;
-            Dictionary<ulong, string> lvlroles = levelroles;
-            string roleName = string.Empty;
+            var role_permitted = false;
+            var lvlroles = levelroles;
+            var roleName = string.Empty;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -1294,7 +1235,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (allowed_users == 0)
             {
-                string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
+                var content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **permittet**!";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
@@ -1317,7 +1258,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (allowed_users > 25)
             {
-                string content =
+                var content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
@@ -1328,11 +1269,8 @@ public class TempVoiceHelper : BaseCommandModule
                 return;
             }
 
-            int ul = 10;
-            if (allowed_users < 10)
-            {
-                ul = allowed_users;
-            }
+            var ul = 10;
+            if (allowed_users < 10) ul = allowed_users;
 
             var selector = new List<DiscordComponent>
             {
@@ -1354,7 +1292,7 @@ public class TempVoiceHelper : BaseCommandModule
                 rowComponents.Add(new DiscordActionRowComponent(buttons));
             }
 
-            string econtent =
+            var econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
             var ssbuilder = new DiscordInteractionResponseBuilder
             {
@@ -1370,21 +1308,21 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordChannel channel = userChannel;
+            var channel = userChannel;
             ulong r_id = 0;
-            Dictionary<ulong, string> lvlroles = levelroles;
+            var lvlroles = levelroles;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -1399,12 +1337,12 @@ public class TempVoiceHelper : BaseCommandModule
                 }
             }
 
-            DiscordRole role_ = interaction.Guild.GetRole(r_id);
+            var role_ = interaction.Guild.GetRole(r_id);
             var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
             overwrites = overwrites.Merge(role_, Permissions.None, Permissions.None,
                 Permissions.UseVoice | Permissions.AccessChannels);
             await channel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
-            string content = "<:success:1085333481820790944> Erfolg! Die Levelbeschränkung wurde **aufgehoben**.";
+            var content = "<:success:1085333481820790944> Erfolg! Die Levelbeschränkung wurde **aufgehoben**.";
             var sbuilder = new DiscordInteractionResponseBuilder
             {
                 IsEphemeral = true,
@@ -1418,34 +1356,30 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordChannel channel = userChannel;
+            var channel = userChannel;
             var u = e.Values.ToList();
             var users = e.Values.Select(x => ulong.Parse(x));
             var usersList = new List<DiscordMember>();
             List<ulong> idlist = new();
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
-            foreach (ulong id in users)
-            {
+            foreach (var id in users)
                 try
                 {
                     idlist.Add(id);
-                    if (id == interaction.User.Id)
-                    {
-                        continue;
-                    }
+                    if (id == interaction.User.Id) continue;
 
                     var user = await interaction.Guild.GetMemberAsync(id);
 
@@ -1460,7 +1394,6 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     // ignored
                 }
-            }
 
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -1475,11 +1408,11 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static async Task PanelChannelClaim(DiscordInteraction interaction, DiscordClient client)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(interaction);
-        List<long> all_dbChannels = await GetAllChannelIDsFromDB();
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        long? channelownerid = await GetChannelOwnerID(interaction);
+        var dbChannels = await GetChannelIDFromDB(interaction);
+        var all_dbChannels = await GetAllChannelIDsFromDB();
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var channelownerid = await GetChannelOwnerID(interaction);
         if (channelownerid == (long)interaction.User.Id)
         {
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
@@ -1515,10 +1448,10 @@ public class TempVoiceHelper : BaseCommandModule
         }
 
         var channelowner = await client.GetUserAsync((ulong)channelownerid);
-        DiscordMember channelownermember = await interaction.Guild.GetMemberAsync(channelowner.Id);
+        var channelownermember = await interaction.Guild.GetMemberAsync(channelowner.Id);
         var orig_owner = channelownermember;
-        DiscordMember new_owner = member;
-        DiscordChannel channel = userChannel;
+        var new_owner = member;
+        var channel = userChannel;
         var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
         if (!channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
@@ -1526,12 +1459,12 @@ public class TempVoiceHelper : BaseCommandModule
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
-                string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                var sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
                 await using (NpgsqlCommand command = new(sql, conn))
                 {
                     command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
                     command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                    int affected = await command.ExecuteNonQueryAsync();
+                    var affected = await command.ExecuteNonQueryAsync();
                 }
             }
 
@@ -1554,7 +1487,6 @@ public class TempVoiceHelper : BaseCommandModule
         }
 
         if (channel.Users.Contains(orig_owner) && all_dbChannels.Contains((long)userChannel.Id))
-        {
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder
                 {
@@ -1562,14 +1494,13 @@ public class TempVoiceHelper : BaseCommandModule
                     Content =
                         $"<:attention:1085333468688433232> Dieser Channel ist nicht claimbar. Der Channelowner {orig_owner.UsernameWithDiscriminator} {orig_owner.Mention} befindet sich noch im Channel"
                 });
-        }
     }
 
     protected static async Task PanelChannelTransfer(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
         if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
         {
             await NoChannel(interaction);
@@ -1580,12 +1511,8 @@ public class TempVoiceHelper : BaseCommandModule
         {
             List<ulong> UsersInChannel = new();
             foreach (var user in userChannel.Users)
-            {
                 if (user.Id != interaction.User.Id)
-                {
                     UsersInChannel.Add(user.Id);
-                }
-            }
 
             var options = new List<DiscordStringSelectComponentOption>();
             foreach (var uid in UsersInChannel)
@@ -1608,7 +1535,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (UsersInChannel.Count > 25)
             {
-                string content =
+                var content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **permittet**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unpermit`` Command.";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
@@ -1628,7 +1555,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 new DiscordActionRowComponent(selector)
             };
-            string econtent =
+            var econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
             var ssbuilder = new DiscordInteractionResponseBuilder
             {
@@ -1644,8 +1571,8 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember orig_owner = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = orig_owner?.VoiceState?.Channel;
+        var orig_owner = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = orig_owner?.VoiceState?.Channel;
         if (userChannel == null || !db_channel.Contains((long)userChannel?.Id))
         {
             await NoChannel(interaction);
@@ -1664,12 +1591,12 @@ public class TempVoiceHelper : BaseCommandModule
                 await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
                 {
                     await conn.OpenAsync();
-                    string sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
+                    var sql = "UPDATE tempvoice SET ownerid = @owner WHERE channelid = @channelid";
                     await using (NpgsqlCommand command = new(sql, conn))
                     {
                         command.Parameters.AddWithValue("@owner", (long)new_owner.Id);
                         command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                        int affected = await command.ExecuteNonQueryAsync();
+                        var affected = await command.ExecuteNonQueryAsync();
                     }
                 }
 
@@ -1692,41 +1619,36 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (channel.Users.Contains(orig_owner) && db_channel.Contains((long)userChannel.Id) &&
                 channel.Users.Contains(new_owner))
-            {
                 await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
                     new DiscordInteractionResponseBuilder
                     {
                         IsEphemeral = true,
                         Content = $"<:attention:1085333468688433232> {new_owner.Mention} ist __nicht__ im Kanal!"
                     });
-            }
         }
     }
 
     protected static async Task PanelChannelKick(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             List<ulong> ChUsers = new();
             foreach (var chuser in userChannel.Users)
             {
                 var uid = chuser.Id;
-                List<ulong> mods = await RetrieveChannelMods(userChannel);
-                if (uid != interaction.User.Id && !mods.Contains(uid))
-                {
-                    ChUsers.Add(uid);
-                }
+                var mods = await RetrieveChannelMods(userChannel);
+                if (uid != interaction.User.Id && !mods.Contains(uid)) ChUsers.Add(uid);
             }
 
             var options = new List<DiscordStringSelectComponentOption>();
@@ -1752,7 +1674,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (ChUsers.Count > 25)
             {
-                string content =
+                var content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder im Channel! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}vckick`` Command.";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
@@ -1772,7 +1694,7 @@ public class TempVoiceHelper : BaseCommandModule
             {
                 new DiscordActionRowComponent(selector)
             };
-            string econtent =
+            var econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
             var ssbuilder = new DiscordInteractionResponseBuilder
             {
@@ -1788,17 +1710,17 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var kickuserid_str = e.Values.First();
             var kickuserid = ulong.Parse(kickuserid_str);
@@ -1821,17 +1743,17 @@ public class TempVoiceHelper : BaseCommandModule
     protected static async Task PanelChannelBlock(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var channel = interaction.Guild.GetChannel(userChannel.Id);
             var selector = new List<DiscordComponent>
@@ -1839,7 +1761,7 @@ public class TempVoiceHelper : BaseCommandModule
                 new DiscordUserSelectComponent("Wähle zu blockierende Mitglieder aus.", "ban_selector",
                     1, 8)
             };
-            string message =
+            var message =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
 
 
@@ -1861,19 +1783,19 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordChannel channel = interaction.Guild.GetChannel(userChannel.Id);
+            var channel = interaction.Guild.GetChannel(userChannel.Id);
 
             var u = e.Values.ToList();
             var users = e.Values.Select(x => ulong.Parse(x));
@@ -1881,26 +1803,18 @@ public class TempVoiceHelper : BaseCommandModule
             List<ulong> idlist = new();
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
-            DiscordRole? staffrole = interaction.Guild.GetRole(GlobalProperties.StaffRoleId);
+            var staffrole = interaction.Guild.GetRole(GlobalProperties.StaffRoleId);
 
-            foreach (ulong id in users)
-            {
+            foreach (var id in users)
                 try
                 {
                     idlist.Add(id);
-                    List<ulong> mods = await RetrieveChannelMods(userChannel);
-                    if (id == interaction.User.Id || mods.Contains(id))
-                    {
-                        continue;
-                    }
+                    var mods = await RetrieveChannelMods(userChannel);
+                    if (id == interaction.User.Id || mods.Contains(id)) continue;
 
                     if (interaction.Guild.Id == ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))
-                    {
                         if (staffrole.Members.Any(x => x.Value.Id == id))
-                        {
                             continue;
-                        }
-                    }
 
 
                     var user = await interaction.Guild.GetMemberAsync(id);
@@ -1917,10 +1831,7 @@ public class TempVoiceHelper : BaseCommandModule
                     //overwrites = overwrites.Merge(user, Permissions.None, Permissions.None, Permissions.UseVoice | Permissions.AccessChannels);
                     overwrites = overwrites.Merge(user, Permissions.None, Permissions.UseVoice,
                         Permissions.AccessChannels);
-                    if (userChannel.Users.Contains(user))
-                    {
-                        await user.DisconnectFromVoiceAsync();
-                    }
+                    if (userChannel.Users.Contains(user)) await user.DisconnectFromVoiceAsync();
 
                     usersList.Add(user);
                 }
@@ -1928,7 +1839,6 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     // ignored
                 }
-            }
 
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -1944,17 +1854,17 @@ public class TempVoiceHelper : BaseCommandModule
     protected static async Task PanelChannelUnblock(DiscordInteraction interaction)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
             var channel = userChannel;
             List<ulong> permited_users = new();
@@ -1964,18 +1874,14 @@ public class TempVoiceHelper : BaseCommandModule
                 .Where(x => x.Type == OverwriteType.Member)
                 .Select(x => x.Id)
                 .ToList();
-            foreach (ulong userid in puserow)
-            {
+            foreach (var userid in puserow)
                 if (userid != interaction.User.Id)
-                {
                     permited_users.Add(userid);
-                }
-            }
 
             var blocked_users = permited_users.Count;
             var options = new List<DiscordStringSelectComponentOption>();
-            Dictionary<ulong, string> lvlroles = levelroles;
-            string roleName = string.Empty;
+            var lvlroles = levelroles;
+            var roleName = string.Empty;
             foreach (var role in interaction.Guild.Roles)
             {
                 var RoleId = role.Value.Id;
@@ -2000,7 +1906,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (blocked_users == 0)
             {
-                string content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **blockiert**!";
+                var content = "<:attention:1085333468688433232> Es sind __keine__ Mitglieder **blockiert**!";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
                     IsEphemeral = true,
@@ -2012,7 +1918,7 @@ public class TempVoiceHelper : BaseCommandModule
 
             if (blocked_users > 25)
             {
-                string content =
+                var content =
                     $"<:attention:1085333468688433232> Es sind __zu viele__ Mitglieder **blockiert**! Bitte benutze den ``{BotConfig.GetConfig()["MainConfig"]["BotPrefix"]}unblock`` Command.";
                 var sbuilder = new DiscordInteractionResponseBuilder
                 {
@@ -2023,11 +1929,8 @@ public class TempVoiceHelper : BaseCommandModule
                 return;
             }
 
-            int ul = 10;
-            if (blocked_users < 10)
-            {
-                ul = blocked_users;
-            }
+            var ul = 10;
+            if (blocked_users < 10) ul = blocked_users;
 
             var selector = new List<DiscordComponent>
             {
@@ -2040,7 +1943,7 @@ public class TempVoiceHelper : BaseCommandModule
                 new DiscordActionRowComponent(selector)
             };
 
-            string econtent =
+            var econtent =
                 "<:botpoint:1083853403316297758> Um eine Option auszuwählen, verwende das Menü und klicke darauf:";
             var ssbuilder = new DiscordInteractionResponseBuilder
             {
@@ -2056,34 +1959,30 @@ public class TempVoiceHelper : BaseCommandModule
         ComponentInteractionCreateEventArgs e)
     {
         var db_channel = await GetChannelIDFromDB(interaction);
-        DiscordMember member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
-        DiscordChannel userChannel = member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, interaction.User);
+        var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
+        var userChannel = member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, interaction.User);
 
-        if (userChannel == null || !db_channel.Contains((long)userChannel?.Id) && !isMod)
+        if (userChannel == null || (!db_channel.Contains((long)userChannel?.Id) && !isMod))
         {
             await NoChannel(interaction);
             return;
         }
 
-        if (userChannel != null && db_channel.Contains((long)userChannel.Id) || userChannel != null && isMod)
+        if ((userChannel != null && db_channel.Contains((long)userChannel.Id)) || (userChannel != null && isMod))
         {
-            DiscordChannel channel = userChannel;
+            var channel = userChannel;
             var u = e.Values.ToList();
             var users = e.Values.Select(x => ulong.Parse(x));
             var usersList = new List<DiscordMember>();
             List<ulong> idlist = new();
             var overwrites = channel.PermissionOverwrites.Select(x => x.ConvertToBuilder())
                 .ToList();
-            foreach (ulong id in users)
-            {
+            foreach (var id in users)
                 try
                 {
                     idlist.Add(id);
-                    if (id == interaction.User.Id)
-                    {
-                        continue;
-                    }
+                    if (id == interaction.User.Id) continue;
 
                     var user = await interaction.Guild.GetMemberAsync(id);
 
@@ -2097,7 +1996,6 @@ public class TempVoiceHelper : BaseCommandModule
                 {
                     // ignored
                 }
-            }
 
             await channel.ModifyAsync(x => { x.PermissionOverwrites = overwrites; });
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -2112,18 +2010,13 @@ public class TempVoiceHelper : BaseCommandModule
 
     protected static bool GetSoundboardState(DiscordChannel channel)
     {
-        bool active = false;
+        var active = false;
         var overwrite =
             channel.PermissionOverwrites.FirstOrDefault(o => o.Id == channel.Guild.EveryoneRole.Id);
-        if (overwrite?.CheckPermission(Permissions.UseSoundboard) == PermissionLevel.Allowed)
-        {
-            active = true;
-        }
+        if (overwrite?.CheckPermission(Permissions.UseSoundboard) == PermissionLevel.Allowed) active = true;
 
         if (overwrite == null || overwrite?.CheckPermission(Permissions.UseSoundboard) == PermissionLevel.Unset)
-        {
             active = false;
-        }
 
         return active;
     }

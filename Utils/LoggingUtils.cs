@@ -56,10 +56,7 @@ public static class LoggingUtils
         }
         finally
         {
-            if (string.IsNullOrEmpty(uid))
-            {
-                uid = "Nicht ermittelbar";
-            }
+            if (string.IsNullOrEmpty(uid)) uid = "Nicht ermittelbar";
         }
 
 
@@ -70,16 +67,10 @@ public static class LoggingUtils
         else
         {
             ip = httpContext.Connection.RemoteIpAddress?.ToString();
-            if (string.IsNullOrEmpty(ip))
-            {
-                ip = "Nicht ermittelbar";
-            }
+            if (string.IsNullOrEmpty(ip)) ip = "Nicht ermittelbar";
         }
 
-        if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2))
-        {
-            ua = header2.ToString();
-        }
+        if (httpContext.Request.Headers.TryGetValue("User-Agent", out var header2)) ua = header2.ToString();
 
         LogWebOAuthDiscordLogin(uid, ip, ua).GetAwaiter().GetResult();
     }

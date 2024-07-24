@@ -18,7 +18,7 @@ public class TempVCEventHandler : TempVoiceHelper
         {
             try
             {
-                if ((e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"]))) return;
+                if (e.Guild.Id != ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ServerId"])) return;
                 var sessionresult = new List<Dictionary<string, object>>();
                 var usersession = new List<dynamic>();
                 List<string> Query = new()
@@ -33,7 +33,7 @@ public class TempVCEventHandler : TempVoiceHelper
                 sessionresult = await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
                 if (sessionresult.Count == 0)
                 {
-                    List<long> all_channels = await GetAllTempChannels();
+                    var all_channels = await GetAllTempChannels();
                     if ((e.Before?.Channel != null && e.After?.Channel == null) ||
                         (e.Before?.Channel != null && e.After?.Channel != null))
                         if (all_channels.Contains((long)e.Before.Channel.Id))
@@ -75,9 +75,9 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
-                                DiscordMember m = await e.Guild.GetMemberAsync(e.User.Id);
+                                var m = await e.Guild.GetMemberAsync(e.User.Id);
 
-                                string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
+                                var defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
                                 defaultVcName = string.IsNullOrWhiteSpace(defaultVcName)
                                     ? $"{m.Username}'s Channel"
                                     : defaultVcName;
@@ -86,7 +86,7 @@ public class TempVCEventHandler : TempVoiceHelper
                                     .Replace("{fullname}", m.UsernameWithDiscriminator);
 
 
-                                DiscordChannel voice = await e.After?.Guild.CreateVoiceChannelAsync
+                                var voice = await e.After?.Guild.CreateVoiceChannelAsync
                                 (defaultVcName, e.After.Channel.Parent,
                                     96000, 0, qualityMode: VideoQualityMode.Full);
                                 var overwrites = voice.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
@@ -124,7 +124,7 @@ public class TempVCEventHandler : TempVoiceHelper
                 }
                 else if (sessionresult.Count == 1)
                 {
-                    List<long> all_channels = await GetAllTempChannels();
+                    var all_channels = await GetAllTempChannels();
                     if ((e.Before?.Channel != null && e.After?.Channel == null) ||
                         (e.Before?.Channel != null && e.After?.Channel != null))
                         if (all_channels.Contains((long)e.Before.Channel.Id))
@@ -163,7 +163,7 @@ public class TempVCEventHandler : TempVoiceHelper
                         if (ulong.TryParse(GetVCConfig("Creation_Channel_ID"), out creationChannelId))
                             if (e.After.Channel.Id == creationChannelId)
                             {
-                                bool sessionskipActive = false;
+                                var sessionskipActive = false;
                                 foreach (var item in sessionresult)
                                 {
                                     sessionskipActive = (bool)item["sessionskip"];
@@ -171,14 +171,14 @@ public class TempVCEventHandler : TempVoiceHelper
                                 }
 
                                 long userId = 0;
-                                string channelName = string.Empty;
-                                int channelBitrate = 0;
-                                int channelLimit = 0;
-                                string blockedusers = string.Empty;
-                                string permitedusers = string.Empty;
-                                bool locked = false;
-                                bool hidden = false;
-                                string channelMods = string.Empty;
+                                var channelName = string.Empty;
+                                var channelBitrate = 0;
+                                var channelLimit = 0;
+                                var blockedusers = string.Empty;
+                                var permitedusers = string.Empty;
+                                var locked = false;
+                                var hidden = false;
+                                var channelMods = string.Empty;
                                 foreach (var item in sessionresult)
                                 {
                                     userId = (long)item["userid"];
@@ -199,16 +199,16 @@ public class TempVCEventHandler : TempVoiceHelper
                                     break;
                                 }
 
-                                List<string> blockeduserslist =
+                                var blockeduserslist =
                                     blockedusers.Split(new[] { ", " }, StringSplitOptions.None).ToList();
-                                List<string> permiteduserslist =
+                                var permiteduserslist =
                                     permitedusers.Split(new[] { ", " }, StringSplitOptions.None).ToList();
 
-                                DiscordMember m = await e.Guild.GetMemberAsync((ulong)userId);
+                                var m = await e.Guild.GetMemberAsync((ulong)userId);
                                 DiscordChannel voice;
                                 if (sessionskipActive)
                                 {
-                                    string defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
+                                    var defaultVcName = GetVCConfig("Default_VC_Name") ?? $"{m.Username}'s Channel";
                                     defaultVcName = string.IsNullOrWhiteSpace(defaultVcName)
                                         ? $"{m.Username}'s Channel"
                                         : defaultVcName;
@@ -296,22 +296,16 @@ public class TempVCEventHandler : TempVoiceHelper
                                     Permissions.ManageChannels | Permissions.MoveMembers | Permissions.UseVoice |
                                     Permissions.AccessChannels, Permissions.None);
                                 if (locked)
-                                {
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
                                         Permissions.UseVoice);
-                                }
 
                                 if (hidden)
-                                {
                                     overwrites = overwrites.Merge(voice.Guild.EveryoneRole, Permissions.None,
                                         Permissions.AccessChannels);
-                                }
 
 
-                                foreach (string user in blockeduserslist)
-                                {
-                                    if (ulong.TryParse(user, out ulong blockeduser))
-                                    {
+                                foreach (var user in blockeduserslist)
+                                    if (ulong.TryParse(user, out var blockeduser))
                                         try
                                         {
                                             var userid = await e.After.Guild.GetMemberAsync(blockeduser);
@@ -323,13 +317,9 @@ public class TempVCEventHandler : TempVoiceHelper
                                         catch (NotFoundException)
                                         {
                                         }
-                                    }
-                                }
 
-                                foreach (string user in permiteduserslist)
-                                {
-                                    if (ulong.TryParse(user, out ulong permiteduser))
-                                    {
+                                foreach (var user in permiteduserslist)
+                                    if (ulong.TryParse(user, out var permiteduser))
                                         try
                                         {
                                             var userid = await e.After.Guild.GetMemberAsync(permiteduser);
@@ -342,16 +332,14 @@ public class TempVCEventHandler : TempVoiceHelper
                                         catch (NotFoundException)
                                         {
                                         }
-                                    }
-                                }
 
                                 try
                                 {
                                     var conn = CurrentApplication.ServiceProvider
                                         .GetRequiredService<NpgsqlDataSource>();
-                                    string sql =
+                                    var sql =
                                         "UPDATE tempvoice SET channelmods = @mods WHERE channelid = @channelid";
-                                    await using NpgsqlCommand command = conn.CreateCommand(sql);
+                                    await using var command = conn.CreateCommand(sql);
                                     command.Parameters.AddWithValue("@mods", string.Join(", ", channelMods));
                                     command.Parameters.AddWithValue("@channelid", (long)voice.Id);
                                     await command.ExecuteNonQueryAsync();
@@ -383,46 +371,38 @@ public class TempVCEventHandler : TempVoiceHelper
             {
                 if (e.Before == null && e.After == null) return;
                 if (e.Before == e.After) return;
-                DiscordChannel beforeChannel = e.Before?.Channel;
-                DiscordChannel afterChannel = e.After?.Channel;
-                List<long> allChannel = await GetAllChannelIDsFromDB();
+                var beforeChannel = e.Before?.Channel;
+                var afterChannel = e.After?.Channel;
+                var allChannel = await GetAllChannelIDsFromDB();
                 if (beforeChannel == null && afterChannel != null)
-                {
                     if (allChannel.Contains((long)afterChannel.Id))
                     {
-                        DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                        var member = await e.Guild.GetMemberAsync(e.User.Id);
                         await afterChannel.SendMessageAsync(
                             $"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
                         return;
                     }
-                }
 
                 if (beforeChannel != null && afterChannel == null)
-                {
                     if (allChannel.Contains((long)beforeChannel.Id))
                     {
-                        DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                        var member = await e.Guild.GetMemberAsync(e.User.Id);
                         await beforeChannel.SendMessageAsync(
                             $"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
                         return;
                     }
-                }
 
                 if (beforeChannel != null && afterChannel != null)
                 {
                     if (beforeChannel == afterChannel) return;
-                    DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                    var member = await e.Guild.GetMemberAsync(e.User.Id);
                     if (allChannel.Contains((long)beforeChannel.Id))
-                    {
                         await beforeChannel.SendMessageAsync(
                             $"<:vcleave:1152229103974502541> {GetBetterUsernameWithID(member)}");
-                    }
 
                     if (allChannel.Contains((long)afterChannel.Id))
-                    {
                         await afterChannel.SendMessageAsync(
                             $"<:vcjoin:1152229106289758388> {GetBetterUsernameWithID(member)}");
-                    }
                 }
             }
             catch (NotFoundException)

@@ -1,6 +1,5 @@
 ﻿#region
 
-using System.Net.Http.Headers;
 using AGC_Management.Attributes;
 using AGC_Management.Providers;
 using AGC_Management.Services;
@@ -30,9 +29,9 @@ public sealed class CaseManagement : BaseCommandModule
         {
             { "caseid", caseid }
         };
-        List<Dictionary<string, object>> wresult =
+        var wresult =
             await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
-        List<Dictionary<string, object>> fresult =
+        var fresult =
             await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
 
 
@@ -40,8 +39,8 @@ public sealed class CaseManagement : BaseCommandModule
         foreach (var result in fresult) flist.Add(result);
         dynamic warn;
         dynamic flag;
-        bool wcase = false;
-        bool fcase = false;
+        var wcase = false;
+        var fcase = false;
         try
         {
             warn = wlist[0];
@@ -89,7 +88,7 @@ public sealed class CaseManagement : BaseCommandModule
         }
         else
         {
-            DiscordEmbed embed = new DiscordEmbedBuilder()
+            var embed = new DiscordEmbedBuilder()
                 .WithTitle("Fehler")
                 .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
                 .WithColor(DiscordColor.Red)
@@ -101,7 +100,7 @@ public sealed class CaseManagement : BaseCommandModule
 
         if (wcase)
         {
-            DiscordEmbedBuilder discordEmbedbuilder = new DiscordEmbedBuilder()
+            var discordEmbedbuilder = new DiscordEmbedBuilder()
                 .WithTitle("Case Informationen").WithColor(BotConfig.GetEmbedColor())
                 .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                 .AddField(new DiscordEmbedField("Case-Typ:", case_type)).WithThumbnail(user.AvatarUrl)
@@ -119,7 +118,7 @@ public sealed class CaseManagement : BaseCommandModule
 
         if (fcase)
         {
-            DiscordEmbedBuilder discordEmbedbuilder = new DiscordEmbedBuilder()
+            var discordEmbedbuilder = new DiscordEmbedBuilder()
                 .WithTitle("Case Informationen").WithColor(BotConfig.GetEmbedColor())
                 .WithFooter(ctx.User.UsernameWithDiscriminator, ctx.User.AvatarUrl)
                 .AddField(new DiscordEmbedField("Case-Typ:", case_type)).WithThumbnail(user.AvatarUrl)
@@ -151,9 +150,9 @@ public sealed class CaseManagement : BaseCommandModule
         {
             { "caseid", caseid }
         };
-        List<Dictionary<string, object>> wresult =
+        var wresult =
             await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
-        List<Dictionary<string, object>> fresult =
+        var fresult =
             await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
 
 
@@ -162,8 +161,8 @@ public sealed class CaseManagement : BaseCommandModule
         dynamic warn;
         dynamic flag;
         string ctyp = null;
-        bool wcase = false;
-        bool fcase = false;
+        var wcase = false;
+        var fcase = false;
         try
         {
             warn = wlist[0];
@@ -187,21 +186,21 @@ public sealed class CaseManagement : BaseCommandModule
         }
 
 
-        string reason = newreason;
+        var reason = newreason;
         string sql;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         if (wcase)
         {
             if (await ToolSet.CheckForReason(ctx, reason)) return;
             sql = "UPDATE warns SET description = @description WHERE caseid = @caseid";
-            await using (NpgsqlCommand command = con.CreateCommand(sql))
+            await using (var command = con.CreateCommand(sql))
             {
                 command.Parameters.AddWithValue("@description", newreason);
                 command.Parameters.AddWithValue("@caseid", caseid);
 
-                int affected = await command.ExecuteNonQueryAsync();
+                var affected = await command.ExecuteNonQueryAsync();
 
-                DiscordEmbed ue = new DiscordEmbedBuilder()
+                var ue = new DiscordEmbedBuilder()
                     .WithTitle("Case Update").WithDescription(
                         $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
                         $"Case-Typ: {ctyp}\n" +
@@ -218,9 +217,8 @@ public sealed class CaseManagement : BaseCommandModule
             var imgAttachments = ctx.Message.Attachments
                 .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
                 .ToList();
-            string urls = ""; 
+            var urls = "";
             if (imgAttachments.Count > 0)
-            {
                 foreach (var attachment in imgAttachments)
                 {
                     var rndm = new Random();
@@ -230,17 +228,16 @@ public sealed class CaseManagement : BaseCommandModule
                     urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
                     imageBytes = null;
                 }
-            }
 
             if (await ToolSet.CheckForReason(ctx, reason)) return;
 
             sql = "UPDATE flags SET description = @description WHERE caseid = @caseid";
-            await using NpgsqlCommand command = con.CreateCommand(sql);
+            await using var command = con.CreateCommand(sql);
             command.Parameters.AddWithValue("@description", newreason + urls);
             command.Parameters.AddWithValue("@caseid", caseid);
 
-            int affected = await command.ExecuteNonQueryAsync();
-            DiscordEmbed ue = new DiscordEmbedBuilder()
+            var affected = await command.ExecuteNonQueryAsync();
+            var ue = new DiscordEmbedBuilder()
                 .WithTitle("Case Update").WithDescription(
                     $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
                     $"Case-Typ: {ctyp}\n" +
@@ -250,7 +247,7 @@ public sealed class CaseManagement : BaseCommandModule
             return;
         }
 
-        DiscordEmbed embed = new DiscordEmbedBuilder()
+        var embed = new DiscordEmbedBuilder()
             .WithTitle("Fehler")
             .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
             .WithColor(DiscordColor.Red)
@@ -275,9 +272,9 @@ public sealed class CaseManagement : BaseCommandModule
         {
             { "caseid", caseid }
         };
-        List<Dictionary<string, object>> wresult =
+        var wresult =
             await DatabaseService.SelectDataFromTable("warns", selectedWarns, whereConditions);
-        List<Dictionary<string, object>> fresult =
+        var fresult =
             await DatabaseService.SelectDataFromTable("flags", selectedWarns, whereConditions);
 
 
@@ -286,8 +283,8 @@ public sealed class CaseManagement : BaseCommandModule
         dynamic warn;
         dynamic flag;
         string ctyp = null;
-        bool wcase = false;
-        bool fcase = false;
+        var wcase = false;
+        var fcase = false;
         try
         {
             warn = wlist[0];
@@ -311,7 +308,7 @@ public sealed class CaseManagement : BaseCommandModule
         }
 
 
-        string reason = deletereason;
+        var reason = deletereason;
         string sql;
         if (wcase)
         {
@@ -324,9 +321,9 @@ public sealed class CaseManagement : BaseCommandModule
                 {
                     command.Parameters.AddWithValue("@caseid", caseid);
 
-                    int affected = await command.ExecuteNonQueryAsync();
+                    var affected = await command.ExecuteNonQueryAsync();
 
-                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                    var ue = new DiscordEmbedBuilder()
                         .WithTitle("Case Gelöscht").WithDescription(
                             $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
                             $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
@@ -348,9 +345,9 @@ public sealed class CaseManagement : BaseCommandModule
                 {
                     command.Parameters.AddWithValue("@caseid", caseid);
 
-                    int affected = await command.ExecuteNonQueryAsync();
+                    var affected = await command.ExecuteNonQueryAsync();
 
-                    DiscordEmbed ue = new DiscordEmbedBuilder()
+                    var ue = new DiscordEmbedBuilder()
                         .WithTitle("Case Gelöscht").WithDescription(
                             $"Der Case mit der ID ``{caseid}`` wurde gelöscht.\n" +
                             $"Case-Typ: {ctyp}\n").WithColor(BotConfig.GetEmbedColor()).Build();
@@ -361,7 +358,7 @@ public sealed class CaseManagement : BaseCommandModule
             return;
         }
 
-        DiscordEmbed embed = new DiscordEmbedBuilder()
+        var embed = new DiscordEmbedBuilder()
             .WithTitle("Fehler")
             .WithDescription($"Es wurde kein Case mit der ID ``{caseid}`` gefunden.")
             .WithColor(DiscordColor.Red)

@@ -6,7 +6,7 @@ public static class HexCheck
     {
         if (color.Length != 6) return false;
 
-        foreach (char c in color)
+        foreach (var c in color)
             if (!IsHexDigit(c))
                 return false;
 

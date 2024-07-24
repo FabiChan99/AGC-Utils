@@ -24,16 +24,16 @@ public class TeamRename : TempVoiceHelper
         }
 
         var current_timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-        bool isMod = await IsChannelMod(userChannel, ctx.Member);
+        var dbChannels = await GetChannelIDFromDB(ctx);
+        var userChannel = ctx.Member?.VoiceState?.Channel;
+        var isMod = await IsChannelMod(userChannel, ctx.Member);
 
 
         if (dbChannels.Contains((long)channelid.Id))
         {
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche Channel umzubenennen...");
-            DiscordChannel channel = channelid;
+            var channel = channelid;
             long timestampdata = 0;
             List<string> Query = new()
             {
@@ -45,32 +45,29 @@ public class TeamRename : TempVoiceHelper
             };
             var dbtimestampdata =
                 await DatabaseService.SelectDataFromTable("tempvoice", Query, WhereCondiditons);
-            foreach (var data in dbtimestampdata)
-            {
-                timestampdata = (long)data["lastedited"];
-            }
+            foreach (var data in dbtimestampdata) timestampdata = (long)data["lastedited"];
 
-            long edit_timestamp = timestampdata;
-            long math = current_timestamp - edit_timestamp;
+            var edit_timestamp = timestampdata;
+            var math = current_timestamp - edit_timestamp;
             if (math < 300)
             {
-                long calc = edit_timestamp + 300;
+                var calc = edit_timestamp + 300;
                 await msg.ModifyAsync(
                     $"<:attention:1085333468688433232> **Fehler!** Der Channel wurde in den letzten 5 Minuten schon einmal umbenannt. Bitte warte noch etwas, bevor du den Channel erneut umbenennen kannst. __Beachte:__ Auf diese Aktualisierung haben wir keinen Einfluss und dies Betrifft nur Bots. Erneut umbenennen kannst du den Channel <t:{calc}:R>.");
                 return;
             }
 
-            string oldname = channel.Name;
+            var oldname = channel.Name;
             await channel.ModifyAsync(x => x.Name = name);
             await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
             {
                 await conn.OpenAsync();
-                string sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
+                var sql = "UPDATE tempvoice SET lastedited = @timestamp WHERE channelid = @channelid";
                 await using (NpgsqlCommand command = new(sql, conn))
                 {
                     command.Parameters.AddWithValue("@timestamp", current_timestamp);
                     command.Parameters.AddWithValue("@channelid", (long)channel.Id);
-                    int affected = await command.ExecuteNonQueryAsync();
+                    var affected = await command.ExecuteNonQueryAsync();
                 }
             }
 

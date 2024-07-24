@@ -18,18 +18,19 @@ public sealed class UnpermitCommand : TempVoiceHelper
     {
         _ = Task.Run(async () =>
             {
-                List<long> dbChannels = await GetChannelIDFromDB(ctx);
-                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+                var dbChannels = await GetChannelIDFromDB(ctx);
+                var userChannel = ctx.Member?.VoiceState?.Channel;
 
-                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+                var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+                if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+                if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) ||
+                    (userChannel != null && isMod))
                 {
                     var unpermitlist = new List<ulong>();
                     List<ulong> ids = new();
@@ -39,17 +40,13 @@ public sealed class UnpermitCommand : TempVoiceHelper
                         $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer unzupermitten...");
                     var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                    foreach (ulong id in ids)
-                    {
+                    foreach (var id in ids)
                         try
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
                             var channelowner = await GetChannelOwnerID(userChannel);
-                            if (channelowner == (long)user.Id)
-                            {
-                                continue;
-                            }
+                            if (channelowner == (long)user.Id) continue;
 
                             overwrites = overwrites.Merge(user, Permissions.None,
                                 Permissions.None, Permissions.AccessChannels | Permissions.UseVoice);
@@ -60,12 +57,11 @@ public sealed class UnpermitCommand : TempVoiceHelper
                         catch (NotFoundException)
                         {
                         }
-                    }
 
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-                    int successCount = unpermitlist.Count;
-                    string endstring =
+                    var successCount = unpermitlist.Count;
+                    var endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **unpermitted**!";
 
                     await msg.ModifyAsync(endstring);

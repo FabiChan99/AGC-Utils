@@ -46,9 +46,9 @@ public sealed class TempVoicePanel : TempVoiceHelper
                 emoji: new DiscordComponentEmoji(1085333487587971102))
         };
 
-        List<DiscordButtonComponent> buttons1 = buttons.Take(5).ToList();
-        List<DiscordButtonComponent> buttons2 = buttons.Skip(5).Take(5).ToList();
-        List<DiscordButtonComponent> buttons3 = buttons.Skip(10).ToList();
+        var buttons1 = buttons.Take(5).ToList();
+        var buttons2 = buttons.Skip(5).Take(5).ToList();
+        var buttons3 = buttons.Skip(10).ToList();
 
         List<DiscordActionRowComponent> rowComponents = new()
         {
@@ -65,7 +65,7 @@ public sealed class TempVoicePanel : TempVoiceHelper
             Color = BotConfig.GetEmbedColor(),
             ImageUrl = "https://files.fabi-chan.me/resources/agc/tempvoice/%C3%BCbersicht.png"
         };
-        DiscordMessageBuilder dmb = new DiscordMessageBuilder().AddComponents(rowComponents).AddEmbed(eb.Build());
+        var dmb = new DiscordMessageBuilder().AddComponents(rowComponents).AddEmbed(eb.Build());
         var msg = await ctx.Channel.SendMessageAsync(dmb);
         BotConfig.SetConfig("TempVC", "VCPanelMessageID", msg.Id.ToString());
         BotConfig.SetConfig("TempVC", "VCPanelChannelID", ctx.Channel.Id.ToString());

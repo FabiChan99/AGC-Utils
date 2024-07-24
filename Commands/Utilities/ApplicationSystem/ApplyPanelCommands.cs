@@ -35,13 +35,9 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             task.Start();
 
             if (refreshQueue.Count > 0)
-            {
                 timer.Change(5000, Timeout.Infinite);
-            }
             else
-            {
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
         }
     }
 
@@ -61,8 +57,8 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
         var msgb = await BuildMessage();
         var m = await ctx.Channel.SendMessageAsync(msgb);
-        ulong id = m.Id;
-        ulong channelId = m.ChannelId;
+        var id = m.Id;
+        var channelId = m.ChannelId;
         await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid",
             id.ToString());
         await CachingService.SetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid",
@@ -74,10 +70,7 @@ public sealed class ApplyPanelCommands : BaseCommandModule
     {
         var m_id = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applymessageid");
         var c_id = await CachingService.GetCacheValue(CustomDatabaseCacheType.ApplicationSystemCache, "applychannelid");
-        if (string.IsNullOrEmpty(m_id) || m_id == "0" || string.IsNullOrEmpty(c_id) || c_id == "0")
-        {
-            return;
-        }
+        if (string.IsNullOrEmpty(m_id) || m_id == "0" || string.IsNullOrEmpty(c_id) || c_id == "0") return;
 
         var msgb = await BuildMessage();
         try
@@ -100,12 +93,10 @@ public sealed class ApplyPanelCommands : BaseCommandModule
 
 
         foreach (var category in categories)
-        {
             selectorlist.Add(new DiscordStringSelectComponentOption(category.PositionName,
                 ToolSet.RemoveWhitespace(category.PositionId),
                 MessageFormatter.BoolToEmoji(category.IsApplicable) + " Diese Position ist " +
                 (category.IsApplicable ? "bewerbbar" : "nicht bewerbbar")));
-        }
 
         var selector = new DiscordStringSelectComponent("select_apply_category",
             "Wähle die gewünschte Bewerbungsposition aus", selectorlist, "applypanelselector");
@@ -119,25 +110,19 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             : dbdata;
         embstr.Append(paneltext);
 
-        DiscordEmbedBuilder emb = new DiscordEmbedBuilder()
+        var emb = new DiscordEmbedBuilder()
             .WithTitle("Bewerbung")
             .WithDescription(embstr.ToString())
             .WithColor(DiscordColor.Gold)
             .WithFooter("AGC Bewerbungssystem", CurrentApplication.TargetGuild.IconUrl);
 
-        DiscordMessageBuilder msgb = new DiscordMessageBuilder()
+        var msgb = new DiscordMessageBuilder()
             .WithEmbed(emb);
 
-        if (categories.Count == 0)
-        {
-            emb.WithDescription(paneltext + "\n\nEs sind keine Bewerbungspositionen verfügbar.");
-        }
+        if (categories.Count == 0) emb.WithDescription(paneltext + "\n\nEs sind keine Bewerbungspositionen verfügbar.");
 
 
-        if (selectorlist.Count > 0)
-        {
-            msgb.AddComponents(selector);
-        }
+        if (selectorlist.Count > 0) msgb.AddComponents(selector);
 
         return msgb;
     }
@@ -151,14 +136,12 @@ public sealed class ApplyPanelCommands : BaseCommandModule
             con.CreateCommand("SELECT positionname, positionid, applicable FROM applicationcategories");
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
-        {
             bewerbungen.Add(new Bewerbung
             {
                 PositionName = reader.GetString(0),
                 PositionId = reader.GetString(1),
                 IsApplicable = reader.GetBoolean(2)
             });
-        }
 
         return bewerbungen;
     }

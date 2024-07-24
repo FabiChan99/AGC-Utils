@@ -50,8 +50,8 @@ public sealed class ImageUtils
     {
         const int cardWidth = 934;
         const int cardHeight = 282;
-        int boxalpha = 150;
-        string font = "Verdana";
+        var boxalpha = 150;
+        var font = "Verdana";
 
         try
         {
@@ -62,9 +62,9 @@ public sealed class ImageUtils
             // ignored
         }
 
-        bool hasCustomSettings = false;
-        string c_bgdata = ""; // base64 image
-        SKColor c_barcolor = SKColor.Parse("#9f00ff");
+        var hasCustomSettings = false;
+        var c_bgdata = ""; // base64 image
+        var c_barcolor = SKColor.Parse("#9f00ff");
         if (await HasCustomRankCardSettings(user.Id))
         {
             hasCustomSettings = true;
@@ -90,10 +90,7 @@ public sealed class ImageUtils
 
         var avatarurl = user.GetAvatarUrl(ImageFormat.Png);
         var response2 = await httpclient.GetAsync(avatarurl);
-        if (!response2.IsSuccessStatusCode)
-        {
-            throw new InvalidDataException("Failed to download avatar image");
-        }
+        if (!response2.IsSuccessStatusCode) throw new InvalidDataException("Failed to download avatar image");
 
         var avatarstream = await response2.Content.ReadAsByteArrayAsync();
 
@@ -112,7 +109,7 @@ public sealed class ImageUtils
         };
         var bgurl = "";
         var default_barcolor = SKColor.Parse("#9f00ff");
-        bool overridecard = false;
+        var overridecard = false;
         try
         {
             bgurl = BotConfig.GetConfig()["Leveling"]["DefaultRankCardBackgroundUrl"];
@@ -124,10 +121,7 @@ public sealed class ImageUtils
 
         var barcolor = default_barcolor;
 
-        if (hasCustomSettings)
-        {
-            barcolor = c_barcolor;
-        }
+        if (hasCustomSettings) barcolor = c_barcolor;
 
 
         try
@@ -139,9 +133,7 @@ public sealed class ImageUtils
                     "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
                 var response = await httpclient.GetAsync(bgurl);
                 if (!response.IsSuccessStatusCode)
-                {
                     throw new InvalidDataException("Failed to download background image");
-                }
 
                 var bgstream = await response.Content.ReadAsByteArrayAsync();
                 using var bg_stream = new MemoryStream(bgstream);
@@ -185,10 +177,7 @@ public sealed class ImageUtils
         if (!string.IsNullOrWhiteSpace(guildiconurl))
         {
             var response3 = await httpclient.GetAsync(guildiconurl);
-            if (!response3.IsSuccessStatusCode)
-            {
-                throw new InvalidDataException("Failed to download guild icon image");
-            }
+            if (!response3.IsSuccessStatusCode) throw new InvalidDataException("Failed to download guild icon image");
 
             var guildiconstream = await response3.Content.ReadAsByteArrayAsync();
             using var guildicon = SKBitmap.Decode(guildiconstream);
@@ -281,9 +270,9 @@ public sealed class ImageUtils
             Typeface = SKTypeface.FromFamilyName(font)
         };
 
-        float xpTextWidth = xpPaint.MeasureText(xpText);
-        float xpTextX = progressBarBackgroundRect.Left + (progressBarBackgroundRect.Width / 2);
-        float xpTextY = progressBarBackgroundRect.Top + (progressBarBackgroundRect.Height / 2) + (xpPaint.TextSize / 2);
+        var xpTextWidth = xpPaint.MeasureText(xpText);
+        var xpTextX = progressBarBackgroundRect.Left + progressBarBackgroundRect.Width / 2;
+        var xpTextY = progressBarBackgroundRect.Top + progressBarBackgroundRect.Height / 2 + xpPaint.TextSize / 2;
         xpTextY -= 2;
 
         if (xpTextX + xpTextWidth / 2 > progressBarRect.Right)
@@ -367,10 +356,7 @@ public sealed class ImageUtils
 
         var avatarurl = user.GetAvatarUrl(ImageFormat.Png);
         var response2 = await httpclient.GetAsync(avatarurl);
-        if (!response2.IsSuccessStatusCode)
-        {
-            throw new InvalidDataException("Failed to download avatar image");
-        }
+        if (!response2.IsSuccessStatusCode) throw new InvalidDataException("Failed to download avatar image");
 
         var avatarstream = await response2.Content.ReadAsByteArrayAsync();
 
@@ -422,10 +408,7 @@ public sealed class ImageUtils
         if (!string.IsNullOrWhiteSpace(guildiconurl))
         {
             var response3 = await httpclient.GetAsync(guildiconurl);
-            if (!response3.IsSuccessStatusCode)
-            {
-                throw new InvalidDataException("Failed to download guild icon image");
-            }
+            if (!response3.IsSuccessStatusCode) throw new InvalidDataException("Failed to download guild icon image");
 
             var guildiconstream = await response3.Content.ReadAsByteArrayAsync();
             using var guildicon = SKBitmap.Decode(guildiconstream);
@@ -518,9 +501,9 @@ public sealed class ImageUtils
             Typeface = SKTypeface.FromFamilyName(font)
         };
 
-        float xpTextWidth = xpPaint.MeasureText(xpText);
-        float xpTextX = progressBarBackgroundRect.Left + (progressBarBackgroundRect.Width / 2);
-        float xpTextY = progressBarBackgroundRect.Top + (progressBarBackgroundRect.Height / 2) + (xpPaint.TextSize / 2);
+        var xpTextWidth = xpPaint.MeasureText(xpText);
+        var xpTextX = progressBarBackgroundRect.Left + progressBarBackgroundRect.Width / 2;
+        var xpTextY = progressBarBackgroundRect.Top + progressBarBackgroundRect.Height / 2 + xpPaint.TextSize / 2;
         xpTextY -= 2;
 
         if (xpTextX + xpTextWidth / 2 > progressBarRect.Right)
@@ -570,10 +553,7 @@ public sealed class ImageUtils
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
                 "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
             var response = await httpclient.GetAsync(bgurl);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new InvalidDataException("Failed to download background image");
-            }
+            if (!response.IsSuccessStatusCode) throw new InvalidDataException("Failed to download background image");
 
             var bgstream = await response.Content.ReadAsByteArrayAsync();
             return Convert.ToBase64String(bgstream);
@@ -609,10 +589,7 @@ public sealed class ImageUtils
         using var cmd = con.CreateCommand("SELECT * FROM userrankcardsettings WHERE userid = @userid");
         cmd.Parameters.AddWithValue("userid", (long)UserId);
         await using var reader = await cmd.ExecuteReaderAsync();
-        if (!reader.HasRows)
-        {
-            return null;
-        }
+        if (!reader.HasRows) return null;
 
         await reader.ReadAsync();
         var bg = "";
@@ -625,10 +602,7 @@ public sealed class ImageUtils
             // ignored
         }
 
-        if (string.IsNullOrWhiteSpace(bg))
-        {
-            bg = await GetFallbackBackground();
-        }
+        if (string.IsNullOrWhiteSpace(bg)) bg = await GetFallbackBackground();
 
         var card = new CustomRankCard
         {

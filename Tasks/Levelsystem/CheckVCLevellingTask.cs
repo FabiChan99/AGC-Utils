@@ -31,62 +31,40 @@ public static class CheckVCLevellingTask
                 var users = new Dictionary<ulong, ulong>();
                 var guild = CurrentApplication.TargetGuild;
                 foreach (var channel in guild.Channels.Values)
-                {
                     if (channel.Type == ChannelType.Voice || channel.Type == ChannelType.Stage)
-                    {
                         foreach (var member in channel.Users)
-                        {
                             if (!users.ContainsKey(member.Id))
                             {
-                                if (member.IsBot)
-                                {
-                                    continue;
-                                }
+                                if (member.IsBot) continue;
 
 
                                 if (member.VoiceState?.IsSelfMuted == true ||
                                     member.VoiceState?.IsSelfDeafened == true ||
                                     member.VoiceState?.IsServerMuted == true ||
                                     member.VoiceState?.IsServerDeafened == true)
-                                {
                                     continue;
-                                }
 
                                 var count = 0;
                                 foreach (var user in channel.Users)
                                 {
-                                    if (user.IsBot)
-                                    {
-                                        continue;
-                                    }
+                                    if (user.IsBot) continue;
 
                                     if (user.VoiceState?.IsSelfMuted == true ||
                                         user.VoiceState?.IsSelfDeafened == true ||
                                         user.VoiceState?.IsServerMuted == true ||
                                         user.VoiceState?.IsServerDeafened == true)
-                                    {
                                         continue;
-                                    }
 
                                     count++;
                                 }
 
-                                if (count < 2)
-                                {
-                                    continue;
-                                }
+                                if (count < 2) continue;
 
 
-                                if (await LevelUtils.IsChannelBlocked(channel.Id))
-                                {
-                                    continue;
-                                }
+                                if (await LevelUtils.IsChannelBlocked(channel.Id)) continue;
 
                                 users.Add(member.Id, channel.Id);
                             }
-                        }
-                    }
-                }
 
                 // get all memberids from the dictionary
                 var memberIds = users.Keys.ToList();
@@ -104,17 +82,12 @@ public static class CheckVCLevellingTask
                         continue;
                     }
 
-                    if (member != null)
-                    {
-                        members.Add(member);
-                    }
+                    if (member != null) members.Add(member);
                 }
 
                 // give xp to all members
                 foreach (var member in members)
-                {
                     await LevelUtils.GiveXP(member, LevelUtils.GetBaseXp(XpRewardType.Voice), XpRewardType.Voice);
-                }
 
                 users.Clear();
                 memberIds.Clear();

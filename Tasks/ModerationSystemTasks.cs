@@ -27,13 +27,13 @@ public class ModerationSystemTasks
 
     private int GetWarnExpiringTime()
     {
-        int fallback = 7;
+        var fallback = 7;
         int days_;
 
         try
         {
             var days = BotConfig.GetConfig()["ModerationConfig"]["WarnExpireDays"];
-            short.TryParse(days, out short parsedDays);
+            short.TryParse(days, out var parsedDays);
             days_ = parsedDays;
         }
         catch (Exception)
@@ -48,13 +48,13 @@ public class ModerationSystemTasks
     {
         discord.Logger.LogInformation("Prüfe auf abgelaufene Warns");
         var warnlist = new List<dynamic>();
-        int days = GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
-        int expireTime = (int)DateTimeOffset.UtcNow.AddDays(-days).ToUnixTimeSeconds();
+        var days = GetWarnExpiringTime(); // Default value is 7 Days if no override in condig present
+        var expireTime = (int)DateTimeOffset.UtcNow.AddDays(-days).ToUnixTimeSeconds();
 
 
-        string selectQuery = $"SELECT * FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
+        var selectQuery = $"SELECT * FROM warns WHERE datum < '{expireTime}' AND perma = 'False'";
 
-        await using (NpgsqlDataReader warnReader = DatabaseService.ExecuteQuery(selectQuery))
+        await using (var warnReader = DatabaseService.ExecuteQuery(selectQuery))
         {
             while (warnReader.Read())
             {
@@ -90,7 +90,7 @@ public class ModerationSystemTasks
             { "perma", (false, "=") }
         };
 
-        int rowsDeleted = await DatabaseService.DeleteDataFromTable("warns", whereConditions);
+        var rowsDeleted = await DatabaseService.DeleteDataFromTable("warns", whereConditions);
 
         discord.Logger.LogInformation($"{rowsDeleted} Abgelaufene Verwarnungen in Flags verschoben.");
     }

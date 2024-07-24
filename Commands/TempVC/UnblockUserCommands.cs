@@ -18,17 +18,18 @@ public sealed class UnblockUserCommands : TempVoiceHelper
     {
         _ = Task.Run(async () =>
             {
-                List<long> dbChannels = await GetChannelIDFromDB(ctx);
-                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
-                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+                var dbChannels = await GetChannelIDFromDB(ctx);
+                var userChannel = ctx.Member?.VoiceState?.Channel;
+                var isMod = await IsChannelMod(userChannel, ctx.Member);
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+                if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+                if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) ||
+                    (userChannel != null && isMod))
                 {
                     var unblocklist = new List<ulong>();
                     List<ulong> ids = new();
@@ -38,8 +39,7 @@ public sealed class UnblockUserCommands : TempVoiceHelper
                         $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu entsperren...");
                     var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                    foreach (ulong id in ids)
-                    {
+                    foreach (var id in ids)
                         try
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
@@ -54,12 +54,11 @@ public sealed class UnblockUserCommands : TempVoiceHelper
                         catch (NotFoundException)
                         {
                         }
-                    }
 
                     await userChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
 
-                    int successCount = unblocklist.Count;
-                    string endstring =
+                    var successCount = unblocklist.Count;
+                    var endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **entsperrt**!";
 
                     await msg.ModifyAsync(endstring);

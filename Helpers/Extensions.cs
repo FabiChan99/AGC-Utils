@@ -4,7 +4,7 @@ internal static class DiscordExtension
 {
     internal static bool isTeamMember(this DiscordMember member)
     {
-        ulong teamRole = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
+        var teamRole = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["StaffRoleId"]);
         return member.Roles.Any(x => x.Id == teamRole);
     }
 
@@ -20,10 +20,7 @@ internal static class DiscordExtension
     internal static string GetFormattedUserName(this DiscordUser member)
     {
         // if migrated
-        if (member.IsMigrated)
-        {
-            return member.Username;
-        }
+        if (member.IsMigrated) return member.Username;
         // if not migrated
 
         return member.Username + "#" + member.Discriminator;
@@ -41,10 +38,7 @@ internal static class DiscordExtension
     internal static string GetFormattedUserName(this DiscordMember member)
     {
         // if migrated
-        if (member.IsMigrated)
-        {
-            return member.Username;
-        }
+        if (member.IsMigrated) return member.Username;
         // if not migrated
 
         return member.Username + "#" + member.Discriminator;

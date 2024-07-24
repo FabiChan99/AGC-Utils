@@ -12,7 +12,6 @@ public class WarnChannelAcknowledgedButtonListener : BaseCommandModule
     {
         if (args.Channel.Name.StartsWith("warn-") && args.Channel.ParentId ==
             ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["SupportCategoryId"]) && args.Id == "ackwarn")
-        {
             _ = Task.Run(async () =>
                 {
                     var c_userid = args.Channel.Topic;
@@ -42,6 +41,5 @@ public class WarnChannelAcknowledgedButtonListener : BaseCommandModule
                     }
                 }
             );
-        }
     }
 }

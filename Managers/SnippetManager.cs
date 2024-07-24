@@ -21,45 +21,24 @@ public class SnippetListener
     {
         _ = Task.Run(async () =>
         {
-            if (e.Guild == null)
-            {
-                return;
-            }
+            if (e.Guild == null) return;
 
-            if (e.Message.Author.IsBot)
-            {
-                return;
-            }
+            if (e.Message.Author.IsBot) return;
 
-            if (e.Message.Channel.Parent == null)
-            {
-                return;
-            }
+            if (e.Message.Channel.Parent == null) return;
 
-            if ((long)e.Message.Channel.Parent.Id != catid)
-            {
-                return;
-            }
+            if ((long)e.Message.Channel.Parent.Id != catid) return;
 
             var openticket = await TicketManagerHelper.IsOpenTicket(e.Message.Channel);
-            if (!openticket)
-            {
-                return;
-            }
+            if (!openticket) return;
 
             var sup = TeamChecker.IsSupporter(await e.Message.Author.ConvertToMember(e.Message.Guild));
-            if (!sup)
-            {
-                return;
-            }
+            if (!sup) return;
 
             var string_to_search = e.Message.Content;
-            if (string.IsNullOrEmpty(string_to_search))
-            {
-                return;
-            }
+            if (string.IsNullOrEmpty(string_to_search)) return;
 
-            string? snipped = await SnippetManagerHelper.GetSnippetAsync(string_to_search);
+            var snipped = await SnippetManagerHelper.GetSnippetAsync(string_to_search);
             if (snipped != null && !e.Message.Author.IsBot)
             {
                 snipped = SnippetManagerHelper.FormatStringWithVariables(snipped);
@@ -70,10 +49,7 @@ public class SnippetListener
                     .WithTitle("Hinweis").WithFooter("AGC Support-System", e.Message.Guild.IconUrl);
                 var users_in_ticket = await TicketManagerHelper.GetTicketUsers(e.Message.Channel);
                 var ping = "";
-                foreach (var user in users_in_ticket)
-                {
-                    ping = ping + $" {user.Mention}";
-                }
+                foreach (var user in users_in_ticket) ping = ping + $" {user.Mention}";
 
                 DiscordMessageBuilder mb = new();
                 mb.WithContent(ping).WithEmbed(eb);

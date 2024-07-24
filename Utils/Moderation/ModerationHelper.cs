@@ -74,7 +74,7 @@ public static class ModerationHelper
     public static async Task<DiscordEmbed> GenerateWarnEmbed(CommandContext ctx, DiscordUser user, DiscordUser mod,
         int warnCount, string caseid, bool isManual, string reason)
     {
-        string unbanurl = GetUnbanURL();
+        var unbanurl = GetUnbanURL();
         var (warnsToKick, warnsToBan) = await GetWarnKickValues();
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
@@ -142,7 +142,7 @@ public static class ModerationHelper
         bool isManual, string reason)
     {
         var (warnsToKick, warnsToBan) = await GetWarnKickValues();
-        string unbanurl = GetUnbanURL();
+        var unbanurl = GetUnbanURL();
         if (warnCount >= warnsToBan)
             return new DiscordEmbedBuilder()
                 .WithDescription(
@@ -212,7 +212,7 @@ public static class ModerationHelper
         {
             "*"
         };
-        List<Dictionary<string, object>> queryResult =
+        var queryResult =
             await DatabaseService.SelectDataFromTable("warnreasons", DBQuery, null);
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Grund auswählen | Aktion: Verwarnen")
@@ -254,20 +254,14 @@ public static class ModerationHelper
 
 
         var valIds = new List<string>();
-        foreach (var option in interaction.Result.Values)
-        {
-            valIds.Add(option);
-        }
+        foreach (var option in interaction.Result.Values) valIds.Add(option);
 
         var reasonBuilder = new StringBuilder();
-        for (int i = 0; i < valIds.Count; i++)
+        for (var i = 0; i < valIds.Count; i++)
         {
             reasonBuilder.Append(ReasonMap[valIds[i]]);
 
-            if (i < valIds.Count - 1)
-            {
-                reasonBuilder.Append(" | ");
-            }
+            if (i < valIds.Count - 1) reasonBuilder.Append(" | ");
         }
 
         var reason = reasonBuilder.ToString();
@@ -284,7 +278,7 @@ public static class ModerationHelper
         {
             "*"
         };
-        List<Dictionary<string, object>> queryResult =
+        var queryResult =
             await DatabaseService.SelectDataFromTable("banreasons", DBQuery, null);
         var embedBuilder = new DiscordEmbedBuilder()
             .WithTitle("Grund auswählen | Aktion: Ban")
@@ -326,20 +320,14 @@ public static class ModerationHelper
 
         Console.WriteLine(interaction.Result.Id);
         var valIds = new List<string>();
-        foreach (var option in interaction.Result.Values)
-        {
-            valIds.Add(option);
-        }
+        foreach (var option in interaction.Result.Values) valIds.Add(option);
 
         var reasonBuilder = new StringBuilder();
-        for (int i = 0; i < valIds.Count; i++)
+        for (var i = 0; i < valIds.Count; i++)
         {
             reasonBuilder.Append(ReasonMap[valIds[i]]);
 
-            if (i < valIds.Count - 1)
-            {
-                reasonBuilder.Append(" | ");
-            }
+            if (i < valIds.Count - 1) reasonBuilder.Append(" | ");
         }
 
         var reason = reasonBuilder.ToString();

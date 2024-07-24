@@ -13,10 +13,7 @@ public class RequireStaffRole : CheckBaseAttribute
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
-        if (GlobalProperties.DebugMode)
-        {
-            return true;
-        }
+        if (GlobalProperties.DebugMode) return true;
 
         // Check if user has staff role
         if (ctx.Member.Roles.Any(r => r.Id == RoleId))
@@ -69,7 +66,7 @@ public class RequireOpenTicket : CheckBaseAttribute
         var openticket = await TicketManagerHelper.IsOpenTicket(ctx.Channel);
         if (!openticket)
         {
-            ulong RoleId = ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["TeamRoleId"]);
+            var RoleId = ulong.Parse(BotConfig.GetConfig()["TicketConfig"]["TeamRoleId"]);
             if (ctx.Member.Roles.Any(r => r.Id == RoleId))
                 await ctx.RespondAsync("Dies ist kein offenes Ticket.");
         }
@@ -106,10 +103,7 @@ public class ACRequireStaffRole : CheckBaseAttribute
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
-        if (GlobalProperties.DebugMode)
-        {
-            return true;
-        }
+        if (GlobalProperties.DebugMode) return true;
 
         // Check if user has staff role
         if (ctx.Member.Roles.Any(r => r.Id == RoleId))
@@ -122,24 +116,18 @@ public class RequireTeamCat : CheckBaseAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
-        if (GlobalProperties.DebugMode)
-        {
-            return true;
-        }
+        if (GlobalProperties.DebugMode) return true;
 
-        ulong botOwnerId = GlobalProperties.BotOwnerId;
-        if (ctx.Member.Id == botOwnerId)
-        {
-            return true;
-        }
+        var botOwnerId = GlobalProperties.BotOwnerId;
+        if (ctx.Member.Id == botOwnerId) return true;
 
-        ulong teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
-        ulong logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
-        ulong modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);
+        var teamAreaCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["TeamAreaCategoryId"]);
+        var logCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["LogCategoryId"]);
+        var modMailCategoryId = ulong.Parse(BotConfig.GetConfig()["ServerConfig"]["ModMailCategoryId"]);
 
-        bool isChannelInValidCategory = ctx.Channel.ParentId == teamAreaCategoryId ||
-                                        ctx.Channel.ParentId == logCategoryId ||
-                                        ctx.Channel.ParentId == modMailCategoryId;
+        var isChannelInValidCategory = ctx.Channel.ParentId == teamAreaCategoryId ||
+                                       ctx.Channel.ParentId == logCategoryId ||
+                                       ctx.Channel.ParentId == modMailCategoryId;
 
         return isChannelInValidCategory;
     }

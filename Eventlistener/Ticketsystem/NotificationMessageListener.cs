@@ -18,36 +18,18 @@ public class NotificationMessageListener : BaseCommandModule
     {
         _ = Task.Run<Task>(async () =>
         {
-            if (e.Guild == null)
-            {
-                return;
-            }
+            if (e.Guild == null) return;
 
-            if (e.Message.Author.IsBot)
-            {
-                return;
-            }
+            if (e.Message.Author.IsBot) return;
 
-            if (e.Message.Channel.Parent == null)
-            {
-                return;
-            }
+            if (e.Message.Channel.Parent == null) return;
 
-            if ((long)e.Message.Channel.Parent.Id != catid)
-            {
-                return;
-            }
+            if ((long)e.Message.Channel.Parent.Id != catid) return;
 
             var openticket = await TicketManagerHelper.IsOpenTicket(e.Message.Channel);
-            if (!openticket)
-            {
-                return;
-            }
+            if (!openticket) return;
 
-            if (TeamChecker.IsSupporter(await e.Message.Author.ConvertToMember(e.Message.Guild)))
-            {
-                return;
-            }
+            if (TeamChecker.IsSupporter(await e.Message.Author.ConvertToMember(e.Message.Guild))) return;
 
             var subscribedStaffs = await NotificationManager.GetSubscribedStaffs(e.Channel);
             foreach (var staff in subscribedStaffs)

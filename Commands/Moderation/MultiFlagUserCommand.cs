@@ -52,7 +52,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
         var imgAttachments = ctx.Message.Attachments
             .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
             .ToList();
-        string urls = "";
+        var urls = "";
         if (imgAttachments.Count > 0)
         {
             urls = " ";
@@ -137,7 +137,7 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
                 .WithEmbed(loadingEmbed).AddComponents(disbtn)
                 .WithReply(ctx.Message.Id);
             await message.ModifyAsync(loadingMessage);
-            string for_str = "";
+            var for_str = "";
             List<DiscordUser> users_to_flag_obj = new();
             foreach (var id in setids)
             {
@@ -169,20 +169,20 @@ public sealed class MultiFlagUserCommand : BaseCommandModule
                 {
                     { "userid", (long)user.Id }
                 };
-                List<Dictionary<string, object>> results =
+                var results =
                     await DatabaseService.SelectDataFromTable("flags", selectedFlags, whereConditions);
                 foreach (var lresult in results) flaglist.Add(lresult);
                 var flagcount = flaglist.Count;
-                string stringtoadd =
+                var stringtoadd =
                     $"{user.UsernameWithDiscriminator} {user.Id} | Case-ID: {caseid_} | {flagcount} Flag(s)\n\n";
                 for_str += stringtoadd;
             }
 
-            string e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
-                              $"__Grund:__ ```{reason + urls}```\n" +
-                              $"__Geflaggte User:__\n" +
-                              $"```{for_str}```";
-            DiscordColor ec = DiscordColor.Green;
+            var e_string = $"Der Multiflag wurde erfolgreich abgeschlossen.\n" +
+                           $"__Grund:__ ```{reason + urls}```\n" +
+                           $"__Geflaggte User:__\n" +
+                           $"```{for_str}```";
+            var ec = DiscordColor.Green;
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle("Multiflag abgeschlossen")
                 .WithDescription(e_string)

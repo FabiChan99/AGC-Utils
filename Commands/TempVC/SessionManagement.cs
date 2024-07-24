@@ -23,11 +23,11 @@ public sealed class SessionManagement : TempVoiceHelper
         {
             List<ulong> blockedusers = new();
             List<ulong> permittedusers = new();
-            List<long> dbChannels = await GetChannelIDFromDB(ctx);
-            bool hidden = false;
-            bool locked = false;
+            var dbChannels = await GetChannelIDFromDB(ctx);
+            var hidden = false;
+            var locked = false;
             List<ulong> channelmods = new();
-            DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+            var userChannel = ctx.Member?.VoiceState?.Channel;
 
             if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
             {
@@ -47,13 +47,10 @@ public sealed class SessionManagement : TempVoiceHelper
                 {
                     { "userid", (long)ctx.User.Id }
                 };
-                bool hasSession = false;
+                var hasSession = false;
                 var usersession =
                     await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
-                foreach (var user in usersession)
-                {
-                    hasSession = true;
-                }
+                foreach (var user in usersession) hasSession = true;
 
 
                 if (hasSession)
@@ -71,30 +68,20 @@ public sealed class SessionManagement : TempVoiceHelper
 
                 var overwrite =
                     userChannel.PermissionOverwrites.FirstOrDefault(o => o.Id == ctx?.Guild?.EveryoneRole.Id);
-                if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied)
-                {
-                    locked = true;
-                }
+                if (overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied) locked = true;
 
                 if (overwrite == null || overwrite?.CheckPermission(Permissions.UseVoice) == PermissionLevel.Unset)
-                {
                     locked = false;
-                }
 
-                if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied)
-                {
-                    hidden = true;
-                }
+                if (overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Denied) hidden = true;
 
                 if (overwrite == null ||
                     overwrite?.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Unset)
-                {
                     hidden = false;
-                }
 
 
-                string blocklist = string.Empty;
-                string permitlist = string.Empty;
+                var blocklist = string.Empty;
+                var permitlist = string.Empty;
                 var buserow = userChannel.PermissionOverwrites
                     .Where(x => x.Type == OverwriteType.Member)
                     .Where(x => x.CheckPermission(Permissions.UseVoice) == PermissionLevel.Denied).Select(x => x.Id)
@@ -106,15 +93,9 @@ public sealed class SessionManagement : TempVoiceHelper
                     .Where(x => x.Id != ctx.User.Id)
                     .Select(x => x.Id)
                     .ToList();
-                foreach (var user in buserow)
-                {
-                    blockedusers.Add(user);
-                }
+                foreach (var user in buserow) blockedusers.Add(user);
 
-                foreach (var user in puserow)
-                {
-                    permittedusers.Add(user);
-                }
+                foreach (var user in puserow) permittedusers.Add(user);
 
                 blocklist = string.Join(", ", blockedusers);
                 permitlist = string.Join(", ", permittedusers);
@@ -156,20 +137,17 @@ public sealed class SessionManagement : TempVoiceHelper
             {
                 { "userid", (long)ctx.User.Id }
             };
-            bool hasSession = false;
+            var hasSession = false;
             var usersession =
                 await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons);
-            foreach (var user in usersession)
-            {
-                hasSession = true;
-            }
+            foreach (var user in usersession) hasSession = true;
 
             Dictionary<string, (object value, string comparisonOperator)> whereConditions = new()
             {
                 { "userid", ((long)ctx.User.Id, "=") }
             };
 
-            int rowsDeleted =
+            var rowsDeleted =
                 await DatabaseService.DeleteDataFromTable("tempvoicesession", whereConditions);
 
             if (!hasSession)
@@ -203,13 +181,10 @@ public sealed class SessionManagement : TempVoiceHelper
             {
                 { "userid", (long)ctx.User.Id }
             };
-            bool hasSession = false;
+            var hasSession = false;
             var usersession =
                 await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
-            foreach (var user in usersession)
-            {
-                hasSession = true;
-            }
+            foreach (var user in usersession) hasSession = true;
 
             if (!hasSession)
             {
@@ -233,16 +208,12 @@ public sealed class SessionManagement : TempVoiceHelper
 
             var sessionSkip = false;
             foreach (var user in session)
-            {
                 if (user["userid"].ToString() == ctx.User.Id.ToString())
-                {
                     sessionSkip = (bool)user["sessionskip"];
-                }
-            }
 
-            bool newSessionSkip = !sessionSkip;
+            var newSessionSkip = !sessionSkip;
 
-            string named = newSessionSkip ? "aktiv" : "inaktiv";
+            var named = newSessionSkip ? "aktiv" : "inaktiv";
 
             var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
@@ -254,10 +225,8 @@ public sealed class SessionManagement : TempVoiceHelper
             var successstring =
                 $"<:success:1085333481820790944> **Erfolg!** Sessionskip wurde erfolgreich auf ``{named}`` **geändert**!";
             if (newSessionSkip)
-            {
                 successstring +=
                     "\n\n**Hinweis:** Sessionskip wird automatisch deaktiviert, wenn du dir einen Channel erstellst!";
-            }
 
             await msg.ModifyAsync(successstring
             );
@@ -282,13 +251,10 @@ public sealed class SessionManagement : TempVoiceHelper
             {
                 { "userid", (long)ctx.User.Id }
             };
-            bool hasSession = false;
+            var hasSession = false;
             var usersession =
                 await DatabaseService.SelectDataFromTable("tempvoicesession", Query, WhereCondiditons_);
-            foreach (var user in usersession)
-            {
-                hasSession = true;
-            }
+            foreach (var user in usersession) hasSession = true;
 
             if (!hasSession)
             {
@@ -310,28 +276,24 @@ public sealed class SessionManagement : TempVoiceHelper
             var session =
                 await DatabaseService.SelectDataFromTable("tempvoicesession", dataQuery, WhereCondiditons);
             foreach (var user in session)
-            {
                 if (user["userid"].ToString() == ctx.User.Id.ToString())
                 {
-                    string channelname = user["channelname"].ToString();
-                    string channelbitrate = user["channelbitrate"].ToString();
-                    string channellimit = user["channellimit"].ToString();
+                    var channelname = user["channelname"].ToString();
+                    var channelbitrate = user["channelbitrate"].ToString();
+                    var channellimit = user["channellimit"].ToString();
 
-                    if (channellimit == "0")
-                    {
-                        channellimit = "Kein Limit";
-                    }
+                    if (channellimit == "0") channellimit = "Kein Limit";
 
                     var caseid = ToolSet.GenerateCaseID();
-                    string blockedusers = IdToMention(user["blockedusers"].ToString());
-                    string permitedusers = IdToMention(user["permitedusers"].ToString());
-                    string channelmods = IdToMention(user["channelmods"].ToString());
-                    string locked = user["locked"].ToString();
-                    string hidden = user["hidden"].ToString();
-                    bool sessionskip = (bool)user["sessionskip"];
-                    string pu = permitedusers;
-                    string bu = blockedusers;
-                    string cm = channelmods;
+                    var blockedusers = IdToMention(user["blockedusers"].ToString());
+                    var permitedusers = IdToMention(user["permitedusers"].ToString());
+                    var channelmods = IdToMention(user["channelmods"].ToString());
+                    var locked = user["locked"].ToString();
+                    var hidden = user["hidden"].ToString();
+                    var sessionskip = (bool)user["sessionskip"];
+                    var pu = permitedusers;
+                    var bu = blockedusers;
+                    var cm = channelmods;
 
                     DiscordEmbedBuilder ebb = new()
                     {
@@ -362,10 +324,7 @@ public sealed class SessionManagement : TempVoiceHelper
                     var interactiviy = ctx.Client.GetInteractivity();
                     var response = await interactiviy.WaitForButtonAsync(msg, ctx.User,
                         TimeSpan.FromMinutes(5));
-                    if (response.TimedOut)
-                    {
-                        await msg.ModifyAsync(nmb);
-                    }
+                    if (response.TimedOut) await msg.ModifyAsync(nmb);
 
                     if (response.Result.Id == $"close_msg_{caseid}")
                     {
@@ -380,7 +339,6 @@ public sealed class SessionManagement : TempVoiceHelper
                         }
                     }
                 }
-            }
         });
     }
 
@@ -388,11 +346,8 @@ public sealed class SessionManagement : TempVoiceHelper
     {
         if (string.IsNullOrEmpty(ids)) return "Keine";
 
-        string[] idArray = ids.Split(",");
-        for (int i = 0; i < idArray.Length; i++)
-        {
-            idArray[i] = $"<@{idArray[i].Trim()}>";
-        }
+        var idArray = ids.Split(",");
+        for (var i = 0; i < idArray.Length; i++) idArray[i] = $"<@{idArray[i].Trim()}>";
 
         return string.Join(", ", idArray);
     }

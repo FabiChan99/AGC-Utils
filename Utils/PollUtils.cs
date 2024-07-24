@@ -9,10 +9,7 @@ public static class PollUtils
         command.CommandText = "SELECT id FROM polls WHERE messageid = @messageid";
         command.Parameters.AddWithValue("messageid", messageId);
         var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
-        {
-            return reader.GetString(0);
-        }
+        if (await reader.ReadAsync()) return reader.GetString(0);
 
         return "NOT_FOUND";
     }
@@ -75,10 +72,7 @@ public static class PollUtils
     public static async Task AddVote(ulong messageId, ulong VoterId, int optionIndex)
     {
         var pollId = await GetPollIdByMessageId(messageId);
-        if (pollId == "NOT_FOUND")
-        {
-            return;
-        }
+        if (pollId == "NOT_FOUND") return;
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = con.CreateCommand();
@@ -93,10 +87,7 @@ public static class PollUtils
     public static async Task RemoveVote(ulong messageId, ulong VoterId, int optionIndex)
     {
         var pollId = await GetPollIdByMessageId(messageId);
-        if (pollId == "NOT_FOUND")
-        {
-            return;
-        }
+        if (pollId == "NOT_FOUND") return;
 
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var command = con.CreateCommand();

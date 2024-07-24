@@ -18,14 +18,14 @@ public sealed class RemoveVorstellungsCooldownCommand : BaseCommandModule
         await using (NpgsqlConnection conn = new(DatabaseService.GetConnectionString()))
         {
             await conn.OpenAsync();
-            string sql = "DELETE FROM vorstellungscooldown WHERE user_id = @userid";
+            var sql = "DELETE FROM vorstellungscooldown WHERE user_id = @userid";
             await using (NpgsqlCommand command = new(sql, conn))
             {
                 command.Parameters.AddWithValue("@userid", (long)user.Id);
 
-                int affected = await command.ExecuteNonQueryAsync();
+                var affected = await command.ExecuteNonQueryAsync();
 
-                DiscordEmbed ue = new DiscordEmbedBuilder()
+                var ue = new DiscordEmbedBuilder()
                     .WithTitle("Cooldown Entfernt").WithDescription(
                         $"{user.UsernameWithDiscriminator} kann nun wieder eine Vorstellung posten.")
                     .WithColor(BotConfig.GetEmbedColor()).Build();

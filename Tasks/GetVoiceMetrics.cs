@@ -45,7 +45,6 @@ public static class GetVoiceMetrics
                 var guild = CurrentApplication.TargetGuild;
                 var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
                 foreach (var channel in guild.Channels.Values)
-                {
                     try
                     {
                         // only allow voice and stage channels
@@ -55,22 +54,13 @@ public static class GetVoiceMetrics
 
                             foreach (var vcm in vcmembers)
                             {
-                                if (vcm == null)
-                                {
-                                    continue;
-                                }
+                                if (vcm == null) continue;
 
-                                if (vcm.IsBot)
-                                {
-                                    continue;
-                                }
+                                if (vcm.IsBot) continue;
 
 
                                 var voicestate = vcm?.VoiceState;
-                                if (voicestate == null)
-                                {
-                                    continue;
-                                }
+                                if (voicestate == null) continue;
 
                                 var state = Statemapper(voicestate);
                                 var userid = vcm.Id;
@@ -92,7 +82,6 @@ public static class GetVoiceMetrics
                     {
                         Console.WriteLine(e);
                     }
-                }
             }
 
             await CachingService.SetCacheValue(CustomDatabaseCacheType.ConfigCache, "lastvcmetricsgather",
@@ -105,25 +94,13 @@ public static class GetVoiceMetrics
 
     private static StatsVoiceStates Statemapper(DiscordVoiceState state)
     {
-        if (state.IsSelfMuted)
-        {
-            return StatsVoiceStates.Muted;
-        }
+        if (state.IsSelfMuted) return StatsVoiceStates.Muted;
 
-        if (state.IsSelfDeafened)
-        {
-            return StatsVoiceStates.Deafened;
-        }
+        if (state.IsSelfDeafened) return StatsVoiceStates.Deafened;
 
-        if (state.IsServerMuted)
-        {
-            return StatsVoiceStates.Muted;
-        }
+        if (state.IsServerMuted) return StatsVoiceStates.Muted;
 
-        if (state.IsServerDeafened)
-        {
-            return StatsVoiceStates.Deafened;
-        }
+        if (state.IsServerDeafened) return StatsVoiceStates.Deafened;
 
         return StatsVoiceStates.Unmuted;
     }

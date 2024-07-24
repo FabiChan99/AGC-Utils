@@ -17,19 +17,20 @@ public class BlockUserCommand : TempVoiceHelper
     {
         _ = Task.Run(async () =>
             {
-                List<long> dbChannels = await GetChannelIDFromDB(ctx);
-                DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+                var dbChannels = await GetChannelIDFromDB(ctx);
+                var userChannel = ctx.Member?.VoiceState?.Channel;
 
-                bool isMod = await IsChannelMod(userChannel, ctx.Member);
+                var isMod = await IsChannelMod(userChannel, ctx.Member);
 
 
-                if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id) && !isMod)
+                if (userChannel == null || (!dbChannels.Contains((long)userChannel?.Id) && !isMod))
                 {
                     await NoChannel(ctx);
                     return;
                 }
 
-                if (userChannel != null && dbChannels.Contains((long)userChannel.Id) || userChannel != null && isMod)
+                if ((userChannel != null && dbChannels.Contains((long)userChannel.Id)) ||
+                    (userChannel != null && isMod))
                 {
                     var blockedlist = new List<ulong>();
                     List<ulong> ids = new();
@@ -39,28 +40,18 @@ public class BlockUserCommand : TempVoiceHelper
                         $"<a:loading_agc:1084157150747697203> **Lade...** Versuche {ids.Count} Nutzer zu blockieren...");
                     var overwrites = userChannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
 
-                    foreach (ulong id in ids)
-                    {
+                    foreach (var id in ids)
                         try
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
 
-                            if (user.Roles.Contains(staffrole))
-                            {
-                                continue;
-                            }
+                            if (user.Roles.Contains(staffrole)) continue;
 
                             var channelowner = await GetChannelOwnerID(userChannel);
-                            if (channelowner == (long)user.Id)
-                            {
-                                continue;
-                            }
+                            if (channelowner == (long)user.Id) continue;
 
-                            List<ulong> mods = await RetrieveChannelMods(userChannel);
-                            if (id == ctx.User.Id || mods.Contains(id))
-                            {
-                                continue;
-                            }
+                            var mods = await RetrieveChannelMods(userChannel);
+                            if (id == ctx.User.Id || mods.Contains(id)) continue;
 
                             try
                             {
@@ -82,7 +73,6 @@ public class BlockUserCommand : TempVoiceHelper
                             ctx.Client.Logger.LogCritical(ex.Message);
                             ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
-                    }
 
                     try
                     {
@@ -95,31 +85,24 @@ public class BlockUserCommand : TempVoiceHelper
                     }
 
 
-                    foreach (ulong id in blockedlist)
-                    {
+                    foreach (var id in blockedlist)
                         try
                         {
                             var user = await ctx.Guild.GetMemberAsync(id);
-                            if (user.Roles.Contains(staffrole))
-                            {
-                                continue;
-                            }
+                            if (user.Roles.Contains(staffrole)) continue;
 
                             if (userChannel.Users.Contains(user) && !user.Roles.Contains(staffrole))
-                            {
                                 await user.DisconnectFromVoiceAsync();
-                            }
                         }
                         catch (Exception ex)
                         {
                             ctx.Client.Logger.LogCritical(ex.Message);
                             ctx.Client.Logger.LogCritical(ex.StackTrace);
                         }
-                    }
 
 
-                    int successCount = blockedlist.Count;
-                    string endstring =
+                    var successCount = blockedlist.Count;
+                    var endstring =
                         $"<:success:1085333481820790944> **Erfolg!** Es {(successCount == 1 ? "wurde" : "wurden")} {successCount} Nutzer erfolgreich **blockiert**!";
 
                     await msg.ModifyAsync(endstring);

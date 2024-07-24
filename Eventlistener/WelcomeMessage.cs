@@ -27,12 +27,9 @@ public class WelcomeMessage : BaseCommandModule
                 if (args.Member.IsBot)
                     return;
 
-                if (args.Guild.Id != serverid)
-                {
-                    return;
-                }
+                if (args.Guild.Id != serverid) return;
 
-                bool active = false;
+                var active = false;
                 ulong channelid = 0;
                 try
                 {
@@ -44,10 +41,7 @@ public class WelcomeMessage : BaseCommandModule
                 {
                 }
 
-                if (!active)
-                {
-                    return;
-                }
+                if (!active) return;
 
                 var embed = new DiscordEmbedBuilder();
                 embed.WithTitle($"Hey {args.Member.DisplayName}! Willkommen auf AGC!");
@@ -70,17 +64,12 @@ public class WelcomeMessage : BaseCommandModule
                     CurrentApplication.DiscordClient.Logger.LogError(e, "Error while getting gif from kawaiiapi");
                 }
 
-                if (imageurl != null)
-                {
-                    embed.WithImageUrl(imageurl);
-                }
+                if (imageurl != null) embed.WithImageUrl(imageurl);
 
                 var channel = await client.GetChannelAsync(channelid);
                 if (args.Member.UsernameWithDiscriminator.Contains("chatnoir"))
-                {
                     await BanBlacklistedUsers(args.Member.Id, args.Guild,
                         "Blacklisted User | Mitbeteiligter am Epsilon Stealer");
-                }
 
                 await Task.Delay(TimeSpan.FromSeconds(5));
                 // look if member is still in guild
@@ -89,10 +78,7 @@ public class WelcomeMessage : BaseCommandModule
                 {
                     var member = await guild.GetMemberAsync(args.Member.Id);
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (member == null)
-                    {
-                        return;
-                    }
+                    if (member == null) return;
                 }
                 catch (Exception)
                 {
@@ -109,10 +95,7 @@ public class WelcomeMessage : BaseCommandModule
 
     private async Task BanBlacklistedUsers(ulong UserId, DiscordGuild guild, string reason)
     {
-        if (guild.Id != serverid)
-        {
-            return;
-        }
+        if (guild.Id != serverid) return;
 
         await guild.BanMemberAsync(UserId, 0, reason);
     }

@@ -19,25 +19,16 @@ public class TempVCMessageLogger : BaseCommandModule
                 if (args.Channel.ParentId != ulong.Parse(BotConfig.GetConfig()["TempVC"]["Creation_Category_ID"]))
                     return;
                 // return if not active setting
-                bool active = bool.Parse(BotConfig.GetConfig()["Logging"]["VCMessageLoggingActive"]);
-                if (!active)
-                {
-                    return;
-                }
+                var active = bool.Parse(BotConfig.GetConfig()["Logging"]["VCMessageLoggingActive"]);
+                if (!active) return;
 
                 // send msgcontent to logchannel via webhook
-                if (args.Author.Id == GlobalProperties.BotOwnerId)
-                {
-                    return;
-                }
+                if (args.Author.Id == GlobalProperties.BotOwnerId) return;
 
-                if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305)
-                {
-                    return;
-                }
+                if (args.Author.Id == 515404778021322773 || args.Author.Id == 856780995629154305) return;
 
-                string webhookid = BotConfig.GetConfig()["Logging"]["VCMessageLoggingWebhookId"];
-                string content = string.IsNullOrWhiteSpace(args.Message.Content)
+                var webhookid = BotConfig.GetConfig()["Logging"]["VCMessageLoggingWebhookId"];
+                var content = string.IsNullOrWhiteSpace(args.Message.Content)
                     ? "Kein Inhalt, Möglicherweise Sticker oder Anhang"
                     : args.Message.Content;
                 var c = "**Nachrichteninhalt: **\n" + content;
@@ -54,7 +45,7 @@ public class TempVCMessageLogger : BaseCommandModule
                 embed.AddField(new DiscordEmbedField("Message Link", args.Message.JumpLink.ToString()));
 
 
-                DiscordWebhookBuilder webhookbuilder = new DiscordWebhookBuilder
+                var webhookbuilder = new DiscordWebhookBuilder
                 {
                     Username = args.Author.Username,
                     AvatarUrl = args.Author.AvatarUrl

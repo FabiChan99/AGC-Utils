@@ -31,7 +31,7 @@ public static class ErrorReporting
 
         try
         {
-            ulong errortrackingguildid = GlobalProperties.AGCGuild.Id;
+            var errortrackingguildid = GlobalProperties.AGCGuild.Id;
             var errortrackingguild = await client.GetGuildAsync(errortrackingguildid);
             var errortrackingchannel = errortrackingguild.GetChannel(GlobalProperties.ErrorTrackingChannelId);
             await errortrackingchannel.SendMessageAsync(embed2);
@@ -39,6 +39,7 @@ public static class ErrorReporting
         catch (Exception)
         {
         }
+
         SentrySdk.CaptureException(exception);
 
         CurrentApplication.DiscordClient.Logger.LogError(
@@ -68,7 +69,7 @@ public static class ErrorReporting
 
         try
         {
-            ulong errortrackingguildid = GlobalProperties.AGCGuild.Id;
+            var errortrackingguildid = GlobalProperties.AGCGuild.Id;
             var errortrackingguild = await client.GetGuildAsync(errortrackingguildid);
             var errortrackingchannel = errortrackingguild.GetChannel(GlobalProperties.ErrorTrackingChannelId);
             await errortrackingchannel.SendMessageAsync(embed2);
@@ -77,6 +78,7 @@ public static class ErrorReporting
         {
             await SendErrorToDev(client, exception);
         }
+
         SentrySdk.CaptureException(exception);
 
         CurrentApplication.DiscordClient.Logger.LogError(

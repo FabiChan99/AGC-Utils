@@ -18,10 +18,7 @@ public sealed class MultiBanCommand : BaseCommandModule
         List<ulong> ids;
         string reason;
         Converter.SeperateIdsAndReason(ids_and_reason, out ids, out reason);
-        if (reason == "")
-        {
-            reason = await ModerationHelper.BanReasonSelector(ctx);
-        }
+        if (reason == "") reason = await ModerationHelper.BanReasonSelector(ctx);
 
         if (await ToolSet.CheckForReason(ctx, reason)) return;
         if (await ToolSet.TicketUrlCheck(ctx, reason)) return;

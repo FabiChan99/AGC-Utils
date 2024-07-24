@@ -28,14 +28,14 @@ public class TempVoiceTasks
             {
                 "channelid"
             };
-            List<Dictionary<string, object>> all_channels =
+            var all_channels =
                 await DatabaseService.SelectDataFromTable("tempvoice", Query, null);
             foreach (var listed_channel in all_channels)
             {
-                string channelid = listed_channel["channelid"].ToString();
+                var channelid = listed_channel["channelid"].ToString();
                 try
                 {
-                    DiscordChannel channel = await discord.TryGetChannelAsync(ulong.Parse(channelid));
+                    var channel = await discord.TryGetChannelAsync(ulong.Parse(channelid));
                     if (channel == null)
                     {
                         Dictionary<string, (object value, string comparisonOperator)>

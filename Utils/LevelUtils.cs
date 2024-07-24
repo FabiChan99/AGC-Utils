@@ -43,7 +43,6 @@ public static class LevelUtils
             "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var percent = 0;
@@ -64,11 +63,8 @@ public static class LevelUtils
                     ProgressInPercent = percent
                 });
             }
-        }
         else
-        {
             leaderboardData.Add(new WebLeaderboardData { UserId = 0, Experience = "0", Level = 0 });
-        }
 
         await reader.CloseAsync();
 
@@ -136,26 +132,23 @@ public static class LevelUtils
     /// <returns>The experience points required to reach the given level.</returns>
     public static int XpForLevel(int lvl)
     {
-        if (lvl <= 0)
-        {
-            return 0;
-        }
+        if (lvl <= 0) return 0;
 
-        int alvl = lvl - 1;
+        var alvl = lvl - 1;
         return (int)(5 / 6.0 * (151 * alvl + 33 * Math.Pow(alvl, 2) + 2 * Math.Pow(alvl, 3)) + 100);
     }
 
     public static int XpForNextLevel(int lvl)
     {
         lvl += 1;
-        int alvl = lvl;
+        var alvl = lvl;
         return (int)(5 / 6.0 * (151 * alvl + 33 * Math.Pow(alvl, 2) + 2 * Math.Pow(alvl, 3)) + 100);
     }
 
     public static int XpToFinishLevel(int xp)
     {
-        int level = LevelAtXp(xp);
-        int xpForNextLevel = XpForLevel(level + 1);
+        var level = LevelAtXp(xp);
+        var xpForNextLevel = XpForLevel(level + 1);
         return xpForNextLevel - xp;
     }
 
@@ -166,20 +159,11 @@ public static class LevelUtils
     public static async Task UpdateLevelRoles(DiscordMember? member)
     {
         // Check if member is null
-        if (member == null)
-        {
-            return;
-        }
+        if (member == null) return;
 
-        if (member.IsBot)
-        {
-            return;
-        }
+        if (member.IsBot) return;
 
-        if (member.IsPending is true)
-        {
-            return;
-        }
+        if (member.IsPending is true) return;
 
 
         try
@@ -192,16 +176,10 @@ public static class LevelUtils
             var currentRoles = new HashSet<ulong>(member.Roles.Select(role => role.Id));
 
             foreach (var reward in rewards)
-            {
                 if (currentRoles.Contains(reward.RoleId) && level < reward.Level)
-                {
                     await member.RevokeRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
-                }
                 else if (!currentRoles.Contains(reward.RoleId) && level >= reward.Level)
-                {
                     await member.GrantRoleAsync(CurrentApplication.TargetGuild.GetRole(reward.RoleId));
-                }
-            }
         }
         catch (Exception e)
         {
@@ -213,12 +191,8 @@ public static class LevelUtils
     {
         var rewards = await GetLevelRewards();
         foreach (var reward in rewards)
-        {
             if (reward.Level == level)
-            {
                 return true;
-            }
-        }
 
         return false;
     }
@@ -232,17 +206,13 @@ public static class LevelUtils
             cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
             await using var reader = await cmd.ExecuteReaderAsync();
             if (reader.HasRows)
-            {
                 while (await reader.ReadAsync())
                 {
                     var messageLevelingEnabled = reader.GetBoolean(0);
                     return messageLevelingEnabled;
                 }
-            }
             else
-            {
                 return false;
-            }
         }
 
         if (type == XpRewardType.Voice)
@@ -252,17 +222,13 @@ public static class LevelUtils
             cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
             await using var reader = await cmd.ExecuteReaderAsync();
             if (reader.HasRows)
-            {
                 while (await reader.ReadAsync())
                 {
                     var vcLevelingEnabled = reader.GetBoolean(0);
                     return vcLevelingEnabled;
                 }
-            }
             else
-            {
                 return false;
-            }
         }
 
         return false;
@@ -273,10 +239,7 @@ public static class LevelUtils
         if (type == XpRewardType.Message)
         {
             var multiplier = await GetMessageXpMultiplier();
-            if (multiplier == 0)
-            {
-                return "Deaktiviert";
-            }
+            if (multiplier == 0) return "Deaktiviert";
 
             return multiplier.ToString();
         }
@@ -284,10 +247,7 @@ public static class LevelUtils
         if (type == XpRewardType.Voice)
         {
             var multiplier = await GetVcXpMultiplier();
-            if (multiplier == 0)
-            {
-                return "Deaktiviert";
-            }
+            if (multiplier == 0) return "Deaktiviert";
 
             return multiplier.ToString();
         }
@@ -335,50 +295,23 @@ public static class LevelUtils
 
     public static float GetFloatFromMultiplicatorItem(MultiplicatorItem multiplicatorItem)
     {
-        if (multiplicatorItem == MultiplicatorItem.Disabled)
-        {
-            return 0;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Disabled) return 0;
 
-        if (multiplicatorItem == MultiplicatorItem.Quarter)
-        {
-            return 0.25f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Quarter) return 0.25f;
 
-        if (multiplicatorItem == MultiplicatorItem.Half)
-        {
-            return 0.5f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Half) return 0.5f;
 
-        if (multiplicatorItem == MultiplicatorItem.One)
-        {
-            return 1.0f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.One) return 1.0f;
 
-        if (multiplicatorItem == MultiplicatorItem.OneAndHalf)
-        {
-            return 1.5f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.OneAndHalf) return 1.5f;
 
-        if (multiplicatorItem == MultiplicatorItem.Two)
-        {
-            return 2.0f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Two) return 2.0f;
 
-        if (multiplicatorItem == MultiplicatorItem.Three)
-        {
-            return 3.0f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Three) return 3.0f;
 
-        if (multiplicatorItem == MultiplicatorItem.Four)
-        {
-            return 4.0f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Four) return 4.0f;
 
-        if (multiplicatorItem == MultiplicatorItem.Five)
-        {
-            return 5.0f;
-        }
+        if (multiplicatorItem == MultiplicatorItem.Five) return 5.0f;
 
         return 0;
     }
@@ -407,12 +340,8 @@ public static class LevelUtils
     {
         var overrides = await GetMultiplicatorOverrides();
         foreach (var overrideRole in overrides)
-        {
             if (overrideRole.RoleId == roleId)
-            {
                 return true;
-            }
-        }
 
         return false;
     }
@@ -421,12 +350,8 @@ public static class LevelUtils
     {
         var blockedChannels = await BlockedChannels();
         foreach (var blockedChannel in blockedChannels)
-        {
             if (blockedChannel == channelId)
-            {
                 return true;
-            }
-        }
 
         return false;
     }
@@ -434,10 +359,7 @@ public static class LevelUtils
     public static async Task<bool> AddBlacklistedChannel(ulong channelId)
     {
         var blockedChannels = await BlockedChannels();
-        if (blockedChannels.Contains(channelId))
-        {
-            return false;
-        }
+        if (blockedChannels.Contains(channelId)) return false;
 
         blockedChannels.Add(channelId);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -453,10 +375,7 @@ public static class LevelUtils
     public static async Task<bool> RemoveBlacklistedChannel(ulong channelId)
     {
         var blockedChannels = await BlockedChannels();
-        if (!blockedChannels.Contains(channelId))
-        {
-            return false;
-        }
+        if (!blockedChannels.Contains(channelId)) return false;
 
         blockedChannels.Remove(channelId);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
@@ -472,12 +391,8 @@ public static class LevelUtils
     {
         var rewards = await GetLevelRewards();
         foreach (var reward in rewards)
-        {
             if (reward.RoleId == roleId)
-            {
                 return true;
-            }
-        }
 
         return false;
     }
@@ -539,10 +454,7 @@ public static class LevelUtils
         await RecalculateUserLevel(userId);
 
         // if user is not in guild, return
-        if (CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userId) == null)
-        {
-            return;
-        }
+        if (CurrentApplication.TargetGuild.Members.Values.FirstOrDefault(x => x.Id == userId) == null) return;
 
         await UpdateLevelRoles(await CurrentApplication.TargetGuild.GetMemberAsync(userId));
     }
@@ -555,19 +467,16 @@ public static class LevelUtils
     /// <returns>A dictionary containing the minimum and maximum XP values.</returns>
     public static Dictionary<int, int> MinAndMaxXpForThisLevel(int lvl)
     {
-        int min = 0;
-        int max = 0;
+        var min = 0;
+        var max = 0;
         if (lvl <= 0)
         {
-            if (lvl == 0)
-            {
-                return new Dictionary<int, int> { { 0, 100 } };
-            }
+            if (lvl == 0) return new Dictionary<int, int> { { 0, 100 } };
 
             return new Dictionary<int, int> { { min, max } };
         }
 
-        int alvl = lvl - 1;
+        var alvl = lvl - 1;
         min = (int)(5 / 6.0 * (151 * alvl + 33 * Math.Pow(alvl, 2) + 2 * Math.Pow(alvl, 3)) + 100);
         max = (int)(5 / 6.0 * (151 * lvl + 33 * Math.Pow(lvl, 2) + 2 * Math.Pow(lvl, 3)) + 100);
         return new Dictionary<int, int> { { min, max } };
@@ -581,14 +490,14 @@ public static class LevelUtils
     /// <returns>The level corresponding to the total experience points.</returns>
     public static int LevelAtXp(int totalXp)
     {
-        int level = 0;
-        int xpForNextLevel = 100;
+        var level = 0;
+        var xpForNextLevel = 100;
 
         while (totalXp >= xpForNextLevel)
         {
             totalXp -= xpForNextLevel;
             level++;
-            xpForNextLevel = 5 * (level * level) + (50 * level) + 100;
+            xpForNextLevel = 5 * level * level + 50 * level + 100;
         }
 
         return level;
@@ -601,8 +510,8 @@ public static class LevelUtils
     /// <returns>The amount of experience points needed to reach the next level.</returns>
     public static int XpUntilNextLevel(int xp)
     {
-        int currentLevel = LevelAtXp(xp);
-        int xpForNextLevel = XpForLevel(currentLevel + 1);
+        var currentLevel = LevelAtXp(xp);
+        var xpForNextLevel = XpForLevel(currentLevel + 1);
         return xpForNextLevel - xp;
     }
 
@@ -613,7 +522,7 @@ public static class LevelUtils
     /// <returns>The rank of the user. Returns 0 if the user is not found.</returns>
     public static async Task<int> GetUserRankAsync(ulong userid)
     {
-        int rank = 0;
+        var rank = 0;
         await AddUserToDbIfNot(userid);
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
@@ -621,16 +530,11 @@ public static class LevelUtils
             db.CreateCommand("SELECT userid, current_xp FROM levelingdata ORDER BY current_xp DESC");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 rank++;
-                if (reader.GetInt64(0) == (long)userid)
-                {
-                    break;
-                }
+                if (reader.GetInt64(0) == (long)userid) break;
             }
-        }
 
 
         return rank;
@@ -681,10 +585,7 @@ public static class LevelUtils
                 {
                     var guildmembers = CurrentApplication.TargetGuild.Members;
                     var member = guildmembers.Values.FirstOrDefault(x => x.Id == (ulong)userId);
-                    if (member != null)
-                    {
-                        await UpdateLevelRoles(member);
-                    }
+                    if (member != null) await UpdateLevelRoles(member);
                 }
                 catch (Exception)
                 {
@@ -716,18 +617,14 @@ public static class LevelUtils
 
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var xp = reader.GetInt32(0);
                 var level = reader.GetInt32(1);
                 rank[userId] = new RankData { Level = level, Xp = xp };
             }
-        }
         else
-        {
             rank[userId] = new RankData { Level = 0, Xp = 0 };
-        }
 
         await reader.CloseAsync();
         return rank;
@@ -768,7 +665,6 @@ public static class LevelUtils
             "SELECT userid, current_xp, current_level FROM levelingdata ORDER BY current_xp DESC");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var userId = reader.GetInt64(0);
@@ -776,11 +672,8 @@ public static class LevelUtils
                 var level = reader.GetInt32(2);
                 leaderboardData.Add(new LeaderboardData { UserId = (ulong)userId, XP = xp, Level = level });
             }
-        }
         else
-        {
             leaderboardData.Add(new LeaderboardData { UserId = 0, XP = 0, Level = 0 });
-        }
 
         await reader.CloseAsync();
         return leaderboardData;
@@ -788,13 +681,9 @@ public static class LevelUtils
 
     public static int GetUserRank(ulong invokingUserId, List<LeaderboardData> leaderboardData)
     {
-        for (int i = 0; i < leaderboardData.Count; i++)
-        {
+        for (var i = 0; i < leaderboardData.Count; i++)
             if (leaderboardData[i].UserId == invokingUserId)
-            {
                 return i + 1;
-            }
-        }
 
         return -1;
     }
@@ -821,17 +710,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var vcLevelingEnabled = reader.GetBoolean(0);
                 return vcLevelingEnabled;
             }
-        }
         else
-        {
             return false;
-        }
 
 
         return false;
@@ -846,17 +731,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var messageLevelingEnabled = reader.GetBoolean(0);
                 return messageLevelingEnabled;
             }
-        }
         else
-        {
             return false;
-        }
 
 
         return false;
@@ -870,17 +751,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var vcXpMultiplier = reader.GetFloat(0);
                 return vcXpMultiplier;
             }
-        }
         else
-        {
             return 1;
-        }
 
 
         return 1;
@@ -894,17 +771,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var messageXpMultiplier = reader.GetFloat(0);
                 return messageXpMultiplier;
             }
-        }
         else
-        {
             return 1;
-        }
 
 
         return 1;
@@ -919,17 +792,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var levelUpMessage = reader.GetString(0);
                 return levelUpMessage;
             }
-        }
         else
-        {
             return "Congratulations {user}! You just advanced to level {level}!";
-        }
 
 
         return "Congratulations {user}! You just advanced to level {level}!";
@@ -944,17 +813,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var levelUpRewardMessage = reader.GetString(0);
                 return levelUpRewardMessage;
             }
-        }
         else
-        {
             return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
-        }
 
 
         return "Congratulations {username}! You just advanced to level {level} and received {rolename}!";
@@ -969,17 +834,13 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)levelguildid);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var levelUpChannelId = reader.GetInt64(0);
                 return (ulong)levelUpChannelId;
             }
-        }
         else
-        {
             return 0;
-        }
 
 
         return 0;
@@ -994,14 +855,12 @@ public static class LevelUtils
         var cmd = db.CreateCommand("SELECT level, roleid FROM level_rewards ORDER BY level ASC");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var level = reader.GetInt32(0);
                 var roleId = reader.GetInt64(1);
                 rewards.Add(new Reward { Level = level, RoleId = (ulong)roleId });
             }
-        }
 
         await reader.CloseAsync();
 
@@ -1031,16 +890,10 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@userid", (long)userId);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
-            {
                 return reader.GetBoolean(0);
-            }
-        }
         else
-        {
             return false;
-        }
 
 
         return false;
@@ -1055,14 +908,12 @@ public static class LevelUtils
         var cmd = db.CreateCommand("SELECT roleid, multiplicator FROM level_multiplicatoroverrideroles");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var roleId = reader.GetInt64(0);
                 var multiplier = reader.GetFloat(1);
                 overrides.Add(new MultiplicatorOverrides { RoleId = (ulong)roleId, Multiplicator = multiplier });
             }
-        }
 
         await reader.CloseAsync();
 
@@ -1071,15 +922,9 @@ public static class LevelUtils
 
     public static async Task<bool> IsLevelingActive(XpRewardType type)
     {
-        if (type == XpRewardType.Message)
-        {
-            return await isMessageLevelingEnabled();
-        }
+        if (type == XpRewardType.Message) return await isMessageLevelingEnabled();
 
-        if (type == XpRewardType.Voice)
-        {
-            return await isVcLevelingEnabled();
-        }
+        if (type == XpRewardType.Voice) return await isVcLevelingEnabled();
 
         return false;
     }
@@ -1093,13 +938,11 @@ public static class LevelUtils
         var cmd = db.CreateCommand("SELECT channelid FROM level_excludedchannels");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var channelId = reader.GetInt64(0);
                 blockedChannels.Add((ulong)channelId);
             }
-        }
 
         await reader.CloseAsync();
 
@@ -1115,13 +958,11 @@ public static class LevelUtils
         var cmd = db.CreateCommand("SELECT roleid FROM level_excludedroles");
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var roleId = reader.GetInt64(0);
                 blockedRoles.Add((ulong)roleId);
             }
-        }
 
         await reader.CloseAsync();
 
@@ -1131,10 +972,7 @@ public static class LevelUtils
     public static async Task<bool> IsChannelBlocked(ulong channelId)
     {
         var blockedChannels = await BlockedChannels();
-        if (blockedChannels.Contains(channelId))
-        {
-            return true;
-        }
+        if (blockedChannels.Contains(channelId)) return true;
 
         return false;
     }
@@ -1143,12 +981,8 @@ public static class LevelUtils
     {
         var blockedRoles = await BlockedRoles();
         foreach (var role in member.Roles)
-        {
             if (blockedRoles.Contains(role.Id))
-            {
                 return true;
-            }
-        }
 
         return false;
     }
@@ -1157,15 +991,9 @@ public static class LevelUtils
     {
         _ = Task.Run(async () =>
         {
-            if (!await IsLevelingActive(type))
-            {
-                return;
-            }
+            if (!await IsLevelingActive(type)) return;
 
-            if (await UserHasBlockedRole(await user.ConvertToMember(CurrentApplication.TargetGuild)))
-            {
-                return;
-            }
+            if (await UserHasBlockedRole(await user.ConvertToMember(CurrentApplication.TargetGuild))) return;
 
             await AddUserToDbIfNot(user.Id);
             var typeString = type == XpRewardType.Message ? "last_text_reward" : "last_vc_reward";
@@ -1192,24 +1020,15 @@ public static class LevelUtils
             var currentLevel = rank[user.Id].Level;
             var xpMultiplier = 1f;
             if (type == XpRewardType.Message)
-            {
                 xpMultiplier = await GetMessageXpMultiplier();
-            }
-            else if (type == XpRewardType.Voice)
-            {
-                xpMultiplier = await GetVcXpMultiplier();
-            }
+            else if (type == XpRewardType.Voice) xpMultiplier = await GetVcXpMultiplier();
 
             var xpToGive = (int)(xpMultiplier * xp);
             var multiplicatorOverrides = await GetMultiplicatorOverrides();
             var member = await user.ConvertToMember(CurrentApplication.TargetGuild);
             foreach (var multiplicatorOverride in multiplicatorOverrides)
-            {
                 if (member.Roles.Any(role => role.Id == multiplicatorOverride.RoleId))
-                {
                     xpToGive = (int)(xpToGive * multiplicatorOverride.Multiplicator);
-                }
-            }
 
             var newXp = currentXp + xpToGive;
             var newLevel = LevelAtXp(newXp);
@@ -1228,10 +1047,7 @@ public static class LevelUtils
             await cmd.ExecuteNonQueryAsync();
 
             CurrentApplication.Logger.Debug("Gave " + xpToGive + " xp to " + user.Username);
-            if (newLevel > currentLevel)
-            {
-                await SendLevelUpMessageAndReward(user, newLevel);
-            }
+            if (newLevel > currentLevel) await SendLevelUpMessageAndReward(user, newLevel);
         });
         await Task.CompletedTask;
     }
@@ -1275,7 +1091,6 @@ public static class LevelUtils
         {
             var role = CurrentApplication.TargetGuild.GetRole(reward[true]);
             if (!member.Roles.Contains(role))
-            {
                 try
                 {
                     await member.GrantRoleAsync(role);
@@ -1284,7 +1099,6 @@ public static class LevelUtils
                 {
                     CurrentApplication.Logger.Error(e.Message);
                 }
-            }
 
             messageBuilder.Append(await MessageFormatter.FormatLevelUpMessage(rewardMessage, true, user, role));
         }
@@ -1296,10 +1110,7 @@ public static class LevelUtils
         var channel = CurrentApplication.TargetGuild.GetChannel(await GetLevelUpChannelId());
         var messagebuilder = new DiscordMessageBuilder();
         messagebuilder.WithContent(messageBuilder.ToString());
-        if (!pingEnabled)
-        {
-            messagebuilder.WithAllowedMentions(Mentions.None);
-        }
+        if (!pingEnabled) messagebuilder.WithAllowedMentions(Mentions.None);
 
         await channel.SendMessageAsync(messagebuilder);
     }
@@ -1308,10 +1119,7 @@ public static class LevelUtils
     {
         var rewards = await GetLevelRewards();
         var reward = rewards.FirstOrDefault(r => r.Level == level);
-        if (reward != null)
-        {
-            return true;
-        }
+        if (reward != null) return true;
 
         return false;
     }
@@ -1325,12 +1133,8 @@ public static class LevelUtils
         await using var reader = await cmd.ExecuteReaderAsync();
 
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
-            {
                 return reader.GetBoolean(0);
-            }
-        }
 
 
         return false;
@@ -1340,10 +1144,7 @@ public static class LevelUtils
     {
         var rewards = await GetLevelRewards();
         var reward = rewards.FirstOrDefault(r => r.Level == level);
-        if (reward != null)
-        {
-            return new Dictionary<bool, ulong> { { true, reward.RoleId } };
-        }
+        if (reward != null) return new Dictionary<bool, ulong> { { true, reward.RoleId } };
 
         return new Dictionary<bool, ulong> { { false, 0 } };
     }
@@ -1378,22 +1179,15 @@ public static class LevelUtils
         cmd.Parameters.AddWithValue("@guildid", (long)CurrentApplication.TargetGuild.Id);
         await using var reader = await cmd.ExecuteReaderAsync();
         if (reader.HasRows)
-        {
             while (await reader.ReadAsync())
             {
                 var levelUpChannelId = reader.GetInt64(0);
-                if (levelUpChannelId == 0)
-                {
-                    return false;
-                }
+                if (levelUpChannelId == 0) return false;
 
                 return true;
             }
-        }
         else
-        {
             return false;
-        }
 
         return false;
     }

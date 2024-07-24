@@ -7,37 +7,33 @@ using Microsoft.AspNetCore.Mvc;
 
 #endregion
 
-namespace AGC_Management.Controller
+namespace AGC_Management.Controller;
+
+[Route("/[action]")]
+public class AccountController : ControllerBase
 {
-    [Route("/[action]")]
-    public class AccountController : ControllerBase
+    public AccountController(IDataProtectionProvider provider)
     {
-        public AccountController(IDataProtectionProvider provider)
-        {
-            Provider = provider;
-        }
+        Provider = provider;
+    }
 
-        public IDataProtectionProvider Provider { get; }
+    public IDataProtectionProvider Provider { get; }
 
-        [HttpGet]
-        public IActionResult Login(string returnUrl = "/")
-        {
-            if (!Url.IsLocalUrl(returnUrl))
-            {
-                returnUrl = "/";
-            }
+    [HttpGet]
+    public IActionResult Login(string returnUrl = "/")
+    {
+        if (!Url.IsLocalUrl(returnUrl)) returnUrl = "/";
 
-            returnUrl = Uri.UnescapeDataString(returnUrl);
+        returnUrl = Uri.UnescapeDataString(returnUrl);
 
 
-            return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
-        }
+        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, "Discord");
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> LogOut(string returnUrl = "/")
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return LocalRedirect(returnUrl);
-        }
+    [HttpGet]
+    public async Task<IActionResult> LogOut(string returnUrl = "/")
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return LocalRedirect(returnUrl);
     }
 }

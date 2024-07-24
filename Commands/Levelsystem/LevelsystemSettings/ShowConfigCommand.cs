@@ -25,20 +25,20 @@ public partial class LevelSystemSettings
 
     public static async Task<DiscordMessageBuilder> GetSetupEmbedAndComponents()
     {
-        string levelupmessage = await LevelUtils.GetLevelUpMessage();
-        string leveluprewardmessage = await LevelUtils.GetLevelUpRewardMessage();
-        bool isLevelUpMessageEnabled = await LevelUtils.IsLevelUpMessageEnabled();
-        ulong levelupchannelid = await LevelUtils.GetLevelUpChannelId();
-        DiscordChannel? levelupchannel = CurrentApplication.TargetGuild?.GetChannel(levelupchannelid);
-        List<ulong> blockedchannels = await LevelUtils.BlockedChannels();
-        List<ulong> blockedroles = await LevelUtils.BlockedRoles();
-        List<Reward> rewards = await LevelUtils.GetLevelRewards();
-        List<MultiplicatorOverrides> multiplicatorOverrides = await LevelUtils.GetMultiplicatorOverrides();
-        string levelmulti_vc = await LevelUtils.GetLevelMultiplier(XpRewardType.Voice);
-        string levelmulti_msg = await LevelUtils.GetLevelMultiplier(XpRewardType.Message);
+        var levelupmessage = await LevelUtils.GetLevelUpMessage();
+        var leveluprewardmessage = await LevelUtils.GetLevelUpRewardMessage();
+        var isLevelUpMessageEnabled = await LevelUtils.IsLevelUpMessageEnabled();
+        var levelupchannelid = await LevelUtils.GetLevelUpChannelId();
+        var levelupchannel = CurrentApplication.TargetGuild?.GetChannel(levelupchannelid);
+        var blockedchannels = await LevelUtils.BlockedChannels();
+        var blockedroles = await LevelUtils.BlockedRoles();
+        var rewards = await LevelUtils.GetLevelRewards();
+        var multiplicatorOverrides = await LevelUtils.GetMultiplicatorOverrides();
+        var levelmulti_vc = await LevelUtils.GetLevelMultiplier(XpRewardType.Voice);
+        var levelmulti_msg = await LevelUtils.GetLevelMultiplier(XpRewardType.Message);
 
-        bool isLevelingEnabledForVoice = await LevelUtils.IsLevelingEnabled(XpRewardType.Voice);
-        bool isLevelingEnabledForMessage = await LevelUtils.IsLevelingEnabled(XpRewardType.Message);
+        var isLevelingEnabledForVoice = await LevelUtils.IsLevelingEnabled(XpRewardType.Voice);
+        var isLevelingEnabledForMessage = await LevelUtils.IsLevelingEnabled(XpRewardType.Message);
 
 
         // local methode
@@ -49,13 +49,9 @@ public partial class LevelSystemSettings
             {
                 var channel = CurrentApplication.TargetGuild?.GetChannel(blockedchannel);
                 if (channel != null)
-                {
                     sb.AppendLine($"- {channel.Mention}");
-                }
                 else
-                {
                     sb.AppendLine($"- Kanal gelöscht ``{blockedchannel}``");
-                }
             }
 
             return sb.ToString();
@@ -69,13 +65,9 @@ public partial class LevelSystemSettings
             {
                 var role = CurrentApplication.TargetGuild?.GetRole(blockedrole);
                 if (role != null)
-                {
                     sb.AppendLine($"- {role.Mention}");
-                }
                 else
-                {
                     sb.AppendLine($"- Rolle gelöscht ``{blockedrole}``");
-                }
             }
 
             return sb.ToString();
@@ -89,13 +81,9 @@ public partial class LevelSystemSettings
             {
                 var role = CurrentApplication.TargetGuild?.GetRole(reward.RoleId);
                 if (role != null)
-                {
                     sb.AppendLine($"- Level ``{reward.Level}``: {role.Mention}");
-                }
                 else
-                {
                     sb.AppendLine($"- Rolle gelöscht ``{reward.RoleId}`` - Level {reward.Level}");
-                }
             }
 
             return sb.ToString();
@@ -109,13 +97,9 @@ public partial class LevelSystemSettings
             {
                 var role = CurrentApplication.TargetGuild?.GetRole(overrideRole.RoleId);
                 if (role != null)
-                {
                     sb.AppendLine($"- {role.Mention}: {overrideRole.Multiplicator}x");
-                }
                 else
-                {
                     sb.AppendLine($"- Rolle gelöscht ``{overrideRole.RoleId}`` - {overrideRole.Multiplicator}x");
-                }
             }
 
             return sb.ToString();
@@ -146,17 +130,10 @@ public partial class LevelSystemSettings
 
         embedDescString.AppendLine("__**Kanal für Levelup Nachrichten**__");
         if (levelupchannel != null)
-        {
             embedDescString.AppendLine($"✅ - {levelupchannel.Mention}");
-        }
         else if (levelupchannelid != 0)
-        {
             embedDescString.AppendLine("\u274c - Kanal gelöscht ``levelupchannelid``");
-        }
-        else if (levelupchannelid == 0)
-        {
-            embedDescString.AppendLine("\u274c - Kein Kanal ausgewählt");
-        }
+        else if (levelupchannelid == 0) embedDescString.AppendLine("\u274c - Kein Kanal ausgewählt");
 
         embedDescString.AppendLine();
         embedDescString.AppendLine("__**Ausgeschlossene Kanäle**__");

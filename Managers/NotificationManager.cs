@@ -12,7 +12,7 @@ public class NotificationManager
 {
     public static async Task<List<DiscordMember?>> GetSubscribedStaffs(DiscordChannel channel)
     {
-        long cid = (long)channel.Id;
+        var cid = (long)channel.Id;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd = con.CreateCommand("SELECT user_id FROM subscriptions WHERE channel_id = @cid");
         cmd.Parameters.AddWithValue("cid", cid);
@@ -22,7 +22,7 @@ public class NotificationManager
         {
             while (await reader.ReadAsync())
             {
-                ulong uid = (ulong)reader.GetInt64(0);
+                var uid = (ulong)reader.GetInt64(0);
                 var user = await CurrentApplication.DiscordClient.GetUserAsync(uid);
                 var member = await channel.Guild.GetMemberAsync(uid);
                 if (member == null)
@@ -42,8 +42,8 @@ public class NotificationManager
 
     public static async Task SetMode(NotificationMode mode, ulong channel_id, ulong user_id)
     {
-        long cid = (long)channel_id;
-        long uid = (long)user_id;
+        var cid = (long)channel_id;
+        var uid = (long)user_id;
         await RemoveMode(channel_id, user_id);
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
@@ -56,8 +56,8 @@ public class NotificationManager
 
     public static async Task RemoveMode(ulong channel_id, ulong user_id)
     {
-        long cid = (long)channel_id;
-        long uid = (long)user_id;
+        var cid = (long)channel_id;
+        var uid = (long)user_id;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd =
             con.CreateCommand("DELETE FROM subscriptions WHERE user_id = @uid AND channel_id = @cid");
@@ -68,7 +68,7 @@ public class NotificationManager
 
     public static async Task ClearMode(ulong channel_id)
     {
-        long cid = (long)channel_id;
+        var cid = (long)channel_id;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         await using var cmd = con.CreateCommand("DELETE FROM subscriptions WHERE channel_id = @cid");
         cmd.Parameters.AddWithValue("cid", cid);
@@ -100,8 +100,8 @@ public class NotificationManager
 
     public static async Task<NotificationMode> GetCurrentMode(ulong channel_id, ulong user_id)
     {
-        long cid = (long)channel_id;
-        long uid = (long)user_id;
+        var cid = (long)channel_id;
+        var uid = (long)user_id;
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
 
         await using var cmd =
@@ -120,10 +120,7 @@ public class NotificationManager
 
     private static List<DiscordActionRowComponent> GetPhase1Row(NotificationMode mode)
     {
-        if (mode == NotificationMode.Disabled)
-        {
-            return TicketComponents.GetNotificationManagerButtons();
-        }
+        if (mode == NotificationMode.Disabled) return TicketComponents.GetNotificationManagerButtons();
 
         return TicketComponents.GetNotificationManagerButtonsEnabledNotify();
     }
@@ -131,11 +128,11 @@ public class NotificationManager
     public static async Task RenderNotificationManager(DiscordInteraction interaction)
     {
         var customid = interaction.Data.CustomId;
-        NotificationMode mode = await GetCurrentMode(interaction.Channel.Id, interaction.User.Id);
-        string enabled = mode != NotificationMode.Disabled ? "✅" : "❌";
-        string modestr = GetModeString(mode);
+        var mode = await GetCurrentMode(interaction.Channel.Id, interaction.User.Id);
+        var enabled = mode != NotificationMode.Disabled ? "✅" : "❌";
+        var modestr = GetModeString(mode);
 
-        StringBuilder content = new StringBuilder();
+        var content = new StringBuilder();
         content.Append($"**Benachrichtigungen für <#{interaction.Channel.Id}> / <@{interaction.User.Id}>**");
         content.Append("\n\n");
         content.Append($"**Aktiv:** {enabled}\n");
@@ -150,11 +147,11 @@ public class NotificationManager
     public static async Task RenderNotificationManagerWithUpdate(DiscordInteraction interaction)
     {
         var customid = interaction.Data.CustomId;
-        NotificationMode mode = await GetCurrentMode(interaction.Channel.Id, interaction.User.Id);
-        string enabled = mode != NotificationMode.Disabled ? "✅" : "❌";
-        string modestr = GetModeString(mode);
+        var mode = await GetCurrentMode(interaction.Channel.Id, interaction.User.Id);
+        var enabled = mode != NotificationMode.Disabled ? "✅" : "❌";
+        var modestr = GetModeString(mode);
 
-        StringBuilder content = new StringBuilder();
+        var content = new StringBuilder();
         content.Append($"**Benachrichtigungen für <#{interaction.Channel.Id}> / <@{interaction.User.Id}>**");
         content.Append("\n\n");
         content.Append($"**Aktiv:** {enabled}\n");

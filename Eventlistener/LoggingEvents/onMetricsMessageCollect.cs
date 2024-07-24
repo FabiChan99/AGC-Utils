@@ -12,20 +12,11 @@ public class onMetricsMessageCollect : ApplicationCommandsModule
     [Event]
     public async Task MessageCreated(DiscordClient client, MessageCreateEventArgs args)
     {
-        if (args.Guild == null)
-        {
-            return;
-        }
+        if (args.Guild == null) return;
 
-        if (args.Guild != CurrentApplication.TargetGuild)
-        {
-            return;
-        }
+        if (args.Guild != CurrentApplication.TargetGuild) return;
 
-        if (args.Message.Author.IsBot)
-        {
-            return;
-        }
+        if (args.Message.Author.IsBot) return;
 
 
         var db = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();

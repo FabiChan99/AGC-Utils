@@ -22,7 +22,7 @@ public sealed class JoinRequestCommand : TempVoiceHelper
             var userchannel = user.VoiceState?.Channel;
             var userchannelid = userchannel?.Id;
             var channelownerid = await GetChannelOwnerID(user);
-            DiscordChannel channel = userchannel;
+            var channel = userchannel;
             DiscordMember? TargetUser = null;
             var msg = await ctx.RespondAsync(
                 "<a:loading_agc:1084157150747697203> **Lade...** Versuche eine Beitrittsanfrage zu stellen...");
@@ -50,7 +50,7 @@ public sealed class JoinRequestCommand : TempVoiceHelper
             TargetUser = user;
             if (db_channels.Contains((long)userchannelid) && channelownerid != (long)user.Id)
             {
-                DiscordMember Owner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
+                var Owner = await ctx.Guild.GetMemberAsync((ulong)channelownerid);
                 await msg.ModifyAsync(
                     $"<:attention:1085333468688433232> **Fehler!** Der User ist nicht der Besitzer des Channels. Der Besitzer ist ``{Owner.UsernameWithDiscriminator}`` \nJoinanfrage wird umgeleitet...");
                 await Task.Delay(3000);
@@ -97,10 +97,7 @@ public sealed class JoinRequestCommand : TempVoiceHelper
                 var channelmods = await RetrieveChannelMods(userchannel);
                 var result = await interactivity.WaitForButtonAsync(msg, interaction =>
                 {
-                    if (interaction.User.Id == TargetUser.Id)
-                    {
-                        return true;
-                    }
+                    if (interaction.User.Id == TargetUser.Id) return true;
 
                     ;
                     if (channelmods.Contains(interaction.User.Id))
@@ -152,12 +149,10 @@ public sealed class JoinRequestCommand : TempVoiceHelper
                     var overwrites = userchannel.PermissionOverwrites.Select(x => x.ConvertToBuilder()).ToList();
                     overwrites = overwrites.Merge(ctx.Member, Permissions.AccessChannels | Permissions.UseVoice,
                         Permissions.None);
-                    int? channellimit = userchannel.UserLimit;
+                    var channellimit = userchannel.UserLimit;
 
-                    if (channellimit != 0 && (channellimit <= userchannel.Users.Count()))
-                    {
+                    if (channellimit != 0 && channellimit <= userchannel.Users.Count())
                         channellimit = userchannel.Users.Count() + 1;
-                    }
 
                     await userchannel.ModifyAsync(x =>
                     {

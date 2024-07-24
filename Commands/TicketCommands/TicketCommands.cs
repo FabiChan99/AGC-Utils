@@ -14,7 +14,7 @@ public class TicketCommands : BaseCommandModule
     [RequireStaffRole]
     public async Task GetTranscript(CommandContext ctx)
     {
-        bool isticket = await TicketManagerHelper.IsTicket(ctx.Channel);
+        var isticket = await TicketManagerHelper.IsTicket(ctx.Channel);
         if (!isticket)
         {
             await ctx.RespondAsync("Dieser Channel ist kein Ticket!");

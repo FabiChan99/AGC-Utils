@@ -27,15 +27,15 @@
 
         if (_current < _total)
         {
-            float progress = (float)_current / _total;
-            int progressWidth = (int)(_barSize * progress);
+            var progress = (float)_current / _total;
+            var progressWidth = (int)(_barSize * progress);
 
             Console.Write("[");
             Console.Write(new string(_progressCharacter, progressWidth));
             Console.Write(new string('-', _barSize - progressWidth));
             Console.Write("] ");
 
-            int percentage = (int)(progress * 100);
+            var percentage = (int)(progress * 100);
             Console.Write($"{percentage}% Completed");
         }
         else

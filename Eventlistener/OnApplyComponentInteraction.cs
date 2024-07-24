@@ -1,7 +1,5 @@
 ﻿#region
 
-using System.Text;
-
 #endregion
 
 namespace AGC_Management.Eventlistener;
@@ -14,7 +12,7 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
     {
         _ = Task.Run(async () =>
             {
-                string cid = args.Interaction.Data.CustomId;
+                var cid = args.Interaction.Data.CustomId;
                 var values = args.Interaction.Data.Values;
                 if (cid != "applypanelselector") return;
                 var randomid = new Random();
@@ -32,6 +30,7 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                         new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
                     return;
                 }
+
                 bool useHttps;
                 try
                 {
@@ -51,7 +50,7 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                 {
                     dashboardUrl = "localhost";
                 }
-                
+
                 var url = $"{(useHttps ? "https" : "http")}://{dashboardUrl}/apply/{pos.ToLower()}";
                 var _embed = new DiscordEmbedBuilder();
                 _embed.WithTitle("Bewerbung");
@@ -59,13 +58,12 @@ public sealed class OnApplyComponentInteraction : BaseCommandModule
                 _embed.WithColor(DiscordColor.Green);
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AddEmbed(_embed).AsEphemeral());
-                
             }
         );
 
         return Task.CompletedTask;
     }
-    
+
 
     private static async Task<bool> isApplicable(string Position)
     {

@@ -33,7 +33,7 @@ public class RoleRefreshMiddleware
 
     private async Task<string> GetRoleAsync(string userId)
     {
-        ulong.TryParse(userId, out ulong id);
+        ulong.TryParse(userId, out var id);
         var r = await AuthUtils.RetrieveRole(id);
         return r;
     }

@@ -16,9 +16,9 @@ public class ChannelModManagement : TempVoiceHelper
     public async Task ChannelModAdd(CommandContext ctx, [RemainingText] DiscordMember user)
     {
         List<ulong> channelmods = new();
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        var dbChannels = await GetChannelIDFromDB(ctx);
 
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        var userChannel = ctx.Member?.VoiceState?.Channel;
 
         if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
@@ -28,7 +28,7 @@ public class ChannelModManagement : TempVoiceHelper
 
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
-            bool isMod = await IsChannelMod(userChannel, user);
+            var isMod = await IsChannelMod(userChannel, user);
             if (isMod)
             {
                 await ctx.RespondAsync("Dieser User ist bereits Kanalmoderator");
@@ -47,8 +47,8 @@ public class ChannelModManagement : TempVoiceHelper
     [Command("reset")]
     public async Task ChannelModReset(CommandContext ctx)
     {
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        var dbChannels = await GetChannelIDFromDB(ctx);
+        var userChannel = ctx.Member?.VoiceState?.Channel;
 
         if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
@@ -74,9 +74,9 @@ public class ChannelModManagement : TempVoiceHelper
     public async Task ChannelModRemove(CommandContext ctx, [RemainingText] DiscordMember user)
     {
         List<ulong> channelmods = new();
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        var dbChannels = await GetChannelIDFromDB(ctx);
 
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        var userChannel = ctx.Member?.VoiceState?.Channel;
 
         if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
@@ -86,7 +86,7 @@ public class ChannelModManagement : TempVoiceHelper
 
         if (userChannel != null && dbChannels.Contains((long)userChannel.Id))
         {
-            bool isMod = await IsChannelMod(userChannel, user);
+            var isMod = await IsChannelMod(userChannel, user);
             if (!isMod)
             {
                 await ctx.RespondAsync("Dieser User ist kein Kanalmoderator");
@@ -106,9 +106,9 @@ public class ChannelModManagement : TempVoiceHelper
     public async Task ChannelModList(CommandContext ctx)
     {
         List<ulong> channelmods = new();
-        List<long> dbChannels = await GetChannelIDFromDB(ctx);
+        var dbChannels = await GetChannelIDFromDB(ctx);
 
-        DiscordChannel userChannel = ctx.Member?.VoiceState?.Channel;
+        var userChannel = ctx.Member?.VoiceState?.Channel;
 
         if (userChannel == null || !dbChannels.Contains((long)userChannel?.Id))
         {
@@ -125,7 +125,7 @@ public class ChannelModManagement : TempVoiceHelper
             }
 
             var currentmods = await RetrieveChannelMods(userChannel);
-            string modlist = string.Empty;
+            var modlist = string.Empty;
             foreach (var mod in currentmods)
             {
                 var member = await ctx.Guild.GetMemberAsync(mod);
