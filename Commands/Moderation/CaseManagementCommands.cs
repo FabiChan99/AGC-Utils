@@ -191,22 +191,41 @@ public sealed class CaseManagement : BaseCommandModule
         var con = CurrentApplication.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
         if (wcase)
         {
+            var imgExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var imgAttachments = ctx.Message.Attachments
+                .Where(att => imgExtensions.Contains(Path.GetExtension(att.Filename).ToLower()))
+                .ToList();
+            var urls = "";
+            if (imgAttachments.Count > 0)
+            {
+                urls = " ";
+                foreach (var attachment in imgAttachments)
+                {
+                    var rndm = new Random();
+                    var rnd = rndm.Next(1000, 9999);
+                    var imageBytes = await CurrentApplication.HttpClient.GetByteArrayAsync(attachment.Url);
+                    var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
+                    urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes, ImageStoreType.Warn)}";
+                    imageBytes = null;
+                }
+            }
+            
+            reason = reason + urls;
+            
             if (await ToolSet.CheckForReason(ctx, reason)) return;
             sql = "UPDATE warns SET description = @description WHERE caseid = @caseid";
-            await using (var command = con.CreateCommand(sql))
-            {
-                command.Parameters.AddWithValue("@description", newreason);
-                command.Parameters.AddWithValue("@caseid", caseid);
+            await using var command = con.CreateCommand(sql);
+            command.Parameters.AddWithValue("@description", newreason);
+            command.Parameters.AddWithValue("@caseid", caseid);
 
-                var affected = await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync();
 
-                var ue = new DiscordEmbedBuilder()
-                    .WithTitle("Case Update").WithDescription(
-                        $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
-                        $"Case-Typ: {ctyp}\n" +
-                        $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
-                await ctx.RespondAsync(ue);
-            }
+            var ue = new DiscordEmbedBuilder()
+                .WithTitle("Case Update").WithDescription(
+                    $"Der Case mit der ID ``{caseid}`` wurde erfolgreich bearbeitet.\n" +
+                    $"Case-Typ: {ctyp}\n" +
+                    $"Neuer Grund: ```{reason}```").WithColor(BotConfig.GetEmbedColor()).Build();
+            await ctx.RespondAsync(ue);
 
             return;
         }
@@ -219,15 +238,19 @@ public sealed class CaseManagement : BaseCommandModule
                 .ToList();
             var urls = "";
             if (imgAttachments.Count > 0)
+            {
+                urls = " ";
                 foreach (var attachment in imgAttachments)
                 {
                     var rndm = new Random();
                     var rnd = rndm.Next(1000, 9999);
                     var imageBytes = await CurrentApplication.HttpClient.GetByteArrayAsync(attachment.Url);
                     var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
-                    urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                    urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes, ImageStoreType.Flag)}";
                     imageBytes = null;
                 }
+            }
+                    
 
             if (await ToolSet.CheckForReason(ctx, reason)) return;
 

@@ -36,7 +36,7 @@ public sealed class FlagUserCommand : BaseCommandModule
                 var rnd = rndm.Next(1000, 9999);
                 var imageBytes = await new HttpClient().GetByteArrayAsync(attachment.Url);
                 var fileName = $"{caseid}_{rnd}{Path.GetExtension(attachment.Filename).ToLower()}";
-                urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes)}";
+                urls += $"\n{ImageStoreProvider.SaveImage(fileName, imageBytes, ImageStoreType.Flag)}";
             }
         }
 
