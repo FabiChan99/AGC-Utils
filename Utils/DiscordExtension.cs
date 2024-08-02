@@ -169,7 +169,7 @@ internal static class DiscordExtension
 
         md = Regex.Replace(md, @"(?<!\\)(?<!\&gt;)(?<!a):\w+?:", e =>
         {
-            if (!DiscordEmoji.TryFromName(CurrentApplication.DiscordClient, e.Value, false, out var emoji))
+            if (!DiscordEmoji.TryFromName(CurrentApplication.DiscordClient, e.Value, out var emoji))
                 return e.Value;
             try
             {
