@@ -125,8 +125,7 @@ internal class Program : BaseCommandModule
                 logger.Fatal(
                     "Der Discord API Token konnte nicht geladen werden.");
                 logger.Fatal("Drücke eine beliebige Taste um das Programm zu beenden.");
-                Console.ReadKey();
-                Environment.Exit(0);
+                throw new ApplicationException();
             }
         }
 

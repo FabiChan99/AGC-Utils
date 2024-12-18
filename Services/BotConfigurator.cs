@@ -23,8 +23,7 @@ public static class BotConfig
             Console.WriteLine("Die Konfigurationsdatei konnte nicht geladen werden. Bitte überprüfe die config.");
             Console.WriteLine("Drücke eine beliebige Taste um das Programm zu beenden.");
             Console.WriteLine(Directory.GetCurrentDirectory());
-            Console.ReadKey();
-            Environment.Exit(0);
+            throw new ApplicationException();
             return null;
         }
 
