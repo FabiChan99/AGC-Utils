@@ -88,7 +88,7 @@ public sealed class ImageUtils
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
-        var avatarurl = user.GetAvatarUrl(ImageFormat.Png);
+        var avatarurl = user.GetAvatarUrl(MediaFormat.Png);
         var response2 = await httpclient.GetAsync(avatarurl);
         if (!response2.IsSuccessStatusCode) throw new InvalidDataException("Failed to download avatar image");
 
@@ -354,7 +354,7 @@ public sealed class ImageUtils
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
-        var avatarurl = user.GetAvatarUrl(ImageFormat.Png);
+        var avatarurl = user.GetAvatarUrl(MediaFormat.Png);
         var response2 = await httpclient.GetAsync(avatarurl);
         if (!response2.IsSuccessStatusCode) throw new InvalidDataException("Failed to download avatar image");
 

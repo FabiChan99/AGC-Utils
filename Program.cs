@@ -103,7 +103,6 @@ internal class Program : BaseCommandModule
                 o.Debug = true;
                 o.AutoSessionTracking = true;
                 o.IsGlobalModeEnabled = true;
-                o.EnableTracing = true;
             });
         }
 
@@ -161,12 +160,6 @@ internal class Program : BaseCommandModule
             {
                 options.LoginPath = "/login";
                 options.LogoutPath = "/logout";
-                options.Events.OnSignedIn = context =>
-                {
-                    LoggingUtils.LogLogin(context);
-
-                    return Task.CompletedTask;
-                };
             })
             .AddDiscord(x =>
             {
